@@ -2,9 +2,6 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
-
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -12,6 +9,7 @@ import java.util.List;
 import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
 import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +31,12 @@ class NewsletterSubscriptionCountServiceTest {
     private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     @BeforeEach
     void setup() {
         newsletterSubscriptionCountRepository.deleteAllInBatch();
-        given(clock.instant()).willReturn(FIXED_INSTANT);
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        clock.setInstant(FIXED_INSTANT, SEOUL_ZONE);
     }
 
     @Test

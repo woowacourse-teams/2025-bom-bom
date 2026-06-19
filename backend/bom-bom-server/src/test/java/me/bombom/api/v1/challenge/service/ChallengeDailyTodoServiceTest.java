@@ -2,9 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,6 +25,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,7 @@ class ChallengeDailyTodoServiceTest {
     private static final LocalDate FIXED_SUNDAY = LocalDate.of(2025, 3, 9);
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -299,7 +298,6 @@ class ChallengeDailyTodoServiceTest {
     }
 
     private void fixClockTo(LocalDate date) {
-        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        clock.setDate(date);
     }
 }

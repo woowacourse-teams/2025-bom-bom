@@ -4,9 +4,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
-import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -37,6 +35,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +79,7 @@ class ChallengeDailyGuideServiceTest {
     private NewsletterGroupRepository newsletterGroupRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     private Member member;
     private Challenge challenge;
@@ -112,8 +111,7 @@ class ChallengeDailyGuideServiceTest {
         // 무조건 평일로 설정 (2026-01-26 월요일)
         today = LocalDate.of(2026, 1, 26);
 
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
-        given(clock.instant()).willReturn(today.atStartOfDay(SEOUL_ZONE).toInstant());
+        clock.setDate(today);
         today = LocalDate.now(clock);
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",
@@ -684,7 +682,7 @@ class ChallengeDailyGuideServiceTest {
         );
         DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 첫날 코멘트");
         LocalDate saturday = LocalDate.of(2026, 1, 31);
-        given(clock.instant()).willReturn(saturday.atStartOfDay(SEOUL_ZONE).toInstant());
+        clock.setDate(saturday);
 
         // when
         challengeDailyGuideService.createDailyGuideComment(

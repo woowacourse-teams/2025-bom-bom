@@ -1,7 +1,6 @@
 package me.bombom.api.v1.challenge.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -11,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,17 +37,16 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
-@AutoConfigureMockMvc
 class ChallengeCommentControllerTest {
 
     private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
@@ -85,7 +82,7 @@ class ChallengeCommentControllerTest {
     private HighlightRepository highlightRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     private Member member;
     private List<Newsletter> newsletters;
@@ -317,8 +314,7 @@ class ChallengeCommentControllerTest {
     }
 
     private void setToday(LocalDate date) {
-        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        clock.setDate(date);
     }
 
     @Test

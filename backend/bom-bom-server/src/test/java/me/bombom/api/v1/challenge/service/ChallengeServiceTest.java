@@ -3,9 +3,7 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -43,6 +41,7 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +83,7 @@ class ChallengeServiceTest {
     private ChallengeTeamRepository challengeTeamRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     private Member member;
     private List<Category> categories;
@@ -118,8 +117,7 @@ class ChallengeServiceTest {
 
         ZoneId seoul = ZoneId.of("Asia/Seoul");
         Instant fixedInstant = LocalDate.of(2025, 3, 15).atStartOfDay(seoul).toInstant();
-        given(clock.instant()).willReturn(fixedInstant);
-        given(clock.getZone()).willReturn(seoul);
+        clock.setInstant(fixedInstant, seoul);
         today = LocalDate.now(clock);
     }
 

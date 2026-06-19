@@ -2,9 +2,6 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
-
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -21,6 +18,7 @@ import me.bombom.api.v1.reading.repository.ContinueReadingShieldHistoryRepositor
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,7 @@ class ContinueReadingShieldServiceTest {
     private ContinueReadingShieldHistoryRepository continueReadingShieldHistoryRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     @BeforeEach
     void setUp() {
@@ -259,7 +257,6 @@ class ContinueReadingShieldServiceTest {
     }
 
     private void fixClockTo(LocalDate date) {
-        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        clock.setDate(date);
     }
 }

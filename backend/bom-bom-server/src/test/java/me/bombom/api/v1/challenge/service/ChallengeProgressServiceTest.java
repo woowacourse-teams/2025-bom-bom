@@ -4,9 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -45,6 +43,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +82,7 @@ class ChallengeProgressServiceTest {
     private HolidayRepository holidayRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     private Member member;
     private Challenge challenge;
@@ -133,12 +132,9 @@ class ChallengeProgressServiceTest {
                 readTodo.getId());
         challengeDailyTodoRepository.save(dailyTodo);
 
-        // Mock Clock behavior
-        // Default: LocalDate.now(clock) returns today
         Instant instant = java.time.Instant.now();
         ZoneId zoneId = java.time.ZoneId.systemDefault();
-        given(clock.instant()).willReturn(instant);
-        given(clock.getZone()).willReturn(zoneId);
+        clock.setInstant(instant, zoneId);
     }
 
     @Test
@@ -634,8 +630,7 @@ class ChallengeProgressServiceTest {
         LocalDate monday = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
         LocalDate friday = monday.minusDays(3); // 직전 금요일
         // 오늘을 월요일로 고정: monday에 완료 기록이 있으므로 completedToday=true → 오늘 미완료 데이터 미추가
-        given(clock.instant()).willReturn(monday.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        given(clock.getZone()).willReturn(java.time.ZoneId.systemDefault());
+        clock.setInstant(monday.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
 
         Challenge streakChallenge = createStreakChallenge("주말 낀 스트릭 챌린지");
         ChallengeParticipant participant = challengeParticipantRepository.save(ChallengeParticipant.builder()

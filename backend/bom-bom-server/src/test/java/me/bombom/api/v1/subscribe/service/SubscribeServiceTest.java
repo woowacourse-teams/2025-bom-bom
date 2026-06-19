@@ -2,19 +2,9 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
@@ -33,11 +23,13 @@ import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
+import me.bombom.api.v1.subscribe.repository.UnsubscribeRetryRepository;
+import me.bombom.support.FakeDiscordWebhookNotifier;
+import me.bombom.support.FakeUnsubscribeAgent;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class SubscribeServiceTest {
@@ -63,17 +55,18 @@ class SubscribeServiceTest {
     @Autowired
     private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
 
-    @MockitoBean
-    private UnsubscribeAgent unsubscribeAgent;
+    @Autowired
+    private FakeUnsubscribeAgent unsubscribeAgent;
 
-    @MockitoBean
-    private DiscordWebhookNotifier discordNotifier;
+    @Autowired
+    private FakeDiscordWebhookNotifier discordNotifier;
 
-    @MockitoBean
-    private UnsubscribeRetryService unsubscribeRetryService;
+    @Autowired
+    private UnsubscribeRetryRepository unsubscribeRetryRepository;
 
     @AfterEach
     void tearDown() {
+        unsubscribeRetryRepository.deleteAllInBatch();
         subscribeRepository.deleteAllInBatch();
         newsletterSubscriptionCountRepository.deleteAllInBatch();
         newsletterRepository.deleteAllInBatch();
@@ -450,8 +443,9 @@ class SubscribeServiceTest {
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(unsubscribeAgent, times(1)).unsubscribe(unsubscribeUrl, newsletterId);
-        verify(unsubscribeRetryService, times(1)).deleteIfExists(subscribeId);
+        assertThat(unsubscribeAgent.getRequests())
+                .containsExactly(new FakeUnsubscribeAgent.UnsubscribeRequest(unsubscribeUrl, newsletterId));
+        assertThat(unsubscribeRetryRepository.findBySubscribeId(subscribeId)).isEmpty();
         assertThat(subscribeRepository.findById(subscribeId)).isEmpty();
     }
 
@@ -473,15 +467,17 @@ class SubscribeServiceTest {
         Long subscribeId = s.getId();
         Long newsletterId = newsletter.getId();
         String unsubscribeUrl = "https://example.com/unsub";
-        doThrow(new RetryableException("Server Error"))
-                .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
-        given(unsubscribeRetryService.scheduleRetry(anyLong(), anyString())).willReturn(true);
+        unsubscribeAgent.failWith(new RetryableException("Server Error"));
 
         // when
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(unsubscribeRetryService, times(1)).scheduleRetry(eq(subscribeId), eq("Server Error"));
+        assertThat(unsubscribeRetryRepository.findBySubscribeId(subscribeId))
+                .hasValueSatisfying(retry -> {
+                    assertThat(retry.getRetryCount()).isEqualTo(1);
+                    assertThat(retry.getLastError()).isEqualTo("Server Error");
+                });
     }
 
     @Test
@@ -502,19 +498,18 @@ class SubscribeServiceTest {
         Long subscribeId = s.getId();
         Long newsletterId = newsletter.getId();
         String unsubscribeUrl = "https://example.com/unsub";
-        doThrow(new AutoUnsubscribeFailedException("Invalid URL", newsletterId, unsubscribeUrl))
-                .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
+        unsubscribeAgent.failWith(new AutoUnsubscribeFailedException("Invalid URL", newsletterId, unsubscribeUrl));
 
         // when
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(discordNotifier, times(1))
-                .sendUnsubscribeErrorNotification(
-                        eq("Invalid URL"),
-                        argThat(sub -> sub.getId().equals(s.getId())),
-                        eq(unsubscribeUrl)
-                );
+        assertThat(discordNotifier.getUnsubscribeErrorNotifications())
+                .containsExactly(new FakeDiscordWebhookNotifier.UnsubscribeErrorNotification(
+                        "Invalid URL",
+                        s.getId(),
+                        unsubscribeUrl
+                ));
 
         Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);

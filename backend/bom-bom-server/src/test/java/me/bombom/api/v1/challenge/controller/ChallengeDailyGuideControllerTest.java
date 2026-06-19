@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
@@ -69,9 +68,6 @@ class ChallengeDailyGuideControllerTest {
 
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
-
-    @MockitoBean
-    private me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     private Member member;
     private Challenge challenge;
@@ -421,4 +417,3 @@ class ChallengeDailyGuideControllerTest {
                 .andExpect(status().isNotFound());
     }
 }
-

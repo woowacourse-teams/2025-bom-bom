@@ -46,7 +46,6 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeServiceTest {
@@ -84,7 +83,7 @@ class ChallengeServiceTest {
     @Autowired
     private ChallengeTeamRepository challengeTeamRepository;
 
-    @MockitoBean
+    @Autowired
     private Clock clock;
 
     private Member member;

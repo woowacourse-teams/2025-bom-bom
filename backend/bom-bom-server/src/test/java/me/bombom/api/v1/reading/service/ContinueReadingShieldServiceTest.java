@@ -2,9 +2,9 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -24,13 +24,8 @@ import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 @IntegrationTest
-@Import(ContinueReadingShieldServiceTest.FixedClockConfig.class)
 class ContinueReadingShieldServiceTest {
 
     private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
@@ -264,46 +259,7 @@ class ContinueReadingShieldServiceTest {
     }
 
     private void fixClockTo(LocalDate date) {
-        ((MutableClock) clock).setDate(date);
-    }
-
-    @TestConfiguration
-    static class FixedClockConfig {
-
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return new MutableClock(MONTH_START_DATE, SEOUL_ZONE);
-        }
-    }
-
-    private static class MutableClock extends Clock {
-
-        private final ZoneId zone;
-        private Instant instant;
-
-        private MutableClock(LocalDate date, ZoneId zone) {
-            this.zone = zone;
-            setDate(date);
-        }
-
-        private void setDate(LocalDate date) {
-            this.instant = date.atStartOfDay(zone).toInstant();
-        }
-
-        @Override
-        public ZoneId getZone() {
-            return zone;
-        }
-
-        @Override
-        public Clock withZone(ZoneId zone) {
-            return Clock.fixed(instant, zone);
-        }
-
-        @Override
-        public Instant instant() {
-            return instant;
-        }
+        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
+        given(clock.getZone()).willReturn(SEOUL_ZONE);
     }
 }

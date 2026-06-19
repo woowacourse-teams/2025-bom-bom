@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
@@ -65,9 +64,6 @@ class ChallengeControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @MockitoBean
-    private me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     private Member member;
     private CustomOAuth2User customOAuth2User;
@@ -197,4 +193,3 @@ class ChallengeControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }
-

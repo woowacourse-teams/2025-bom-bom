@@ -31,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +45,7 @@ class ChallengeDailyTodoServiceTest {
     // 테스트용 고정 일요일 (2025-03-09)
     private static final LocalDate FIXED_SUNDAY = LocalDate.of(2025, 3, 9);
 
-    @MockitoBean
+    @Autowired
     private Clock clock;
 
     @Autowired

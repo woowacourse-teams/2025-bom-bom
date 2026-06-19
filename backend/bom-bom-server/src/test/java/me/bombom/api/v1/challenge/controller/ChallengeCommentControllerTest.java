@@ -46,7 +46,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
@@ -85,7 +84,7 @@ class ChallengeCommentControllerTest {
     @Autowired
     private HighlightRepository highlightRepository;
 
-    @MockitoBean
+    @Autowired
     private Clock clock;
 
     private Member member;

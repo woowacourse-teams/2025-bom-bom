@@ -2,6 +2,7 @@ package me.bombom.support;
 
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -26,6 +27,7 @@ public class CleanUp {
     );
 
     private final EntityManager entityManager;
+    // 다음 태스크의 all() 삭제 메서드에서 DELETE FROM 쿼리 실행에 사용된다.
     private final JdbcTemplate jdbcTemplate;
 
     private List<String> cleanableTableNames;
@@ -47,15 +49,15 @@ public class CleanUp {
     private List<String> resolveCleanableTableNames() {
         MappingMetamodel mappingMetamodel = resolveMappingMetamodel();
 
-        List<String> tableNames = new ArrayList<>();
+        // SINGLE_TABLE 상속 계층은 같은 물리 테이블명을 여러 번 반환할 수 있으므로 LinkedHashSet으로 중복을 제거한다.
+        Set<String> uniqueTableNames = new LinkedHashSet<>();
         mappingMetamodel.forEachEntityDescriptor(descriptor -> {
-            String rawTableName = descriptor.getMappedTableDetails().getTableName();
-            String tableName = rawTableName.replace("`", "");
+            String tableName = descriptor.getMappedTableDetails().getTableName().replace("`", "");
             if (!EXCLUDED_TABLES.contains(tableName)) {
-                tableNames.add(tableName);
+                uniqueTableNames.add(tableName);
             }
         });
-        return tableNames;
+        return new ArrayList<>(uniqueTableNames);
     }
 
     private MappingMetamodel resolveMappingMetamodel() {

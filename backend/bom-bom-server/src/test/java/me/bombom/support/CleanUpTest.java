@@ -27,6 +27,7 @@ class CleanUpTest {
         List<String> tables = cleanUp.cleanableTableNames();
 
         // then
+        // flyway_schema_history, SPRING_SESSION은 JPA 엔티티가 아니라 메타모델에 없으므로 자동 제외된다.
         assertThat(tables)
                 .doesNotContain("flyway_schema_history")
                 .doesNotContain("SPRING_SESSION")

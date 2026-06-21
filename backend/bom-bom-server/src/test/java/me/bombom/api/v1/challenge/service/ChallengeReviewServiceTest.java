@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
@@ -56,6 +57,9 @@ class ChallengeReviewServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     private Clock clock;
@@ -116,6 +120,74 @@ class ChallengeReviewServiceTest {
         // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).nickname()).isEqualTo("탈퇴한 사용자");
+    }
+
+    @Test
+    void getReviews_본인_리뷰와_타인_비공개_리뷰_다른_챌린지_리뷰는_목록에서_제외된다() {
+        // given
+        Member anotherMember = memberRepository.save(TestFixture.createUniqueMember("익명", "another-provider"));
+        Member hiddenMember = memberRepository.save(TestFixture.createUniqueMember("숨김", "hidden-provider"));
+        Challenge challengeA = challengeRepository.save(ongoingChallenge());
+        Challenge challengeB = challengeRepository.save(ongoingChallenge());
+        saveReview(challengeA.getId(), viewer.getId(), "내 비공개", true);
+        ChallengeReview otherPublic = saveReview(challengeA.getId(), other.getId(), "타인 공개", false);
+        ChallengeReview anotherPublic = saveReview(challengeA.getId(), anotherMember.getId(), "또 다른 타인 공개", false);
+        saveReview(challengeA.getId(), hiddenMember.getId(), "타인 비공개", true);
+        saveReview(challengeB.getId(), viewer.getId(), "다른 챌린지 본인 공개", false);
+
+        // when
+        Page<ChallengeReviewResponse> result = challengeReviewService.getReviews(
+                challengeA.getId(), viewer.getId(), PageRequest.of(0, 20)
+        );
+
+        // then
+        assertThat(result.getContent())
+                .extracting(ChallengeReviewResponse::reviewId)
+                .containsExactlyInAnyOrder(otherPublic.getId(), anotherPublic.getId());
+    }
+
+    @Test
+    void getReviews_본인이_작성한_공개_리뷰도_목록에서_제외된다() {
+        // given
+        Challenge challenge = challengeRepository.save(ongoingChallenge());
+        saveReview(challenge.getId(), viewer.getId(), "내 공개", false);
+        ChallengeReview otherPublic = saveReview(challenge.getId(), other.getId(), "타인 공개", false);
+
+        // when
+        Page<ChallengeReviewResponse> result = challengeReviewService.getReviews(
+                challenge.getId(), viewer.getId(), PageRequest.of(0, 20)
+        );
+
+        // then
+        assertThat(result.getContent())
+                .extracting(ChallengeReviewResponse::reviewId)
+                .containsExactly(otherPublic.getId());
+    }
+
+    @Test
+    void getReviews_응답의_nickname은_리뷰_작성_시점이_아니라_조회_시점의_현재_nickname을_반영한다() {
+        // given
+        Challenge challenge = challengeRepository.save(ongoingChallenge());
+        saveReview(challenge.getId(), other.getId(), "타인 공개", false);
+
+        // when
+        other.updateProfile(
+                "변경 닉네임",
+                other.getProfileImageUrl(),
+                LocalDate.now(),
+                other.getGender()
+        );
+        memberRepository.saveAndFlush(other);
+        em.clear();
+
+        Page<ChallengeReviewResponse> result = challengeReviewService.getReviews(
+                challenge.getId(), viewer.getId(), PageRequest.of(0, 20)
+        );
+
+        // then
+        assertThat(result.getContent())
+                .extracting(ChallengeReviewResponse::nickname)
+                .containsExactly("변경 닉네임");
     }
 
     @Test

@@ -19,8 +19,7 @@ public interface ChallengeReviewRepository extends JpaRepository<ChallengeReview
         SELECT new me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem(
             cr.id,
             m.nickname,
-            cr.comment,
-            cr.isPrivate
+            cr.comment
         )
         FROM ChallengeReview cr
         LEFT JOIN Member m ON m.id = cr.memberId

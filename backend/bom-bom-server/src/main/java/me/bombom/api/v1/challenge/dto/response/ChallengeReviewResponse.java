@@ -1,7 +1,6 @@
 package me.bombom.api.v1.challenge.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.NotNull;
 
 public record ChallengeReviewResponse(
@@ -16,14 +15,7 @@ public record ChallengeReviewResponse(
 
         @NotNull
         @Schema(description = "작성자 코멘트", example = "좋았어요")
-        String comment,
-
-        @Schema(
-                requiredMode = RequiredMode.REQUIRED,
-                description = "비밀글 여부",
-                example = "false"
-        )
-        boolean isPrivate
+        String comment
 ) {
 
     public static final String WITHDRAWN_MEMBER_NICKNAME = "탈퇴한 사용자";
@@ -33,8 +25,7 @@ public record ChallengeReviewResponse(
         return new ChallengeReviewResponse(
                 item.reviewId(),
                 displayNickname,
-                item.comment(),
-                item.isPrivate()
+                item.comment()
         );
     }
 }

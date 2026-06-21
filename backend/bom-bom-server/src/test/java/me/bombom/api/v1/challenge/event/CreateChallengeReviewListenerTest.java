@@ -64,15 +64,6 @@ class CreateChallengeReviewListenerTest {
 
     @BeforeEach
     void setUp() {
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         Member member = memberRepository.save(TestFixture.normalMemberFixture());
 
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");

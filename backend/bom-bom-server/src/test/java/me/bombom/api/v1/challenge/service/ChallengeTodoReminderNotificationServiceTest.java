@@ -14,7 +14,6 @@ import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotif
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoReminderNotificationRepository;
@@ -40,9 +39,6 @@ class ChallengeTodoReminderNotificationServiceTest {
     private ChallengeTodoReminderNotificationRepository challengeTodoReminderNotificationRepository;
 
     @Autowired
-    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
-
-    @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
     @Autowired
@@ -65,14 +61,8 @@ class ChallengeTodoReminderNotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeTodoReminderNotificationRepository.deleteAllInBatch();
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
+        // holiday 는 CleanUp 의 제외(seed) 테이블이라 자동 정리되지 않는다.
+        // 공휴일 테스트가 holiday 행을 직접 추가하므로, 다른 테스트 오염을 막기 위해 수동 정리한다.
         holidayRepository.deleteAllInBatch();
     }
 

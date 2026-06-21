@@ -63,13 +63,6 @@ class ChallengeCommentReplyServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeCommentReplyRepository.deleteAllInBatch();
-        challengeCommentRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         commentAuthorMember = memberRepository.save(
                 TestFixture.createUniqueMember("commentAuthor", java.util.UUID.randomUUID().toString()));
         replyMember = memberRepository.save(

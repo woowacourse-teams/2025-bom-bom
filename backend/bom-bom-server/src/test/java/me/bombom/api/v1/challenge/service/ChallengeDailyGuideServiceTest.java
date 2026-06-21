@@ -92,16 +92,6 @@ class ChallengeDailyGuideServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeDailyGuideCommentRepository.deleteAllInBatch();
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeDailyGuideRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 

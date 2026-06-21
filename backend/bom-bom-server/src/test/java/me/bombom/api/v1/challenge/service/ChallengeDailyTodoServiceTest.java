@@ -82,13 +82,6 @@ class ChallengeDailyTodoServiceTest {
     void setUp() {
         fixClockTo(FIXED_WEEKDAY);
 
-        challengeDailyTodoRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
 
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");

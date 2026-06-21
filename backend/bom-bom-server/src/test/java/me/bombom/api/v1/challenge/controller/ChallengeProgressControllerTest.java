@@ -25,7 +25,6 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,16 +59,6 @@ class ChallengeProgressControllerTest {
         private Member memberA;
         private Challenge challenge;
         private OAuth2AuthenticationToken authToken;
-
-        @AfterEach
-        void tearDown() {
-                challengeDailyResultRepository.deleteAllInBatch();
-                challengeParticipantRepository.deleteAllInBatch();
-                challengeTeamRepository.deleteAllInBatch();
-                challengeRepository.deleteAllInBatch();
-                memberRepository.deleteAllInBatch();
-                newsletterGroupRepository.deleteAllInBatch();
-        }
 
         @BeforeEach
         void setUp() {

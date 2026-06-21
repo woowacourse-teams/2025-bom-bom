@@ -89,14 +89,8 @@ class ChallengeProgressServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
+        // holiday 는 CleanUp 의 제외(seed) 테이블이라 자동 정리되지 않는다.
+        // 공휴일 테스트가 holiday 행을 직접 추가하므로, 다른 테스트 오염을 막기 위해 수동 정리한다.
         holidayRepository.deleteAllInBatch();
 
         member = memberRepository.save(

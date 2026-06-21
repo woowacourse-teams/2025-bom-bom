@@ -67,13 +67,6 @@ class ChallengeCommentReplyControllerTest {
 
     @BeforeEach
     void setUp() {
-        challengeCommentReplyRepository.deleteAllInBatch();
-        challengeCommentRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         viewer = memberRepository.save(
                 TestFixture.createUniqueMember("replyUser", java.util.UUID.randomUUID().toString()));
         Member commentAuthor = memberRepository.save(

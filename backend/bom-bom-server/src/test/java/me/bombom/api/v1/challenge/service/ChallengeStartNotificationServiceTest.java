@@ -17,7 +17,6 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,15 +40,6 @@ class ChallengeStartNotificationServiceTest {
 
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
-
-    @BeforeEach
-    void setUp() {
-        challengeStartNotificationRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-    }
 
     @Test
     void 시작일_챌린지_참여자에게_PENDING_알림을_생성한다() {

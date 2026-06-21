@@ -40,10 +40,6 @@ class ChallengeReviewRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        challengeReviewRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         viewer = memberRepository.save(TestFixture.createUniqueMember("나밍곰", "viewer-provider"));
         otherMember = memberRepository.save(TestFixture.createUniqueMember("제나", "other-provider"));
 

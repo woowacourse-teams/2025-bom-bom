@@ -71,15 +71,6 @@ class ChallengeControllerTest {
 
     @BeforeEach
     void setUp() {
-        challengeParticipantRepository.deleteAllInBatch();
-        newsletterGroupItemRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 

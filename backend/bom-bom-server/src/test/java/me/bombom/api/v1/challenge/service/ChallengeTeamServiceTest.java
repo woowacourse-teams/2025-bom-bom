@@ -56,13 +56,6 @@ class ChallengeTeamServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         var group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("테스트 그룹"));
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",

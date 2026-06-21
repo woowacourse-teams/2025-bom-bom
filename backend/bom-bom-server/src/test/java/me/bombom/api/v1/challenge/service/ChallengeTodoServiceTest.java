@@ -10,7 +10,6 @@ import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
@@ -40,9 +39,6 @@ class ChallengeTodoServiceTest {
     private ChallengeTodoRepository challengeTodoRepository;
 
     @Autowired
-    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
-
-    @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
 
     @Autowired
@@ -52,14 +48,6 @@ class ChallengeTodoServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         var member = memberRepository.save(TestFixture.createUniqueMember("tester", "id"));
         var group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("그룹"));
         var challenge = challengeRepository.save(TestFixture.createChallenge(

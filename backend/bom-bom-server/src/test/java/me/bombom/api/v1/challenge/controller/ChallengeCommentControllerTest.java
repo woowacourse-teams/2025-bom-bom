@@ -92,15 +92,6 @@ class ChallengeCommentControllerTest {
 
     @BeforeEach
     void setUp() {
-        challengeCommentRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        highlightRepository.deleteAllInBatch();
-
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
         var attributes = java.util.Map.<String, Object>of(

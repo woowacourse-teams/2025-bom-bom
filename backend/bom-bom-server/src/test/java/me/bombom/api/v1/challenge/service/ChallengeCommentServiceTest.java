@@ -113,19 +113,6 @@ class ChallengeCommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeCommentReplyRepository.deleteAllInBatch();
-        challengeCommentRepository.deleteAllInBatch();
-        challengeCommentLikeRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        highlightRepository.deleteAllInBatch();
-
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 

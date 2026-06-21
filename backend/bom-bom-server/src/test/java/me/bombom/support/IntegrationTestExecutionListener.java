@@ -1,5 +1,7 @@
 package me.bombom.support;
 
+import me.bombom.support.acceptance.AcceptanceTest;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -18,5 +20,19 @@ public class IntegrationTestExecutionListener extends AbstractTestExecutionListe
                 .getBeansOfType(ResettableTestDouble.class)
                 .values()
                 .forEach(ResettableTestDouble::reset);
+
+        if (isAcceptanceTest(testContext)) {
+            return;
+        }
+        testContext.getApplicationContext()
+                .getBean(CleanUp.class)
+                .all();
+    }
+
+    private boolean isAcceptanceTest(TestContext testContext) {
+        return AnnotatedElementUtils.findMergedAnnotation(
+                testContext.getTestClass(),
+                AcceptanceTest.class
+        ) != null;
     }
 }

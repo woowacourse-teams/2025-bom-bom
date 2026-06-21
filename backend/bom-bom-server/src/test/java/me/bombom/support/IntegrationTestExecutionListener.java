@@ -24,12 +24,13 @@ public class IntegrationTestExecutionListener extends AbstractTestExecutionListe
         if (isAcceptanceTest(testContext)) {
             return;
         }
+        // CleanUp은 IntegrationTestConfig가 항상 등록한다. 없으면 테스트 설정 오류이므로 일부러 즉시 실패시킨다.
         testContext.getApplicationContext()
                 .getBean(CleanUp.class)
                 .all();
     }
 
-    private boolean isAcceptanceTest(TestContext testContext) {
+    private static boolean isAcceptanceTest(TestContext testContext) {
         return AnnotatedElementUtils.findMergedAnnotation(
                 testContext.getTestClass(),
                 AcceptanceTest.class

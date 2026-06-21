@@ -52,6 +52,7 @@ class CleanUpTest {
         memberRepository.save(TestFixture.uniqueMemberFixture());
         ensureHolidayExists();
         long holidayCountBefore = holidayRepository.count();
+        assertThat(holidayCountBefore).isPositive();
 
         // when
         cleanUp.all();

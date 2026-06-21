@@ -27,7 +27,6 @@ public class CleanUp {
     );
 
     private final EntityManager entityManager;
-    // 다음 태스크의 all() 삭제 메서드에서 DELETE FROM 쿼리 실행에 사용된다.
     private final JdbcTemplate jdbcTemplate;
 
     private List<String> cleanableTableNames;

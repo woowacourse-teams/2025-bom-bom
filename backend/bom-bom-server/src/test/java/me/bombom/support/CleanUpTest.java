@@ -3,14 +3,23 @@ package me.bombom.support;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @IntegrationTest
 class CleanUpTest {
 
     @Autowired
     private CleanUp cleanUp;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private JdbcTemplate testJdbcTemplate;
 
     @Test
     void 정리_대상에_도메인_테이블이_포함된다() {
@@ -33,5 +42,24 @@ class CleanUpTest {
                 .doesNotContain("SPRING_SESSION")
                 .doesNotContain("holiday")
                 .doesNotContain("monthly_reading_snapshot_meta");
+    }
+
+    @Test
+    void all_호출시_도메인_데이터는_지우고_seed는_보존한다() {
+        // given
+        memberRepository.save(TestFixture.normalMemberFixture());
+        long seedBefore = jdbcTemplateRowCount("holiday");
+
+        // when
+        cleanUp.all();
+
+        // then
+        assertThat(memberRepository.count()).isZero();
+        assertThat(jdbcTemplateRowCount("holiday")).isEqualTo(seedBefore);
+        assertThat(seedBefore).isPositive();
+    }
+
+    private long jdbcTemplateRowCount(String table) {
+        return testJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + table, Long.class);
     }
 }

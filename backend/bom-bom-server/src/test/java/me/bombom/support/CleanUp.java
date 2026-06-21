@@ -39,6 +39,14 @@ public class CleanUp {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public void all() {
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        for (String table : cleanableTableNames()) {
+            jdbcTemplate.execute("DELETE FROM " + table);
+        }
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+    }
+
     public List<String> cleanableTableNames() {
         if (cleanableTableNames == null) {
             cleanableTableNames = resolveCleanableTableNames();

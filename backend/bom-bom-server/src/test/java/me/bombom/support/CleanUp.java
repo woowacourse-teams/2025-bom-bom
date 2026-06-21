@@ -12,17 +12,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class CleanUp {
 
     /**
-     * 읽기 전용 seed 테이블. Flyway 적용 직후 행이 있고 테스트가 직접 변경하지 않는 테이블이다.
-     * 빈 테스트 DB에 마이그레이션을 적용해 비어있지 않은 테이블 중,
-     * 현재 테스트가 deleteAllInBatch로 지우지 않는 것을 골라 구성했다.
+     * 읽기 전용 seed 테이블. 무조건적인 Flyway seed가 존재하고 활성(@Disabled가 아닌) 테스트가
+     * INSERT/DELETE로 변경하지 않는 테이블만 제외한다.
+     * - reading_snapshot_meta: 앱 랭킹 로직이 seed된 행(MONTHLY/CONTINUE)을 읽으므로 보존한다.
+     * - unsubscribe_pattern: 유일한 writer인 UnsubscribeAgentTest가 @Disabled이므로 정적 참조 seed로 취급한다.
      */
     private static final Set<String> EXCLUDED_TABLES = Set.of(
-            "monthly_reading_snapshot_meta",
-            "continue_reading_snapshot_meta",
             "reading_snapshot_meta",
-            "unsubscribe_pattern",
-            "newsletter_previous_policy",
-            "badge"
+            "unsubscribe_pattern"
     );
 
     private final EntityManager entityManager;

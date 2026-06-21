@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -63,6 +64,8 @@ class BookmarkControllerTest {
     private Member member;
     private CustomOAuth2User customOAuth2User;
     private OAuth2AuthenticationToken authToken;
+    private List<Newsletter> newsletters;
+    private List<Article> articles;
 
     @BeforeEach
     void setUp() {
@@ -84,10 +87,10 @@ class BookmarkControllerTest {
         List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
         newsletterDetailRepository.saveAll(newsletterDetails);
 
-        List<Newsletter> newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
+        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
 
-        List<Article> articles = TestFixture.createArticles(member, newsletters);
+        articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
 
         Bookmark bookmark = Bookmark.builder()
@@ -172,5 +175,71 @@ class BookmarkControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalCount").value(1));
+    }
+
+    @Test
+    void 뉴스레터로_북마크_목록을_필터링한다() throws Exception {
+        Article article = articles.stream()
+                .filter(candidate -> candidate.getNewsletterId().equals(newsletters.get(1).getId()))
+                .findFirst()
+                .orElseThrow();
+        bookmarkRepository.save(Bookmark.builder()
+                .memberId(member.getId())
+                .articleId(article.getId())
+                .build());
+
+        mockMvc.perform(get("/api/v1/bookmarks")
+                        .with(authentication(authToken))
+                        .queryParam("newsletterId", newsletters.get(1).getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].articleId").value(article.getId()));
+    }
+
+    @Test
+    void 같은_아티클을_중복_북마크해도_한_건만_저장한다() throws Exception {
+        Article article = articles.get(1);
+
+        mockMvc.perform(post("/api/v1/bookmarks/articles/{articleId}", article.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(post("/api/v1/bookmarks/articles/{articleId}", article.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        assertThat(bookmarkRepository.countAllByMemberIdAndNewsletterId(
+                member.getId(),
+                article.getNewsletterId()
+        )).isEqualTo(1);
+    }
+
+    @Test
+    void 다른_사용자의_아티클은_북마크할_수_없다() throws Exception {
+        Member other = memberRepository.save(TestFixture.createUniqueMember("other", "bookmark-other"));
+        Article otherArticle = articleRepository.save(TestFixture.createArticle(
+                "다른 사용자의 글",
+                other.getId(),
+                newsletters.getFirst().getId(),
+                java.time.LocalDateTime.of(2026, 1, 1, 0, 0)
+        ));
+
+        mockMvc.perform(post("/api/v1/bookmarks/articles/{articleId}", otherArticle.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void 다른_사용자의_아티클_북마크는_삭제할_수_없다() throws Exception {
+        Member other = memberRepository.save(TestFixture.createUniqueMember("other", "bookmark-delete-other"));
+        Article otherArticle = articleRepository.save(TestFixture.createArticle(
+                "다른 사용자의 글",
+                other.getId(),
+                newsletters.getFirst().getId(),
+                java.time.LocalDateTime.of(2026, 1, 1, 0, 0)
+        ));
+
+        mockMvc.perform(delete("/api/v1/bookmarks/articles/{articleId}", otherArticle.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isForbidden());
     }
 }

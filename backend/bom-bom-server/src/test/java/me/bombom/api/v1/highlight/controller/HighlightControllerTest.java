@@ -1,6 +1,9 @@
 package me.bombom.api.v1.highlight.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -61,13 +64,20 @@ class HighlightControllerTest {
     private List<Highlight> highlights;
     private CustomOAuth2User customOAuth2User;
     private OAuth2AuthenticationToken authToken;
+    private Member member;
+    private List<Newsletter> newsletters;
+    private List<Article> articles;
 
     @BeforeEach
     void setUp() {
-        memberRepository.deleteAllInBatch();
+        highlightRepository.deleteAllInBatch();
         articleRepository.deleteAllInBatch();
+        newsletterRepository.deleteAllInBatch();
+        newsletterDetailRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
 
-        Member member = TestFixture.normalMemberFixture();
+        member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
         List<Category> categories = TestFixture.createCategories();
@@ -76,10 +86,10 @@ class HighlightControllerTest {
         List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
         newsletterDetailRepository.saveAll(newsletterDetails);
 
-        List<Newsletter> newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
+        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
         newsletterRepository.saveAll(newsletters);
 
-        List<Article> articles = TestFixture.createArticles(member, newsletters);
+        articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
 
         highlights = TestFixture.createHighlightFixtures(articles);
@@ -153,5 +163,110 @@ class HighlightControllerTest {
                             }
                         """))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 아티클로_하이라이트를_필터링해_최신순으로_조회한다() throws Exception {
+        mockMvc.perform(get("/api/v1/highlights")
+                        .with(authentication(authToken))
+                        .queryParam("articleId", articles.getFirst().getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[0].text").value("두 번째 하이라이트"))
+                .andExpect(jsonPath("$.content[1].text").value("첫 번째 하이라이트"));
+    }
+
+    @Test
+    void 뉴스레터로_하이라이트를_필터링한다() throws Exception {
+        mockMvc.perform(get("/api/v1/highlights")
+                        .with(authentication(authToken))
+                        .queryParam("newsletterId", newsletters.get(2).getId().toString())
+                        .queryParam("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content.length()").value(2));
+    }
+
+    @Test
+    void 중복된_위치에_하이라이트를_생성해도_건수가_증가하지_않는다() throws Exception {
+        long beforeCount = highlightRepository.count();
+        String content = String.format("""
+                {
+                  "location": {
+                    "startOffset": 0,
+                    "startXPath": "div[0]/p[0]",
+                    "endOffset": 10,
+                    "endXPath": "div[0]/p[0]"
+                  },
+                  "articleId": %d,
+                  "color": "#ffeb3b",
+                  "text": "중복 위치",
+                  "memo": "메모"
+                }
+                """, articles.getFirst().getId());
+
+        mockMvc.perform(post("/api/v1/highlights")
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isCreated());
+
+        assertThat(highlightRepository.count()).isEqualTo(beforeCount);
+    }
+
+    @Test
+    void 존재하지_않는_아티클에는_하이라이트를_생성할_수_없다() throws Exception {
+        String content = """
+                {
+                  "location": {
+                    "startOffset": 0,
+                    "startXPath": "div[0]/p[0]",
+                    "endOffset": 10,
+                    "endXPath": "div[0]/p[0]"
+                  },
+                  "articleId": 99999,
+                  "color": "#ffeb3b",
+                  "text": "존재하지 않는 글",
+                  "memo": "메모"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/highlights")
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 하이라이트를_삭제한다() throws Exception {
+        Long highlightId = highlights.getFirst().getId();
+
+        mockMvc.perform(delete("/api/v1/highlights/{id}", highlightId)
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        assertThat(highlightRepository.findById(highlightId)).isEmpty();
+    }
+
+    @Test
+    void 존재하지_않는_하이라이트를_수정하면_404를_반환한다() throws Exception {
+        mockMvc.perform(patch("/api/v1/highlights/{id}", 99999)
+                        .with(authentication(authToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "color": "#9c27b0"
+                                }
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 뉴스레터별_하이라이트_통계를_조회한다() throws Exception {
+        mockMvc.perform(get("/api/v1/highlights/statistics/newsletters")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalCount").value(highlights.size()));
     }
 }

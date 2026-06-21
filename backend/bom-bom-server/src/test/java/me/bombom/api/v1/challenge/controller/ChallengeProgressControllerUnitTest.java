@@ -32,6 +32,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -57,6 +58,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         GlobalExceptionHandler.class,
         ChallengeProgressControllerUnitTest.TestConfig.class
 })
+@Tag("integration")
 @WebMvcTest(value = ChallengeProgressController.class, properties = "LOG_PATH=build/logs")
 class ChallengeProgressControllerUnitTest {
 

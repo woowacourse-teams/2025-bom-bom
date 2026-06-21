@@ -1,4 +1,5 @@
 def generatedOpenApiJavaDir = layout.projectDirectory.dir("generated/openapi")
+def openApiGenerationFingerprintFile = generatedOpenApiJavaDir.file(".generation-fingerprint")
 def lineSeparator = System.lineSeparator()
 def recordPattern = ~/(?s)public record (\w+)\(\R(.*?)\R\) \{\R/
 
@@ -117,7 +118,10 @@ def normalizeRecordComponentBlankLines = { File file ->
 
 def removeResponseContainerElementValidation = { File file ->
     String text = file.getText("UTF-8")
-    file.setText(text.replaceAll(/List<@Valid /, "List<"), "UTF-8")
+    String normalized = text.replaceAll(/List<@Valid /, "List<")
+    if (normalized != text) {
+        file.setText(normalized, "UTF-8")
+    }
 }
 
 def formatResponseModel = { File file ->
@@ -198,7 +202,19 @@ tasks.named("spotlessOpenApiModelsApply") {
     dependsOn("spotlessOpenApiModels")
 }
 
+[
+    "addOpenApiResponseFactories",
+    "spotlessJava",
+    "spotlessJavaApply",
+    "spotlessOpenApiModels",
+    "spotlessOpenApiModelsApply",
+].each { taskName ->
+    tasks.named(taskName) {
+        onlyIf { !openApiGenerationFingerprintFile.asFile.exists() }
+    }
+}
+
 // 컴파일 전에는 생성 코드 포맷까지 끝난 상태를 보장한다.
 tasks.named("compileJava") {
-    dependsOn("spotlessJavaApply", "spotlessOpenApiModelsApply")
+    dependsOn("writeOpenApiGenerationFingerprint")
 }

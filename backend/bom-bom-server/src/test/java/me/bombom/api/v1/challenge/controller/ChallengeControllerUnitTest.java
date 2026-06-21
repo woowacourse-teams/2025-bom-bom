@@ -18,6 +18,7 @@ import me.bombom.api.v1.challenge.service.ChallengeService;
 import me.bombom.api.v1.common.exception.GlobalExceptionHandler;
 import me.bombom.api.v1.member.domain.Member;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @WithMockUser
+@Tag("integration")
 @WebMvcTest(ChallengeController.class)
 @Import({ChallengeController.class, GlobalExceptionHandler.class, ChallengeControllerUnitTest.TestConfig.class})
 class ChallengeControllerUnitTest {

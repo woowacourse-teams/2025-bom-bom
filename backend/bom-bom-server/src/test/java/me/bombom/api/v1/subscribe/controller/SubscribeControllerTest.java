@@ -22,6 +22,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,6 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@Tag("integration")
 @AutoConfigureMockMvc
 @WebMvcTest(controllers = SubscribeController.class)
 @Import({SubscribeController.class, SubscribeControllerTest.TestConfig.class})

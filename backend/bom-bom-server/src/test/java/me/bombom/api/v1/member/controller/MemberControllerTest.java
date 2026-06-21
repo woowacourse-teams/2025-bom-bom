@@ -2,7 +2,9 @@ package me.bombom.api.v1.member.controller;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,6 +100,36 @@ class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value("new.nickname"))
                 .andDo(print());
+    }
+
+    @Test
+    void 회원_정보를_조회한다() throws Exception {
+        mockMvc.perform(get("/api/v1/members/me")
+                        .with(authentication(authentication)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.email").value(member.getEmail()));
+    }
+
+    @Test
+    void 회원_프로필을_조회한다() throws Exception {
+        mockMvc.perform(get("/api/v1/members/me/profile")
+                        .with(authentication(authentication)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value(member.getNickname()));
+    }
+
+    @Test
+    void 이미_사용중인_닉네임으로_변경하면_예외가_발생한다() throws Exception {
+        Member other = memberRepository.save(TestFixture.createUniqueMember("duplicated", "member-controller-other"));
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest(other.getNickname(), null, null, null);
+
+        mockMvc.perform(patch("/api/v1/members/me")
+                        .with(authentication(authentication))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }

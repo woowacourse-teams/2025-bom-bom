@@ -1,8 +1,10 @@
 package me.bombom.support;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class IntegrationTestConfig {
@@ -35,5 +37,10 @@ public class IntegrationTestConfig {
     @Primary
     FakeAppleOAuth2Service fakeAppleOAuth2Service() {
         return new FakeAppleOAuth2Service();
+    }
+
+    @Bean
+    CleanUp cleanUp(EntityManager entityManager, JdbcTemplate jdbcTemplate) {
+        return new CleanUp(entityManager, jdbcTemplate);
     }
 }

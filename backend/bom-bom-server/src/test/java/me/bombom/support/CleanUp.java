@@ -20,7 +20,6 @@ public class CleanUp {
             "monthly_reading_snapshot_meta",
             "continue_reading_snapshot_meta",
             "reading_snapshot_meta",
-            "holiday",
             "unsubscribe_pattern",
             "newsletter_previous_policy",
             "badge"

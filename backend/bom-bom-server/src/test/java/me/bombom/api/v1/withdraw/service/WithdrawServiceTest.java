@@ -72,6 +72,25 @@ class WithdrawServiceTest {
     }
 
     @Test
+    void 연속_읽기_정보가_없어도_회원_탈퇴_정보는_0일로_이전된다() {
+        // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
+
+        // when
+        withdrawService.migrateDeletedMember(member);
+
+        // then
+        List<WithdrawnMember> withdrawn = withdrawnMemberRepository.findAll();
+        assertSoftly(softly -> {
+            softly.assertThat(withdrawn).hasSize(1);
+            softly.assertThat(withdrawn.getFirst().getMemberId()).isEqualTo(member.getId());
+            softly.assertThat(withdrawn.getFirst().getContinueReading()).isZero();
+            softly.assertThat(withdrawn.getFirst().getBookmarkedCount()).isZero();
+            softly.assertThat(withdrawn.getFirst().getHighlightCount()).isZero();
+        });
+    }
+
+    @Test
     void 만료일이_오늘인_탈퇴_회원_정보는_삭제된다() {
         // given
         WithdrawnMember expired = WithdrawnMember.builder()

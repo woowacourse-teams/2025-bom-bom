@@ -109,4 +109,17 @@ class NewsletterSubscriptionCountServiceTest {
             softly.assertThat(result.getAge20s()).isEqualTo(1);
         });
     }
+
+    @Test
+    void 회원이_없으면_회원ID로_구독자_수를_감소하지_않는다() {
+        newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(1L, AGE_20S_BIRTH_DATE);
+
+        newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(1L, -1L);
+
+        NewsletterSubscriptionCount result = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotal()).isEqualTo(1);
+            softly.assertThat(result.getAge20s()).isEqualTo(1);
+        });
+    }
 }

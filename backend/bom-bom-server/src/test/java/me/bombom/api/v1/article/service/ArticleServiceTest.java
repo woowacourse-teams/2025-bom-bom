@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDateTime;
@@ -9,9 +10,13 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
+import me.bombom.api.v1.article.dto.request.DeleteArticlesRequest;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -22,6 +27,9 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
+import me.bombom.api.v1.pet.ScorePolicyConstants;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +63,9 @@ class ArticleServiceTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private TodayReadingRepository todayReadingRepository;
+
     @Test
     void 북마크되지_않은_아티클만_초과_정리한다() {
         // given
@@ -87,6 +98,72 @@ class ArticleServiceTest {
                     .extracting(Article::getId)
                     .contains(bookmarkedArticle.getId());
         });
+    }
+
+    @Test
+    void 오늘_읽기수가_정책_최대값_이하면_아티클_점수를_추가할_수_있다() {
+        // given
+        Member member = saveUserMember();
+        todayReadingRepository.save(TodayReading.builder()
+                .memberId(member.getId())
+                .totalCount(5)
+                .currentCount(ScorePolicyConstants.MAX_TODAY_READING_COUNT)
+                .readCount(0)
+                .build());
+
+        // when
+        boolean result = articleService.canAddArticleScore(member.getId());
+
+        // then
+        assertSoftly(softly -> softly.assertThat(result).isTrue());
+    }
+
+    @Test
+    void 오늘_읽기수가_정책_최대값을_초과하면_아티클_점수를_추가할_수_없다() {
+        // given
+        Member member = saveUserMember();
+        todayReadingRepository.save(TodayReading.builder()
+                .memberId(member.getId())
+                .totalCount(5)
+                .currentCount(ScorePolicyConstants.MAX_TODAY_READING_COUNT + 1)
+                .readCount(0)
+                .build());
+
+        // when
+        boolean result = articleService.canAddArticleScore(member.getId());
+
+        // then
+        assertSoftly(softly -> softly.assertThat(result).isFalse());
+    }
+
+    @Test
+    void 오늘_읽기정보가_없으면_아티클_점수_추가_가능여부를_판단할_수_없다() {
+        // given
+        Member member = saveUserMember();
+
+        // when & then
+        assertThatThrownBy(() -> articleService.canAddArticleScore(member.getId()))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 다른_회원의_아티클은_삭제할_수_없다() {
+        // given
+        Member owner = saveUserMember();
+        Member requester = saveUserMember();
+        Newsletter newsletter = saveArticleNewsletter("아티클삭제권한");
+        Article article = articleRepository.save(TestFixture.createArticle(
+                "삭제 대상",
+                owner.getId(),
+                newsletter.getId(),
+                BASE_TIME
+        ));
+
+        // when & then
+        assertThatThrownBy(() -> articleService.delete(requester, new DeleteArticlesRequest(List.of(article.getId()))))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
 
     private Member saveUserMember() {

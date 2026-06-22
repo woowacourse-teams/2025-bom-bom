@@ -65,8 +65,13 @@ public class MyPageService {
                 .stream()
                 .sorted(Comparator.comparing(ContinueReadingRankHistory::getPeriod))
                 .toList();
+        LocalDate today = LocalDate.now(clock);
         List<RankHistoryResponse> rankHistories = histories.stream()
-                .map(history -> toRankHistoryResponse(history.getPeriod(), history.getRankOrder()))
+                .map(history -> RankHistoryResponse.of(
+                        history.getPeriod(),
+                        history.getRankOrder(),
+                        today
+                ))
                 .toList();
 
         return RankCardResponse.of(
@@ -84,8 +89,13 @@ public class MyPageService {
                 .stream()
                 .sorted(Comparator.comparing(MonthlyReadingRankHistory::getPeriod))
                 .toList();
+        LocalDate today = LocalDate.now(clock);
         List<RankHistoryResponse> rankHistories = histories.stream()
-                .map(history -> toRankHistoryResponse(history.getPeriod(), history.getRankOrder()))
+                .map(history -> RankHistoryResponse.of(
+                        history.getPeriod(),
+                        history.getRankOrder(),
+                        today
+                ))
                 .toList();
 
         return RankCardResponse.of(
@@ -101,18 +111,6 @@ public class MyPageService {
             return null;
         }
         return rankHistories.getLast().rank();
-    }
-
-    private RankHistoryResponse toRankHistoryResponse(LocalDate period, long rank) {
-        String month = period.toString().substring(0, 7);
-        String label = period.getYear() == LocalDate.now(clock).getYear()
-                ? period.getMonthValue() + "월"
-                : String.format("%02d.%02d", period.getYear() % 100, period.getMonthValue());
-        return RankHistoryResponse.of(
-                month,
-                label,
-                rank
-        );
     }
 
     private CIllegalArgumentException entityNotFound(Long memberId, String entityType) {

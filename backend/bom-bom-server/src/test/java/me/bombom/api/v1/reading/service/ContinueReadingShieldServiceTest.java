@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -247,8 +246,7 @@ class ContinueReadingShieldServiceTest {
     }
 
     private Member createMember() {
-        String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-        return memberRepository.save(TestFixture.createUniqueMember("shield_" + suffix, "shield_pid_" + suffix));
+        return memberRepository.save(TestFixture.createUniqueMember("보호막테스트회원", "shield-service-test"));
     }
 
     private void fixClockTo(LocalDate date) {

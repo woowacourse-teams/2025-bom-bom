@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
@@ -90,7 +89,7 @@ class ChallengeProgressServiceTest {
     @BeforeEach
     void setUp() {
         member = memberRepository.save(
-                TestFixture.createUniqueMember("tester", java.util.UUID.randomUUID().toString()));
+                TestFixture.createUniqueMember("tester", "challenge-progress-test"));
 
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
         newsletterGroupRepository.save(group);
@@ -654,7 +653,8 @@ class ChallengeProgressServiceTest {
     @Test
     void 참가하지_않은_챌린지_스트릭_조회시_예외_발생() {
         // given
-        Member nonParticipant = memberRepository.save(TestFixture.createUniqueMember("nonParticipant", UUID.randomUUID().toString()));
+        Member nonParticipant = memberRepository.save(
+                TestFixture.createUniqueMember("nonParticipant", "non-participant"));
 
         // when & then
         assertThatThrownBy(() -> challengeProgressService.getMemberStreak(challenge.getId(), nonParticipant, 5))
@@ -916,7 +916,7 @@ class ChallengeProgressServiceTest {
         Member otherMember = memberRepository.save(
                 TestFixture.createUniqueMember(
                         "other",
-                        UUID.randomUUID().toString()
+                        "other-member"
                 )
         );
 

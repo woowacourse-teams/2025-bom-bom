@@ -6,7 +6,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
@@ -47,7 +46,7 @@ class PetServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = TestFixture.createUniqueMember(getUniqueValue(), getUniqueValue());
+        member = TestFixture.createUniqueMember("펫테스트회원", "pet-service-test");
         memberRepository.save(member);
         firstStage = TestFixture.createStage(1, 0);
         stageRepository.save(firstStage);
@@ -182,9 +181,5 @@ class PetServiceTest {
 
         // then
         assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
-    }
-
-    private String getUniqueValue() {
-        return UUID.randomUUID().toString().substring(0, 20);
     }
 }

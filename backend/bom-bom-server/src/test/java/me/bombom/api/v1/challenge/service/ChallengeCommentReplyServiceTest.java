@@ -64,11 +64,11 @@ class ChallengeCommentReplyServiceTest {
     @BeforeEach
     void setUp() {
         commentAuthorMember = memberRepository.save(
-                TestFixture.createUniqueMember("commentAuthor", java.util.UUID.randomUUID().toString()));
+                TestFixture.createUniqueMember("commentAuthor", "comment-author"));
         replyMember = memberRepository.save(
-                TestFixture.createUniqueMember("replyAuthor", java.util.UUID.randomUUID().toString()));
+                TestFixture.createUniqueMember("replyAuthor", "reply-author"));
         thirdPartyMember = memberRepository.save(
-                TestFixture.createUniqueMember("thirdParty", java.util.UUID.randomUUID().toString()));
+                TestFixture.createUniqueMember("thirdParty", "third-party"));
 
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
         newsletterGroupRepository.save(group);
@@ -172,7 +172,7 @@ class ChallengeCommentReplyServiceTest {
     void 챌린지_참여자가_아닌_회원은_답글을_작성할_수_없다() {
         // given
         Member outsider = memberRepository.save(
-                TestFixture.createUniqueMember("outsider", java.util.UUID.randomUUID().toString()));
+                TestFixture.createUniqueMember("outsider", "outsider"));
         CreateCommentReplyRequest request = new CreateCommentReplyRequest("reply", false);
 
         // when & then
@@ -188,7 +188,7 @@ class ChallengeCommentReplyServiceTest {
     void 챌린지_참여자가_아니면_답글을_조회할_수_없다() {
         // given
         Member outsider = memberRepository.save(
-                TestFixture.createUniqueMember("outsider", java.util.UUID.randomUUID().toString()));
+                TestFixture.createUniqueMember("outsider", "outsider"));
 
         // when & then
         assertThatThrownBy(() -> challengeCommentReplyService.getCommentReplies(

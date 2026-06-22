@@ -9,7 +9,7 @@ import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import me.bombom.support.MutableClock;
+import me.bombom.support.time.MutableClock;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;

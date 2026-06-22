@@ -15,7 +15,7 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import me.bombom.support.MutableClock;
+import me.bombom.support.time.MutableClock;
 import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;

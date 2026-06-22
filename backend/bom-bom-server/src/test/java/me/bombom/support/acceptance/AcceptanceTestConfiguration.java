@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * 인수 테스트 데이터셋 로더와 테스트 인증 필터를 Spring 컨텍스트에 등록한다.
+ */
 @TestConfiguration(proxyBeanMethods = false)
 public class AcceptanceTestConfiguration {
 

@@ -1,4 +1,4 @@
-package me.bombom.support;
+package me.bombom.support.auth;
 
 import java.util.Optional;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -7,6 +7,9 @@ import me.bombom.api.v1.member.domain.Member;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
+/**
+ * 통합 테스트에서 실제 Apple OAuth2 API 호출 없이 인증 Bean 의존성을 대체한다.
+ */
 public class FakeAppleOAuth2Service extends AppleOAuth2Service {
 
     public FakeAppleOAuth2Service() {

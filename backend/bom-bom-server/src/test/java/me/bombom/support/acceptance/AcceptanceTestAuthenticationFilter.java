@@ -15,6 +15,9 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * 인수 테스트 요청의 X-Test-Member-Id 헤더를 읽어 SecurityContext에 테스트 회원 인증을 주입한다.
+ */
 public class AcceptanceTestAuthenticationFilter extends OncePerRequestFilter {
 
     private final MemberRepository memberRepository;

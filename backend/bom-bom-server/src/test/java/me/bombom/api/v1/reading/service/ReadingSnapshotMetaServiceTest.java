@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import me.bombom.api.v1.reading.domain.ReadingSnapshotType;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

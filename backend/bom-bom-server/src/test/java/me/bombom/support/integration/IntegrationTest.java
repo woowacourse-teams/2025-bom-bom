@@ -1,4 +1,4 @@
-package me.bombom.support;
+package me.bombom.support.integration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
 
+/**
+ * Spring Boot, MockMvc, Testcontainers 설정을 함께 올리는 통합 테스트용 메타 애노테이션이다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

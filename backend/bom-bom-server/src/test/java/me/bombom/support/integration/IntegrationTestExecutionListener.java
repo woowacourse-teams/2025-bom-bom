@@ -1,10 +1,15 @@
-package me.bombom.support;
+package me.bombom.support.integration;
 
 import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.persistence.CleanUp;
+import me.bombom.support.testdouble.ResettableTestDouble;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
+/**
+ * 통합 테스트 실행 전 테스트 대역을 초기화하고 인수 테스트가 아닌 경우 DB를 정리한다.
+ */
 public class IntegrationTestExecutionListener extends AbstractTestExecutionListener {
 
     private static final int ORDER_BEFORE_TRANSACTION = 3000;

@@ -17,7 +17,7 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

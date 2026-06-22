@@ -19,6 +19,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 인수 테스트용 JSON 데이터셋을 읽어 테이블별로 삭제, 삽입, 추가 적재를 수행한다.
+ */
 public class AcceptanceDataSetLoader {
 
     private static final Pattern SQL_IDENTIFIER = Pattern.compile("[A-Za-z0-9_]+");

@@ -24,7 +24,7 @@ import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.withdraw.domain.WithdrawnMember;
 import me.bombom.api.v1.withdraw.repository.WithdrawnMemberRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

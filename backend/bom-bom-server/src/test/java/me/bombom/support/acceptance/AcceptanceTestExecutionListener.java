@@ -1,12 +1,15 @@
 package me.bombom.support.acceptance;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import me.bombom.support.ResettableTestDouble;
+import me.bombom.support.testdouble.ResettableTestDouble;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.web.servlet.MockMvc;
 
+/**
+ * 인수 테스트 실행 전후로 데이터셋, 테스트 대역, RestAssured MockMvc 상태를 준비하고 복원한다.
+ */
 public class AcceptanceTestExecutionListener extends AbstractTestExecutionListener {
 
     private static final int ORDER_BEFORE_TRANSACTION = 3000;

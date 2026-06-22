@@ -1,4 +1,4 @@
-package me.bombom.support;
+package me.bombom.support.persistence;
 
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
@@ -10,6 +10,9 @@ import org.hibernate.metamodel.MappingMetamodel;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * 통합 테스트 사이에 JPA 도메인 테이블을 비우고 필요한 seed 데이터를 기준값으로 복원한다.
+ */
 public class CleanUp {
 
     private static final String READING_SNAPSHOT_META_SEED_SQL = """

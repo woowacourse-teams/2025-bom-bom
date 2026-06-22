@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import me.bombom.support.MutableClock;
+import me.bombom.support.time.MutableClock;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;

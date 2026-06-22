@@ -1,15 +1,19 @@
-package me.bombom.support;
+package me.bombom.support.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * IntegrationTestExecutionListener가 테스트 메서드 사이에 DB를 자동 정리하는지 검증한다.
+ */
 @IntegrationTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CleanUpAutoCleaningTest {

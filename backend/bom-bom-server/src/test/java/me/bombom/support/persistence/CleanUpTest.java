@@ -1,4 +1,4 @@
-package me.bombom.support;
+package me.bombom.support.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,10 +6,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * CleanUp이 정리 대상 테이블을 올바르게 고르고 seed 데이터를 복원하는지 검증한다.
+ */
 @IntegrationTest
 class CleanUpTest {
 

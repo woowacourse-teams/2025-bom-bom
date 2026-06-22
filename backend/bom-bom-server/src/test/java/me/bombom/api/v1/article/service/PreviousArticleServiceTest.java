@@ -24,7 +24,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

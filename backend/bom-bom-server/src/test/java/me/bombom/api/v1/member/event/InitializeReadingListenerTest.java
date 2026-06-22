@@ -8,7 +8,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
 import me.bombom.api.v1.reading.service.ReadingService;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

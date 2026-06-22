@@ -10,7 +10,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeReview;
 import me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

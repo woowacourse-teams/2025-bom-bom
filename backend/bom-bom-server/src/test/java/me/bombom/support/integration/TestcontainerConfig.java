@@ -1,4 +1,4 @@
-package me.bombom.support;
+package me.bombom.support.integration;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -9,6 +9,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+/**
+ * 통합 테스트용 MySQL Testcontainers를 시작하고 Gradle worker별 데이터베이스를 설정한다.
+ */
 @TestConfiguration
 public class TestcontainerConfig {
 

@@ -24,9 +24,9 @@ import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.api.v1.subscribe.repository.UnsubscribeRetryRepository;
-import me.bombom.support.FakeDiscordWebhookNotifier;
-import me.bombom.support.FakeUnsubscribeAgent;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.notification.FakeDiscordWebhookNotifier;
+import me.bombom.support.subscribe.FakeUnsubscribeAgent;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

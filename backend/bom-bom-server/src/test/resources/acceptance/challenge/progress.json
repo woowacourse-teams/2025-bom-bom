@@ -1,0 +1,83 @@
+{
+  "member": [
+    {
+      "id": 1,
+      "provider": "apple",
+      "provider_id": "challengeUserA",
+      "email": "challenge-a@bombom.news",
+      "nickname": "userA",
+      "gender": "FEMALE",
+      "role_id": 1
+    },
+    {
+      "id": 2,
+      "provider": "google",
+      "provider_id": "challengeUserB",
+      "email": "challenge-b@bombom.news",
+      "nickname": "userB",
+      "gender": "MALE",
+      "role_id": 1
+    }
+  ],
+  "newsletter_group": [
+    {
+      "id": 1,
+      "name": "그룹"
+    }
+  ],
+  "challenge": [
+    {
+      "id": 1,
+      "name": "Test Challenge",
+      "generation": 1,
+      "start_date": "2026-06-17",
+      "end_date": "2026-06-27",
+      "total_days": 10,
+      "is_badge_issued": false,
+      "newsletter_group_id": 1
+    }
+  ],
+  "challenge_team": [
+    {
+      "id": 1,
+      "challenge_id": 1,
+      "progress": 77
+    }
+  ],
+  "challenge_participant": [
+    {
+      "id": 1,
+      "challenge_id": 1,
+      "member_id": 1,
+      "challenge_team_id": 1,
+      "completed_days": 2,
+      "is_survived": false,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 2,
+      "challenge_id": 1,
+      "member_id": 2,
+      "challenge_team_id": 1,
+      "completed_days": 3,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    }
+  ],
+  "challenge_daily_result": [
+    {
+      "id": 1,
+      "participant_id": 2,
+      "date": "2026-06-22",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 2,
+      "participant_id": 2,
+      "date": "2026-06-23",
+      "status": "SHIELD"
+    }
+  ]
+}

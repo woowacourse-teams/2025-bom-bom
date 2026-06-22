@@ -1,340 +1,236 @@
 package me.bombom.api.v1.challenge.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.module.mockmvc.response.MockMvcResponse;
+import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.repository.ArticleRepository;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.ChallengeComment;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
-import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
-import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.highlight.domain.Color;
-import me.bombom.api.v1.highlight.domain.Highlight;
-import me.bombom.api.v1.highlight.domain.HighlightLocation;
-import me.bombom.api.v1.highlight.repository.HighlightRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.Category;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.repository.CategoryRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.support.IntegrationTest;
+import java.util.Map;
 import me.bombom.support.MutableClock;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@IntegrationTest
+@AcceptanceTest("acceptance/challenge/comment.json")
 class ChallengeCommentControllerTest {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ChallengeCommentRepository challengeCommentRepository;
-
-    @Autowired
-    private ChallengeParticipantRepository challengeParticipantRepository;
-
-    @Autowired
-    private ArticleRepository articleRepository;
-
-    @Autowired
-    private NewsletterRepository newsletterRepository;
-
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private HighlightRepository highlightRepository;
+    private static final long MEMBER_ID = 1L;
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 9);
 
     @Autowired
     private MutableClock clock;
 
-    private Member member;
-    private List<Newsletter> newsletters;
-    private Article article;
-    private ChallengeComment challengeComment;
-    private OAuth2AuthenticationToken authToken;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-        var attributes = java.util.Map.<String, Object>of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
+        clock.setDate(TODAY);
+    }
+
+    @Test
+    void 챌린지_팀_댓글을_기간으로_필터링해_조회한다() {
+        Map<String, Object> result = getComments(Map.of(
+                "start", TODAY.minusDays(1).toString(),
+                "end", TODAY.plusDays(1).toString()
+        ));
+
+        assertSoftly(softly -> {
+            softly.assertThat(content(result).getFirst().get("comment")).isEqualTo("comment");
+            softly.assertThat(result.get("totalElements")).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void id가_1_미만이면_400을_응답한다() {
+        authenticatedRequest()
+                .queryParams(Map.of("start", TODAY.toString(), "end", TODAY.toString()))
+                .when()
+                .get("/api/v1/challenges/{challengeId}/comments", 0)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_코멘트_후보_아티클을_조회한다() {
+        List<Map<String, Object>> result = getCandidateArticles(TODAY);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result).isNotEmpty();
+            softly.assertThat(result.getFirst().get("articleId")).isEqualTo(2);
+            softly.assertThat(result.getFirst().get("newsletterName")).isEqualTo("뉴스픽");
+            softly.assertThat(result.getFirst().get("articleTitle")).isEqualTo("하이라이트 아티클");
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 챌린지_코멘트를_생성한다() {
+        createComment(1, "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다.")
+                .then()
+                .statusCode(201);
+
+        assertThat(countComments()).isEqualTo(2);
+    }
+
+    @Test
+    void 코멘트가_20자_미만이면_400을_응답한다() {
+        createComment(1, "너무 짧은 댓글")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 하이라이트가_8퍼센트를_넘으면_잘라서_응답한다() {
+        Map<String, Object> result = getArticleHighlights(2);
+
+        assertThat(content(result).getFirst().get("text")).isEqualTo("ABCDEFGH...");
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 챌린지_코멘트를_수정한다() {
+        updateComment(1, "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다.")
+                .then()
+                .statusCode(204);
+
+        assertThat(findComment(1)).isEqualTo("수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다.");
+    }
+
+    @Test
+    void 챌린지_코멘트가_20자_미만이면_수정에_실패한다() {
+        updateComment(1, "짧은 코멘트")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_ID가_1_미만이면_좋아요_추가에_실패한다() {
+        addLike(0, 1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 코멘트_ID가_1_미만이면_좋아요_추가에_실패한다() {
+        addLike(1, 0)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_ID가_1_미만이면_좋아요_삭제에_실패한다() {
+        deleteLike(0, 1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 코멘트_ID가_1_미만이면_좋아요_삭제에_실패한다() {
+        deleteLike(1, 0)
+                .then()
+                .statusCode(400);
+    }
+
+    private static Map<String, Object> getComments(Map<String, ?> query) {
+        return authenticatedRequest()
+                .queryParams(query)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/comments", 1)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static List<Map<String, Object>> getCandidateArticles(LocalDate date) {
+        return authenticatedRequest()
+                .queryParam("date", date.toString())
+                .when()
+                .get("/api/v1/challenges/comments/articles/candidates")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getList("$");
+    }
+
+    private static Map<String, Object> getArticleHighlights(long articleId) {
+        return authenticatedRequest()
+                .when()
+                .get("/api/v1/challenges/comments/articles/{articleId}/highlights", articleId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static MockMvcResponse createComment(long articleId, String comment) {
+        return authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "articleId", articleId,
+                        "quotation", "quote",
+                        "comment", comment
+                ))
+                .when()
+                .post("/api/v1/challenges/{challengeId}/comments", 1);
+    }
+
+    private static MockMvcResponse updateComment(long commentId, String comment) {
+        return authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of("comment", comment))
+                .when()
+                .patch("/api/v1/challenges/{challengeId}/comments/{commentId}", 1, commentId);
+    }
+
+    private static MockMvcResponse addLike(long challengeId, long commentId) {
+        return authenticatedRequest()
+                .when()
+                .put("/api/v1/challenges/{challengeId}/comments/{commentId}/like", challengeId, commentId);
+    }
+
+    private static MockMvcResponse deleteLike(long challengeId, long commentId) {
+        return authenticatedRequest()
+                .when()
+                .delete("/api/v1/challenges/{challengeId}/comments/{commentId}/like", challengeId, commentId);
+    }
+
+    private static MockMvcRequestSpecification authenticatedRequest() {
+        return RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+    }
+
+    private int countComments() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from challenge_comment", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private String findComment(long commentId) {
+        return jdbcTemplate.queryForObject(
+                "select comment from challenge_comment where id = ?",
+                String.class,
+                commentId
         );
-        CustomOAuth2User principal = new CustomOAuth2User(attributes, member, null, null);
-        authToken = new OAuth2AuthenticationToken(
-                principal,
-                principal.getAuthorities(),
-                "registrationId"
-        );
-
-        List<Category> categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
-
-        List<NewsletterDetail> details = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(details);
-
-        newsletters = TestFixture.createNewslettersWithDetails(categories, details);
-        newsletterRepository.saveAll(newsletters);
-
-        article = TestFixture.createArticles(member, newsletters).get(0);
-        articleRepository.save(article);
-
-        ChallengeParticipant participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipantWithTeam(
-                        1L,
-                        member.getId(),
-                        10L,
-                        0,
-                        0
-                )
-        );
-
-        challengeComment = challengeCommentRepository.save(
-                TestFixture.createChallengeComment(
-                        article.getNewsletterId(),
-                        participant.getId(),
-                        article.getTitle(),
-                        "quote",
-                        "comment"
-                )
-        );
-
-        setToday(LocalDate.of(2026, 1, 9)); // 평일 default
     }
 
-    @Test
-    void 챌린지_팀_댓글을_기간으로_필터링해_조회한다() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 1L)
-                        .param("start", LocalDate.now().minusDays(1).toString())
-                        .param("end", LocalDate.now().plusDays(1).toString())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(
-                                authToken))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].comment").value("comment"))
-                .andExpect(jsonPath("$.totalElements").value(1));
-    }
-
-    @Test
-    void id가_1_미만이면_400을_응답한다() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments", 0L)
-                        .param("start", LocalDate.now().toString())
-                        .param("end", LocalDate.now().toString())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(
-                                authToken))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 챌린지_코멘트_후보_아티클을_조회한다() throws Exception {
-        // given
-        articleRepository.save(
-                Article.builder()
-                        .title("타이틀")
-                        .contents("<h1>아티클</h1>")
-                        .contentsText("아티클")
-                        .thumbnailUrl("https://example.com/images/thumb.png")
-                        .expectedReadTime(5)
-                        .contentsSummary("요약")
-                        .isRead(true)
-                        .memberId(member.getId())
-                        .newsletterId(newsletters.getFirst().getId())
-                        .arrivedDateTime(LocalDateTime.now())
-                        .build()
-        );
-
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/comments/articles/candidates")
-                        .param("date", LocalDate.now().toString())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].articleId").exists())
-                .andExpect(jsonPath("$[0].newsletterName").isNotEmpty())
-                .andExpect(jsonPath("$[0].articleTitle").isNotEmpty());
-    }
-
-    @Test
-    void 챌린지_코멘트를_생성한다() throws Exception {
-        // given
-        ChallengeCommentRequest request = new ChallengeCommentRequest(
-                article.getId(),
-                "quote",
-                "챌린지 한 줄 코멘트로 20자 이상의 댓글을 작성했습니다."
-        );
-        setToday(LocalDate.of(2026, 1, 9)); // 금요일
-
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    void 코멘트가_20자_미만이면_400을_응답한다() throws Exception {
-        // given
-        ChallengeCommentRequest request = new ChallengeCommentRequest(
-                article.getId(),
-                "quote",
-                "너무 짧은 댓글"
-        );
-
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments", 1L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 하이라이트가_8퍼센트를_넘으면_잘라서_응답한다() throws Exception {
-        // given
-        String contentsText = "b".repeat(100);
-        Article longArticle = articleRepository.save(
-                Article.builder()
-                        .title("하이라이트 아티클")
-                        .contents("<p>본문</p>")
-                        .contentsText(contentsText)
-                        .thumbnailUrl("https://example.com/thumb.png")
-                        .expectedReadTime(4)
-                        .contentsSummary("요약")
-                        .isRead(true)
-                        .memberId(member.getId())
-                        .newsletterId(newsletters.getFirst().getId())
-                        .arrivedDateTime(LocalDateTime.now())
-                        .build()
-        );
-
-        highlightRepository.save(
-                Highlight.builder()
-                        .highlightLocation(new HighlightLocation(0, "div[0]/p[0]", 10, "div[0]/p[0]"))
-                        .memberId(member.getId())
-                        .newsletterId(longArticle.getNewsletterId())
-                        .articleId(longArticle.getId())
-                        .title(longArticle.getTitle())
-                        .color(Color.from("#00ff00"))
-                        .text("ABCDEFGHIJKL")
-                        .memo("memo")
-                        .build()
-        );
-
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/comments/articles/{articleId}/highlights", longArticle.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].text").value("ABCDEFGH..."));
-    }
-
-    @Test
-    void 챌린지_코멘트를_수정한다() throws Exception {
-        // given
-        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest(
-                "수정된 챌린지 한 줄 코멘트를 20자 이상 작성합니다."
-        );
-
-        // when & then
-        mockMvc.perform(patch("/api/v1/challenges/{challengeId}/comments/{commentId}", 1L, challengeComment.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent());
-
-        assertThat(challengeCommentRepository.findById(challengeComment.getId()))
-                .get()
-                .extracting(ChallengeComment::getComment)
-                .isEqualTo(request.comment());
-    }
-
-    @Test
-    void 챌린지_코멘트가_20자_미만이면_수정에_실패한다() throws Exception {
-        // given
-        UpdateChallengeCommentRequest request = new UpdateChallengeCommentRequest("짧은 코멘트");
-
-        // when & then
-        mockMvc.perform(patch("/api/v1/challenges/{challengeId}/comments/{commentId}", 1L, challengeComment.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    private void setToday(LocalDate date) {
-        clock.setDate(date);
-    }
-
-    @Test
-    void 챌린지_ID가_1_미만이면_좋아요_추가에_실패한다() throws Exception {
-        // when & then
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 0L, challengeComment.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 코멘트_ID가_1_미만이면_좋아요_추가에_실패한다() throws Exception {
-        // when & then
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 1L, 0L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 챌린지_ID가_1_미만이면_좋아요_삭제에_실패한다() throws Exception {
-        mockMvc.perform(delete("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 0L, challengeComment.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 코멘트_ID가_1_미만이면_좋아요_삭제에_실패한다() throws Exception {
-        mockMvc.perform(delete("/api/v1/challenges/{challengeId}/comments/{commentId}/like", 1L, 0L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken)))
-                .andExpect(status().isBadRequest());
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> content(Map<String, Object> page) {
+        return (List<Map<String, Object>>) page.get("content");
     }
 }

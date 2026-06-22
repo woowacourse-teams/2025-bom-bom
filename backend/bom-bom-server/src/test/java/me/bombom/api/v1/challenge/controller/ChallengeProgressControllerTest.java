@@ -1,153 +1,63 @@
 package me.bombom.api.v1.challenge.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.time.LocalDate;
+import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.ChallengeTeam;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
+@AcceptanceTest("acceptance/challenge/progress.json")
 class ChallengeProgressControllerTest {
 
-        @Autowired
-        private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
 
-        @Autowired
-        private MemberRepository memberRepository;
+    @Test
+    void 특정_팀_진행상황을_조회한다() {
+        Map<String, Object> result = getTeamProgress(1, 1);
+        List<Map<String, Object>> members = members(result);
+        List<Map<String, Object>> firstMemberProgresses = dailyProgresses(members.getFirst());
 
-        @Autowired
-        private ChallengeRepository challengeRepository;
+        assertSoftly(softly -> {
+            softly.assertThat(teamSummary(result).get("achievementAverage")).isEqualTo(77);
+            softly.assertThat(members).hasSize(2);
+            softly.assertThat(members.get(0).get("nickname")).isEqualTo("userB");
+            softly.assertThat(firstMemberProgresses).hasSize(2);
+            softly.assertThat(firstMemberProgresses.get(0).get("status")).isEqualTo("COMPLETE");
+            softly.assertThat(firstMemberProgresses.get(1).get("status")).isEqualTo("SHIELD");
+            softly.assertThat(members.get(1).get("nickname")).isEqualTo("userA");
+        });
+    }
 
-        @Autowired
-        private ChallengeParticipantRepository challengeParticipantRepository;
+    private static Map<String, Object> getTeamProgress(long challengeId, long teamId) {
+        return RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/teams/{teamId}", challengeId, teamId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
 
-        @Autowired
-        private ChallengeTeamRepository challengeTeamRepository;
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> teamSummary(Map<String, Object> result) {
+        return (Map<String, Object>) result.get("teamSummary");
+    }
 
-        @Autowired
-        private ChallengeDailyResultRepository challengeDailyResultRepository;
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> members(Map<String, Object> result) {
+        return (List<Map<String, Object>>) result.get("members");
+    }
 
-        @Autowired
-        private NewsletterGroupRepository newsletterGroupRepository;
-
-        private Member memberA;
-        private Challenge challenge;
-        private OAuth2AuthenticationToken authToken;
-
-        @BeforeEach
-        void setUp() {
-                memberA = memberRepository.save(TestFixture.createUniqueMember("userA", "A"));
-
-                NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-                newsletterGroupRepository.save(group);
-                challenge = challengeRepository.save(TestFixture.createChallenge(
-                                "Test Challenge",
-                                LocalDate.now().minusDays(5),
-                                LocalDate.now().plusDays(5),
-                                10,
-                                group.getId()));
-
-                Map<String, Object> attributes = Map.of(
-                                "id", memberA.getId().toString(),
-                                "email", memberA.getEmail(),
-                                "name", memberA.getNickname());
-
-                CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, memberA, null, null);
-
-                authToken = new OAuth2AuthenticationToken(
-                                customOAuth2User,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                                "google");
-        }
-
-        private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,
-                        int completedDays, boolean isSurvived) {
-                return ChallengeParticipant.builder()
-                                .challengeId(challengeId)
-                                .memberId(memberId)
-                                .challengeTeamId(teamId)
-                                .completedDays(completedDays)
-                                .isSurvived(isSurvived)
-                                .shield(0)
-                                .build();
-        }
-
-        private ChallengeTeam createChallengeTeam(Long challengeId, int progress) {
-                return ChallengeTeam.builder()
-                                .challengeId(challengeId)
-                                .progress(progress)
-                                .build();
-        }
-
-        private ChallengeDailyResult createChallengeDailyResult(Long participantId, LocalDate date,
-                        ChallengeDailyStatus status) {
-                return ChallengeDailyResult.builder()
-                                .participantId(participantId)
-                                .date(date)
-                                .status(status)
-                                .build();
-        }
-
-        @Test
-        void 특정_팀_진행상황을_조회한다() throws Exception {
-                // given
-                Member memberB = memberRepository.save(TestFixture.createUniqueMember("userB", "B"));
-                ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
-
-                // Member A: Completed 2 days
-                challengeParticipantRepository.save(
-                                createTeamParticipant(challenge.getId(), memberA.getId(), team.getId(), 2, false));
-
-                // Member B: Completed 3 days
-                ChallengeParticipant participantB = challengeParticipantRepository.save(
-                                createTeamParticipant(challenge.getId(), memberB.getId(), team.getId(), 3, true));
-
-                // Daily Results for Member B
-                ChallengeDailyResult resultB1 = createChallengeDailyResult(participantB.getId(), LocalDate.now(),
-                                ChallengeDailyStatus.COMPLETE);
-                ChallengeDailyResult resultB2 = createChallengeDailyResult(participantB.getId(),
-                                LocalDate.now().plusDays(1),
-                                ChallengeDailyStatus.SHIELD);
-                challengeDailyResultRepository.saveAll(List.of(resultB1, resultB2));
-
-                // when & then
-                mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challenge.getId(), team.getId())
-                                .with(authentication(authToken)))
-                                .andExpect(status().isOk())
-                                .andDo(print())
-                                .andExpect(jsonPath("$.teamSummary.achievementAverage").value(team.getProgress()))
-                                .andExpect(jsonPath("$.members").isArray())
-                                .andExpect(jsonPath("$.members[0].nickname").value(memberB.getNickname())) // Sorted by completedDays
-                                .andExpect(jsonPath("$.members[0].dailyProgresses").isArray())
-                                .andExpect(jsonPath("$.members[0].dailyProgresses[0].status").value("COMPLETE"))
-                                .andExpect(jsonPath("$.members[0].dailyProgresses[1].status").value("SHIELD"))
-                                .andExpect(jsonPath("$.members[1].nickname").value(memberA.getNickname()))
-                                .andDo(print());
-        }
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> dailyProgresses(Map<String, Object> member) {
+        return (List<Map<String, Object>>) member.get("dailyProgresses");
+    }
 }

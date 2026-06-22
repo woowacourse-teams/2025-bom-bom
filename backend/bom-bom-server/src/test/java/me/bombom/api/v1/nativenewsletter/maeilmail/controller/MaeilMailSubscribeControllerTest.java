@@ -1,155 +1,150 @@
 package me.bombom.api.v1.nativenewsletter.maeilmail.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.module.mockmvc.response.MockMvcResponse;
+import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
 import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionTrack;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
-import me.bombom.api.v1.newsletter.domain.Category;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.domain.NewsletterSource;
-import me.bombom.api.v1.newsletter.repository.CategoryRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@IntegrationTest
+@AcceptanceTest({
+        "acceptance/common/member.json",
+        "acceptance/maeilmail/maeil-mail-newsletter.json"
+})
 class MaeilMailSubscribeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    @Test
+    void 미구독이면_빈_트랙을_반환한다() {
+        Map<String, Object> result = getSubscription();
 
-    @Autowired
-    private NewsletterRepository newsletterRepository;
-
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private SubscribeRepository subscribeRepository;
-
-    @Autowired
-    private MaeilMailSubscriptionTrackRepository trackRepository;
-
-    private Member member;
-
-    @BeforeEach
-    void setUp() {
-        member = memberRepository.save(TestFixture.createUniqueMember("maeil-user", "maeil-subscribe-controller"));
-        newsletterRepository.save(createMaeilMailNewsletter());
+        assertThat(result.get("tracks")).isEqualTo(List.of());
     }
 
     @Test
-    void 미구독이면_빈_트랙을_반환한다() throws Exception {
-        mockMvc.perform(get("/api/v1/subscriptions/native/maeil-mail")
-                        .header(AcceptanceTestHeaders.MEMBER_ID, member.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tracks").isEmpty());
-    }
-
-    @Test
-    void 트랙을_보내면_매일메일을_신규_구독한다() throws Exception {
+    @ResetsAcceptanceData
+    void 트랙을_보내면_매일메일을_신규_구독한다() {
         changeSubscription(List.of("BE", "FE"))
-                .andExpect(status().isOk());
+                .then()
+                .statusCode(200);
 
-        assertThat(subscribeRepository.findAll()).hasSize(1);
-        assertThat(trackRepository.findAll())
-                .extracting(MaeilMailSubscriptionTrack::getField)
-                .containsExactlyInAnyOrder(MaeilMailTrack.BE, MaeilMailTrack.FE);
+        assertThat(countSubscriptions()).isEqualTo(1);
+        assertThat(findTrackFields()).containsExactlyInAnyOrder("BE", "FE");
     }
 
     @Test
-    void 구독_중인_트랙을_요청한_트랙으로_치환한다() throws Exception {
-        changeSubscription(List.of("BE", "FE")).andExpect(status().isOk());
-        changeSubscription(List.of("BE")).andExpect(status().isOk());
+    @ResetsAcceptanceData
+    void 구독_중인_트랙을_요청한_트랙으로_치환한다() {
+        changeSubscription(List.of("BE", "FE")).then().statusCode(200);
+        changeSubscription(List.of("BE")).then().statusCode(200);
 
-        mockMvc.perform(get("/api/v1/subscriptions/native/maeil-mail")
-                        .header(AcceptanceTestHeaders.MEMBER_ID, member.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tracks.length()").value(1))
-                .andExpect(jsonPath("$.tracks[0]").value("BE"));
+        Map<String, Object> result = getSubscription();
+
+        assertThat(result.get("tracks")).isEqualTo(List.of("BE"));
     }
 
     @Test
-    void 구독을_삭제하면_구독과_트랙을_모두_삭제한다() throws Exception {
-        changeSubscription(List.of("BE", "FE")).andExpect(status().isOk());
+    @ResetsAcceptanceData
+    void 구독을_삭제하면_구독과_트랙을_모두_삭제한다() {
+        changeSubscription(List.of("BE", "FE")).then().statusCode(200);
 
-        mockMvc.perform(delete("/api/v1/subscriptions/native/maeil-mail")
-                        .header(AcceptanceTestHeaders.MEMBER_ID, member.getId()))
-                .andExpect(status().isOk());
+        deleteSubscription().then().statusCode(200);
 
-        assertThat(subscribeRepository.findAll()).isEmpty();
-        assertThat(trackRepository.findAll()).isEmpty();
+        assertThat(countSubscriptions()).isZero();
+        assertThat(countTracks()).isZero();
     }
 
     @Test
-    void 미구독_상태의_삭제는_성공한다() throws Exception {
-        mockMvc.perform(delete("/api/v1/subscriptions/native/maeil-mail")
-                        .header(AcceptanceTestHeaders.MEMBER_ID, member.getId()))
-                .andExpect(status().isOk());
+    void 미구독_상태의_삭제는_성공한다() {
+        deleteSubscription().then().statusCode(200);
     }
 
     @Test
-    void 빈_트랙으로_구독을_요청하면_400을_반환한다() throws Exception {
+    void 빈_트랙으로_구독을_요청하면_400을_반환한다() {
         changeSubscription(List.of())
-                .andExpect(status().isBadRequest());
+                .then()
+                .statusCode(400);
 
-        assertThat(subscribeRepository.findAll()).isEmpty();
+        assertThat(countSubscriptions()).isZero();
     }
 
     @Test
-    void 중복된_트랙으로_구독을_요청하면_400을_반환한다() throws Exception {
+    void 중복된_트랙으로_구독을_요청하면_400을_반환한다() {
         changeSubscription(List.of("BE", "BE"))
-                .andExpect(status().isBadRequest());
+                .then()
+                .statusCode(400);
 
-        assertThat(subscribeRepository.findAll()).isEmpty();
+        assertThat(countSubscriptions()).isZero();
     }
 
-    private ResultActions changeSubscription(List<String> tracks) throws Exception {
-        return mockMvc.perform(put("/api/v1/subscriptions/native/maeil-mail")
-                .header(AcceptanceTestHeaders.MEMBER_ID, member.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("tracks", tracks))));
+    private static Map<String, Object> getSubscription() {
+        return authenticatedRequest()
+                .when()
+                .get("/api/v1/subscriptions/native/maeil-mail")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
     }
 
-    private Newsletter createMaeilMailNewsletter() {
-        Category category = categoryRepository.save(TestFixture.createCategory());
-        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
-        return TestFixture.createNewsletter(
-                "매일메일",
-                "maeil@bombom.news",
-                category.getId(),
-                detail.getId(),
-                NewsletterSource.MAEIL_MAIL
+    private static MockMvcResponse changeSubscription(List<String> tracks) {
+        return authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of("tracks", tracks))
+                .when()
+                .put("/api/v1/subscriptions/native/maeil-mail");
+    }
+
+    private static MockMvcResponse deleteSubscription() {
+        return authenticatedRequest()
+                .when()
+                .delete("/api/v1/subscriptions/native/maeil-mail");
+    }
+
+    private static MockMvcRequestSpecification authenticatedRequest() {
+        return RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+    }
+
+    private int countSubscriptions() {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from subscribe where member_id = ? and newsletter_id = ?",
+                Integer.class,
+                MEMBER_ID,
+                1L
+        );
+        return count == null ? 0 : count;
+    }
+
+    private int countTracks() {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from maeil_mail_subscription_track where member_id = ?",
+                Integer.class,
+                MEMBER_ID
+        );
+        return count == null ? 0 : count;
+    }
+
+    private List<String> findTrackFields() {
+        return jdbcTemplate.queryForList(
+                "select field from maeil_mail_subscription_track where member_id = ? order by field",
+                String.class,
+                MEMBER_ID
         );
     }
 }

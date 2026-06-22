@@ -1,190 +1,139 @@
 package me.bombom.api.v1.challenge.controller;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.module.mockmvc.response.MockMvcResponse;
+import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeComment;
-import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
-import me.bombom.api.v1.challenge.repository.ChallengeCommentReplyRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@IntegrationTest
+@AcceptanceTest("acceptance/challenge/comment.json")
 class ChallengeCommentReplyControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    @Test
+    void commentId가_1_미만이면_400을_응답한다() {
+        createCommentReply(1, 0, "감사합니다!", false)
+                .then()
+                .statusCode(400);
+    }
 
-    @Autowired
-    private ChallengeRepository challengeRepository;
+    @Test
+    void 답글_내용이_null이면_400을_응답한다() {
+        authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of("isPrivate", false))
+                .when()
+                .post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", 1, 1)
+                .then()
+                .statusCode(400);
+    }
 
-    @Autowired
-    private ChallengeParticipantRepository challengeParticipantRepository;
+    @Test
+    void 답글_내용이_500자를_초과하면_400을_응답한다() {
+        createCommentReply(1, 1, "a".repeat(501), false)
+                .then()
+                .statusCode(400);
+    }
 
-    @Autowired
-    private ChallengeCommentRepository challengeCommentRepository;
+    @Test
+    @ResetsAcceptanceData
+    void 코멘트_답글을_생성한다() {
+        createCommentReply(1, 1, "새로운 답글입니다.", false)
+                .then()
+                .statusCode(201);
 
-    @Autowired
-    private ChallengeCommentReplyRepository challengeCommentReplyRepository;
+        assertSoftly(softly -> {
+            softly.assertThat(countCommentReplies()).isEqualTo(2);
+            softly.assertThat(findReplyCount(1)).isEqualTo(2);
+        });
+    }
 
-    @Autowired
-    private NewsletterGroupRepository newsletterGroupRepository;
+    @Test
+    void 코멘트_답글_목록을_조회하면_페이지정보를_반환한다() {
+        Map<String, Object> result = getCommentReplies(1, 1);
 
-    private OAuth2AuthenticationToken authToken;
-    private Member viewer;
-    private Challenge challenge;
-    private ChallengeComment challengeComment;
+        assertSoftly(softly -> {
+            softly.assertThat(content(result)).hasSize(1);
+            softly.assertThat(content(result).getFirst().get("reply")).isEqualTo("첫번째 답글");
+            softly.assertThat(content(result).getFirst().get("isMyReply")).isEqualTo(true);
+            softly.assertThat(result.get("totalElements")).isEqualTo(1);
+        });
+    }
 
-    @BeforeEach
-    void setUp() {
-        viewer = memberRepository.save(
-                TestFixture.createUniqueMember("replyUser", java.util.UUID.randomUUID().toString()));
-        Member commentAuthor = memberRepository.save(
-                TestFixture.createUniqueMember("commentAuthor", java.util.UUID.randomUUID().toString()));
+    @Test
+    void 코멘트ID가_1미만이면_답글_조회시_400을_응답한다() {
+        authenticatedRequest()
+                .when()
+                .get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", 1, 0)
+                .then()
+                .statusCode(400);
+    }
 
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        challenge = challengeRepository.save(
-                TestFixture.createChallenge(
-                        "comment-challenge",
-                        java.time.LocalDate.now().minusDays(1),
-                        java.time.LocalDate.now().plusDays(5),
-                        7,
-                        group.getId()));
+    private static Map<String, Object> getCommentReplies(long challengeId, long commentId) {
+        return authenticatedRequest()
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challengeId, commentId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
 
-        ChallengeParticipant commentAuthorParticipant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        commentAuthor.getId(),
-                        0));
+    private static MockMvcResponse createCommentReply(
+            long challengeId,
+            long commentId,
+            String reply,
+            boolean isPrivate
+    ) {
+        return authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "reply", reply,
+                        "isPrivate", isPrivate
+                ))
+                .when()
+                .post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challengeId, commentId);
+    }
 
-        ChallengeParticipant viewerParticipant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        viewer.getId(),
-                        0));
+    private static MockMvcRequestSpecification authenticatedRequest() {
+        return RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+    }
 
-        challengeComment = challengeCommentRepository.save(
-                TestFixture.createChallengeComment(
-                        1L,
-                        commentAuthorParticipant.getId(),
-                        "article title",
-                        "quote",
-                        "comment"));
+    private int countCommentReplies() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from challenge_comment_reply", Integer.class);
+        return count == null ? 0 : count;
+    }
 
-        challengeCommentReplyRepository.save(
-                ChallengeCommentReply.builder()
-                        .commentId(challengeComment.getId())
-                        .participantId(viewerParticipant.getId())
-                        .reply("첫번째 답글")
-                        .build());
-
-        Map<String, Object> attributes = Map.of(
-                "id", viewer.getId().toString(),
-                "email", viewer.getEmail(),
-                "name", viewer.getNickname()
+    private int findReplyCount(long commentId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select reply_count from challenge_comment where id = ?",
+                Integer.class,
+                commentId
         );
-
-        CustomOAuth2User principal = new CustomOAuth2User(attributes, viewer, null, null);
-        authToken = new OAuth2AuthenticationToken(
-                principal,
-                principal.getAuthorities(),
-                "registrationId"
-        );
+        return count == null ? 0 : count;
     }
 
-    @Test
-    void commentId가_1_미만이면_400을_응답한다() throws Exception {
-        // given
-        CreateCommentReplyRequest request = new CreateCommentReplyRequest("감사합니다!", false);
-
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), 0L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 답글_내용이_null이면_400을_응답한다() throws Exception {
-        // given
-        CreateCommentReplyRequest request = new CreateCommentReplyRequest(null, false);
-
-        // when & then
-        mockMvc.perform(
-                        post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), challengeComment.getId())
-                                .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 답글_내용이_500자를_초과하면_400을_응답한다() throws Exception {
-        // given
-        String longReply = "a".repeat(501);
-        CreateCommentReplyRequest request = new CreateCommentReplyRequest(longReply, false);
-
-        // when & then
-        mockMvc.perform(
-                        post("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), challengeComment.getId())
-                                .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 코멘트_답글_목록을_조회하면_200과_페이지정보를_반환한다() throws Exception {
-        // when & then
-        mockMvc.perform(
-                        get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), challengeComment.getId())
-                                .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                                .param("size", "10")
-                                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].reply", is("첫번째 답글")))
-                .andExpect(jsonPath("$.content[0].isMyReply", is(true)));
-    }
-
-    @Test
-    void 코멘트ID가_1미만이면_답글_조회시_400을_응답한다() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challenge.getId(), 0L)
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(authToken))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> content(Map<String, Object> page) {
+        return (List<Map<String, Object>>) page.get("content");
     }
 }

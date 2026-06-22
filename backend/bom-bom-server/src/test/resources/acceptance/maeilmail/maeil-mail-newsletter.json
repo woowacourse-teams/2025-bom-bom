@@ -1,0 +1,33 @@
+{
+  "category": [
+    {
+      "id": 1,
+      "name": "매일메일"
+    }
+  ],
+  "newsletter_detail": [
+    {
+      "id": 1,
+      "main_page_url": "https://maeil-mail.bombom.news",
+      "subscribe_url": "https://maeil-mail.bombom.news/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "매일메일"
+    }
+  ],
+  "newsletter": [
+    {
+      "id": 1,
+      "name": "매일메일",
+      "description": "매일메일",
+      "image_url": "https://cdn.bombom.me/maeil-mail.png",
+      "email": "maeil@bombom.news",
+      "category_id": 1,
+      "detail_id": 1,
+      "status": "ACTIVE",
+      "source": "MAEIL_MAIL"
+    }
+  ],
+  "subscribe": [],
+  "maeil_mail_subscription_track": []
+}

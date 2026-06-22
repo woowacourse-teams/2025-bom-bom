@@ -1,322 +1,212 @@
 package me.bombom.api.v1.challenge.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.time.Clock;
+import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.module.mockmvc.response.MockMvcResponse;
+import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.ChallengeReview;
-import me.bombom.api.v1.challenge.domain.ChallengeTeam;
-import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
-import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
-import me.bombom.api.v1.challenge.event.CreateChallengeCommentListener;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeReviewRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@IntegrationTest
+@AcceptanceTest("acceptance/challenge/review.json")
 class ChallengeReviewControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
+    private static final long OTHER_MEMBER_ID = 2L;
+    private static final long CHALLENGE_ID = 1L;
+    private static final long PARTICIPANT_ID = 1L;
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 26);
 
     @Autowired
-    private ChallengeRepository challengeRepository;
+    private MutableClock clock;
 
     @Autowired
-    private ChallengeReviewRepository challengeReviewRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ChallengeParticipantRepository challengeParticipantRepository;
-
-    @Autowired
-    private ChallengeTodoRepository challengeTodoRepository;
-
-    @Autowired
-    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
-
-    @Autowired
-    private ChallengeDailyResultRepository challengeDailyResultRepository;
-
-    @Autowired
-    private ChallengeTeamRepository challengeTeamRepository;
-
-    @Autowired
-    private CreateChallengeCommentListener createChallengeCommentListener;
-
-    @Autowired
-    private Clock clock;
-
-    private Member viewer;
-    private Member otherMember;
-    private OAuth2AuthenticationToken viewerAuth;
-    private Long challengeAId;
-    private Long challengeBId;
-    private Long viewerParticipantId;
-    private Long viewerTeamId;
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void setUp() {
-        viewer = memberRepository.save(TestFixture.createUniqueMember("나밍곰", "viewer-provider"));
-        otherMember = memberRepository.save(TestFixture.createUniqueMember("제나", "other-provider"));
-
-        // 프로덕션 Clock 빈(Asia/Seoul) 과 시간대 일치 보장 — CI(UTC) 환경에서 LocalDate.now() 와 차이 방지
-        LocalDate today = LocalDate.now(clock);
-        // 챌린지A: 오늘이 마지막 날 (REVIEW 가 진행도 TODO 리스트에 노출되는 조건)
-        Challenge challengeA = challengeRepository.save(
-                TestFixture.createChallenge("챌린지A", today.minusDays(2), today, 3, 1L)
-        );
-        Challenge challengeB = challengeRepository.save(
-                TestFixture.createChallenge("챌린지B", today, today.plusDays(10), 11, 2L)
-        );
-        challengeAId = challengeA.getId();
-        challengeBId = challengeB.getId();
-
-        // TODO 타입 시드 — REVIEW + COMMENT (idempotency 검증용)
-        challengeTodoRepository.save(TestFixture.createChallengeTodo(challengeAId, ChallengeTodoType.REVIEW));
-        challengeTodoRepository.save(TestFixture.createChallengeTodo(challengeAId, ChallengeTodoType.COMMENT));
-        challengeTodoRepository.save(TestFixture.createChallengeTodo(challengeBId, ChallengeTodoType.REVIEW));
-
-        // 팀 + 참여자 (viewer 는 challengeA 참여자, team 포함)
-        ChallengeTeam viewerTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challengeAId, 0));
-        viewerTeamId = viewerTeam.getId();
-        ChallengeParticipant savedParticipant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipantWithTeam(challengeAId, viewer.getId(), viewerTeamId, 0, 0)
-        );
-        viewerParticipantId = savedParticipant.getId();
-
-        viewerAuth = authOf(viewer);
+    void 시간을_고정한다() {
+        clock.setDate(TODAY);
     }
 
     @Test
-    void 로그인한_사용자는_가시성_정책에_맞는_리뷰_목록을_조회한다() throws Exception {
-        // given
-        Member anotherMember = saveMember("익명", "another-provider");
-        Member hiddenMember = saveMember("숨김", "hidden-provider");
-        save(challengeAId, viewer.getId(), "내 비공개", true);
-        save(challengeAId, otherMember.getId(), "타인 공개", false);
-        save(challengeAId, anotherMember.getId(), "또 다른 타인 공개", false);
-        save(challengeAId, hiddenMember.getId(), "타인 비공개", true);
-        save(challengeBId, viewer.getId(), "다른 챌린지 본인 공개", false);
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-visible.json")
+    void 로그인한_사용자는_가시성_정책에_맞는_리뷰_목록을_조회한다() {
+        Map<String, Object> result = getReviews(CHALLENGE_ID, MEMBER_ID, null, null);
+        List<Map<String, Object>> content = content(result);
 
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(3))
-                .andExpect(jsonPath("$.content[?(@.comment == '타인 비공개')]").isEmpty())
-                .andExpect(jsonPath("$.content[?(@.comment == '다른 챌린지 본인 공개')]").isEmpty())
-                .andExpect(jsonPath("$.content[?(@.isMyReview == true && @.comment == '내 비공개')]").exists())
-                .andExpect(jsonPath("$.content[?(@.isMyReview == false && @.comment == '타인 공개')]").exists());
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("totalElements")).isEqualTo(3);
+            softly.assertThat(content).noneMatch(review -> review.get("comment").equals("타인 비공개"));
+            softly.assertThat(content).noneMatch(review -> review.get("comment").equals("다른 챌린지 본인 공개"));
+            softly.assertThat(content).anyMatch(review -> review.get("comment").equals("내 비공개")
+                    && review.get("isMyReview").equals(true));
+            softly.assertThat(content).anyMatch(review -> review.get("comment").equals("타인 공개")
+                    && review.get("isMyReview").equals(false));
+        });
     }
 
     @Test
-    void 페이징_파라미터가_적용된다() throws Exception {
-        // given
-        Member pageMember = saveMember("페이지1", "page-provider-1");
-        Member anotherPageMember = saveMember("페이지2", "page-provider-2");
-        save(challengeAId, viewer.getId(), "리뷰1", false);
-        save(challengeAId, pageMember.getId(), "리뷰2", false);
-        save(challengeAId, anotherPageMember.getId(), "리뷰3", false);
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-page.json")
+    void 페이징_파라미터가_적용된다() {
+        Map<String, Object> result = getReviews(CHALLENGE_ID, MEMBER_ID, 0, 2);
 
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .param("page", "0")
-                        .param("size", "2")
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.totalElements").value(3))
-                .andExpect(jsonPath("$.totalPages").value(2));
+        assertSoftly(softly -> {
+            softly.assertThat(content(result)).hasSize(2);
+            softly.assertThat(result.get("totalElements")).isEqualTo(3);
+            softly.assertThat(result.get("totalPages")).isEqualTo(2);
+        });
     }
 
     @Test
-    void 존재하지_않는_챌린지_조회_시_404_를_반환한다() throws Exception {
-        // given
-        long missingChallengeId = 999_999L;
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", missingChallengeId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
+    void 존재하지_않는_챌린지_조회_시_404_를_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews", 999_999)
+                .then()
+                .statusCode(404);
     }
 
     @Test
-    void 비인증_상태로_리뷰_목록을_조회하면_401_을_반환한다() throws Exception {
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews", challengeAId))
-                .andExpect(status().isUnauthorized());
+    void 비인증_상태로_리뷰_목록을_조회하면_401_을_반환한다() {
+        RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews", CHALLENGE_ID)
+                .then()
+                .statusCode(401);
     }
 
     @Test
-    void getMyReview_내_리뷰가_존재하면_200_과_본문을_반환한다() throws Exception {
-        // given
-        ChallengeReview mine = save(challengeAId, viewer.getId(), "내 리뷰", true);
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-my.json")
+    void getMyReview_내_리뷰가_존재하면_본문을_반환한다() {
+        Map<String, Object> result = getMyReview(CHALLENGE_ID, MEMBER_ID);
 
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reviewId").value(mine.getId()))
-                .andExpect(jsonPath("$.nickname").value(viewer.getNickname()))
-                .andExpect(jsonPath("$.comment").value("내 리뷰"))
-                .andExpect(jsonPath("$.isPrivate").value(true))
-                .andExpect(jsonPath("$.isMyReview").doesNotExist());
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("reviewId")).isEqualTo(1);
+            softly.assertThat(result.get("nickname")).isEqualTo("나밍곰");
+            softly.assertThat(result.get("comment")).isEqualTo("내 리뷰");
+            softly.assertThat(result.get("isPrivate")).isEqualTo(true);
+            softly.assertThat(result).doesNotContainKey("isMyReview");
+        });
     }
 
     @Test
-    void getMyReview_내_리뷰가_없으면_404_를_반환한다() throws Exception {
-        // given
-        save(challengeAId, otherMember.getId(), "타인 공개", false);
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-other.json")
+    void getMyReview_내_리뷰가_없으면_404_를_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews/me", CHALLENGE_ID)
+                .then()
+                .statusCode(404);
     }
 
     @Test
-    void getMyReview_존재하지_않는_챌린지면_404_를_반환한다() throws Exception {
-        // given
-        long missingChallengeId = 999_999L;
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", missingChallengeId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
+    void getMyReview_존재하지_않는_챌린지면_404_를_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews/me", 999_999)
+                .then()
+                .statusCode(404);
     }
 
     @Test
-    void getMyReview_다른_챌린지의_내_리뷰만_있을_때_404_를_반환한다() throws Exception {
-        // given
-        save(challengeBId, viewer.getId(), "다른 챌린지 본인 리뷰", false);
-
-        // when // then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isNotFound());
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-other-challenge.json")
+    void getMyReview_다른_챌린지의_내_리뷰만_있을_때_404_를_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews/me", CHALLENGE_ID)
+                .then()
+                .statusCode(404);
     }
 
     @Test
-    void getMyReview_비인증_상태이면_401_을_반환한다() throws Exception {
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/reviews/me", challengeAId))
-                .andExpect(status().isUnauthorized());
+    void getMyReview_비인증_상태이면_401_을_반환한다() {
+        RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews/me", CHALLENGE_ID)
+                .then()
+                .statusCode(401);
     }
 
     @Test
-    void createReview_정상_요청이면_201_과_함께_리뷰가_저장되고_당일_출석이_인정된다() throws Exception {
-        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":true}";
+    @ResetsAcceptanceData
+    void createReview_정상_요청이면_리뷰가_저장되고_당일_출석이_인정된다() {
+        createReview(CHALLENGE_ID, MEMBER_ID, "좋았어요", true)
+                .then()
+                .statusCode(201);
 
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated());
-
-        // 리뷰 저장 검증
-        assertThat(challengeReviewRepository.findAll()).hasSize(1);
-        ChallengeReview saved = challengeReviewRepository.findAll().get(0);
-        assertThat(saved.getChallengeId()).isEqualTo(challengeAId);
-        assertThat(saved.getMemberId()).isEqualTo(viewer.getId());
-        assertThat(saved.getComment()).isEqualTo("좋았어요");
-        assertThat(saved.isPrivate()).isTrue();
-
-        // 출석 인정 검증 (이벤트 리스너 트리거 결과)
-        Long participantId = challengeParticipantRepository
-                .findByChallengeIdAndMemberId(challengeAId, viewer.getId())
-                .orElseThrow()
-                .getId();
-        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(participantId, LocalDate.now(clock)))
-                .isTrue();
-        assertThat(challengeDailyTodoRepository.count()).isEqualTo(1); // REVIEW 타입 daily todo 1건
+        assertSoftly(softly -> {
+            softly.assertThat(countReviews()).isEqualTo(1);
+            softly.assertThat(findReviewComment(CHALLENGE_ID, MEMBER_ID)).isEqualTo("좋았어요");
+            softly.assertThat(findReviewIsPrivate(CHALLENGE_ID, MEMBER_ID)).isTrue();
+            softly.assertThat(existsDailyResult(PARTICIPANT_ID, TODAY)).isTrue();
+            softly.assertThat(countDailyTodos(PARTICIPANT_ID, TODAY, "REVIEW")).isEqualTo(1);
+        });
     }
 
     @Test
-    void createReview_비참여자_리뷰_작성_시도는_404_를_반환하고_출석도_인정되지_않는다_IDOR_방어() throws Exception {
-        // otherMember 는 challengeA 에 참여하지 않은 사용자
-        OAuth2AuthenticationToken nonParticipantAuth = authOf(otherMember);
-        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
+    void createReview_비참여자_리뷰_작성_시도는_404_를_반환하고_출석도_인정되지_않는다_IDOR_방어() {
+        createReview(CHALLENGE_ID, OTHER_MEMBER_ID, "좋았어요", false)
+                .then()
+                .statusCode(404);
 
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(nonParticipantAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-
-        assertThat(challengeReviewRepository.findAll()).isEmpty();
-        assertThat(challengeDailyResultRepository.count()).isZero();
-        assertThat(challengeDailyTodoRepository.count()).isZero();
+        assertSoftly(softly -> {
+            softly.assertThat(countReviews()).isZero();
+            softly.assertThat(countDailyResults()).isZero();
+            softly.assertThat(countDailyTodos()).isZero();
+        });
     }
 
     @Test
-    void createReview_이미_본인이_작성한_리뷰가_있으면_400_을_반환한다() throws Exception {
-        save(challengeAId, viewer.getId(), "기존 리뷰", false);
-        String body = "{\"comment\":\"중복 시도\",\"isPrivate\":false}";
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-my.json")
+    void createReview_이미_본인이_작성한_리뷰가_있으면_400_을_반환한다() {
+        createReview(CHALLENGE_ID, MEMBER_ID, "중복 시도", false)
+                .then()
+                .statusCode(400);
 
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-
-        assertThat(challengeReviewRepository.findAll()).hasSize(1);
+        assertThat(countReviews()).isEqualTo(1);
     }
 
     @Test
-    void createReview_존재하지_않는_챌린지면_404_를_반환한다() throws Exception {
-        long missingChallengeId = 999_999L;
-        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
-
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", missingChallengeId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
+    void createReview_존재하지_않는_챌린지면_404_를_반환한다() {
+        createReview(999_999, MEMBER_ID, "좋았어요", false)
+                .then()
+                .statusCode(404);
     }
 
     @Test
-    void createReview_비인증_상태이면_401_을_반환한다() throws Exception {
-        String body = "{\"comment\":\"좋았어요\",\"isPrivate\":false}";
-
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isUnauthorized());
+    void createReview_비인증_상태이면_401_을_반환한다() {
+        RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(Map.of("comment", "좋았어요", "isPrivate", false))
+                .when()
+                .post("/api/v1/challenges/{challengeId}/reviews", CHALLENGE_ID)
+                .then()
+                .statusCode(401);
     }
 
     @Test
+    @ResetsAcceptanceData
     void createReview_동시_요청이_여러_건이어도_정확히_한_건만_저장되고_나머지는_400_을_반환한다() throws Exception {
-        // given
         int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch ready = new CountDownLatch(threadCount);
@@ -324,234 +214,361 @@ class ChallengeReviewControllerTest {
         CountDownLatch done = new CountDownLatch(threadCount);
         AtomicInteger createdCount = new AtomicInteger();
         AtomicInteger badRequestCount = new AtomicInteger();
-        String body = "{\"comment\":\"동시 요청\",\"isPrivate\":false}";
 
-        // when
-        for (int i = 0; i < threadCount; i++) {
+        for (int index = 0; index < threadCount; index++) {
             executor.submit(() -> {
                 try {
                     ready.countDown();
                     start.await();
-                    int status = mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                                    .with(authentication(viewerAuth))
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(body))
+                    int status = createReview(CHALLENGE_ID, MEMBER_ID, "동시 요청", false)
                             .andReturn()
-                            .getResponse()
-                            .getStatus();
-                    if (status == 201) createdCount.incrementAndGet();
-                    else if (status == 400) badRequestCount.incrementAndGet();
+                            .statusCode();
+                    if (status == 201) {
+                        createdCount.incrementAndGet();
+                    } else if (status == 400) {
+                        badRequestCount.incrementAndGet();
+                    }
                 } catch (Exception ignored) {
                 } finally {
                     done.countDown();
                 }
             });
         }
+
         ready.await();
         start.countDown();
         done.await(10, TimeUnit.SECONDS);
         executor.shutdownNow();
 
-        // then
-        assertThat(createdCount.get()).isEqualTo(1);
-        assertThat(badRequestCount.get()).isEqualTo(threadCount - 1);
-        assertThat(challengeReviewRepository.findAll()).hasSize(1);
+        assertSoftly(softly -> {
+            softly.assertThat(createdCount.get()).isEqualTo(1);
+            softly.assertThat(badRequestCount.get()).isEqualTo(threadCount - 1);
+            softly.assertThat(countReviews()).isEqualTo(1);
+        });
     }
 
     @Test
-    void createReview_comment_가_빈_문자열이면_400_을_반환한다() throws Exception {
-        String body = "{\"comment\":\"\",\"isPrivate\":false}";
+    void createReview_comment_가_빈_문자열이면_400_을_반환한다() {
+        createReview(CHALLENGE_ID, MEMBER_ID, "", false)
+                .then()
+                .statusCode(400);
 
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-
-        assertThat(challengeReviewRepository.findAll()).isEmpty();
+        assertThat(countReviews()).isZero();
     }
 
     @Test
-    void updateReview_정상_요청이면_204_와_함께_리뷰가_갱신된다() throws Exception {
-        ChallengeReview mine = save(challengeAId, viewer.getId(), "원본", false);
-        String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
+    @ResetsAcceptanceData
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-my.json")
+    void updateReview_정상_요청이면_리뷰가_갱신된다() {
+        updateReview(CHALLENGE_ID, 1, MEMBER_ID, "수정됨", true)
+                .then()
+                .statusCode(204);
 
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, mine.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNoContent());
-
-        ChallengeReview updated = challengeReviewRepository.findById(mine.getId()).orElseThrow();
-        assertThat(updated.getComment()).isEqualTo("수정됨");
-        assertThat(updated.isPrivate()).isTrue();
+        assertSoftly(softly -> {
+            softly.assertThat(findReviewComment(1)).isEqualTo("수정됨");
+            softly.assertThat(findReviewIsPrivate(1)).isTrue();
+        });
     }
 
     @Test
-    void updateReview_리뷰가_존재하지_않으면_404_를_반환한다() throws Exception {
-        long missingReviewId = 999_999L;
-        String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
-
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, missingReviewId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
+    void updateReview_리뷰가_존재하지_않으면_404_를_반환한다() {
+        updateReview(CHALLENGE_ID, 999_999, MEMBER_ID, "수정됨", true)
+                .then()
+                .statusCode(404);
     }
 
     @Test
-    void updateReview_path_challengeId_와_review의_challengeId_가_불일치하면_404_를_반환한다() throws Exception {
-        ChallengeReview reviewInChallengeB = save(challengeBId, viewer.getId(), "원본", false);
-        String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-other-challenge.json")
+    void updateReview_path_challengeId_와_review의_challengeId_가_불일치하면_404_를_반환한다() {
+        updateReview(CHALLENGE_ID, 5, MEMBER_ID, "수정됨", true)
+                .then()
+                .statusCode(404);
 
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, reviewInChallengeB.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-
-        ChallengeReview untouched = challengeReviewRepository.findById(reviewInChallengeB.getId()).orElseThrow();
-        assertThat(untouched.getComment()).isEqualTo("원본");
+        assertThat(findReviewComment(5)).isEqualTo("다른 챌린지 본인 리뷰");
     }
 
     @Test
-    void updateReview_본인_리뷰가_아니면_404_를_반환한다_IDOR_방어() throws Exception {
-        ChallengeReview othersReview = save(challengeAId, otherMember.getId(), "타인 원본", false);
-        String body = "{\"comment\":\"가로채기\",\"isPrivate\":true}";
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-other.json")
+    void updateReview_본인_리뷰가_아니면_404_를_반환한다_IDOR_방어() {
+        updateReview(CHALLENGE_ID, 2, MEMBER_ID, "가로채기", true)
+                .then()
+                .statusCode(404);
 
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, othersReview.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isNotFound());
-
-        ChallengeReview untouched = challengeReviewRepository.findById(othersReview.getId()).orElseThrow();
-        assertThat(untouched.getComment()).isEqualTo("타인 원본");
+        assertThat(findReviewComment(2)).isEqualTo("타인 공개");
     }
 
     @Test
-    void updateReview_비인증_상태이면_401_을_반환한다() throws Exception {
-        ChallengeReview mine = save(challengeAId, viewer.getId(), "원본", false);
-        String body = "{\"comment\":\"수정됨\",\"isPrivate\":true}";
-
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, mine.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isUnauthorized());
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-my.json")
+    void updateReview_비인증_상태이면_401_을_반환한다() {
+        RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(Map.of("comment", "수정됨", "isPrivate", true))
+                .when()
+                .put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", CHALLENGE_ID, 1)
+                .then()
+                .statusCode(401);
     }
 
     @Test
-    void updateReview_comment가_빈_문자열이면_400_을_반환한다() throws Exception {
-        ChallengeReview mine = save(challengeAId, viewer.getId(), "원본", false);
-        String body = "{\"comment\":\"\",\"isPrivate\":true}";
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-my.json")
+    void updateReview_comment가_빈_문자열이면_400_을_반환한다() {
+        updateReview(CHALLENGE_ID, 1, MEMBER_ID, "", true)
+                .then()
+                .statusCode(400);
 
-        mockMvc.perform(put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeAId, mine.getId())
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-
-        ChallengeReview untouched = challengeReviewRepository.findById(mine.getId()).orElseThrow();
-        assertThat(untouched.getComment()).isEqualTo("원본");
+        assertThat(findReviewComment(1)).isEqualTo("내 리뷰");
     }
 
     @Test
-    void 리뷰_작성_시_진행도의_REVIEW_TODO가_미완료에서_완료로_변경된다() throws Exception {
-        // given — 작성 전 진행도 조회
-        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'INCOMPLETE')]").exists())
-                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'COMPLETE')]").doesNotExist());
+    @ResetsAcceptanceData
+    void 리뷰_작성_시_진행도의_REVIEW_TODO가_미완료에서_완료로_변경된다() {
+        Map<String, Object> before = getMyProgress(CHALLENGE_ID, MEMBER_ID);
+        assertThat(hasTodoStatus(before, "REVIEW", "INCOMPLETE")).isTrue();
+        assertThat(hasTodoStatus(before, "REVIEW", "COMPLETE")).isFalse();
 
-        // when — 리뷰 작성
-        String body = "{\"comment\":\"잘 했어요\",\"isPrivate\":false}";
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated());
+        createReview(CHALLENGE_ID, MEMBER_ID, "잘 했어요", false)
+                .then()
+                .statusCode(201);
 
-        // then — 작성 후 진행도 조회: REVIEW 상태가 COMPLETE 로 변경
-        mockMvc.perform(get("/api/v1/challenges/{id}/progress/me", challengeAId)
-                        .with(authentication(viewerAuth)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'COMPLETE')]").exists())
-                .andExpect(jsonPath("$.todayTodos[?(@.challengeTodoType == 'REVIEW' && @.challengeTodoStatus == 'INCOMPLETE')]").doesNotExist());
+        Map<String, Object> after = getMyProgress(CHALLENGE_ID, MEMBER_ID);
+        assertThat(hasTodoStatus(after, "REVIEW", "COMPLETE")).isTrue();
+        assertThat(hasTodoStatus(after, "REVIEW", "INCOMPLETE")).isFalse();
     }
 
     @Test
-    void 리뷰_작성만으로_출석이_인정된다() throws Exception {
-        // when
-        String body = "{\"comment\":\"리뷰만 작성\",\"isPrivate\":false}";
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated());
+    @ResetsAcceptanceData
+    void 리뷰_작성만으로_출석이_인정된다() {
+        createReview(CHALLENGE_ID, MEMBER_ID, "리뷰만 작성", false)
+                .then()
+                .statusCode(201);
 
-        // then — 출석 인정
-        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now(clock)))
-                .isTrue();
-        assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
-                .isEqualTo(1);
+        assertSoftly(softly -> {
+            softly.assertThat(existsDailyResult(PARTICIPANT_ID, TODAY)).isTrue();
+            softly.assertThat(findCompletedDays(PARTICIPANT_ID)).isEqualTo(1);
+        });
     }
 
     @Test
-    void 코멘트와_리뷰_둘_다_작성해도_출석은_단_1회만_인정된다() throws Exception {
-        // given — 코멘트 작성 이벤트 직접 발행 (코멘트 API 의존성 회피)
-        createChallengeCommentListener.on(new CreateChallengeCommentEvent(viewerParticipantId));
-        long dailyResultCountAfterComment = challengeDailyResultRepository.count();
-        int completedDaysAfterComment = challengeParticipantRepository.findById(viewerParticipantId)
-                .orElseThrow().getCompletedDays();
-        assertThat(dailyResultCountAfterComment).isEqualTo(1);
-        assertThat(completedDaysAfterComment).isEqualTo(1);
+    @ResetsAcceptanceData
+    @AdditionalAcceptanceDataSet("acceptance/challenge/review-daily-result.json")
+    void 코멘트와_리뷰_둘_다_작성해도_출석은_단_1회만_인정된다() {
+        updateCompletedDays(PARTICIPANT_ID, 1);
 
-        // when — 같은 날 리뷰 추가 작성
-        String body = "{\"comment\":\"리뷰도 작성\",\"isPrivate\":false}";
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/reviews", challengeAId)
-                        .with(authentication(viewerAuth))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated());
+        createReview(CHALLENGE_ID, MEMBER_ID, "리뷰도 작성", false)
+                .then()
+                .statusCode(201);
 
-        // then — 출석은 1회만 인정 (idempotent)
-        assertThat(challengeDailyResultRepository.count()).isEqualTo(1);
-        assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
-                .isEqualTo(1);
+        assertSoftly(softly -> {
+            softly.assertThat(countDailyResults(PARTICIPANT_ID, TODAY)).isEqualTo(1);
+            softly.assertThat(findCompletedDays(PARTICIPANT_ID)).isEqualTo(1);
+        });
     }
 
     @Test
     void 리뷰도_코멘트도_미작성이면_출석이_인정되지_않는다() {
-        // when // then — 아무 행위도 하지 않음 → 출석 데이터 0건
-        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(viewerParticipantId, LocalDate.now(clock)))
-                .isFalse();
-        assertThat(challengeParticipantRepository.findById(viewerParticipantId).orElseThrow().getCompletedDays())
-                .isZero();
+        assertSoftly(softly -> {
+            softly.assertThat(existsDailyResult(PARTICIPANT_ID, TODAY)).isFalse();
+            softly.assertThat(findCompletedDays(PARTICIPANT_ID)).isZero();
+        });
     }
 
-    private ChallengeReview save(Long challengeId, Long memberId, String comment, boolean isPrivate) {
-        return challengeReviewRepository.save(
-                ChallengeReview.builder()
-                        .challengeId(challengeId)
-                        .memberId(memberId)
-                        .comment(comment)
-                        .isPrivate(isPrivate)
-                        .build()
+    private static Map<String, Object> getReviews(
+            long challengeId,
+            long memberId,
+            Integer page,
+            Integer size
+    ) {
+        MockMvcRequestSpecification request = request(memberId);
+        if (page != null) {
+            request.queryParam("page", page);
+        }
+        if (size != null) {
+            request.queryParam("size", size);
+        }
+
+        return request
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getMyReview(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/reviews/me", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static MockMvcResponse createReview(long challengeId, long memberId, String comment, boolean isPrivate) {
+        return request(memberId)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "comment", comment,
+                        "isPrivate", isPrivate
+                ))
+                .when()
+                .post("/api/v1/challenges/{challengeId}/reviews", challengeId);
+    }
+
+    private static MockMvcResponse updateReview(
+            long challengeId,
+            long reviewId,
+            long memberId,
+            String comment,
+            boolean isPrivate
+    ) {
+        return request(memberId)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "comment", comment,
+                        "isPrivate", isPrivate
+                ))
+                .when()
+                .put("/api/v1/challenges/{challengeId}/reviews/{reviewId}", challengeId, reviewId);
+    }
+
+    private static Map<String, Object> getMyProgress(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/me", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static MockMvcRequestSpecification request(long memberId) {
+        return RestAssuredMockMvc.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
+    }
+
+    private int countReviews() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from challenge_review", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private String findReviewComment(long reviewId) {
+        return jdbcTemplate.queryForObject(
+                "select comment from challenge_review where id = ?",
+                String.class,
+                reviewId
         );
     }
 
-    private OAuth2AuthenticationToken authOf(Member member) {
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
+    private boolean findReviewIsPrivate(long reviewId) {
+        Boolean isPrivate = jdbcTemplate.queryForObject(
+                "select is_private from challenge_review where id = ?",
+                Boolean.class,
+                reviewId
         );
-        CustomOAuth2User principal = new CustomOAuth2User(attributes, member, null, null);
-        return new OAuth2AuthenticationToken(principal, principal.getAuthorities(), "registrationId");
+        return Boolean.TRUE.equals(isPrivate);
     }
 
-    private Member saveMember(String nickname, String providerId) {
-        return memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
+    private String findReviewComment(long challengeId, long memberId) {
+        return jdbcTemplate.queryForObject(
+                "select comment from challenge_review where challenge_id = ? and member_id = ?",
+                String.class,
+                challengeId,
+                memberId
+        );
+    }
+
+    private boolean findReviewIsPrivate(long challengeId, long memberId) {
+        Boolean isPrivate = jdbcTemplate.queryForObject(
+                "select is_private from challenge_review where challenge_id = ? and member_id = ?",
+                Boolean.class,
+                challengeId,
+                memberId
+        );
+        return Boolean.TRUE.equals(isPrivate);
+    }
+
+    private int countDailyTodos() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from challenge_daily_todo", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private int countDailyTodos(long participantId, LocalDate date, String todoType) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from challenge_daily_todo cdt
+                        join challenge_todo ct on ct.id = cdt.challenge_todo_id
+                        where cdt.participant_id = ?
+                          and cdt.todo_date = ?
+                          and ct.todo_type = ?
+                        """,
+                Integer.class,
+                participantId,
+                date,
+                todoType
+        );
+        return count == null ? 0 : count;
+    }
+
+    private int countDailyResults() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from challenge_daily_result", Integer.class);
+        return count == null ? 0 : count;
+    }
+
+    private boolean existsDailyResult(long participantId, LocalDate date) {
+        return countDailyResults(participantId, date) > 0;
+    }
+
+    private int countDailyResults(long participantId, LocalDate date) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from challenge_daily_result where participant_id = ? and date = ?",
+                Integer.class,
+                participantId,
+                date
+        );
+        return count == null ? 0 : count;
+    }
+
+    private int findCompletedDays(long participantId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select completed_days from challenge_participant where id = ?",
+                Integer.class,
+                participantId
+        );
+        return count == null ? 0 : count;
+    }
+
+    private void updateCompletedDays(long participantId, int completedDays) {
+        jdbcTemplate.update(
+                "update challenge_participant set completed_days = ? where id = ?",
+                completedDays,
+                participantId
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> content(Map<String, Object> page) {
+        return (List<Map<String, Object>>) page.get("content");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> todayTodos(Map<String, Object> progress) {
+        return (List<Map<String, Object>>) progress.get("todayTodos");
+    }
+
+    private static boolean hasTodoStatus(Map<String, Object> progress, String todoType, String status) {
+        return todayTodos(progress).stream()
+                .anyMatch(todo -> todo.get("challengeTodoType").equals(todoType)
+                        && todo.get("challengeTodoStatus").equals(status));
     }
 }

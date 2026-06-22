@@ -1,61 +1,34 @@
 package me.bombom.api.v1.member.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static me.bombom.support.acceptance.AcceptanceTestHeaders.MEMBER_ID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
+@AcceptanceTest({
+        "acceptance/common/member.json",
+        "acceptance/member/member.json"
+})
 class MemberControllerTest {
+
+    private static final long MEMBER_ID_VALUE = 1L;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    private Member member;
-    private Authentication authentication;
-
-    @BeforeEach
-    void setUp() {
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
-        );
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
-        authentication = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
-    }
 
     @Test
     void 형식에_맞지_않는_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
@@ -65,7 +38,7 @@ class MemberControllerTest {
 
         // when & then
         mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
@@ -80,7 +53,7 @@ class MemberControllerTest {
 
         // when & then
         mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
@@ -88,6 +61,7 @@ class MemberControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
     void 형식에_맞는_닉네임이면_정상_동작한다() throws Exception {
         // given
         MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("new.nickname", null, null, null);
@@ -95,7 +69,7 @@ class MemberControllerTest {
 
         // when & then
         mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
@@ -106,27 +80,26 @@ class MemberControllerTest {
     @Test
     void 회원_정보를_조회한다() throws Exception {
         mockMvc.perform(get("/api/v1/members/me")
-                        .with(authentication(authentication)))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
-                .andExpect(jsonPath("$.email").value(member.getEmail()));
+                .andExpect(jsonPath("$.nickname").value("인수테스트회원"))
+                .andExpect(jsonPath("$.email").value("acceptance@bombom.news"));
     }
 
     @Test
     void 회원_프로필을_조회한다() throws Exception {
         mockMvc.perform(get("/api/v1/members/me/profile")
-                        .with(authentication(authentication)))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nickname").value(member.getNickname()));
+                .andExpect(jsonPath("$.nickname").value("인수테스트회원"));
     }
 
     @Test
     void 이미_사용중인_닉네임으로_변경하면_예외가_발생한다() throws Exception {
-        Member other = memberRepository.save(TestFixture.createUniqueMember("duplicated", "member-controller-other"));
-        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest(other.getNickname(), null, null, null);
+        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("duplicated", null, null, null);
 
         mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

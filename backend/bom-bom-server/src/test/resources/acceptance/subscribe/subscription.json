@@ -1,0 +1,39 @@
+{
+  "category": [
+    { "id": 1, "name": "테크" }
+  ],
+  "newsletter_detail": [
+    {
+      "id": 1,
+      "main_page_url": "https://newsletter.test",
+      "subscribe_url": "https://newsletter.test/subscribe",
+      "issue_cycle": "매주 발행",
+      "subscribe_count": 100,
+      "sender": "테스트 발신자"
+    }
+  ],
+  "newsletter": [
+    {
+      "id": 1,
+      "name": "테스트 뉴스레터",
+      "description": "테스트 설명",
+      "image_url": "https://cdn.bombom.me/newsletter.png",
+      "email": "newsletter@test.com",
+      "category_id": 1,
+      "detail_id": 1,
+      "status": "ACTIVE",
+      "source": "EXTERNAL"
+    }
+  ],
+  "subscribe": [
+    {
+      "id": 1,
+      "newsletter_id": 1,
+      "member_id": 1,
+      "unsubscribe_url": "https://newsletter.test/unsubscribe",
+      "status": "SUBSCRIBED",
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ]
+}

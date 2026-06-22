@@ -1,82 +1,49 @@
 package me.bombom.api.v1.member.controller;
 
+import static me.bombom.support.acceptance.AcceptanceTestHeaders.MEMBER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.domain.WarningSetting;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.member.repository.WarningSettingRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
+@AcceptanceTest({
+        "acceptance/common/member.json",
+        "acceptance/member/warning-setting.json"
+})
 class WarningControllerTest {
+
+    private static final long MEMBER_ID_VALUE = 1L;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private WarningSettingRepository warningSettingRepository;
-
-    private Member member;
-
-    private OAuth2AuthenticationToken authToken;
-
-    @BeforeEach
-    void setUp() {
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-
-        WarningSetting warningSetting = WarningSetting.builder()
-                .memberId(member.getId())
-                .isVisible(true)
-                .build();
-        warningSettingRepository.save(warningSetting);
-
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
-        );
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
-        authToken = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
-    }
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void 임박_경고_설정을_조회한다() throws Exception {
         // when & then
         mockMvc.perform(get("/api/v1/members/me/warning/near-capacity")
-                        .with(authentication(authToken)))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isVisible").value(true));
     }
 
     @Test
+    @ResetsAcceptanceData
     void 임박_경고_설정을_수정한다() throws Exception {
         // when
         mockMvc.perform(post("/api/v1/members/me/warning/near-capacity")
-                        .with(authentication(authToken))
+                        .header(MEMBER_ID, MEMBER_ID_VALUE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -86,7 +53,11 @@ class WarningControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        WarningSetting updatedSetting = warningSettingRepository.findByMemberId(member.getId()).orElseThrow();
-        assertThat(updatedSetting.isVisible()).isFalse();
+        Boolean visible = jdbcTemplate.queryForObject(
+                "select is_visible from warning_setting where member_id = ?",
+                Boolean.class,
+                MEMBER_ID_VALUE
+        );
+        assertThat(visible).isFalse();
     }
 }

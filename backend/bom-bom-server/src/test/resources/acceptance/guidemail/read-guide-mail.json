@@ -1,0 +1,23 @@
+{
+  "stage": [
+    { "id": 1, "level": 1, "required_score": 0 }
+  ],
+  "pet": [
+    { "id": 1, "member_id": 1, "stage_id": 1, "current_score": 0, "is_attended": false }
+  ],
+  "today_reading": [
+    { "id": 1, "member_id": 1, "total_count": 3, "current_count": 0, "read_count": 0 }
+  ],
+  "weekly_reading": [
+    { "id": 1, "member_id": 1, "goal_count": 5, "current_count": 3 }
+  ],
+  "continue_reading_realtime": [
+    { "id": 1, "member_id": 1, "day_count": 10, "max_day_count": 10 }
+  ],
+  "monthly_reading_snapshot": [
+    { "id": 1, "member_id": 1, "current_count": 10, "rank_order": 0, "next_rank_difference": 0 }
+  ],
+  "monthly_reading_realtime": [
+    { "id": 1, "member_id": 1, "current_count": 0 }
+  ]
+}

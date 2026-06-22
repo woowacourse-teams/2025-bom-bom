@@ -1,0 +1,13 @@
+{
+  "member": [
+    {
+      "id": 2,
+      "provider": "provider",
+      "provider_id": "member-controller-other",
+      "email": "other@bombom.news",
+      "nickname": "duplicated",
+      "gender": "FEMALE",
+      "role_id": 1
+    }
+  ]
+}

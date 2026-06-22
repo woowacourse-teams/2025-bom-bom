@@ -1,125 +1,35 @@
 package me.bombom.api.v1.subscribe.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static me.bombom.support.acceptance.AcceptanceTestHeaders.MEMBER_ID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.enums.Gender;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.subscribe.service.SubscribeService;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Tag("integration")
-@AutoConfigureMockMvc
-@WebMvcTest(controllers = SubscribeController.class)
-@Import({SubscribeController.class, SubscribeControllerTest.TestConfig.class})
+@AcceptanceTest({
+        "acceptance/common/member.json",
+        "acceptance/subscribe/subscription.json"
+})
 class SubscribeControllerTest {
 
-    @Configuration
-    @EnableWebSecurity
-    static class TestConfig implements WebMvcConfigurer {
-
-        @Bean
-        public MemberRepository memberRepository() {
-            return mock(MemberRepository.class);
-        }
-
-        @Bean
-        public LoginMemberArgumentResolver loginMemberArgumentResolver() {
-            return new LoginMemberArgumentResolver("JSESSIONID", "");
-        }
-
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                    .exceptionHandling(ex -> ex
-                            .authenticationEntryPoint((request, response,
-                                                       authException) -> response.sendError(
-                                    HttpServletResponse.SC_UNAUTHORIZED)))
-                    .build();
-        }
-
-        @Override
-        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new LoginMemberArgumentResolver("JSESSIONID", ""));
-
-        }
-    }
+    private static final long MEMBER_ID_VALUE = 1L;
+    private static final long SUBSCRIPTION_ID = 1L;
 
     @Autowired
-    MockMvc mockMvc;
-
-    @MockitoBean
-    SubscribeService subscribeService;
-
-    @Autowired
-    MemberRepository memberRepository;
-
-    private OAuth2AuthenticationToken authToken;
-
-    @BeforeEach
-    void setUp() {
-        Member member = Member.builder()
-                .id(1L)
-                .provider("apple")
-                .providerId("providerId")
-                .email("email@bombom.news")
-                .nickname("nickname")
-                .gender(Gender.FEMALE)
-                .roleId(1L)
-                .build();
-
-        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
-
-        Map<String, Object> attrs = Map.of(
-                "id", "1",
-                "email", "email@bombom.news",
-                "name", "nickname");
-
-        CustomOAuth2User user = new CustomOAuth2User(attrs, member, null, null);
-        authToken = new OAuth2AuthenticationToken(user, user.getAuthorities(), "registrationId");
-    }
+    private MockMvc mockMvc;
 
     @Test
     void 인증된_사용자는_구독_목록을_조회할_수_있다() throws Exception {
-        given(subscribeService.getSubscribedNewsletters(any(Member.class)))
-                .willReturn(List.of());
-
-        mockMvc.perform(get("/api/v1/members/me/subscriptions")
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/members/me/subscriptions").header(MEMBER_ID, MEMBER_ID_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].subscriptionId").value(SUBSCRIPTION_ID))
+                .andExpect(jsonPath("$[0].name").value("테스트 뉴스레터"));
     }
 
     @Test
@@ -129,11 +39,10 @@ class SubscribeControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
     void 인증된_사용자는_구독_취소를_요청할_수_있다() throws Exception {
-        doNothing().when(subscribeService).unsubscribe(anyLong(), anyLong());
-
-        mockMvc.perform(post("/api/v1/members/me/subscriptions/{id}/unsubscribe", 1L)
-                        .with(authentication(authToken)))
+        mockMvc.perform(post("/api/v1/members/me/subscriptions/{id}/unsubscribe", SUBSCRIPTION_ID)
+                        .header(MEMBER_ID, MEMBER_ID_VALUE))
                 .andExpect(status().isOk());
     }
 }

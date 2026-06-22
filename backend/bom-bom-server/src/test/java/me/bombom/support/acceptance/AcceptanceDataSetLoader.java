@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AcceptanceDataSetLoader {
 
     private static final Pattern SQL_IDENTIFIER = Pattern.compile("[A-Za-z0-9_]+");
+    private static final String CURRENT_DATE_TIME = "${CURRENT_DATE_TIME}";
 
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
@@ -36,12 +39,37 @@ public class AcceptanceDataSetLoader {
     }
 
     @Transactional
-    public void load(String classpathLocation) {
-        JsonNode dataSet = readDataSet(classpathLocation);
-        List<Map.Entry<String, JsonNode>> tables = tables(dataSet);
+    public void load(String... classpathLocations) {
+        Map<String, List<JsonNode>> rowsByTable = mergeDataSets(classpathLocations);
+        deleteExistingRows(new ArrayList<>(rowsByTable.keySet()));
+        insertRows(rowsByTable);
+    }
 
-        deleteExistingRows(tables);
-        insertRows(tables);
+    @Transactional
+    public void append(String... classpathLocations) {
+        insertRows(mergeDataSets(classpathLocations));
+    }
+
+    @Transactional
+    public void clear(String... classpathLocations) {
+        Map<String, List<JsonNode>> rowsByTable = mergeDataSets(classpathLocations);
+        deleteExistingRows(new ArrayList<>(rowsByTable.keySet()));
+    }
+
+    private Map<String, List<JsonNode>> mergeDataSets(String[] classpathLocations) {
+        if (classpathLocations.length == 0) {
+            throw new IllegalArgumentException("인수 테스트 데이터셋 경로가 하나 이상 필요합니다.");
+        }
+
+        Map<String, List<JsonNode>> rowsByTable = new LinkedHashMap<>();
+        for (String classpathLocation : classpathLocations) {
+            JsonNode dataSet = readDataSet(classpathLocation);
+            tables(dataSet).forEach(table -> {
+                List<JsonNode> rows = rowsByTable.computeIfAbsent(table.getKey(), ignored -> new ArrayList<>());
+                table.getValue().forEach(rows::add);
+            });
+        }
+        return rowsByTable;
     }
 
     private JsonNode readDataSet(String classpathLocation) {
@@ -73,20 +101,18 @@ public class AcceptanceDataSetLoader {
         return tables;
     }
 
-    private void deleteExistingRows(List<Map.Entry<String, JsonNode>> tables) {
+    private void deleteExistingRows(List<String> tables) {
         for (int index = tables.size() - 1; index >= 0; index--) {
-            String table = tables.get(index).getKey();
+            String table = tables.get(index);
             jdbcTemplate.execute("DELETE FROM " + quote(table));
         }
     }
 
-    private void insertRows(List<Map.Entry<String, JsonNode>> tables) {
-        for (Map.Entry<String, JsonNode> table : tables) {
-            insertRows(table.getKey(), table.getValue());
-        }
+    private void insertRows(Map<String, List<JsonNode>> rowsByTable) {
+        rowsByTable.forEach(this::insertRows);
     }
 
-    private void insertRows(String table, JsonNode rows) {
+    private void insertRows(String table, List<JsonNode> rows) {
         Map<List<String>, List<JsonNode>> rowsByColumns = new LinkedHashMap<>();
         for (JsonNode row : rows) {
             List<String> columns = columns(table, row);
@@ -136,6 +162,8 @@ public class AcceptanceDataSetLoader {
 
             if (value.isNull()) {
                 preparedStatement.setObject(parameterIndex, null);
+            } else if (value.isTextual() && CURRENT_DATE_TIME.equals(value.textValue())) {
+                preparedStatement.setTimestamp(parameterIndex, Timestamp.valueOf(LocalDateTime.now()));
             } else if (value.isBoolean()) {
                 preparedStatement.setBoolean(parameterIndex, value.booleanValue());
             } else if (value.isIntegralNumber()) {

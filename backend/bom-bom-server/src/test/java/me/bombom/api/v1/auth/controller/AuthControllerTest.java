@@ -7,45 +7,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.auth.enums.SignupValidateField;
 import me.bombom.api.v1.auth.enums.SignupValidateStatus;
-import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.request.MemberSignupRequest;
 import me.bombom.api.v1.member.enums.Gender;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
+@AcceptanceTest("acceptance/common/member.json")
 class AuthControllerTest {
+
+    private static final String EXISTING_NICKNAME = "인수테스트회원";
+    private static final String EXISTING_EMAIL = "acceptance@bombom.news";
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    private Member member;
-
-    @BeforeEach
-    void setUp() {
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-    }
 
     @Test
     void 닉네임_중복_체크_DUPLICATE() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", SignupValidateField.NICKNAME.name())
-                        .param("userInput", member.getNickname())
+                        .param("userInput", EXISTING_NICKNAME)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(SignupValidateStatus.DUPLICATE.name()));
@@ -74,7 +62,7 @@ class AuthControllerTest {
     void 이메일_중복_체크_DUPLICATE() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", SignupValidateField.EMAIL.name())
-                        .param("userInput", member.getEmail())
+                        .param("userInput", EXISTING_EMAIL)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(SignupValidateStatus.DUPLICATE.name()));
@@ -84,7 +72,7 @@ class AuthControllerTest {
     void 유효하지_않은_필드_입력_시_예외() throws Exception {
         mockMvc.perform(get("/api/v1/auth/signup/check")
                         .param("field", "INVALID")
-                        .param("userInput", member.getEmail())
+                        .param("userInput", EXISTING_EMAIL)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andDo(print());

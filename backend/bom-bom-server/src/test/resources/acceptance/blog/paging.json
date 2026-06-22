@@ -1,0 +1,16 @@
+{
+  "blog_post": [
+    {
+      "id": 4,
+      "member_id": 102,
+      "title": "두 번째 공개 글",
+      "content": "본문",
+      "description": "두 번째 공개 글 설명",
+      "status": "PUBLISHED",
+      "visibility": "PUBLIC",
+      "published_at": "2026-03-22 09:00:00",
+      "created_at": "2026-03-22 09:00:00",
+      "updated_at": "2026-03-22 09:00:00"
+    }
+  ]
+}

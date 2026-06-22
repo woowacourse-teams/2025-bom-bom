@@ -16,5 +16,5 @@ import org.springframework.test.context.TestExecutionListeners;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AcceptanceTest {
 
-    String value();
+    String[] value();
 }

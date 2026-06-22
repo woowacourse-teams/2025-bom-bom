@@ -18,19 +18,19 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
 
     @Query("""
             SELECT new me.bombom.api.v1.reading.dto.ReadCountComparison(
-                COUNT(CASE WHEN h.readAt >= :currentStart AND h.readAt < :currentEnd THEN h.id ELSE NULL END),
-                COUNT(CASE WHEN h.readAt >= :previousStart AND h.readAt < :currentStart THEN h.id ELSE NULL END)
+                COUNT(CASE WHEN h.readAt >= :thisMonthStart AND h.readAt < :thisMonthEnd THEN h.id ELSE NULL END),
+                COUNT(CASE WHEN h.readAt >= :lastMonthStart AND h.readAt < :thisMonthStart THEN h.id ELSE NULL END)
             )
             FROM ArticleReadHistory h
             WHERE h.memberId = :memberId
-              AND h.readAt >= :previousStart
-              AND h.readAt < :currentEnd
+              AND h.readAt >= :lastMonthStart
+              AND h.readAt < :thisMonthEnd
             """)
-    ReadCountComparison countReadsInPeriods(
+    ReadCountComparison countMonthlyReadComparison(
             @Param("memberId") Long memberId,
-            @Param("previousStart") LocalDateTime previousStart,
-            @Param("currentStart") LocalDateTime currentStart,
-            @Param("currentEnd") LocalDateTime currentEnd
+            @Param("lastMonthStart") LocalDateTime lastMonthStart,
+            @Param("thisMonthStart") LocalDateTime thisMonthStart,
+            @Param("thisMonthEnd") LocalDateTime thisMonthEnd
     );
 
     @Query("""

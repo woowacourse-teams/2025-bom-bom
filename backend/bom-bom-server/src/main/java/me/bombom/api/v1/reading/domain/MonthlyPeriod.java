@@ -6,8 +6,8 @@ import java.time.YearMonth;
 import java.util.stream.Stream;
 
 public record MonthlyPeriod(
-        LocalDateTime startInclusive,
-        LocalDateTime endExclusive
+        LocalDateTime start,
+        LocalDateTime end
 ) {
 
     public static MonthlyPeriod from(YearMonth yearMonth) {
@@ -18,6 +18,6 @@ public record MonthlyPeriod(
     }
 
     public Stream<LocalDate> dates() {
-        return startInclusive.toLocalDate().datesUntil(endExclusive.toLocalDate());
+        return start.toLocalDate().datesUntil(end.toLocalDate());
     }
 }

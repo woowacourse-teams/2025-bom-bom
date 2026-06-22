@@ -60,29 +60,29 @@ public class MonthlyReportService {
     private List<DailyReadCount> countDailyReads(Member member, MonthlyPeriod period) {
         return articleReadHistoryRepository.countDailyReads(
                 member.getId(),
-                period.startInclusive(),
-                period.endExclusive()
+                period.start(),
+                period.end()
         );
     }
 
     private ReadCountComparison countReads(
             Member member,
-            MonthlyPeriod previousPeriod,
-            MonthlyPeriod currentPeriod
+            MonthlyPeriod lastMonth,
+            MonthlyPeriod thisMonth
     ) {
-        return articleReadHistoryRepository.countReadsInPeriods(
+        return articleReadHistoryRepository.countMonthlyReadComparison(
                 member.getId(),
-                previousPeriod.startInclusive(),
-                currentPeriod.startInclusive(),
-                currentPeriod.endExclusive()
+                lastMonth.start(),
+                thisMonth.start(),
+                thisMonth.end()
         );
     }
 
     private long countBookmarks(Member member, MonthlyPeriod period) {
         return bookmarkRepository.countBookmarksInPeriod(
                 member.getId(),
-                period.startInclusive(),
-                period.endExclusive()
+                period.start(),
+                period.end()
         );
     }
 
@@ -93,8 +93,8 @@ public class MonthlyReportService {
     ) {
         return articleReadHistoryRepository.findFrequentReadNewsletters(
                 member.getId(),
-                period.startInclusive(),
-                period.endExclusive(),
+                period.start(),
+                period.end(),
                 limit
         );
     }

@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -385,8 +385,8 @@ class ArticleControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcResponse request(String path, Map<String, ?> query, boolean authenticated) {
-        MockMvcRequestSpecification request = RestAssuredMockMvc.given()
+    private static Response request(String path, Map<String, ?> query, boolean authenticated) {
+        RequestSpecification request = RestAssured.given()
                 .accept(ContentType.JSON)
                 .queryParams(query);
         if (authenticated) {
@@ -395,11 +395,11 @@ class ArticleControllerTest {
         return request.when().get(path);
     }
 
-    private static MockMvcResponse patchRequest(String path) {
+    private static Response patchRequest(String path) {
         return authenticatedRequest().when().patch(path);
     }
 
-    private static MockMvcResponse deleteRequest(List<Integer> articleIds) {
+    private static Response deleteRequest(List<Integer> articleIds) {
         return authenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(Map.of("articleIds", articleIds))
@@ -407,8 +407,8 @@ class ArticleControllerTest {
                 .post("/api/v1/articles/delete");
     }
 
-    private static MockMvcRequestSpecification authenticatedRequest() {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }

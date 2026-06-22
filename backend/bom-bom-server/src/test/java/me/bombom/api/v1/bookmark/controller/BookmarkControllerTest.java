@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -133,20 +133,20 @@ class BookmarkControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcResponse postBookmark(long articleId) {
+    private static Response postBookmark(long articleId) {
         return authenticatedRequest()
                 .when()
                 .post("/api/v1/bookmarks/articles/{articleId}", articleId);
     }
 
-    private static MockMvcResponse deleteBookmark(long articleId) {
+    private static Response deleteBookmark(long articleId) {
         return authenticatedRequest()
                 .when()
                 .delete("/api/v1/bookmarks/articles/{articleId}", articleId);
     }
 
-    private static MockMvcRequestSpecification authenticatedRequest() {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }

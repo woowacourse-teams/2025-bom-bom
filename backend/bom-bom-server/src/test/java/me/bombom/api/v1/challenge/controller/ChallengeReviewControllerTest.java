@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +85,7 @@ class ChallengeReviewControllerTest {
 
     @Test
     void 비인증_상태로_리뷰_목록을_조회하면_401_을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/challenges/{challengeId}/reviews", CHALLENGE_ID)
@@ -138,7 +138,7 @@ class ChallengeReviewControllerTest {
 
     @Test
     void getMyReview_비인증_상태이면_401_을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/challenges/{challengeId}/reviews/me", CHALLENGE_ID)
@@ -194,7 +194,7 @@ class ChallengeReviewControllerTest {
 
     @Test
     void createReview_비인증_상태이면_401_을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .body(Map.of("comment", "좋았어요", "isPrivate", false))
@@ -300,7 +300,7 @@ class ChallengeReviewControllerTest {
     @Test
     @AdditionalAcceptanceDataSet("acceptance/challenge/review-my.json")
     void updateReview_비인증_상태이면_401_을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .body(Map.of("comment", "수정됨", "isPrivate", true))
@@ -379,7 +379,7 @@ class ChallengeReviewControllerTest {
             Integer page,
             Integer size
     ) {
-        MockMvcRequestSpecification request = request(memberId);
+        RequestSpecification request = request(memberId);
         if (page != null) {
             request.queryParam("page", page);
         }
@@ -410,7 +410,7 @@ class ChallengeReviewControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcResponse createReview(long challengeId, long memberId, String comment, boolean isPrivate) {
+    private static Response createReview(long challengeId, long memberId, String comment, boolean isPrivate) {
         return request(memberId)
                 .contentType(ContentType.JSON)
                 .body(Map.of(
@@ -421,7 +421,7 @@ class ChallengeReviewControllerTest {
                 .post("/api/v1/challenges/{challengeId}/reviews", challengeId);
     }
 
-    private static MockMvcResponse updateReview(
+    private static Response updateReview(
             long challengeId,
             long reviewId,
             long memberId,
@@ -450,8 +450,8 @@ class ChallengeReviewControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcRequestSpecification request(long memberId) {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification request(long memberId) {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
     }

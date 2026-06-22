@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +76,7 @@ class ChallengeControllerTest {
 
     @Test
     void view_허용되지_않은_값이면_400_반환() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .queryParam("view", "invalid")
                 .when()
@@ -140,7 +140,7 @@ class ChallengeControllerTest {
 
     @Test
     void 챌린지_상세_조회에서_id가_양수가_아니면_400을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/challenges/{id}", -1)
@@ -150,7 +150,7 @@ class ChallengeControllerTest {
 
     @Test
     void 챌린지_신청_가능_여부_조회에서_id가_양수가_아니면_400을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/challenges/{id}/eligibility", -1)
@@ -160,7 +160,7 @@ class ChallengeControllerTest {
 
     @Test
     void 챌린지_신청에서_id가_양수가_아니면_400을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
                 .when()
@@ -171,7 +171,7 @@ class ChallengeControllerTest {
 
     @Test
     void 챌린지_취소에서_id가_양수가_아니면_400을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
                 .when()
@@ -182,7 +182,7 @@ class ChallengeControllerTest {
 
     @Test
     void 팀_목록_조회에서_id가_양수가_아니면_400을_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
                 .when()
@@ -192,7 +192,7 @@ class ChallengeControllerTest {
     }
 
     private static List<Map<String, Object>> getChallenges(Long memberId, String view) {
-        MockMvcRequestSpecification request = RestAssuredMockMvc.given()
+        RequestSpecification request = RestAssured.given()
                 .accept(ContentType.JSON);
         if (memberId != null) {
             request.header(AcceptanceTestHeaders.MEMBER_ID, memberId);
@@ -213,7 +213,7 @@ class ChallengeControllerTest {
     }
 
     private static Map<String, Object> getChallengeInfo(long challengeId) {
-        return RestAssuredMockMvc.given()
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/challenges/{id}", challengeId)
@@ -226,7 +226,7 @@ class ChallengeControllerTest {
     }
 
     private static Map<String, Object> getChallengeLanding(long challengeId) {
-        return RestAssuredMockMvc.given()
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/challenges/{id}/landing", challengeId)
@@ -239,7 +239,7 @@ class ChallengeControllerTest {
     }
 
     private static Map<String, Object> getTeamList(long challengeId, long memberId) {
-        return RestAssuredMockMvc.given()
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, memberId)
                 .when()

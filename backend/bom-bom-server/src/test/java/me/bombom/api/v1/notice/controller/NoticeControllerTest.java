@@ -1,35 +1,47 @@
 package me.bombom.api.v1.notice.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import java.util.List;
+import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
 @AcceptanceTest("acceptance/notice/get-notices.json")
 class NoticeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
     @Test
-    void 공지_목록을_생성일_내림차순과_ID_오름차순으로_페이지네이션하여_조회한다() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/notices")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].title").value("공지3"))
-                .andExpect(jsonPath("$.content[1].title").value("공지2"))
-                .andExpect(jsonPath("$.content[2].title").value("공지1"))
-                .andExpect(jsonPath("$.totalElements").value(3))
-                .andExpect(jsonPath("$.size").value(20))
-                .andExpect(jsonPath("$.sort.sorted").value(true));
+    void 공지_목록을_생성일_내림차순과_ID_오름차순으로_페이지네이션하여_조회한다() {
+        Map<String, Object> result = RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/notices")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(content(result).get(0).get("title")).isEqualTo("공지3");
+            softly.assertThat(content(result).get(1).get("title")).isEqualTo("공지2");
+            softly.assertThat(content(result).get(2).get("title")).isEqualTo("공지1");
+            softly.assertThat(result.get("totalElements")).isEqualTo(3);
+            softly.assertThat(result.get("size")).isEqualTo(20);
+            softly.assertThat(sort(result).get("sorted")).isEqualTo(true);
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> content(Map<String, Object> page) {
+        return (List<Map<String, Object>>) page.get("content");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> sort(Map<String, Object> page) {
+        return (Map<String, Object>) page.get("sort");
     }
 }

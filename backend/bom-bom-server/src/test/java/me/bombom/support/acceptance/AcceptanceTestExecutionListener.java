@@ -1,14 +1,14 @@
 package me.bombom.support.acceptance;
 
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.RestAssured;
 import me.bombom.support.testdouble.ResettableTestDouble;
+import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * 인수 테스트 실행 전후로 데이터셋, 테스트 대역, RestAssured MockMvc 상태를 준비하고 복원한다.
+ * 인수 테스트 실행 전후로 데이터셋, 테스트 대역, RestAssured HTTP 상태를 준비하고 복원한다.
  */
 public class AcceptanceTestExecutionListener extends AbstractTestExecutionListener {
 
@@ -31,9 +31,9 @@ public class AcceptanceTestExecutionListener extends AbstractTestExecutionListen
                 .values()
                 .forEach(ResettableTestDouble::reset);
 
-        RestAssuredMockMvc.reset();
-        RestAssuredMockMvc.mockMvc(testContext.getApplicationContext().getBean(MockMvc.class));
-        RestAssuredMockMvc.enableLoggingOfRequestAndResponseIfValidationFails();
+        RestAssured.reset();
+        RestAssured.port = port(testContext);
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
         AdditionalAcceptanceDataSet additionalDataSet = additionalDataSet(testContext);
         if (additionalDataSet != null) {
@@ -79,5 +79,11 @@ public class AcceptanceTestExecutionListener extends AbstractTestExecutionListen
 
     private AcceptanceDataSetLoader dataSetLoader(TestContext testContext) {
         return testContext.getApplicationContext().getBean(AcceptanceDataSetLoader.class);
+    }
+
+    private int port(TestContext testContext) {
+        return ((WebServerApplicationContext) testContext.getApplicationContext())
+                .getWebServer()
+                .getPort();
     }
 }

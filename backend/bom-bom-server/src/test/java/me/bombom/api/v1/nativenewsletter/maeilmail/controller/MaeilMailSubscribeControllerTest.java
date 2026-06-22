@@ -3,9 +3,9 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -101,7 +101,7 @@ class MaeilMailSubscribeControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcResponse changeSubscription(List<String> tracks) {
+    private static Response changeSubscription(List<String> tracks) {
         return authenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(Map.of("tracks", tracks))
@@ -109,14 +109,14 @@ class MaeilMailSubscribeControllerTest {
                 .put("/api/v1/subscriptions/native/maeil-mail");
     }
 
-    private static MockMvcResponse deleteSubscription() {
+    private static Response deleteSubscription() {
         return authenticatedRequest()
                 .when()
                 .delete("/api/v1/subscriptions/native/maeil-mail");
     }
 
-    private static MockMvcRequestSpecification authenticatedRequest() {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }

@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -127,7 +127,7 @@ class PreviousArticleControllerTest {
     }
 
     private static List<Map<String, Object>> requestPreviousArticles(Map<String, ?> query) {
-        return RestAssuredMockMvc.given()
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .queryParams(query)
                 .when()
@@ -153,7 +153,7 @@ class PreviousArticleControllerTest {
     }
 
     private static Map<String, Object> requestPreviousArticleDetailWithoutLogin(long articleId) {
-        return RestAssuredMockMvc.given()
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/articles/previous/{articleId}", articleId)
@@ -165,8 +165,8 @@ class PreviousArticleControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcRequestSpecification authenticatedRequest(long memberId) {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification authenticatedRequest(long memberId) {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
     }

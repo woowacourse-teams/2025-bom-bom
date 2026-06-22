@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -178,7 +178,7 @@ class ChallengeCommentControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcResponse createComment(long articleId, String comment) {
+    private static Response createComment(long articleId, String comment) {
         return authenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
@@ -190,7 +190,7 @@ class ChallengeCommentControllerTest {
                 .post("/api/v1/challenges/{challengeId}/comments", 1);
     }
 
-    private static MockMvcResponse updateComment(long commentId, String comment) {
+    private static Response updateComment(long commentId, String comment) {
         return authenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(Map.of("comment", comment))
@@ -198,20 +198,20 @@ class ChallengeCommentControllerTest {
                 .patch("/api/v1/challenges/{challengeId}/comments/{commentId}", 1, commentId);
     }
 
-    private static MockMvcResponse addLike(long challengeId, long commentId) {
+    private static Response addLike(long challengeId, long commentId) {
         return authenticatedRequest()
                 .when()
                 .put("/api/v1/challenges/{challengeId}/comments/{commentId}/like", challengeId, commentId);
     }
 
-    private static MockMvcResponse deleteLike(long challengeId, long commentId) {
+    private static Response deleteLike(long challengeId, long commentId) {
         return authenticatedRequest()
                 .when()
                 .delete("/api/v1/challenges/{challengeId}/comments/{commentId}/like", challengeId, commentId);
     }
 
-    private static MockMvcRequestSpecification authenticatedRequest() {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }

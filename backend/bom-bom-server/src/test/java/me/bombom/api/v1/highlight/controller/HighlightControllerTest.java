@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.response.MockMvcResponse;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -141,7 +141,7 @@ class HighlightControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcResponse createHighlight(long articleId, String text) {
+    private static Response createHighlight(long articleId, String text) {
         return authenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(highlightCreateRequest(articleId, text))
@@ -149,7 +149,7 @@ class HighlightControllerTest {
                 .post("/api/v1/highlights");
     }
 
-    private static MockMvcResponse updateHighlight(long highlightId, Map<String, ?> body) {
+    private static Response updateHighlight(long highlightId, Map<String, ?> body) {
         return authenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -157,7 +157,7 @@ class HighlightControllerTest {
                 .patch("/api/v1/highlights/{id}", highlightId);
     }
 
-    private static MockMvcResponse deleteHighlight(long highlightId) {
+    private static Response deleteHighlight(long highlightId) {
         return authenticatedRequest()
                 .when()
                 .delete("/api/v1/highlights/{id}", highlightId);
@@ -178,8 +178,8 @@ class HighlightControllerTest {
         );
     }
 
-    private static MockMvcRequestSpecification authenticatedRequest() {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }

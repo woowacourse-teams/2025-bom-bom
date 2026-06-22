@@ -2,16 +2,9 @@ package me.bombom.api.v1.newsletter.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +15,6 @@ import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.test.web.servlet.MockMvc;
 
 @AcceptanceTest("acceptance/newsletter/get-newsletters.json")
 class NewsletterControllerTest {
@@ -33,9 +24,6 @@ class NewsletterControllerTest {
 
     @Autowired
     private MutableClock clock;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +65,7 @@ class NewsletterControllerTest {
 
     @Test
     void 존재하지_않는_뉴스레터_상세는_404를_반환한다() {
-        RestAssuredMockMvc.given()
+        RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/v1/newsletters/{id}", 99999)
@@ -124,22 +112,18 @@ class NewsletterControllerTest {
     }
 
     @Test
-    void 유효하지_않은_인증_객체여도_공개_목록을_반환한다() throws Exception {
-        TestingAuthenticationToken invalidAuthentication = new TestingAuthenticationToken("invalid", null);
-        invalidAuthentication.setAuthenticated(true);
+    void 존재하지_않는_회원_헤더여도_공개_목록을_반환한다() {
+        Map<String, Object> result = requestNewsletters(Map.of(), 999_999L);
 
-        mockMvc.perform(get("/api/v1/newsletters").with(authentication(invalidAuthentication)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.newsletters.length()").value(4))
-                .andExpect(jsonPath("$.newsletters[*].newsletterId").value(not(hasItem(is(5)))))
-                .andExpect(jsonPath("$.newsletters[*].newsletterId").value(not(hasItem(is(6)))))
-                .andExpect(jsonPath("$.newsletters[*].newsletterId").value(not(hasItem(is(7)))))
-                .andExpect(jsonPath("$.newsletters[*].newsletterId").value(not(hasItem(is(8)))))
-                .andExpect(jsonPath("$.newsletters[*].newsletterId").value(not(hasItem(is(9)))));
+        assertSoftly(softly -> {
+            softly.assertThat(newsletters(result)).hasSize(4);
+            softly.assertThat(newsletters(result)).extracting(newsletter -> newsletter.get("newsletterId"))
+                    .doesNotContain(5, 6, 7, 8, 9);
+        });
     }
 
     private static Map<String, Object> requestNewsletters(Map<String, ?> query, boolean authenticated) {
-        var request = RestAssuredMockMvc.given()
+        var request = RestAssured.given()
                 .accept(ContentType.JSON)
                 .queryParams(query);
         if (authenticated) {
@@ -155,8 +139,23 @@ class NewsletterControllerTest {
                 .getMap("$");
     }
 
+    private static Map<String, Object> requestNewsletters(Map<String, ?> query, long memberId) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .queryParams(query)
+                .header(AcceptanceTestHeaders.MEMBER_ID, memberId)
+                .when()
+                .get("/api/v1/newsletters")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
     private static Map<String, Object> requestNewsletterDetail(long newsletterId, boolean authenticated) {
-        var request = RestAssuredMockMvc.given()
+        var request = RestAssured.given()
                 .accept(ContentType.JSON);
         if (authenticated) {
             request.header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);

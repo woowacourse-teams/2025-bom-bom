@@ -3,8 +3,8 @@ package me.bombom.api.v1.challenge.controller;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.http.ContentType;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -186,7 +186,7 @@ class ChallengeProgressControllerTest {
     }
 
     private static Map<String, Object> getMemberStreak(long challengeId, long memberId, Integer limit) {
-        MockMvcRequestSpecification request = request(memberId);
+        RequestSpecification request = request(memberId);
         if (limit != null) {
             request.queryParam("limit", limit);
         }
@@ -214,8 +214,8 @@ class ChallengeProgressControllerTest {
                 .getMap("$");
     }
 
-    private static MockMvcRequestSpecification request(long memberId) {
-        return RestAssuredMockMvc.given()
+    private static RequestSpecification request(long memberId) {
+        return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
     }

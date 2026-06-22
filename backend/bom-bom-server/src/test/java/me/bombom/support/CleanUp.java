@@ -7,18 +7,23 @@ import java.util.List;
 import java.util.Set;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metamodel.MappingMetamodel;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class CleanUp {
 
+    private static final String READING_SNAPSHOT_META_SEED_SQL = """
+            INSERT INTO reading_snapshot_meta (snapshot_type, snapshot_at)
+            VALUES ('MONTHLY', '2000-01-01 00:00:00.000000'),
+                   ('CONTINUE', '2000-01-01 00:00:00.000000')
+            """;
+
     /**
      * 읽기 전용 seed 테이블. 무조건적인 Flyway seed가 존재하고 활성(@Disabled가 아닌) 테스트가
      * INSERT/DELETE로 변경하지 않는 테이블만 제외한다.
-     * - reading_snapshot_meta: 앱 랭킹 로직이 seed된 행(MONTHLY/CONTINUE)을 읽으므로 보존한다.
      * - unsubscribe_pattern: 유일한 writer인 UnsubscribeAgentTest가 @Disabled이므로 정적 참조 seed로 취급한다.
      */
     private static final Set<String> EXCLUDED_TABLES = Set.of(
-            "reading_snapshot_meta",
             "unsubscribe_pattern"
     );
 
@@ -35,11 +40,15 @@ public class CleanUp {
     }
 
     public void all() {
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
-        for (String table : cleanableTableNames()) {
-            jdbcTemplate.execute("DELETE FROM " + table);
-        }
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+        jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
+            try (var statement = connection.createStatement()) {
+                for (String table : cleanableTableNames()) {
+                    statement.executeUpdate("DELETE FROM `" + table + "`");
+                }
+                statement.executeUpdate(READING_SNAPSHOT_META_SEED_SQL);
+            }
+            return null;
+        });
     }
 
     public List<String> cleanableTableNames() {

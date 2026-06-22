@@ -2,6 +2,7 @@ package me.bombom.support;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -40,28 +41,40 @@ class CleanUpTest {
         assertThat(tables)
                 .doesNotContain("flyway_schema_history")
                 .doesNotContain("SPRING_SESSION")
-                .doesNotContain("reading_snapshot_meta");
+                .contains("reading_snapshot_meta")
+                .doesNotContain("unsubscribe_pattern");
     }
 
     @Test
-    void all_호출시_도메인_데이터는_지우고_seed는_보존한다() {
+    void all_호출시_도메인_데이터는_지우고_변경된_seed는_기준값으로_복원한다() {
         // given
-        long seedBefore = countSeed();
-        assertThat(seedBefore).isPositive();
         memberRepository.save(TestFixture.uniqueMemberFixture());
+        jdbcTemplate.update("UPDATE reading_snapshot_meta SET snapshot_at = '2099-12-31 23:59:59.999999'");
 
         // when
         cleanUp.all();
 
         // then
         assertThat(memberRepository.count()).isZero();
-        assertThat(countSeed()).isEqualTo(seedBefore);
+        assertThat(readingSnapshotMeta()).containsOnly(
+                new SnapshotMeta("MONTHLY", LocalDateTime.of(2000, 1, 1, 0, 0)),
+                new SnapshotMeta("CONTINUE", LocalDateTime.of(2000, 1, 1, 0, 0))
+        );
     }
 
-    private long countSeed() {
-        return jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reading_snapshot_meta",
-                Long.class
+    private List<SnapshotMeta> readingSnapshotMeta() {
+        return jdbcTemplate.query(
+                "SELECT snapshot_type, snapshot_at FROM reading_snapshot_meta",
+                (resultSet, rowNumber) -> new SnapshotMeta(
+                        resultSet.getString("snapshot_type"),
+                        resultSet.getTimestamp("snapshot_at").toLocalDateTime()
+                )
         );
+    }
+
+    private record SnapshotMeta(
+            String snapshotType,
+            LocalDateTime snapshotAt
+    ) {
     }
 }

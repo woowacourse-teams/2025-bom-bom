@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @IntegrationTest
 class MaeilMailSubscribeControllerTest {
@@ -77,7 +78,7 @@ class MaeilMailSubscribeControllerTest {
 
     @Test
     void 트랙을_보내면_매일메일을_신규_구독한다() throws Exception {
-        구독_변경(List.of("BE", "FE"))
+        changeSubscription(List.of("BE", "FE"))
                 .andExpect(status().isOk());
 
         assertThat(subscribeRepository.findAll()).hasSize(1);
@@ -88,8 +89,8 @@ class MaeilMailSubscribeControllerTest {
 
     @Test
     void 구독_중인_트랙을_요청한_트랙으로_치환한다() throws Exception {
-        구독_변경(List.of("BE", "FE")).andExpect(status().isOk());
-        구독_변경(List.of("BE")).andExpect(status().isOk());
+        changeSubscription(List.of("BE", "FE")).andExpect(status().isOk());
+        changeSubscription(List.of("BE")).andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/subscriptions/native/maeil-mail")
                         .header(AcceptanceTestHeaders.MEMBER_ID, member.getId()))
@@ -100,7 +101,7 @@ class MaeilMailSubscribeControllerTest {
 
     @Test
     void 구독을_삭제하면_구독과_트랙을_모두_삭제한다() throws Exception {
-        구독_변경(List.of("BE", "FE")).andExpect(status().isOk());
+        changeSubscription(List.of("BE", "FE")).andExpect(status().isOk());
 
         mockMvc.perform(delete("/api/v1/subscriptions/native/maeil-mail")
                         .header(AcceptanceTestHeaders.MEMBER_ID, member.getId()))
@@ -119,7 +120,7 @@ class MaeilMailSubscribeControllerTest {
 
     @Test
     void 빈_트랙으로_구독을_요청하면_400을_반환한다() throws Exception {
-        구독_변경(List.of())
+        changeSubscription(List.of())
                 .andExpect(status().isBadRequest());
 
         assertThat(subscribeRepository.findAll()).isEmpty();
@@ -127,13 +128,13 @@ class MaeilMailSubscribeControllerTest {
 
     @Test
     void 중복된_트랙으로_구독을_요청하면_400을_반환한다() throws Exception {
-        구독_변경(List.of("BE", "BE"))
+        changeSubscription(List.of("BE", "BE"))
                 .andExpect(status().isBadRequest());
 
         assertThat(subscribeRepository.findAll()).isEmpty();
     }
 
-    private org.springframework.test.web.servlet.ResultActions 구독_변경(List<String> tracks) throws Exception {
+    private ResultActions changeSubscription(List<String> tracks) throws Exception {
         return mockMvc.perform(put("/api/v1/subscriptions/native/maeil-mail")
                 .header(AcceptanceTestHeaders.MEMBER_ID, member.getId())
                 .contentType(MediaType.APPLICATION_JSON)

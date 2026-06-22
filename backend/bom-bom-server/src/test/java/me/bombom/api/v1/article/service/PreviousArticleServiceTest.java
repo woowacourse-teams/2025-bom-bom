@@ -60,10 +60,10 @@ class PreviousArticleServiceTest {
     @Test
     void 자동_이동된_지난_아티클은_뉴스레터별_최신_10개만_남기고_정리한다() {
         // given
-        Newsletter newsletter = 지난아티클뉴스레터저장("지난아티클정리");
+        Newsletter newsletter = savePreviousArticleNewsletter("지난아티클정리");
 
-        자동이동지난아티클저장(newsletter.getId(), 12);
-        고정지난아티클저장(newsletter.getId(), 3);
+        saveAutoMovedPreviousArticles(newsletter.getId(), 12);
+        saveFixedPreviousArticles(newsletter.getId(), 3);
 
         // when
         int deletedCount = previousArticleService.cleanupOldPreviousArticles();
@@ -71,17 +71,17 @@ class PreviousArticleServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(deletedCount).isEqualTo(2);
-            softly.assertThat(지난아티클개수(newsletter.getId(), false)).isEqualTo(10);
-            softly.assertThat(지난아티클개수(newsletter.getId(), true)).isEqualTo(3);
+            softly.assertThat(countPreviousArticles(newsletter.getId(), false)).isEqualTo(10);
+            softly.assertThat(countPreviousArticles(newsletter.getId(), true)).isEqualTo(3);
         });
     }
 
     @Test
     void 아카이브_권한_관리자의_아티클을_지난_아티클로_이동한다() {
         // given
-        Member admin = 아카이브관리자저장();
-        Newsletter newsletter = 지난아티클뉴스레터저장("관리자아티클이동");
-        관리자아티클저장(admin, newsletter, 5);
+        Member admin = saveArchiveAdmin();
+        Newsletter newsletter = savePreviousArticleNewsletter("관리자아티클이동");
+        saveAdminArticles(admin, newsletter, 5);
         long initialCount = previousArticleRepository.count();
 
         // when
@@ -98,7 +98,7 @@ class PreviousArticleServiceTest {
                 .isInstanceOf(CServerErrorException.class);
     }
 
-    private Newsletter 지난아티클뉴스레터저장(String name) {
+    private Newsletter savePreviousArticleNewsletter(String name) {
         Category category = categoryRepository.save(Category.builder()
                 .name(name + "카테고리")
                 .build());
@@ -112,13 +112,13 @@ class PreviousArticleServiceTest {
         return newsletterRepository.save(newsletter);
     }
 
-    private Member 아카이브관리자저장() {
+    private Member saveArchiveAdmin() {
         Role archiveRole = roleRepository.save(Role.builder().authority("ARCHIVE").build());
         Member admin = TestFixture.createMemberWithRole("지난아티클관리자", uniqueValue("archive"), archiveRole.getId());
         return memberRepository.save(admin);
     }
 
-    private void 고정지난아티클저장(Long newsletterId, int count) {
+    private void saveFixedPreviousArticles(Long newsletterId, int count) {
         List<PreviousArticle> articles = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             articles.add(TestFixture.createPreviousArticle(
@@ -130,7 +130,7 @@ class PreviousArticleServiceTest {
         previousArticleRepository.saveAll(articles);
     }
 
-    private void 자동이동지난아티클저장(Long newsletterId, int count) {
+    private void saveAutoMovedPreviousArticles(Long newsletterId, int count) {
         List<PreviousArticle> articles = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             articles.add(PreviousArticle.builder()
@@ -146,7 +146,7 @@ class PreviousArticleServiceTest {
         previousArticleRepository.saveAll(articles);
     }
 
-    private void 관리자아티클저장(Member admin, Newsletter newsletter, int count) {
+    private void saveAdminArticles(Member admin, Newsletter newsletter, int count) {
         List<Article> articles = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             articles.add(TestFixture.createArticle(
@@ -159,7 +159,7 @@ class PreviousArticleServiceTest {
         articleRepository.saveAll(articles);
     }
 
-    private long 지난아티클개수(Long newsletterId, boolean isFixed) {
+    private long countPreviousArticles(Long newsletterId, boolean isFixed) {
         return previousArticleRepository.findAll().stream()
                 .filter(article -> article.getNewsletterId().equals(newsletterId))
                 .filter(article -> article.isFixed() == isFixed)

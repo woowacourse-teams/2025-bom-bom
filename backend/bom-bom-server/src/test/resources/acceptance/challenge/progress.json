@@ -53,7 +53,7 @@
       "completed_days": 2,
       "is_survived": false,
       "shield": 0,
-      "streak": 0
+      "streak": 2
     },
     {
       "id": 2,
@@ -66,15 +66,52 @@
       "streak": 0
     }
   ],
+  "challenge_todo": [
+    {
+      "id": 1,
+      "challenge_id": 1,
+      "todo_type": "READ"
+    },
+    {
+      "id": 2,
+      "challenge_id": 1,
+      "todo_type": "COMMENT"
+    },
+    {
+      "id": 3,
+      "challenge_id": 1,
+      "todo_type": "REVIEW"
+    }
+  ],
+  "challenge_daily_todo": [
+    {
+      "id": 1,
+      "participant_id": 1,
+      "todo_date": "2026-06-22",
+      "challenge_todo_id": 1
+    }
+  ],
   "challenge_daily_result": [
     {
       "id": 1,
+      "participant_id": 1,
+      "date": "2026-06-21",
+      "status": "COMPLETE"
+    },
+    {
+      "id": 2,
+      "participant_id": 1,
+      "date": "2026-06-22",
+      "status": "SHIELD"
+    },
+    {
+      "id": 3,
       "participant_id": 2,
       "date": "2026-06-22",
       "status": "COMPLETE"
     },
     {
-      "id": 2,
+      "id": 4,
       "participant_id": 2,
       "date": "2026-06-23",
       "status": "SHIELD"

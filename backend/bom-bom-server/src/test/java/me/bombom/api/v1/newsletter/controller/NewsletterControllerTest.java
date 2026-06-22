@@ -65,13 +65,6 @@ class NewsletterControllerTest {
     @BeforeEach
     void setUp() {
         clock.setDate(TODAY);
-        subscribeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        newsletterSubscriptionCountRepository.deleteAllInBatch();
-
         List<NewsletterDetail> details = newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails());
         categories = categoryRepository.saveAll(TestFixture.createCategories());
         newsletters = newsletterRepository.saveAll(TestFixture.createNewslettersWithDetails(categories, details));

@@ -46,7 +46,6 @@ class InitializeReadingListenerTest {
         if (baselineMemberId != null) {
             readingService.deleteAllByMemberId(baselineMemberId);
         }
-        memberRepository.deleteAllInBatch();
     }
 
     @Test

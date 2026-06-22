@@ -27,8 +27,6 @@ class NoticeControllerTest {
 
     @BeforeEach
     void setUp() {
-        noticeRepository.deleteAllInBatch();
-
         noticeRepository.save(TestFixture.createNotice("공지1", NoticeCategory.UPDATE));
         noticeRepository.save(TestFixture.createNotice("공지2", NoticeCategory.EVENT));
         noticeRepository.save(TestFixture.createNotice("공지3", NoticeCategory.NOTICE));

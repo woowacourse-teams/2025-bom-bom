@@ -63,13 +63,6 @@ class MaeilMailSubscribeControllerTest {
 
     @BeforeEach
     void setUp() {
-        trackRepository.deleteAllInBatch();
-        subscribeRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createUniqueMember("maeil-user", "maeil-subscribe-controller"));
         newsletterRepository.save(createMaeilMailNewsletter());
     }

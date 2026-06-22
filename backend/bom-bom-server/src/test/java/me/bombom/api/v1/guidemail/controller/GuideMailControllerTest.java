@@ -65,15 +65,6 @@ class GuideMailControllerTest {
 
     @BeforeEach
     void setUp() {
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        continueReadingRepository.deleteAllInBatch();
-        weeklyReadingRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        petRepository.deleteAllInBatch();
-        stageRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createUniqueMember("nickname", "guide-mail-controller"));
         Stage stage = stageRepository.save(TestFixture.createStage(1, 0));
         pet = petRepository.save(TestFixture.createPet(member, stage.getId()));

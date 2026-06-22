@@ -37,7 +37,6 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.deleteAllInBatch();
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
     }

@@ -70,15 +70,6 @@ class WithdrawServiceTest {
 
     @BeforeEach
     public void setup() {
-        bookmarkRepository.deleteAllInBatch();
-        highlightRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        withdrawnMemberRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        continueReadingRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.normalMemberFixture());
         categories = TestFixture.createCategories();
         categoryRepository.saveAll(categories);

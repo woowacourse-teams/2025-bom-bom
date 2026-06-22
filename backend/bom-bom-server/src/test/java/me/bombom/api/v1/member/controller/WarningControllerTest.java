@@ -41,9 +41,6 @@ class WarningControllerTest {
 
     @BeforeEach
     void setUp() {
-        warningSettingRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 

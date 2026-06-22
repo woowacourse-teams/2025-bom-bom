@@ -57,12 +57,6 @@ class BadgeServiceTest {
 
     @BeforeEach
     void setUp() {
-        badgeRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
         member3 = memberRepository.save(TestFixture.createUniqueMember("member3", "provider3"));

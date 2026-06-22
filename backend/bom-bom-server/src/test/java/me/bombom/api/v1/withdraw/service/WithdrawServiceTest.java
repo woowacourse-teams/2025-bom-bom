@@ -5,27 +5,20 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
+import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
+import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.Category;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.repository.CategoryRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.withdraw.domain.WithdrawnMember;
 import me.bombom.api.v1.withdraw.repository.WithdrawnMemberRepository;
 import me.bombom.support.integration.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,55 +38,24 @@ class WithdrawServiceTest {
     private HighlightRepository highlightRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private NewsletterRepository newsletterRepository;
-
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
-
-    @Autowired
     private ContinueReadingRealtimeRepository continueReadingRepository;
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
-    @Autowired
-    private ArticleRepository articleRepository;
-
-    List<Category> categories;
-    List<Newsletter> newsletters;
-    List<Article> articles;
-    Member member;
-    List<Highlight> highlights;
-
-    @BeforeEach
-    public void setup() {
-        member = memberRepository.save(TestFixture.normalMemberFixture());
-        categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
-        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(newsletterDetails);
-        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
-        newsletterRepository.saveAll(newsletters);
-        articles = TestFixture.createArticles(member, newsletters);
-        articleRepository.saveAll(articles);
-        highlights = TestFixture.createHighlightFixtures(articles);
-        highlightRepository.saveAll(highlights);
-    }
-
     @Test
     void 회원_탈퇴_시_탈퇴_회원_정보로_이전된다() {
         // given
+        Member member = memberRepository.save(TestFixture.normalMemberFixture());
         continueReadingRepository.save(ContinueReadingRealtime.builder()
                 .memberId(member.getId())
                 .dayCount(10)
                 .build());
         bookmarkRepository.save(Bookmark.builder()
                 .memberId(member.getId())
-                .articleId(articles.getFirst().getId())
+                .articleId(1L)
                 .build());
+        saveHighlights(member.getId(), 6);
 
         // when
         withdrawService.migrateDeletedMember(member);
@@ -141,5 +103,19 @@ class WithdrawServiceTest {
             softly.assertThat(remaining).hasSize(1);
             softly.assertThat(remaining.get(0).getEmail()).isEqualTo("valid@test.com");
         });
+    }
+
+    private void saveHighlights(Long memberId, int count) {
+        for (int index = 0; index < count; index++) {
+            highlightRepository.save(Highlight.builder()
+                    .highlightLocation(new HighlightLocation(index, "div[0]/p[0]", index + 1, "div[0]/p[0]"))
+                    .memberId(memberId)
+                    .articleId((long) index + 1)
+                    .newsletterId(1L)
+                    .color(Color.from("#ffeb3b"))
+                    .title("아티클")
+                    .text("하이라이트")
+                    .build());
+        }
     }
 }

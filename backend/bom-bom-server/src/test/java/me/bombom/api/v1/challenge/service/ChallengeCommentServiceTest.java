@@ -116,15 +116,8 @@ class ChallengeCommentServiceTest {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        List<Category> categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
-
-        List<NewsletterDetail> details = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(details);
-
-        newsletters = newsletterRepository.saveAll(TestFixture.createNewslettersWithDetails(categories, details));
-
-        articles = articleRepository.saveAll(TestFixture.createArticles(member, newsletters));
+        newsletters = List.of(saveNewsletter());
+        articles = saveArticles(member, newsletters.getFirst());
         article = articles.get(0);
 
         NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
@@ -769,5 +762,25 @@ class ChallengeCommentServiceTest {
 
     private void setToday(LocalDate date) {
         clock.setDate(date);
+    }
+
+    private Newsletter saveNewsletter() {
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        return newsletterRepository.save(TestFixture.createNewsletter(
+                "챌린지 댓글 뉴스레터",
+                "challenge-comment@bombom.news",
+                category.getId(),
+                detail.getId()
+        ));
+    }
+
+    private List<Article> saveArticles(Member member, Newsletter newsletter) {
+        LocalDateTime now = LocalDateTime.now();
+        return articleRepository.saveAll(List.of(
+                TestFixture.createArticle("아티클 제목 1", member.getId(), newsletter.getId(), now.minusMinutes(5)),
+                TestFixture.createArticle("아티클 제목 2", member.getId(), newsletter.getId(), now.minusMinutes(10)),
+                TestFixture.createArticle("아티클 제목 3", member.getId(), newsletter.getId(), now.minusMinutes(20))
+        ));
     }
 }

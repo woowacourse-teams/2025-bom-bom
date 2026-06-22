@@ -86,7 +86,6 @@ class ChallengeServiceTest {
     private MutableClock clock;
 
     private Member member;
-    private List<Category> categories;
     private List<Newsletter> newsletters;
     private LocalDate today;
 
@@ -95,14 +94,7 @@ class ChallengeServiceTest {
         member = TestFixture.normalMemberFixture();
         memberRepository.save(member);
 
-        categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
-
-        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(newsletterDetails);
-
-        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
-        newsletterRepository.saveAll(newsletters);
+        newsletters = saveNewsletters();
 
         ZoneId seoul = ZoneId.of("Asia/Seoul");
         Instant fixedInstant = LocalDate.of(2025, 3, 15).atStartOfDay(seoul).toInstant();
@@ -1052,5 +1044,16 @@ class ChallengeServiceTest {
             softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
             softly.assertThat(result.teams().get(3).teamNumber()).isEqualTo(4);
         });
+    }
+
+    private List<Newsletter> saveNewsletters() {
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail firstDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        NewsletterDetail secondDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+
+        return newsletterRepository.saveAll(List.of(
+                TestFixture.createNewsletter("뉴스레터1", "newsletter1@bombom.news", category.getId(), firstDetail.getId()),
+                TestFixture.createNewsletter("뉴스레터2", "newsletter2@bombom.news", category.getId(), secondDetail.getId())
+        ));
     }
 }

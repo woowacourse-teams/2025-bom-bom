@@ -84,7 +84,7 @@ public class MemberService {
     public MemberJoinDaysResponse getJoinDays(Member member) {
         LocalDate joinedAt = member.getCreatedAt().toLocalDate();
         long daysBetween = ChronoUnit.DAYS.between(joinedAt, LocalDate.now(clock));
-        int daysSinceJoined = Math.toIntExact(daysBetween);
+        int daysSinceJoined = Math.toIntExact(daysBetween) + 1;
         return MemberJoinDaysResponse.of(daysSinceJoined, joinedAt);
     }
 

@@ -17,18 +17,6 @@ public record RankHistoryResponse(
         String label = period.getYear() == today.getYear()
                 ? period.getMonthValue() + "월"
                 : String.format("%02d.%02d", period.getYear() % 100, period.getMonthValue());
-        return RankHistoryResponse.of(
-                month,
-                label,
-                rank
-        );
-    }
-
-    public static RankHistoryResponse of(
-            String month,
-            String label,
-            long rank
-    ) {
         return new RankHistoryResponse(
                 month,
                 label,

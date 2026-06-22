@@ -5,7 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.Article;
@@ -13,8 +13,9 @@ import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.enums.Gender;
+import me.bombom.api.v1.member.domain.Role;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.member.repository.RoleRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
@@ -22,10 +23,8 @@ import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.integration.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @IntegrationTest
 class ArticleServiceTest {
@@ -54,70 +53,26 @@ class ArticleServiceTest {
     private NewsletterRepository newsletterRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private Member member;
-    private Newsletter newsletter;
-
-    @BeforeEach
-    void setUp() {
-        jdbcTemplate.update("""
-                INSERT INTO role (id, authority)
-                VALUES (1, 'USER')
-                ON DUPLICATE KEY UPDATE authority = 'USER'
-                """);
-
-        member = memberRepository.save(Member.builder()
-                .provider("apple")
-                .providerId("article-cleanup-test")
-                .email("article-cleanup@bombom.news")
-                .nickname("cleanup")
-                .gender(Gender.FEMALE)
-                .roleId(1L)
-                .build());
-        Category category = categoryRepository.save(TestFixture.createCategories().getFirst());
-        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
-        newsletter = newsletterRepository.save(TestFixture.createNewsletter(
-                "정리 테스트 뉴스레터",
-                "cleanup@example.com",
-                category.getId(),
-                detail.getId()
-        ));
-    }
+    private RoleRepository roleRepository;
 
     @Test
     void 북마크되지_않은_아티클만_초과_정리한다() {
-        Article bookmarkedArticle = articleRepository.save(TestFixture.createArticle(
-                "북마크 아티클",
-                member.getId(),
-                newsletter.getId(),
-                BASE_TIME.minusDays(100)
-        ));
-        bookmarkRepository.save(Bookmark.builder()
-                .articleId(bookmarkedArticle.getId())
-                .memberId(member.getId())
-                .build());
+        // given
+        Member member = saveUserMember();
+        Newsletter newsletter = saveArticleNewsletter("아티클정리");
+        Article bookmarkedArticle = saveBookmarkedArticle(member, newsletter);
+        saveUnbookmarkedArticles(member, newsletter, 505);
 
-        List<Article> additionalArticles = IntStream.range(0, 505)
-                .mapToObj(index -> TestFixture.createArticle(
-                        "bulk " + index,
-                        member.getId(),
-                        newsletter.getId(),
-                        BASE_TIME.plusMinutes(index)
-                ))
-                .toList();
-        articleRepository.saveAll(additionalArticles);
-
-        Set<Long> bookmarkedArticleIds = bookmarkRepository.findAll().stream()
-                .map(Bookmark::getArticleId)
-                .collect(Collectors.toSet());
+        Set<Long> bookmarkedArticleIds = Set.of(bookmarkedArticle.getId());
         long unbookmarkedBefore = articleRepository.findAll().stream()
                 .filter(article -> article.getMemberId().equals(member.getId()))
                 .filter(article -> !bookmarkedArticleIds.contains(article.getId()))
                 .count();
 
+        // when
         int deletedCount = articleService.cleanupExcessArticles(1000, 500);
 
+        // then
         List<Article> remainingArticles = articleRepository.findAll().stream()
                 .filter(article -> article.getMemberId().equals(member.getId()))
                 .toList();
@@ -132,5 +87,65 @@ class ArticleServiceTest {
                     .extracting(Article::getId)
                     .contains(bookmarkedArticle.getId());
         });
+    }
+
+    private Member saveUserMember() {
+        Role userRole = roleRepository.save(Role.builder()
+                .authority("USER")
+                .build());
+        Member member = TestFixture.createMemberWithRole(
+                uniqueValue("member"),
+                uniqueValue("user"),
+                userRole.getId()
+        );
+        return memberRepository.save(member);
+    }
+
+    private Newsletter saveArticleNewsletter(String name) {
+        Category category = categoryRepository.save(Category.builder()
+                .name(name + "카테고리")
+                .build());
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        Newsletter newsletter = TestFixture.createNewsletter(
+                name,
+                uniqueEmail("article"),
+                category.getId(),
+                detail.getId()
+        );
+        return newsletterRepository.save(newsletter);
+    }
+
+    private Article saveBookmarkedArticle(Member member, Newsletter newsletter) {
+        Article article = articleRepository.save(TestFixture.createArticle(
+                "북마크 아티클",
+                member.getId(),
+                newsletter.getId(),
+                BASE_TIME.minusDays(100)
+        ));
+        bookmarkRepository.save(Bookmark.builder()
+                .articleId(article.getId())
+                .memberId(member.getId())
+                .build());
+        return article;
+    }
+
+    private void saveUnbookmarkedArticles(Member member, Newsletter newsletter, int count) {
+        List<Article> articles = IntStream.range(0, count)
+                .mapToObj(index -> TestFixture.createArticle(
+                        "bulk " + index,
+                        member.getId(),
+                        newsletter.getId(),
+                        BASE_TIME.plusMinutes(index)
+                ))
+                .toList();
+        articleRepository.saveAll(articles);
+    }
+
+    private String uniqueEmail(String prefix) {
+        return uniqueValue(prefix) + "@bombom.news";
+    }
+
+    private String uniqueValue(String prefix) {
+        return prefix + "-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 }

@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import me.bombom.api.v1.TestFixture;
@@ -19,29 +18,38 @@ import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuide;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.domain.ChallengeTodo;
+import me.bombom.api.v1.challenge.domain.ChallengeTodoType;
 import me.bombom.api.v1.challenge.domain.DailyGuideType;
 import me.bombom.api.v1.challenge.dto.request.DailyGuideCommentRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeTodoRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.IntegrationTest;
+import me.bombom.support.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @IntegrationTest
 class ChallengeDailyGuideControllerTest {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    private static final LocalDate MONDAY = LocalDate.of(2026, 1, 26);
+    private static final String COMMENT = "뉴스레터 읽기 팁을 공유합니다";
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,86 +70,37 @@ class ChallengeDailyGuideControllerTest {
     private ChallengeDailyGuideCommentRepository challengeDailyGuideCommentRepository;
 
     @Autowired
+    private ChallengeTodoRepository challengeTodoRepository;
+
+    @Autowired
+    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
+
+    @Autowired
+    private ChallengeDailyResultRepository challengeDailyResultRepository;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
 
-    private Member member;
-    private Challenge challenge;
-    private ChallengeParticipant participant;
-    private ChallengeDailyGuide guide;
-    private OAuth2AuthenticationToken authToken;
-    private LocalDate today;
+    @Autowired
+    private MutableClock clock;
 
     @BeforeEach
-    void setUp() {
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-
-        today = LocalDate.now(SEOUL_ZONE);
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        challenge = challengeRepository.save(TestFixture.createChallenge(
-                "테스트 챌린지",
-                today.minusDays(5),
-                today.plusDays(5),
-                10,
-                group.getId()
-        ));
-
-        participant = challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(
-                        challenge.getId(),
-                        member.getId(),
-                        0
-                )
-        );
-
-        int dayIndex = calculateDayIndex(challenge.getStartDate(), today);
-        guide = challengeDailyGuideRepository.save(
-                TestFixture.createChallengeDailyGuide(
-                        challenge.getId(),
-                        dayIndex,
-                        DailyGuideType.COMMENT,
-                        "https://example.com/day07.webp",
-                        "오늘은 팁을 남겨주세요",
-                        true
-                )
-        );
-
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
-        );
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-        authToken = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
-    }
-
-    private int calculateDayIndex(LocalDate startDate, LocalDate today) {
-        DayOfWeek dayOfWeek = today.getDayOfWeek();
-        boolean isWeekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
-
-        if (isWeekend) {
-            return 0;
-        }
-        return (int) DAYS.between(startDate, today) + 1;
+    void 시간을_월요일로_고정한다() {
+        clock.setDate(MONDAY);
     }
 
     @Test
-    void 오늘의_데일리_가이드_조회_성공() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challenge.getId())
-                        .with(authentication(authToken)))
+    void 오늘의_데일리_가이드를_조회한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        오늘의_데일리_가이드를_조회한다(data.challenge().getId(), data.authentication())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dayIndex").value(guide.getDayIndex()))
+                .andExpect(jsonPath("$.dayIndex").value(data.guide().getDayIndex()))
                 .andExpect(jsonPath("$.type").value("COMMENT"))
-                .andExpect(jsonPath("$.imageUrl").value("https://example.com/day07.webp"))
+                .andExpect(jsonPath("$.imageUrl").value("https://example.com/daily-guide.webp"))
                 .andExpect(jsonPath("$.notice").value("오늘은 팁을 남겨주세요"))
                 .andExpect(jsonPath("$.commentEnabled").value(true))
                 .andExpect(jsonPath("$.myComment.exists").value(false))
@@ -150,261 +109,473 @@ class ChallengeDailyGuideControllerTest {
     }
 
     @Test
-    void 댓글이_있는_경우_오늘의_데일리_가이드_조회() throws Exception {
-        // given
-        challengeDailyGuideCommentRepository.save(
-                TestFixture.createChallengeDailyGuideComment(
-                        guide.getId(),
-                        participant.getId(),
-                        "뉴스레터 읽기 팁을 공유합니다"
-                )
-        );
+    void 작성한_댓글과_함께_오늘의_데일리_가이드를_조회한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        데일리_가이드_댓글을_저장한다(data, COMMENT);
 
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challenge.getId())
-                        .with(authentication(authToken)))
+        오늘의_데일리_가이드를_조회한다(data.challenge().getId(), data.authentication())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.myComment.exists").value(true))
-                .andExpect(jsonPath("$.myComment.content").value("뉴스레터 읽기 팁을 공유합니다"))
+                .andExpect(jsonPath("$.myComment.content").value(COMMENT))
                 .andExpect(jsonPath("$.myComment.createdAt").exists());
     }
 
     @Test
-    void 데일리_가이드_댓글_작성_성공() throws Exception {
-        // given - dayIndex가 1이 아닌 값으로 설정 (day1일 때 ChallengeTodo 필요하므로)
-        challengeDailyGuideCommentRepository.deleteAll();
-        challengeDailyGuideRepository.deleteAll();
-        
-        // dayIndex를 1이 아닌 값으로 설정 (day1이면 ChallengeTodo가 필요함)
-        int dayIndex = 2;
-        if (dayIndex > challenge.getTotalDays()) {
-            dayIndex = challenge.getTotalDays();
-        }
-        // totalDays가 1이면 테스트 불가 (dayIndex 1은 ChallengeTodo 필요)
-        if (challenge.getTotalDays() <= 1) {
-            return;
-        }
-        
-        guide = challengeDailyGuideRepository.save(
-                TestFixture.createChallengeDailyGuide(
-                        challenge.getId(),
-                        dayIndex,
-                        DailyGuideType.COMMENT,
-                        "https://example.com/day07.webp",
-                        "오늘은 팁을 남겨주세요",
-                        true
-                )
-        );
+    void 참여하지_않은_회원은_오늘의_데일리_가이드를_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        Member nonParticipant = 회원을_저장한다("미참여자", "non-participant");
 
-        DailyGuideCommentRequest request = new DailyGuideCommentRequest("뉴스레터 읽기 팁을 공유합니다");
+        오늘의_데일리_가이드를_조회한다(data.challenge().getId(), 인증정보를_생성한다(nonParticipant))
+                .andExpect(status().isNotFound());
+    }
 
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
-                        challenge.getId(), dayIndex)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+    @Test
+    void 존재하지_않는_챌린지의_오늘의_데일리_가이드는_조회할_수_없다() throws Exception {
+        Member member = 회원을_저장한다("회원", "member");
+
+        오늘의_데일리_가이드를_조회한다(999L, 인증정보를_생성한다(member))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 진행_기간이_아닌_챌린지의_오늘의_데일리_가이드는_조회할_수_없다() throws Exception {
+        Member member = 회원을_저장한다("회원", "member");
+        Challenge futureChallenge = 챌린지를_저장한다(MONDAY.plusDays(10), MONDAY.plusDays(20));
+        챌린지_참여자를_저장한다(futureChallenge, member);
+
+        오늘의_데일리_가이드를_조회한다(futureChallenge.getId(), 인증정보를_생성한다(member))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 데일리_가이드에_댓글을_작성한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(2, true);
+
+        데일리_가이드_댓글을_작성한다(data, COMMENT)
                 .andExpect(status().isCreated());
 
-        // then - 댓글이 생성되었는지 확인
         List<ChallengeDailyGuideComment> comments = challengeDailyGuideCommentRepository.findAll();
-        assertThat(comments).hasSize(1);
-        assertThat(comments.get(0).getContent()).isEqualTo("뉴스레터 읽기 팁을 공유합니다");
+        assertThat(comments).singleElement().satisfies(comment -> {
+            assertThat(comment.getGuideId()).isEqualTo(data.guide().getId());
+            assertThat(comment.getParticipantId()).isEqualTo(data.participant().getId());
+            assertThat(comment.getContent()).isEqualTo(COMMENT);
+        });
     }
 
     @Test
-    void 이미_댓글이_있는_경우_400_응답() throws Exception {
-        // given
-        challengeDailyGuideCommentRepository.save(
-                TestFixture.createChallengeDailyGuideComment(
-                        guide.getId(),
-                        participant.getId(),
-                        "기존 댓글"
-                )
-        );
-        DailyGuideCommentRequest request = new DailyGuideCommentRequest("새 댓글");
-        int dayIndex = guide.getDayIndex();
+    void 이미_댓글을_작성한_가이드에는_다시_작성할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        데일리_가이드_댓글을_저장한다(data, "기존 댓글");
 
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
-                        challenge.getId(), dayIndex)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        데일리_가이드_댓글을_작성한다(data, "새 댓글")
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void 챌린지에_참여하지_않은_경우_404_응답() throws Exception {
-        // given
-        Member otherMember = TestFixture.createUniqueMember("other", "other");
-        memberRepository.save(otherMember);
-        Map<String, Object> attributes = Map.of(
-                "id", otherMember.getId().toString(),
-                "email", otherMember.getEmail(),
-                "name", otherMember.getNickname()
-        );
-        CustomOAuth2User otherUser = new CustomOAuth2User(attributes, otherMember, null, null);
-        OAuth2AuthenticationToken otherToken = new OAuth2AuthenticationToken(
-                otherUser,
-                otherUser.getAuthorities(),
-                "registrationId"
-        );
+    void 댓글_작성이_비활성화된_가이드에는_댓글을_작성할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(2, false);
 
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challenge.getId())
-                        .with(authentication(otherToken)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void 잘못된_challengeId로_조회시_404_응답() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", 999L)
-                        .with(authentication(authToken)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void 댓글_내용이_비어있으면_400_응답() throws Exception {
-        // given
-        DailyGuideCommentRequest request = new DailyGuideCommentRequest("");
-        int dayIndex = guide.getDayIndex();
-
-        // when & then
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
-                        challenge.getId(), dayIndex)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        데일리_가이드_댓글을_작성한다(data, COMMENT)
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void 주말_가이드_조회_성공() throws Exception {
-        // given - 기존 guide 삭제하고 오늘 날짜에 맞는 가이드 생성
-        challengeDailyGuideRepository.deleteAll();
-        int actualDayIndex = calculateDayIndex(challenge.getStartDate(), today);
-        ChallengeDailyGuide actualGuide = challengeDailyGuideRepository.save(
-                TestFixture.createChallengeDailyGuide(
-                        challenge.getId(),
-                        actualDayIndex,
-                        DailyGuideType.COMMENT,
-                        "https://example.com/weekend.webp",
-                        "주말입니다",
-                        false
-                )
-        );
+    void 존재하지_않는_가이드에는_댓글을_작성할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
 
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challenge.getId())
-                        .with(authentication(authToken)))
+        데일리_가이드_댓글을_작성한다(data.challenge().getId(), 2, data.authentication(), COMMENT)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 아직_열리지_않은_가이드에는_댓글을_작성할_수_없다() throws Exception {
+        int tomorrowDayIndex = 오늘의_일차를_계산한다() + 1;
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(tomorrowDayIndex, true);
+
+        데일리_가이드_댓글을_작성한다(data, COMMENT)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 빈_내용으로는_댓글을_작성할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        데일리_가이드_댓글을_작성한다(data, "")
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 첫날_댓글을_작성하면_MINDSET_투두와_출석이_완료된다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(1, true);
+        ChallengeTodos todos = 챌린지_투두를_저장한다(data.challenge());
+
+        데일리_가이드_댓글을_작성한다(data, "첫날 댓글")
+                .andExpect(status().isCreated());
+
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), MONDAY, todos.mindset().getId())).isTrue();
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(
+                data.participant().getId(), MONDAY)).isTrue();
+        ChallengeParticipant participant = challengeParticipantRepository.findById(data.participant().getId()).orElseThrow();
+        assertThat(participant.getCompletedDays()).isEqualTo(1);
+    }
+
+    @Test
+    void 첫날이_아니면_댓글을_작성해도_챌린지_투두가_완료되지_않는다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(2, true);
+        ChallengeTodos todos = 챌린지_투두를_저장한다(data.challenge());
+
+        데일리_가이드_댓글을_작성한다(data, "둘째 날 댓글")
+                .andExpect(status().isCreated());
+
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), MONDAY, todos.read().getId())).isFalse();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), MONDAY, todos.comment().getId())).isFalse();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), MONDAY, todos.mindset().getId())).isFalse();
+    }
+
+    @Test
+    void 첫날_MINDSET_투두가_이미_있으면_중복으로_생성하지_않는다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(1, true);
+        ChallengeTodos todos = 챌린지_투두를_저장한다(data.challenge());
+        challengeDailyTodoRepository.save(TestFixture.createChallengeDailyTodo(
+                data.participant().getId(), MONDAY, todos.mindset().getId()));
+
+        데일리_가이드_댓글을_작성한다(data, "첫날 댓글")
+                .andExpect(status().isCreated());
+
+        long mindsetTodoCount = challengeDailyTodoRepository.findAll().stream()
+                .filter(todo -> todo.getParticipantId().equals(data.participant().getId()))
+                .filter(todo -> todo.getChallengeTodoId().equals(todos.mindset().getId()))
+                .filter(todo -> todo.getTodoDate().equals(MONDAY))
+                .count();
+        assertThat(mindsetTodoCount).isEqualTo(1);
+    }
+
+    @Test
+    void 첫날_출석이_이미_완료되었으면_출석과_완료일을_중복으로_반영하지_않는다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(1, true);
+        ChallengeTodos todos = 챌린지_투두를_저장한다(data.challenge());
+        challengeDailyResultRepository.save(TestFixture.createChallengeDailyResult(
+                data.participant().getId(), MONDAY, ChallengeDailyStatus.COMPLETE));
+
+        데일리_가이드_댓글을_작성한다(data, "첫날 댓글")
+                .andExpect(status().isCreated());
+
+        ChallengeParticipant participant = challengeParticipantRepository.findById(data.participant().getId()).orElseThrow();
+        assertThat(challengeDailyResultRepository.count()).isEqualTo(1);
+        assertThat(participant.getCompletedDays()).isZero();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), MONDAY, todos.comment().getId())).isTrue();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), MONDAY, todos.mindset().getId())).isTrue();
+    }
+
+    @Test
+    void 주말에_첫날_댓글을_작성하면_READ를_제외한_투두와_출석이_완료된다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(1, true);
+        ChallengeTodos todos = 챌린지_투두를_저장한다(data.challenge());
+        LocalDate saturday = LocalDate.of(2026, 1, 31);
+        clock.setDate(saturday);
+
+        데일리_가이드_댓글을_작성한다(data, "주말 첫날 댓글")
+                .andExpect(status().isCreated());
+
+        ChallengeParticipant participant = challengeParticipantRepository.findById(data.participant().getId()).orElseThrow();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), saturday, todos.read().getId())).isFalse();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), saturday, todos.comment().getId())).isTrue();
+        assertThat(challengeDailyTodoRepository.existsByParticipantIdAndTodoDateAndChallengeTodoId(
+                data.participant().getId(), saturday, todos.mindset().getId())).isTrue();
+        assertThat(challengeDailyResultRepository.existsByParticipantIdAndDate(
+                data.participant().getId(), saturday)).isTrue();
+        assertThat(participant.getCompletedDays()).isEqualTo(1);
+    }
+
+    @Test
+    void 주말에는_주말용_데일리_가이드를_조회한다() throws Exception {
+        LocalDate saturday = LocalDate.of(2026, 1, 31);
+        clock.setDate(saturday);
+        DailyGuideTestData data = 참여중인_챌린지와_데일리_가이드를_저장한다(0, false);
+
+        오늘의_데일리_가이드를_조회한다(data.challenge().getId(), data.authentication())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dayIndex").value(actualDayIndex))
-                .andExpect(jsonPath("$.type").exists())
-                .andExpect(jsonPath("$.imageUrl").exists());
+                .andExpect(jsonPath("$.dayIndex").value(0))
+                .andExpect(jsonPath("$.type").value("COMMENT"))
+                .andExpect(jsonPath("$.imageUrl").value("https://example.com/daily-guide.webp"));
     }
 
     @Test
-    void 주말_가이드_댓글_작성_불가() throws Exception {
-        // given - 기존 guide 삭제하고 commentEnabled = false인 가이드 생성
-        challengeDailyGuideRepository.deleteAll();
-        int actualDayIndex = calculateDayIndex(challenge.getStartDate(), today);
-        ChallengeDailyGuide disabledGuide = challengeDailyGuideRepository.save(
-                TestFixture.createChallengeDailyGuide(
-                        challenge.getId(),
-                        actualDayIndex,
-                        DailyGuideType.COMMENT,
-                        "https://example.com/weekend.webp",
-                        "주말입니다",
-                        false
-                )
-        );
-        DailyGuideCommentRequest request = new DailyGuideCommentRequest("주말 댓글 작성 시도");
+    void 데일리_가이드의_댓글_목록을_조회한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        데일리_가이드_댓글을_저장한다(data, "첫 번째 댓글");
+        Member anotherMember = 회원을_저장한다("다른 회원", "another-member");
+        ChallengeParticipant anotherParticipant = 챌린지_참여자를_저장한다(data.challenge(), anotherMember);
+        challengeDailyGuideCommentRepository.save(TestFixture.createChallengeDailyGuideComment(
+                data.guide().getId(), anotherParticipant.getId(), "두 번째 댓글"));
 
-        // when & then - commentEnabled = false이므로 댓글 작성 불가능 (400)
-        mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
-                        challenge.getId(), actualDayIndex)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        데일리_가이드_댓글_목록을_조회한다(data, null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void 데일리_가이드의_댓글_목록을_페이지_크기에_맞게_조회한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        데일리_가이드_댓글을_저장한다(data, "첫 번째 댓글");
+        Member anotherMember = 회원을_저장한다("다른 회원", "another-member");
+        ChallengeParticipant anotherParticipant = 챌린지_참여자를_저장한다(data.challenge(), anotherMember);
+        challengeDailyGuideCommentRepository.save(TestFixture.createChallengeDailyGuideComment(
+                data.guide().getId(), anotherParticipant.getId(), "두 번째 댓글"));
+
+        데일리_가이드_댓글_목록을_조회한다(data, 1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
+    void 존재하지_않는_챌린지의_댓글_목록은_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        데일리_가이드_댓글_목록을_조회한다(999L, data.guide().getDayIndex(), data.authentication(), null)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 챌린지_범위를_벗어난_일차의_댓글_목록은_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        데일리_가이드_댓글_목록을_조회한다(
+                data.challenge().getId(), data.challenge().getTotalDays() + 1, data.authentication(), null)
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void 데일리_가이드_코멘트_목록_조회_성공() throws Exception {
-        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
-        int dayIndex = guide.getDayIndex();
-        if (dayIndex == 0) {
-            // 주말인 경우 유효한 dayIndex로 가이드 재생성
-            challengeDailyGuideRepository.deleteAll();
-            dayIndex = 1;
-            guide = challengeDailyGuideRepository.save(
-                    TestFixture.createChallengeDailyGuide(
-                            challenge.getId(),
-                            dayIndex,
-                            DailyGuideType.COMMENT,
-                            "https://example.com/day07.webp",
-                            "오늘은 팁을 남겨주세요",
-                            true
-                    )
-            );
+    void 존재하지_않는_가이드의_댓글_목록은_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        int missingDayIndex = data.guide().getDayIndex() + 1;
+
+        데일리_가이드_댓글_목록을_조회한다(
+                data.challenge().getId(), missingDayIndex, data.authentication(), null)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 댓글이_없으면_빈_목록을_반환한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        데일리_가이드_댓글_목록을_조회한다(data, null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0));
+    }
+
+    @Test
+    void 참여하지_않은_회원은_데일리_가이드의_댓글_목록을_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        Member nonParticipant = 회원을_저장한다("미참여자", "non-participant");
+
+        데일리_가이드_댓글_목록을_조회한다(
+                data.challenge().getId(), data.guide().getDayIndex(), 인증정보를_생성한다(nonParticipant), null)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 데일리_가이드에_작성한_내_댓글을_조회한다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        데일리_가이드_댓글을_저장한다(data, COMMENT);
+
+        내_데일리_가이드_댓글을_조회한다(data.challenge().getId(), data.guide().getDayIndex(), data.authentication())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comment").value(COMMENT));
+    }
+
+    @Test
+    void 작성한_댓글이_없으면_내_댓글_내용은_null이다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        내_데일리_가이드_댓글을_조회한다(data.challenge().getId(), data.guide().getDayIndex(), data.authentication())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comment").doesNotExist());
+    }
+
+    @Test
+    void 존재하지_않는_챌린지에서는_내_댓글을_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+
+        내_데일리_가이드_댓글을_조회한다(999L, data.guide().getDayIndex(), data.authentication())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 참여하지_않은_회원은_내_댓글을_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        Member nonParticipant = 회원을_저장한다("미참여자", "non-participant");
+
+        내_데일리_가이드_댓글을_조회한다(
+                        data.challenge().getId(), data.guide().getDayIndex(), 인증정보를_생성한다(nonParticipant))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 아직_열리지_않은_가이드의_내_댓글은_조회할_수_없다() throws Exception {
+        DailyGuideTestData data = 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다();
+        int tomorrowDayIndex = 오늘의_일차를_계산한다() + 1;
+
+        내_데일리_가이드_댓글을_조회한다(
+                        data.challenge().getId(), tomorrowDayIndex, data.authentication())
+                .andExpect(status().isBadRequest());
+    }
+
+    private DailyGuideTestData 참여중인_챌린지와_오늘의_데일리_가이드를_저장한다() {
+        return 참여중인_챌린지와_데일리_가이드를_저장한다(오늘의_일차를_계산한다(), true);
+    }
+
+    private DailyGuideTestData 참여중인_챌린지와_데일리_가이드를_저장한다(
+            int dayIndex,
+            boolean commentEnabled
+    ) {
+        Member member = 회원을_저장한다("회원", "member");
+        LocalDate today = LocalDate.now(clock);
+        Challenge challenge = 챌린지를_저장한다(today.minusDays(5), today.plusDays(5));
+        ChallengeParticipant participant = 챌린지_참여자를_저장한다(challenge, member);
+        ChallengeDailyGuide guide = challengeDailyGuideRepository.save(TestFixture.createChallengeDailyGuide(
+                challenge.getId(),
+                dayIndex,
+                DailyGuideType.COMMENT,
+                "https://example.com/daily-guide.webp",
+                "오늘은 팁을 남겨주세요",
+                commentEnabled
+        ));
+        return new DailyGuideTestData(member, 인증정보를_생성한다(member), challenge, participant, guide);
+    }
+
+    private Challenge 챌린지를_저장한다(LocalDate startDate, LocalDate endDate) {
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("그룹"));
+        return challengeRepository.save(TestFixture.createChallenge(
+                "테스트 챌린지",
+                startDate,
+                endDate,
+                10,
+                group.getId()
+        ));
+    }
+
+    private Member 회원을_저장한다(String nickname, String identifier) {
+        return memberRepository.save(TestFixture.createUniqueMember(nickname, identifier));
+    }
+
+    private ChallengeParticipant 챌린지_참여자를_저장한다(Challenge challenge, Member member) {
+        return challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                challenge.getId(), member.getId(), 0));
+    }
+
+    private ChallengeTodos 챌린지_투두를_저장한다(Challenge challenge) {
+        ChallengeTodo read = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
+        ChallengeTodo comment = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
+        ChallengeTodo mindset = challengeTodoRepository.save(
+                TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.MINDSET));
+        return new ChallengeTodos(read, comment, mindset);
+    }
+
+    private ChallengeDailyGuideComment 데일리_가이드_댓글을_저장한다(DailyGuideTestData data, String content) {
+        return challengeDailyGuideCommentRepository.save(TestFixture.createChallengeDailyGuideComment(
+                data.guide().getId(), data.participant().getId(), content));
+    }
+
+    private OAuth2AuthenticationToken 인증정보를_생성한다(Member member) {
+        Map<String, Object> attributes = Map.of(
+                "id", member.getId().toString(),
+                "email", member.getEmail(),
+                "name", member.getNickname()
+        );
+        CustomOAuth2User user = new CustomOAuth2User(attributes, member, null, null);
+        return new OAuth2AuthenticationToken(user, user.getAuthorities(), "registrationId");
+    }
+
+    private int 오늘의_일차를_계산한다() {
+        LocalDate today = LocalDate.now(clock);
+        if (today.getDayOfWeek() == DayOfWeek.SATURDAY || today.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return 0;
         }
-
-        challengeDailyGuideCommentRepository.save(
-                TestFixture.createChallengeDailyGuideComment(
-                        guide.getId(),
-                        participant.getId(),
-                        "테스트 코멘트"
-                )
-        );
-
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
-                        challenge.getId(), dayIndex)
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].nickname").exists())
-                .andExpect(jsonPath("$.content[0].comment").exists())
-                .andExpect(jsonPath("$.content[0].createdAt").exists());
+        return (int) DAYS.between(today.minusDays(5), today) + 1;
     }
 
-    @Test
-    void 존재하지_않는_챌린지로_코멘트_목록_조회시_404_응답() throws Exception {
-        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
-        int dayIndex = guide.getDayIndex() == 0 ? 1 : guide.getDayIndex();
-
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
-                        999L, dayIndex)
-                        .with(authentication(authToken)))
-                .andExpect(status().isNotFound());
+    private ResultActions 오늘의_데일리_가이드를_조회한다(
+            Long challengeId,
+            OAuth2AuthenticationToken authentication
+    ) throws Exception {
+        return mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/today", challengeId)
+                .with(authentication(authentication)));
     }
 
-    @Test
-    void 코멘트_목록_조회시_챌린지에_참여하지_않은_경우_404_응답() throws Exception {
-        // given - guide.getDayIndex()가 0(주말)이 아닌 경우만 테스트
-        int dayIndex = guide.getDayIndex() == 0 ? 1 : guide.getDayIndex();
+    private ResultActions 데일리_가이드_댓글을_작성한다(DailyGuideTestData data, String content) throws Exception {
+        return 데일리_가이드_댓글을_작성한다(
+                data.challenge().getId(), data.guide().getDayIndex(), data.authentication(), content);
+    }
 
-        Member otherMember = TestFixture.createUniqueMember("other", "other");
-        memberRepository.save(otherMember);
-        Map<String, Object> attributes = Map.of(
-                "id", otherMember.getId().toString(),
-                "email", otherMember.getEmail(),
-                "name", otherMember.getNickname()
-        );
-        CustomOAuth2User otherUser = new CustomOAuth2User(attributes, otherMember, null, null);
-        OAuth2AuthenticationToken otherToken = new OAuth2AuthenticationToken(
-                otherUser,
-                otherUser.getAuthorities(),
-                "registrationId"
-        );
+    private ResultActions 데일리_가이드_댓글을_작성한다(
+            Long challengeId,
+            int dayIndex,
+            OAuth2AuthenticationToken authentication,
+            String content
+    ) throws Exception {
+        DailyGuideCommentRequest request = new DailyGuideCommentRequest(content);
+        return mockMvc.perform(post("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
+                        challengeId, dayIndex)
+                .with(authentication(authentication))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+    }
 
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments",
-                        challenge.getId(), dayIndex)
-                        .with(authentication(otherToken)))
-                .andExpect(status().isNotFound());
+    private ResultActions 데일리_가이드_댓글_목록을_조회한다(DailyGuideTestData data, Integer size) throws Exception {
+        return 데일리_가이드_댓글_목록을_조회한다(
+                data.challenge().getId(), data.guide().getDayIndex(), data.authentication(), size);
+    }
+
+    private ResultActions 데일리_가이드_댓글_목록을_조회한다(
+            Long challengeId,
+            int dayIndex,
+            OAuth2AuthenticationToken authentication,
+            Integer size
+    ) throws Exception {
+        var request = get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/comments", challengeId, dayIndex)
+                .with(authentication(authentication));
+        if (size != null) {
+            request.param("size", String.valueOf(size));
+        }
+        return mockMvc.perform(request);
+    }
+
+    private ResultActions 내_데일리_가이드_댓글을_조회한다(
+            Long challengeId,
+            int dayIndex,
+            OAuth2AuthenticationToken authentication
+    ) throws Exception {
+        return mockMvc.perform(get("/api/v1/challenges/{challengeId}/daily-guides/{dayIndex}/my-comment",
+                        challengeId, dayIndex)
+                .with(authentication(authentication)));
+    }
+
+    private record DailyGuideTestData(
+            Member member,
+            OAuth2AuthenticationToken authentication,
+            Challenge challenge,
+            ChallengeParticipant participant,
+            ChallengeDailyGuide guide
+    ) {
+    }
+
+    private record ChallengeTodos(ChallengeTodo read, ChallengeTodo comment, ChallengeTodo mindset) {
     }
 }

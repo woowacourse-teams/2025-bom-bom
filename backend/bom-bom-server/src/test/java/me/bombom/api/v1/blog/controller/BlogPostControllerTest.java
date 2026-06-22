@@ -70,12 +70,6 @@ class BlogPostControllerTest {
     @BeforeEach
     void setUp() {
         initializeRoles();
-        blogPostTagRepository.deleteAllInBatch();
-        blogHashtagRepository.deleteAllInBatch();
-        blogImageAssetRepository.deleteAllInBatch();
-        blogPostRepository.deleteAllInBatch();
-        blogCategoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
 
         Role userRole = findRoleByAuthority("USER");
         Role adminRole = findRoleByAuthority("ADMIN");

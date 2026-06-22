@@ -112,20 +112,6 @@ class ReadingServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 기존 데이터 삭제
-        badgeRepository.deleteAllInBatch();
-        continueReadingShieldHistoryRepository.deleteAllInBatch();
-        continueReadingShieldRepository.deleteAllInBatch();
-        monthlyReadingRankHistoryRepository.deleteAllInBatch();
-        continueReadingRankHistoryRepository.deleteAllInBatch();
-        yearlyReadingRepository.deleteAllInBatch();
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        weeklyReadingRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        continueReadingRepository.deleteAllInBatch();
-        continueReadingRankingSnapshotRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         assertThat(continueReadingRankingSnapshotRepository.count()).isZero();
 
         String nickname = ("test_nickname_" + UUID.randomUUID()).substring(0, 20);

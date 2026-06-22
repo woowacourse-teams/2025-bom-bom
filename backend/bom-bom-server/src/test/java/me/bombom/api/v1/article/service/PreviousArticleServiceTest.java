@@ -88,15 +88,6 @@ class PreviousArticleServiceTest {
 
     @BeforeEach
     public void setup() {
-        subscribeRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        previousArticleRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterPreviousPolicyRepository.deleteAllInBatch();
-        roleRepository.deleteAllInBatch();
-
         // Role 생성
         Role memberRole = roleRepository.save(Role.builder().authority("MEMBER").build());
         Role archiveRole = roleRepository.save(Role.builder().authority("ARCHIVE").build());

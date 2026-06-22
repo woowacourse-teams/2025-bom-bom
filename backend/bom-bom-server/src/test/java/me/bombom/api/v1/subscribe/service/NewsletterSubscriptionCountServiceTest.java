@@ -35,7 +35,6 @@ class NewsletterSubscriptionCountServiceTest {
 
     @BeforeEach
     void setup() {
-        newsletterSubscriptionCountRepository.deleteAllInBatch();
         clock.setInstant(FIXED_INSTANT, SEOUL_ZONE);
     }
 

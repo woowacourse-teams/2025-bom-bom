@@ -57,11 +57,6 @@ class ContinueReadingShieldServiceTest {
     @BeforeEach
     void setUp() {
         fixClockTo(MONTH_START_DATE);
-        continueReadingShieldHistoryRepository.deleteAllInBatch();
-        continueReadingShieldRepository.deleteAllInBatch();
-        continueReadingRealtimeRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
     }
 
     @Test

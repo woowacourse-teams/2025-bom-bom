@@ -61,13 +61,6 @@ class ArticleServiceTest {
 
     @BeforeEach
     void setUp() {
-        bookmarkRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         jdbcTemplate.update("""
                 INSERT INTO role (id, authority)
                 VALUES (1, 'USER')

@@ -69,13 +69,6 @@ class BookmarkControllerTest {
 
     @BeforeEach
     void setUp() {
-        bookmarkRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-
         newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails());
 
         member = TestFixture.normalMemberFixture();

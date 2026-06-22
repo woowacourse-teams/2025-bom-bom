@@ -27,7 +27,6 @@ import me.bombom.api.v1.subscribe.repository.UnsubscribeRetryRepository;
 import me.bombom.support.FakeDiscordWebhookNotifier;
 import me.bombom.support.FakeUnsubscribeAgent;
 import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -63,17 +62,6 @@ class SubscribeServiceTest {
 
     @Autowired
     private UnsubscribeRetryRepository unsubscribeRetryRepository;
-
-    @AfterEach
-    void tearDown() {
-        unsubscribeRetryRepository.deleteAllInBatch();
-        subscribeRepository.deleteAllInBatch();
-        newsletterSubscriptionCountRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-    }
 
     @Test
     void 구독중인_뉴스레터를_조회한다() {

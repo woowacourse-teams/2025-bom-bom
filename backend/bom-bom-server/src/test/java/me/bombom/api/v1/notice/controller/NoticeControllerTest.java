@@ -10,7 +10,6 @@ import me.bombom.api.v1.notice.domain.NoticeCategory;
 import me.bombom.api.v1.notice.repository.NoticeRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -33,8 +32,7 @@ class NoticeControllerTest {
     }
 
     @Test
-    @DisplayName("공지 목록은 createdAt DESC, id ASC 정렬로 페이지네이션되어 반환된다")
-    void getNotices() throws Exception {
+    void 공지_목록을_생성일_내림차순과_ID_오름차순으로_페이지네이션하여_조회한다() throws Exception {
         // when & then
         mockMvc.perform(get("/api/v1/notices")
                         .contentType(MediaType.APPLICATION_JSON))

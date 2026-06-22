@@ -28,7 +28,6 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHist
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -86,8 +85,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("아티클 id로 매일메일 컨텐츠 정보를 조회한다")
-    void getContentInformationByArticle_success() throws Exception {
+    void 아티클_ID로_매일메일_콘텐츠_정보를_조회한다() throws Exception {
         // given
         Long articleId = issueHistory.getArticleId();
 
@@ -104,8 +102,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("매일메일 컨텐츠의 모범 답변을 조회한다")
-    void getIdealAnswer_success() throws Exception {
+    void 매일메일_콘텐츠의_모범_답변을_조회한다() throws Exception {
         // given
         Long contentId = content.getId();
 
@@ -124,8 +121,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("아티클 id로 사용자 답변을 제출하고 다시 조회한다")
-    void submitAnswerAndGetSubmittedAnswer_success() throws Exception {
+    void 아티클_ID로_사용자_답변을_제출하고_다시_조회한다() throws Exception {
         // given
         Long articleId = issueHistory.getArticleId();
         String answer = "GC Root에서 도달할 수 없는 객체를 수거한다.";
@@ -155,8 +151,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("같은 컨텐츠라도 발행 아티클이 다르면 각각 답변을 제출하고 조회한다")
-    void submitAnswer_sameContentDifferentArticles_success() throws Exception {
+    void 같은_콘텐츠라도_발행_아티클이_다르면_각각_답변을_제출하고_조회한다() throws Exception {
         // given
         MaeilMailIssueHistory secondIssueHistory = issueHistoryRepository.save(
                 createIssueHistory(SECOND_ARTICLE_ID, content.getId())
@@ -209,8 +204,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("답변이 1500자면 제출할 수 있다")
-    void submitAnswer_answerMaxLength_success() throws Exception {
+    void 답변이_1500자면_제출할_수_있다() throws Exception {
         // given
         Long articleId = issueHistory.getArticleId();
         String answer = "가".repeat(1_500);
@@ -231,8 +225,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 아티클에 답변을 제출하면 404를 반환한다")
-    void submitAnswer_articleNotFound() throws Exception {
+    void 존재하지_않는_아티클에_답변을_제출하면_404를_반환한다() throws Exception {
         // given
         String answer = "존재하지 않는 아티클에는 저장되지 않는다.";
 
@@ -250,8 +243,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("기존 컨텐츠 id 기반 답변 제출 URL은 더 이상 사용하지 않는다")
-    void submitAnswer_legacyContentIdPathNotFound() throws Exception {
+    void 기존_콘텐츠_ID_기반_답변_제출_URL은_더_이상_사용하지_않는다() throws Exception {
         // given
         Long contentId = issueHistory.getContentId();
         String answer = "기존 URL로는 저장되지 않는다.";
@@ -267,8 +259,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("답변이 공백이면 제출할 수 없다")
-    void submitAnswer_blankAnswer() throws Exception {
+    void 답변이_공백이면_제출할_수_없다() throws Exception {
         // given
         Long articleId = issueHistory.getArticleId();
 
@@ -286,8 +277,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("답변이 1500자를 초과하면 제출할 수 없다")
-    void submitAnswer_answerTooLong() throws Exception {
+    void 답변이_1500자를_초과하면_제출할_수_없다() throws Exception {
         // given
         Long articleId = issueHistory.getArticleId();
         String answer = "가".repeat(1_501);
@@ -306,8 +296,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("아직 제출하지 않은 답변을 조회하면 404를 반환한다")
-    void getSubmittedAnswer_notFound() throws Exception {
+    void 아직_제출하지_않은_답변을_조회하면_404를_반환한다() throws Exception {
         // given
         Long articleId = issueHistory.getArticleId();
 
@@ -322,8 +311,7 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 아티클의 제출 답변을 조회하면 404를 반환한다")
-    void getSubmittedAnswer_articleNotFound() throws Exception {
+    void 존재하지_않는_아티클의_제출_답변을_조회하면_404를_반환한다() throws Exception {
         // when & then
         MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
                         UNKNOWN_ARTICLE_ID)

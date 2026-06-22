@@ -16,7 +16,6 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.member.repository.WarningSettingRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -65,8 +64,7 @@ class WarningControllerTest {
     }
 
     @Test
-    @DisplayName("임박 경고 설정 조회 성공")
-    void nearCapacityWarningStatus_success() throws Exception {
+    void 임박_경고_설정을_조회한다() throws Exception {
         // when & then
         mockMvc.perform(get("/api/v1/members/me/warning/near-capacity")
                         .with(authentication(authToken)))
@@ -75,8 +73,7 @@ class WarningControllerTest {
     }
 
     @Test
-    @DisplayName("임박 경고 설정 수정 성공")
-    void updateWarningSetting_success() throws Exception {
+    void 임박_경고_설정을_수정한다() throws Exception {
         // when
         mockMvc.perform(post("/api/v1/members/me/warning/near-capacity")
                         .with(authentication(authToken))

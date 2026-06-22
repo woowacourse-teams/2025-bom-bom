@@ -12,7 +12,6 @@ import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.ResetsAcceptanceData;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,7 +25,6 @@ class ArticleControllerTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    @DisplayName("기본 아티클 목록 조회 성공")
     void 아티클_목록_조회_성공() {
         Map<String, Object> 조회결과 = 아티클_목록_조회(Map.of());
 
@@ -65,7 +63,6 @@ class ArticleControllerTest {
     }
 
     @Test
-    @DisplayName("검색 아티클 목록 조회 - 뉴스 키워드")
     void 뉴스_키워드_검색() {
         Map<String, Object> 조회결과 = 아티클_검색(Map.of("keyword", "뉴스"));
 
@@ -79,7 +76,6 @@ class ArticleControllerTest {
     }
 
     @Test
-    @DisplayName("검색 아티클 목록 조회 - 레터 키워드")
     void 레터_키워드_검색() {
         Map<String, Object> 조회결과 = 아티클_검색(Map.of("keyword", "레터"));
 
@@ -93,7 +89,6 @@ class ArticleControllerTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 키워드 검색 아티클 목록 조회")
     void 존재하지_않는_키워드_검색() {
         Map<String, Object> 조회결과 = 아티클_검색(Map.of("keyword", "존재하지않는키워드"));
 
@@ -191,7 +186,6 @@ class ArticleControllerTest {
     }
 
     @Test
-    @DisplayName("뉴스레터 키워드 복합 필터링 아티클 목록 조회")
     void 뉴스레터와_키워드로_복합_검색한다() {
         Map<String, Object> 조회결과 = 아티클_검색(Map.of(
                 "newsletterId", 3,
@@ -212,7 +206,6 @@ class ArticleControllerTest {
     }
 
     @Test
-    @DisplayName("일반 목록 조회에서 keyword 파라미터는 무시됨")
     void 일반_목록_조회는_검색어를_무시한다() {
         Map<String, Object> 조회결과 = 아티클_목록_조회(Map.of("keyword", "아티클"));
 

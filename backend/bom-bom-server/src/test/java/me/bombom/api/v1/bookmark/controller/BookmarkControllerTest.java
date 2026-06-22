@@ -27,7 +27,6 @@ import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -107,8 +106,7 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @DisplayName("북마크 목록 조회 성공")
-    void getBookmarks_success() throws Exception {
+    void 북마크_목록을_조회한다() throws Exception {
         // when & then
         mockMvc.perform(get("/api/v1/bookmarks")
                         .with(authentication(authToken))
@@ -120,8 +118,7 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @DisplayName("북마크 상태 조회 성공")
-    void getBookmarkStatus_success() throws Exception {
+    void 북마크_상태를_조회한다() throws Exception {
         // given
         Article article = articleRepository.findAll().get(0);
 
@@ -134,8 +131,7 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @DisplayName("북마크 추가 성공")
-    void addBookmark_success() throws Exception {
+    void 북마크를_추가한다() throws Exception {
         // given
         Article article = articleRepository.findAll().get(1);
 
@@ -147,8 +143,7 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @DisplayName("북마크 삭제 성공")
-    void deleteBookmark_success() throws Exception {
+    void 북마크를_삭제한다() throws Exception {
         // given
         Article article = articleRepository.findAll().get(0);
 
@@ -160,8 +155,7 @@ class BookmarkControllerTest {
     }
 
     @Test
-    @DisplayName("뉴스레터별 북마크 통계 조회 성공")
-    void getBookmarkNewsletterStatistics_success() throws Exception {
+    void 뉴스레터별_북마크_통계를_조회한다() throws Exception {
         // when & then
         mockMvc.perform(get("/api/v1/bookmarks/statistics/newsletters")
                         .with(authentication(authToken))

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;
 import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,41 @@ class ChallengeCommentReplyControllerTest {
     }
 
     @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/comment-reply-private.json")
+    void 비공개_답글을_답글_작성자가_조회하면_조회된다() {
+        Map<String, Object> result = getCommentReplies(1, 1, 2);
+
+        assertThat(content(result))
+                .anyMatch(reply -> reply.get("reply").equals("비공개 답글")
+                        && reply.get("isMyReply").equals(true)
+                        && reply.get("isPrivate").equals(true));
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/comment-reply-private.json")
+    void 비공개_답글을_원댓글_작성자가_조회하면_조회된다() {
+        Map<String, Object> result = getCommentReplies(1, 1, MEMBER_ID);
+
+        assertThat(content(result))
+                .anyMatch(reply -> reply.get("reply").equals("비공개 답글")
+                        && reply.get("isMyReply").equals(false)
+                        && reply.get("isPrivate").equals(true));
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/comment-reply-private.json")
+    void 비공개_답글을_제3자가_조회하면_목록에_포함되지_않는다() {
+        Map<String, Object> result = getCommentReplies(1, 1, 3);
+
+        assertSoftly(softly -> {
+            softly.assertThat(content(result))
+                    .noneMatch(reply -> reply.get("reply").equals("비공개 답글"));
+            softly.assertThat(content(result))
+                    .anyMatch(reply -> reply.get("reply").equals("공개 답글"));
+        });
+    }
+
+    @Test
     void 코멘트ID가_1미만이면_답글_조회시_400을_응답한다() {
         authenticatedRequest()
                 .when()
@@ -84,7 +120,11 @@ class ChallengeCommentReplyControllerTest {
     }
 
     private static Map<String, Object> getCommentReplies(long challengeId, long commentId) {
-        return authenticatedRequest()
+        return getCommentReplies(challengeId, commentId, MEMBER_ID);
+    }
+
+    private static Map<String, Object> getCommentReplies(long challengeId, long commentId, long memberId) {
+        return request(memberId)
                 .queryParam("size", 10)
                 .when()
                 .get("/api/v1/challenges/{challengeId}/comments/{commentId}/replies", challengeId, commentId)
@@ -113,9 +153,13 @@ class ChallengeCommentReplyControllerTest {
     }
 
     private static RequestSpecification authenticatedRequest() {
+        return request(MEMBER_ID);
+    }
+
+    private static RequestSpecification request(long memberId) {
         return RestAssured.given()
                 .accept(ContentType.JSON)
-                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+                .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
     }
 
     private int countCommentReplies() {

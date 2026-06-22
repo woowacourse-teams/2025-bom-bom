@@ -106,6 +106,85 @@ class ChallengeCommentControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
+    void 챌린지_코멘트에_좋아요를_추가하면_집계된다() {
+        Map<String, Object> result = addLike(1, 1)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("likeCount")).isEqualTo(1);
+            softly.assertThat(findLikeCount(1)).isEqualTo(1);
+            softly.assertThat(countLikes()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 같은_참가자가_중복으로_좋아요를_눌러도_한번만_집계된다() {
+        addLike(1, 1)
+                .then()
+                .statusCode(200);
+
+        Map<String, Object> result = addLike(1, 1)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("likeCount")).isEqualTo(1);
+            softly.assertThat(findLikeCount(1)).isEqualTo(1);
+            softly.assertThat(countLikes()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 챌린지_코멘트_좋아요를_삭제하면_집계가_감소한다() {
+        addLike(1, 1)
+                .then()
+                .statusCode(200);
+
+        Map<String, Object> result = deleteLike(1, 1)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("likeCount")).isEqualTo(0);
+            softly.assertThat(findLikeCount(1)).isZero();
+            softly.assertThat(countLikes()).isZero();
+        });
+    }
+
+    @Test
+    void 좋아요가_없을_때_삭제해도_집계는_변하지_않는다() {
+        Map<String, Object> result = deleteLike(1, 1)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("likeCount")).isEqualTo(0);
+            softly.assertThat(findLikeCount(1)).isZero();
+            softly.assertThat(countLikes()).isZero();
+        });
+    }
+
+    @Test
     void 챌린지_코멘트가_20자_미만이면_수정에_실패한다() {
         updateComment(1, "짧은 코멘트")
                 .then()
@@ -227,6 +306,20 @@ class ChallengeCommentControllerTest {
                 String.class,
                 commentId
         );
+    }
+
+    private int findLikeCount(long commentId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select like_count from challenge_comment where id = ?",
+                Integer.class,
+                commentId
+        );
+        return count == null ? 0 : count;
+    }
+
+    private int countLikes() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from challenge_comment_like", Integer.class);
+        return count == null ? 0 : count;
     }
 
     @SuppressWarnings("unchecked")

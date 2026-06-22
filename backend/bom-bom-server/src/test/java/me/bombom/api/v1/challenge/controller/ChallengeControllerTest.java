@@ -13,9 +13,11 @@ import me.bombom.support.time.MutableClock;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @AcceptanceTest("acceptance/challenge/list-base.json")
 class ChallengeControllerTest {
@@ -25,6 +27,9 @@ class ChallengeControllerTest {
 
     @Autowired
     private MutableClock clock;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void 시간을_고정한다() {
@@ -139,6 +144,60 @@ class ChallengeControllerTest {
     }
 
     @Test
+    @AdditionalAcceptanceDataSet({
+            "acceptance/challenge/list-not-joined.json",
+            "acceptance/challenge/list-subscribe.json"
+    })
+    void 챌린지_신청_가능_여부를_조회한다() {
+        Map<String, Object> result = getEligibility(1, MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("canApply")).isEqualTo(true);
+            softly.assertThat(result.get("reason")).isEqualTo("ELIGIBLE");
+        });
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-not-joined.json")
+    void 구독하지_않은_뉴스레터가_있으면_챌린지_신청_불가를_응답한다() {
+        Map<String, Object> result = getEligibility(1, MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("canApply")).isEqualTo(false);
+            softly.assertThat(result.get("reason")).isEqualTo("NOT_SUBSCRIBED");
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    @AdditionalAcceptanceDataSet({
+            "acceptance/challenge/list-not-joined.json",
+            "acceptance/challenge/list-subscribe.json"
+    })
+    void 챌린지를_신청한다() {
+        request(MEMBER_ID)
+                .when()
+                .post("/api/v1/challenges/{id}/application", 1)
+                .then()
+                .statusCode(201);
+
+        assertThat(countParticipants(1, MEMBER_ID)).isEqualTo(1);
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-applied-future.json")
+    void 신청한_챌린지를_취소한다() {
+        request(MEMBER_ID)
+                .when()
+                .delete("/api/v1/challenges/{id}/application", 1)
+                .then()
+                .statusCode(204);
+
+        assertThat(countParticipants(1, MEMBER_ID)).isZero();
+    }
+
+    @Test
     void 챌린지_상세_조회에서_id가_양수가_아니면_400을_반환한다() {
         RestAssured.given()
                 .accept(ContentType.JSON)
@@ -239,9 +298,7 @@ class ChallengeControllerTest {
     }
 
     private static Map<String, Object> getTeamList(long challengeId, long memberId) {
-        return RestAssured.given()
-                .accept(ContentType.JSON)
-                .header(AcceptanceTestHeaders.MEMBER_ID, memberId)
+        return request(memberId)
                 .when()
                 .get("/api/v1/challenges/{id}/teams", challengeId)
                 .then()
@@ -250,6 +307,34 @@ class ChallengeControllerTest {
                 .extract()
                 .jsonPath()
                 .getMap("$");
+    }
+
+    private static Map<String, Object> getEligibility(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{id}/eligibility", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static RequestSpecification request(long memberId) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
+    }
+
+    private int countParticipants(long challengeId, long memberId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from challenge_participant where challenge_id = ? and member_id = ?",
+                Integer.class,
+                challengeId,
+                memberId
+        );
+        return count == null ? 0 : count;
     }
 
     @SuppressWarnings("unchecked")

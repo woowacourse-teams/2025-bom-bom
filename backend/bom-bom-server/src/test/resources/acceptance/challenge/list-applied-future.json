@@ -1,0 +1,39 @@
+{
+  "newsletter_group": [
+    {
+      "id": 1,
+      "name": "그룹"
+    }
+  ],
+  "newsletter_group_item": [
+    {
+      "id": 1,
+      "newsletter_group_id": 1,
+      "newsletter_id": 1
+    }
+  ],
+  "challenge": [
+    {
+      "id": 1,
+      "name": "챌린지",
+      "generation": 1,
+      "start_date": "2026-01-31",
+      "end_date": "2026-02-10",
+      "total_days": 10,
+      "is_badge_issued": false,
+      "newsletter_group_id": 1
+    }
+  ],
+  "challenge_participant": [
+    {
+      "id": 1,
+      "challenge_id": 1,
+      "member_id": 1,
+      "challenge_team_id": null,
+      "completed_days": 0,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    }
+  ]
+}

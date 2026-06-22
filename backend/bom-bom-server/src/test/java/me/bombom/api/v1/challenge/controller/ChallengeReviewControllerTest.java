@@ -58,6 +58,7 @@ class ChallengeReviewControllerTest {
             softly.assertThat(content).anyMatch(review -> review.get("comment").equals("내 비공개")
                     && review.get("isMyReview").equals(true));
             softly.assertThat(content).anyMatch(review -> review.get("comment").equals("타인 공개")
+                    && review.get("nickname").equals("제나")
                     && review.get("isMyReview").equals(false));
         });
     }

@@ -3,8 +3,8 @@ package me.bombom.api.v1.challenge.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import io.restassured.http.ContentType;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
@@ -52,14 +52,15 @@ class ChallengeReviewControllerTest {
         List<Map<String, Object>> content = content(result);
 
         assertSoftly(softly -> {
-            softly.assertThat(result.get("totalElements")).isEqualTo(3);
+            softly.assertThat(result.get("totalElements")).isEqualTo(2);
             softly.assertThat(content).noneMatch(review -> review.get("comment").equals("타인 비공개"));
             softly.assertThat(content).noneMatch(review -> review.get("comment").equals("다른 챌린지 본인 공개"));
-            softly.assertThat(content).anyMatch(review -> review.get("comment").equals("내 비공개")
-                    && review.get("isMyReview").equals(true));
+            softly.assertThat(content).noneMatch(review -> review.get("comment").equals("내 비공개"));
             softly.assertThat(content).anyMatch(review -> review.get("comment").equals("타인 공개")
-                    && review.get("nickname").equals("제나")
-                    && review.get("isMyReview").equals(false));
+                    && review.get("nickname").equals("제나"));
+            softly.assertThat(content).anyMatch(review -> review.get("comment").equals("또 다른 타인 공개")
+                    && review.get("nickname").equals("익명"));
+            softly.assertThat(content).allSatisfy(review -> assertThat(review).doesNotContainKey("isMyReview"));
         });
     }
 
@@ -70,8 +71,8 @@ class ChallengeReviewControllerTest {
 
         assertSoftly(softly -> {
             softly.assertThat(content(result)).hasSize(2);
-            softly.assertThat(result.get("totalElements")).isEqualTo(3);
-            softly.assertThat(result.get("totalPages")).isEqualTo(2);
+            softly.assertThat(result.get("totalElements")).isEqualTo(2);
+            softly.assertThat(result.get("totalPages")).isEqualTo(1);
         });
     }
 

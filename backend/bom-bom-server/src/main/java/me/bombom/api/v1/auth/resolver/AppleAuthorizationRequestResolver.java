@@ -62,5 +62,3 @@ public class AppleAuthorizationRequestResolver implements OAuth2AuthorizationReq
         return customized;
     }
 }
-
-

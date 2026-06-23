@@ -1,0 +1,43 @@
+package me.bombom.api.v1.reading.controller;
+
+import jakarta.validation.Valid;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.reading.service.MonthlyReportService;
+import me.bombom.openapi.monthlyreport.api.MonthlyReportApi;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportDashboardRequest;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
+import me.bombom.openapi.monthlyreport.model.ReadingCalendarDayResponse;
+import me.bombom.openapi.monthlyreport.model.ReadingDashboardResponse;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/members/me/reading")
+public class MonthlyReportController implements MonthlyReportApi {
+
+    private final MonthlyReportService monthlyReportService;
+
+    @Override
+    @GetMapping("/calendar")
+    public List<ReadingCalendarDayResponse> getReadingCalendar(
+            @LoginMember Member member,
+            @Valid @ModelAttribute MonthlyReportRequest request
+    ) {
+        return monthlyReportService.getReadingCalendar(member, request);
+    }
+
+    @Override
+    @GetMapping("/dashboard")
+    public ReadingDashboardResponse getReadingDashboard(
+            @LoginMember Member member,
+            @Valid @ModelAttribute MonthlyReportDashboardRequest request
+    ) {
+        return monthlyReportService.getReadingDashboard(member, request);
+    }
+}

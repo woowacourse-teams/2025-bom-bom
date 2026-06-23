@@ -6,72 +6,38 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.ErrorResponse;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContent;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContentAnswer;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailUserAnswer;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentAnswerRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHistoryRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@AcceptanceTest("acceptance/maeilmail/maeil-mail-content-empty.json")
+@AcceptanceTest("acceptance/maeilmail/maeil-mail-content.json")
 class MaeilMailControllerTest {
 
+    private static final Long MEMBER_ID = 1L;
+    private static final Long CONTENT_ID = 1L;
+    private static final Long CONTENT_WITHOUT_ANSWER_ID = 2L;
+    private static final Long ISSUE_HISTORY_ID = 1L;
+    private static final Long SECOND_ISSUE_HISTORY_ID = 2L;
     private static final Long ARTICLE_ID = 10_001L;
     private static final Long SECOND_ARTICLE_ID = 10_002L;
     private static final Long UNKNOWN_ARTICLE_ID = 99_999L;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private MaeilMailContentRepository contentRepository;
-
-    @Autowired
-    private MaeilMailContentAnswerRepository contentAnswerRepository;
-
-    @Autowired
-    private MaeilMailIssueHistoryRepository issueHistoryRepository;
-
-    @Autowired
     private MaeilMailUserAnswerRepository userAnswerRepository;
-
-    private Member member;
-    private MaeilMailContent content;
-    private MaeilMailIssueHistory issueHistory;
-
-    @BeforeEach
-    void setUp() {
-        userAnswerRepository.deleteAllInBatch();
-        contentAnswerRepository.deleteAllInBatch();
-        issueHistoryRepository.deleteAllInBatch();
-        contentRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
-        member = memberRepository.save(TestFixture.normalMemberFixture());
-        content = contentRepository.save(createContent());
-        contentAnswerRepository.save(createContentAnswer(content.getId()));
-        issueHistory = issueHistoryRepository.save(createIssueHistory(ARTICLE_ID, content.getId()));
-    }
 
     @Test
     void 아티클_ID로_매일메일_콘텐츠_정보를_조회한다() {
         MaeilMailInformationResponse response = authenticatedRequest()
-                .queryParam("articleId", issueHistory.getArticleId())
+                .queryParam("articleId", ARTICLE_ID)
                 .when()
                 .get("/api/v1/maeil-mail/content")
                 .then()
@@ -80,14 +46,14 @@ class MaeilMailControllerTest {
                 .extract()
                 .as(MaeilMailInformationResponse.class);
 
-        assertThat(response.contentId()).isEqualTo(content.getId());
+        assertThat(response.contentId()).isEqualTo(CONTENT_ID);
     }
 
     @Test
     void 매일메일_콘텐츠의_모범_답변을_조회한다() {
         MaeilMailIdealAnswerResponse response = authenticatedRequest()
                 .when()
-                .get("/api/v1/maeil-mail/{contentId}/answer", content.getId())
+                .get("/api/v1/maeil-mail/{contentId}/answer", CONTENT_ID)
                 .then()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
@@ -102,67 +68,57 @@ class MaeilMailControllerTest {
 
     @Test
     void 모범_답변이_없는_컨텐츠는_404를_반환한다() {
-        MaeilMailContent contentWithoutAnswer = contentRepository.save(MaeilMailContent.builder()
-                .topicId(2L)
-                .title("답변 없는 질문")
-                .content("<p>질문</p>")
-                .contentsText("질문")
-                .contentsSummary("질문")
-                .expectedReadTime(1)
-                .build());
-
         authenticatedRequest()
                 .when()
-                .get("/api/v1/maeil-mail/{contentId}/answer", contentWithoutAnswer.getId())
+                .get("/api/v1/maeil-mail/{contentId}/answer", CONTENT_WITHOUT_ANSWER_ID)
                 .then()
                 .statusCode(404);
     }
 
     @Test
+    @ResetsAcceptanceData
     void 아티클_ID로_사용자_답변을_제출하고_다시_조회한다() {
         String answer = "GC Root에서 도달할 수 없는 객체를 수거한다.";
 
-        submitAnswer(issueHistory.getArticleId(), answer)
+        submitAnswer(ARTICLE_ID, answer)
                 .then()
                 .statusCode(201);
 
         MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
         assertSoftly(softly -> {
-            softly.assertThat(savedAnswer.getMemberId()).isEqualTo(member.getId());
-            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(issueHistory.getId());
+            softly.assertThat(savedAnswer.getMemberId()).isEqualTo(MEMBER_ID);
+            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(ISSUE_HISTORY_ID);
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
 
-        MaeilMailSubmittedAnswerResponse response = getSubmittedAnswer(issueHistory.getArticleId(), 200)
+        MaeilMailSubmittedAnswerResponse response = getSubmittedAnswer(ARTICLE_ID, 200)
                 .as(MaeilMailSubmittedAnswerResponse.class);
 
         assertThat(response.answer()).isEqualTo(answer);
     }
 
     @Test
+    @ResetsAcceptanceData
     void 같은_콘텐츠라도_발행_아티클이_다르면_각각_답변을_제출하고_조회한다() {
-        MaeilMailIssueHistory secondIssueHistory = issueHistoryRepository.save(
-                createIssueHistory(SECOND_ARTICLE_ID, content.getId())
-        );
         String firstAnswer = "첫 번째 발행 아티클에 대한 답변";
         String secondAnswer = "두 번째 발행 아티클에 대한 답변";
 
-        submitAnswer(issueHistory.getArticleId(), firstAnswer)
+        submitAnswer(ARTICLE_ID, firstAnswer)
                 .then()
                 .statusCode(201);
-        submitAnswer(secondIssueHistory.getArticleId(), secondAnswer)
+        submitAnswer(SECOND_ARTICLE_ID, secondAnswer)
                 .then()
                 .statusCode(201);
 
-        MaeilMailSubmittedAnswerResponse firstResponse = getSubmittedAnswer(issueHistory.getArticleId(), 200)
+        MaeilMailSubmittedAnswerResponse firstResponse = getSubmittedAnswer(ARTICLE_ID, 200)
                 .as(MaeilMailSubmittedAnswerResponse.class);
-        MaeilMailSubmittedAnswerResponse secondResponse = getSubmittedAnswer(secondIssueHistory.getArticleId(), 200)
+        MaeilMailSubmittedAnswerResponse secondResponse = getSubmittedAnswer(SECOND_ARTICLE_ID, 200)
                 .as(MaeilMailSubmittedAnswerResponse.class);
         MaeilMailUserAnswer savedFirstAnswer = userAnswerRepository
-                .findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
+                .findByMemberIdAndIssueHistoryId(MEMBER_ID, ISSUE_HISTORY_ID)
                 .orElseThrow();
         MaeilMailUserAnswer savedSecondAnswer = userAnswerRepository
-                .findByMemberIdAndIssueHistoryId(member.getId(), secondIssueHistory.getId())
+                .findByMemberIdAndIssueHistoryId(MEMBER_ID, SECOND_ISSUE_HISTORY_ID)
                 .orElseThrow();
 
         assertSoftly(softly -> {
@@ -175,16 +131,17 @@ class MaeilMailControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
     void 답변이_1500자면_제출할_수_있다() {
         String answer = "가".repeat(1_500);
 
-        submitAnswer(issueHistory.getArticleId(), answer)
+        submitAnswer(ARTICLE_ID, answer)
                 .then()
                 .statusCode(201);
 
         MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
         assertSoftly(softly -> {
-            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(issueHistory.getId());
+            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(ISSUE_HISTORY_ID);
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
     }
@@ -208,7 +165,7 @@ class MaeilMailControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of("answer", "기존 URL로는 저장되지 않는다."))
                 .when()
-                .post("/api/v1/maeil-mail/{contentId}/answer/me", issueHistory.getContentId())
+                .post("/api/v1/maeil-mail/{contentId}/answer/me", CONTENT_ID)
                 .then()
                 .statusCode(404);
 
@@ -217,7 +174,7 @@ class MaeilMailControllerTest {
 
     @Test
     void 답변이_공백이면_제출할_수_없다() {
-        ErrorResponse response = submitAnswer(issueHistory.getArticleId(), " ")
+        ErrorResponse response = submitAnswer(ARTICLE_ID, " ")
                 .then()
                 .statusCode(400)
                 .contentType(ContentType.JSON)
@@ -230,7 +187,7 @@ class MaeilMailControllerTest {
 
     @Test
     void 답변이_1500자를_초과하면_제출할_수_없다() {
-        ErrorResponse response = submitAnswer(issueHistory.getArticleId(), "가".repeat(1_501))
+        ErrorResponse response = submitAnswer(ARTICLE_ID, "가".repeat(1_501))
                 .then()
                 .statusCode(400)
                 .contentType(ContentType.JSON)
@@ -243,7 +200,7 @@ class MaeilMailControllerTest {
 
     @Test
     void 아직_제출하지_않은_답변을_조회하면_404를_반환한다() {
-        ErrorResponse response = getSubmittedAnswer(issueHistory.getArticleId(), 404)
+        ErrorResponse response = getSubmittedAnswer(ARTICLE_ID, 404)
                 .as(ErrorResponse.class);
 
         assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
@@ -281,31 +238,6 @@ class MaeilMailControllerTest {
     private io.restassured.specification.RequestSpecification authenticatedRequest() {
         return RestAssured.given()
                 .accept(ContentType.JSON)
-                .header(AcceptanceTestHeaders.MEMBER_ID, member.getId());
-    }
-
-    private MaeilMailContent createContent() {
-        return MaeilMailContent.builder()
-                .topicId(1L)
-                .title("Java의 GC 동작 방식은?")
-                .content("<p>Java의 GC 동작 방식은?</p>")
-                .contentsText("Java의 GC 동작 방식은?")
-                .contentsSummary("GC 질문")
-                .expectedReadTime(3)
-                .build();
-    }
-
-    private MaeilMailContentAnswer createContentAnswer(Long contentId) {
-        return MaeilMailContentAnswer.builder()
-                .contentId(contentId)
-                .answer("<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>")
-                .build();
-    }
-
-    private MaeilMailIssueHistory createIssueHistory(Long articleId, Long contentId) {
-        return MaeilMailIssueHistory.builder()
-                .articleId(articleId)
-                .contentId(contentId)
-                .build();
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }
 }

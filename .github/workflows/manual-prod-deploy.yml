@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.DEPLOY_BRANCH }}
+          submodules: recursive
 
       - name: JDK 21 설정
         uses: actions/setup-java@v4
@@ -36,7 +37,7 @@ jobs:
         run: |
           mkdir -p src/main/resources src/test/resources
           printf '%s' "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > src/main/resources/application.yml
-          
+
       - name: only 빌드
         run: ./gradlew clean assemble --no-daemon --stacktrace --info
 
@@ -58,6 +59,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.DEPLOY_BRANCH }}
+          submodules: recursive
 
       - name: JDK 21 설정
         uses: actions/setup-java@v4
@@ -90,6 +92,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.DEPLOY_BRANCH }}
+          submodules: recursive
 
       - name: JAR 다운로드
         uses: actions/download-artifact@v4
@@ -123,20 +126,21 @@ jobs:
   deploy-server-sub:
     name: Production Server sub 배포
     needs: docker-image
-    runs-on: [ self-hosted, prod-sub ] 
+    runs-on: [ self-hosted, prod-sub ]
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
 
     environment:
       name: production
-      url: https://api.bombom.news 
+      url: https://api.bombom.news
 
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
         with:
           ref: ${{ env.DEPLOY_BRANCH }}
+          submodules: recursive
 
       - name: DockerHub 로그인
         uses: docker/login-action@v3
@@ -166,14 +170,14 @@ jobs:
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
-          
+
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env down || true
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
-              
+
       - name: Docker 리소스 정리
         run: |
           sudo docker container prune -f --filter "until=24h"
@@ -182,18 +186,21 @@ jobs:
   deploy-server-main:
     name: Production Server main 배포
     needs: docker-image
-    runs-on: [ self-hosted, prod-main ]  
+    runs-on: [ self-hosted, prod-main ]
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
 
     environment:
       name: production
-      url: https://api.bombom.news 
+      url: https://api.bombom.news
 
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_BRANCH }}
+          submodules: recursive
 
       - name: DockerHub 로그인
         uses: docker/login-action@v3
@@ -223,14 +230,14 @@ jobs:
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env config | rg -n 'OAUTH2_APPLE_PRIVATE_KEY' || true
-          
+
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env down || true
 
           sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
-              
+
       - name: Docker 리소스 정리
         run: |
           sudo docker container prune -f --filter "until=24h"

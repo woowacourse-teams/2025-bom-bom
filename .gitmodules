@@ -1,0 +1,3 @@
+[submodule "backend/bom-bom-server/openapi-spec"]
+	path = backend/bom-bom-server/openapi-spec
+	url = https://github.com/Bombom-Team/bom-bom-api-spec.git

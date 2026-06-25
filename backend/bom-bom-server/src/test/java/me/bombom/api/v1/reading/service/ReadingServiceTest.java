@@ -20,6 +20,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
+import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
@@ -373,6 +374,28 @@ class ReadingServiceTest {
             softly.assertThat(result.rank()).isEqualTo(3L);
             softly.assertThat(result.dayCount()).isEqualTo(10);
             softly.assertThat(result.nickname()).isEqualTo(member.getNickname());
+            softly.assertThat(result.streakShield().status().name()).isEqualTo("AVAILABLE");
+            softly.assertThat(result.streakShield().remainingCount()).isEqualTo(1);
+            softly.assertThat(result.streakShield().monthlyLimit()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 보상_보호막만_남아도_나의_연속_읽기_보호막은_사용_가능으로_조회된다() {
+        연속_읽기_랭킹_기본_데이터를_저장한다();
+        continueReadingShieldRepository.deleteByMemberId(member.getId());
+        continueReadingShieldRepository.save(ContinueReadingShield.builder()
+                .memberId(member.getId())
+                .monthlyRemainingCount(0)
+                .rewardRemainingCount(2)
+                .build());
+
+        MemberContinueReadingRankResponse result = readingService.getMemberContinueReadingRank(member);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.streakShield().status().name()).isEqualTo("AVAILABLE");
+            softly.assertThat(result.streakShield().remainingCount()).isEqualTo(2);
+            softly.assertThat(result.streakShield().monthlyLimit()).isEqualTo(1);
         });
     }
 
@@ -400,6 +423,7 @@ class ReadingServiceTest {
             softly.assertThat(result.dayCount()).isEqualTo(0);
             softly.assertThat(result.rank()).isEqualTo(2L);
             softly.assertThat(result.nickname()).isEqualTo(member.getNickname());
+            softly.assertThat(result.streakShield().status().name()).isEqualTo("AVAILABLE");
         });
     }
 
@@ -917,6 +941,7 @@ class ReadingServiceTest {
     private void 연속_읽기_랭킹_기본_데이터를_저장한다() {
         member = 회원을_저장한다();
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        continueReadingShieldRepository.save(ContinueReadingShield.create(member.getId()));
         continueReadingRankingSnapshotRepository.save(
                 ContinueReadingSnapshot.create(member.getId(), continueReading.getDayCount(), 1L)
         );

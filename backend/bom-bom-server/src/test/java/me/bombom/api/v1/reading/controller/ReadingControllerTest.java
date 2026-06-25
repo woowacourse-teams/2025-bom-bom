@@ -10,6 +10,8 @@ import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @AcceptanceTest({
         "acceptance/common/member.json",
@@ -18,6 +20,9 @@ import org.junit.jupiter.api.Test;
 class ReadingControllerTest {
 
     private static final long MEMBER_ID_VALUE = 1L;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void 인증된_사용자는_읽기_현황을_조회할_수_있다() {
@@ -120,11 +125,35 @@ class ReadingControllerTest {
     @Test
     void 인증된_사용자는_내_연속_읽기_랭킹을_조회할_수_있다() {
         Map<String, Object> response = authenticatedGet("/api/v1/members/me/reading/streak/rank/me");
+        Map<String, Object> streakShield = nested(response, "streakShield");
 
         assertSoftly(softly -> {
             softly.assertThat(response.get("nickname")).isEqualTo("인수테스트회원");
             softly.assertThat(response.get("rank")).isEqualTo(1);
             softly.assertThat(response.get("dayCount")).isEqualTo(10);
+            softly.assertThat(streakShield.get("status")).isEqualTo("AVAILABLE");
+            softly.assertThat(streakShield.get("remainingCount")).isEqualTo(1);
+            softly.assertThat(streakShield.get("monthlyLimit")).isEqualTo(1);
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 인증된_사용자는_사용_완료된_연속_읽기_보호막_현황을_조회할_수_있다() {
+        jdbcTemplate.update("""
+                UPDATE continue_reading_shield
+                SET monthly_remaining_count = 0,
+                    reward_remaining_count = 0
+                WHERE member_id = ?
+                """, MEMBER_ID_VALUE);
+
+        Map<String, Object> response = authenticatedGet("/api/v1/members/me/reading/streak/rank/me");
+        Map<String, Object> streakShield = nested(response, "streakShield");
+
+        assertSoftly(softly -> {
+            softly.assertThat(streakShield.get("status")).isEqualTo("USED");
+            softly.assertThat(streakShield.get("remainingCount")).isEqualTo(0);
+            softly.assertThat(streakShield.get("monthlyLimit")).isEqualTo(1);
         });
     }
 

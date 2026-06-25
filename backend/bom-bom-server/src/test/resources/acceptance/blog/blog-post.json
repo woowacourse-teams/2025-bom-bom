@@ -1,0 +1,121 @@
+{
+  "role": [
+    { "id": 1, "authority": "USER" },
+    { "id": 2, "authority": "ADMIN" }
+  ],
+  "member": [
+    {
+      "id": 101,
+      "provider": "provider",
+      "provider_id": "blog-user",
+      "email": "blog-user@bombom.news",
+      "nickname": "블로그회원",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    },
+    {
+      "id": 102,
+      "provider": "provider",
+      "provider_id": "blog-admin",
+      "email": "blog-admin@bombom.news",
+      "nickname": "블로그관리자",
+      "gender": "FEMALE",
+      "role_id": 2,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ],
+  "blog_category": [
+    {
+      "id": 1,
+      "name": "테크",
+      "created_at": "2026-03-20 00:00:00",
+      "updated_at": "2026-03-20 00:00:00"
+    }
+  ],
+  "blog_post": [
+    {
+      "id": 1,
+      "member_id": 101,
+      "title": "공개 글",
+      "content": "공개 글 본문",
+      "description": "공개 글 설명",
+      "thumbnail_image_id": 1,
+      "status": "PUBLISHED",
+      "visibility": "PUBLIC",
+      "category_id": 1,
+      "published_at": "2026-03-25 09:00:00",
+      "created_at": "2026-03-25 09:00:00",
+      "updated_at": "2026-03-25 09:00:00"
+    },
+    {
+      "id": 2,
+      "member_id": 102,
+      "title": "비공개 글",
+      "content": "비공개 글 본문",
+      "description": "비공개 글 설명",
+      "status": "PUBLISHED",
+      "visibility": "PRIVATE",
+      "category_id": 1,
+      "published_at": "2026-03-24 09:00:00",
+      "created_at": "2026-03-24 09:00:00",
+      "updated_at": "2026-03-24 09:00:00"
+    },
+    {
+      "id": 3,
+      "member_id": 101,
+      "title": "임시 글",
+      "content": "임시 글 본문",
+      "description": "임시 글 설명",
+      "status": "DRAFT",
+      "visibility": "PUBLIC",
+      "category_id": 1,
+      "published_at": "2026-03-23 09:00:00",
+      "created_at": "2026-03-23 09:00:00",
+      "updated_at": "2026-03-23 09:00:00"
+    }
+  ],
+  "blog_image_asset": [
+    {
+      "id": 1,
+      "blog_post_id": 1,
+      "object_key": "blog/public-thumb",
+      "image_url": "https://cdn.bombom.me/public.png",
+      "status": "ATTACHED",
+      "created_at": "2026-03-25 09:00:00",
+      "updated_at": "2026-03-25 09:00:00"
+    }
+  ],
+  "blog_hashtag": [
+    {
+      "id": 1,
+      "name": "스프링",
+      "created_at": "2026-03-25 09:00:00",
+      "updated_at": "2026-03-25 09:00:00"
+    },
+    {
+      "id": 2,
+      "name": "백엔드",
+      "created_at": "2026-03-25 09:00:00",
+      "updated_at": "2026-03-25 09:00:00"
+    }
+  ],
+  "blog_post_tag": [
+    {
+      "id": 1,
+      "blog_post_id": 1,
+      "blog_hashtag_id": 1,
+      "created_at": "2026-03-25 09:00:00",
+      "updated_at": "2026-03-25 09:00:00"
+    },
+    {
+      "id": 2,
+      "blog_post_id": 1,
+      "blog_hashtag_id": 2,
+      "created_at": "2026-03-25 09:00:00",
+      "updated_at": "2026-03-25 09:00:00"
+    }
+  ]
+}

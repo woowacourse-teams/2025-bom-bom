@@ -53,6 +53,28 @@ def openApiDomainGroups = [
     ],
 ]
 
+def openApiGenerationFingerprintFile = generatedOpenApiDir.file(".generation-fingerprint")
+def openApiGenerationInputFiles = files(
+    openApiSpecFile,
+    fileTree("src/main/resources/openapi-templates"),
+    layout.projectDirectory.file("gradle/openapi-generator.gradle"),
+    layout.projectDirectory.file("gradle/openapi-generated-format.gradle"),
+)
+def calculateOpenApiGenerationFingerprint = {
+    def digest = java.security.MessageDigest.getInstance("SHA-256")
+    openApiGenerationInputFiles.files
+        .findAll(File::exists)
+        .sort { left, right -> left.absolutePath <=> right.absolutePath }
+        .each { input ->
+            digest.update(input.absolutePath.getBytes("UTF-8"))
+            digest.update(input.bytes)
+        }
+    digest.update(openApiDomainGroups.toString().getBytes("UTF-8"))
+    digest.update(openApiConfigOptions.toString().getBytes("UTF-8"))
+    digest.update(openApiGlobalProperties.toString().getBytes("UTF-8"))
+    return digest.digest().encodeHex().toString()
+}
+
 // submodule이 초기화되지 않은 상태에서 빌드가 진행되지 않도록 막는다.
 tasks.register("verifyOpenApiSpec") {
     doLast {
@@ -69,10 +91,28 @@ tasks.register("cleanGeneratedOpenApi", Delete) {
     delete(generatedOpenApiDir)
 }
 
+tasks.register("prepareOpenApiGeneration") {
+    dependsOn("verifyOpenApiSpec")
+
+    doLast {
+        String expectedFingerprint = calculateOpenApiGenerationFingerprint()
+        File fingerprintFile = openApiGenerationFingerprintFile.asFile
+        boolean generatedSourcesExist = !fileTree(generatedOpenApiDir) {
+            include("**/*.java")
+        }.isEmpty()
+        boolean fingerprintMatches = fingerprintFile.exists() &&
+            fingerprintFile.getText("UTF-8") == expectedFingerprint
+
+        if (!generatedSourcesExist || !fingerprintMatches) {
+            delete(generatedOpenApiDir)
+        }
+    }
+}
+
 def openApiDomainGenerateTasks = openApiDomainGroups.collect { domain ->
     tasks.register("openApiGenerate${domain.name}", openApiGeneratorTaskClass) {
-        dependsOn("verifyOpenApiSpec")
-        mustRunAfter("cleanGeneratedOpenApi")
+        dependsOn("prepareOpenApiGeneration")
+        onlyIf { !openApiGenerationFingerprintFile.asFile.exists() }
         generatorName.set("spring")
         inputSpec.set(openApiSpecFile.asFile.absolutePath)
         outputDir.set(generatedOpenApiDir.asFile.absolutePath)
@@ -97,9 +137,31 @@ def openApiDomainGenerateTasks = openApiDomainGroups.collect { domain ->
 // OpenAPI 스펙으로부터 Spring 인터페이스와 모델을 도메인별 패키지에 생성한다.
 tasks.named("openApiGenerate") {
     dependsOn("verifyOpenApiSpec")
-    dependsOn("cleanGeneratedOpenApi")
     dependsOn(openApiDomainGenerateTasks)
     onlyIf { false }
+}
+
+tasks.register("regenerateOpenApi") {
+    group = "openapi tools"
+    description = "생성 결과를 삭제하고 OpenAPI 코드를 다시 생성합니다."
+    dependsOn("cleanGeneratedOpenApi", "writeOpenApiGenerationFingerprint")
+}
+openApiDomainGenerateTasks.each { generatorTask ->
+    generatorTask.configure {
+        mustRunAfter("cleanGeneratedOpenApi")
+    }
+}
+
+tasks.register("writeOpenApiGenerationFingerprint") {
+    dependsOn("spotlessJavaApply", "spotlessOpenApiModelsApply")
+    inputs.files(openApiGenerationInputFiles)
+    outputs.file(openApiGenerationFingerprintFile)
+
+    doLast {
+        File fingerprintFile = openApiGenerationFingerprintFile.asFile
+        fingerprintFile.parentFile.mkdirs()
+        fingerprintFile.setText(calculateOpenApiGenerationFingerprint(), "UTF-8")
+    }
 }
 
 sourceSets {

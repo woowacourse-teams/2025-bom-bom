@@ -14,7 +14,6 @@ import me.bombom.api.v1.subscribe.dto.response.PlaywrightResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,7 +46,6 @@ class UnsubscribeAgentTest {
     }
 
     @Test
-    @DisplayName("구독 취소 성공 시 예외가 발생하지 않는다")
     void 구독_취소_성공() {
         // given
         given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
@@ -59,7 +57,6 @@ class UnsubscribeAgentTest {
     }
 
     @Test
-    @DisplayName("5xx 에러 발생 시 RetryableException을 발생시킨다")
     void 구독_취소_재시도_가능한_에러() {
         // given
         given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))
@@ -71,7 +68,6 @@ class UnsubscribeAgentTest {
     }
 
     @Test
-    @DisplayName("4xx 에러 발생 시 AutoUnsubscribeFailedException을 발생시킨다")
     void 구독_취소_실패_에러() {
         // given
         given(playwrightClient.executeUnsubscribe(eq(MOCK_URL), any(UnsubscribePatterns.class)))

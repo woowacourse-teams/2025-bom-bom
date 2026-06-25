@@ -1,0 +1,13 @@
+{
+  "challenge_review": [
+    {
+      "id": 2,
+      "challenge_id": 1,
+      "member_id": 2,
+      "comment": "타인 공개",
+      "is_private": false,
+      "created_at": "2026-01-26 10:01:00",
+      "updated_at": "2026-01-26 10:01:00"
+    }
+  ]
+}

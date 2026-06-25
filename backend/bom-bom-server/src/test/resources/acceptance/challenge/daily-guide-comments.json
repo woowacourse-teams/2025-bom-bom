@@ -1,0 +1,20 @@
+{
+  "challenge_daily_guide_comment": [
+    {
+      "id": 1,
+      "guide_id": 1,
+      "participant_id": 1,
+      "content": "뉴스레터 읽기 팁을 공유합니다",
+      "created_at": "2026-01-26 10:00:00",
+      "updated_at": "2026-01-26 10:00:00"
+    },
+    {
+      "id": 2,
+      "guide_id": 1,
+      "participant_id": 2,
+      "content": "두 번째 댓글",
+      "created_at": "2026-01-26 10:01:00",
+      "updated_at": "2026-01-26 10:01:00"
+    }
+  ]
+}

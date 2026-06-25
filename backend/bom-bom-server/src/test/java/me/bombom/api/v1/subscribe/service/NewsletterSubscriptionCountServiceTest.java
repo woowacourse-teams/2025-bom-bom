@@ -2,20 +2,17 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
-
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
 import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class NewsletterSubscriptionCountServiceTest {
@@ -33,14 +30,12 @@ class NewsletterSubscriptionCountServiceTest {
     @Autowired
     private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
 
-    @MockitoBean
-    private Clock clock;
+    @Autowired
+    private MutableClock clock;
 
     @BeforeEach
     void setup() {
-        newsletterSubscriptionCountRepository.deleteAllInBatch();
-        given(clock.instant()).willReturn(FIXED_INSTANT);
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        clock.setInstant(FIXED_INSTANT, SEOUL_ZONE);
     }
 
     @Test
@@ -107,6 +102,19 @@ class NewsletterSubscriptionCountServiceTest {
         newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(1L, AGE_20S_BIRTH_DATE);
 
         newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCount(1L, null);
+
+        NewsletterSubscriptionCount result = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotal()).isEqualTo(1);
+            softly.assertThat(result.getAge20s()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 회원이_없으면_회원ID로_구독자_수를_감소하지_않는다() {
+        newsletterSubscriptionCountService.updateNewsletterSubscriptionCount(1L, AGE_20S_BIRTH_DATE);
+
+        newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(1L, -1L);
 
         NewsletterSubscriptionCount result = newsletterSubscriptionCountRepository.findAll().getFirst();
         assertSoftly(softly -> {

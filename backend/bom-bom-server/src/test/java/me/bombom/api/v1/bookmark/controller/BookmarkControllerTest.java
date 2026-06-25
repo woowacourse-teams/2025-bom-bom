@@ -1,183 +1,168 @@
 package me.bombom.api.v1.bookmark.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.http.ContentType;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.article.domain.Article;
-import me.bombom.api.v1.article.repository.ArticleRepository;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
-import me.bombom.api.v1.bookmark.domain.Bookmark;
-import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.Category;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.repository.CategoryRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@IntegrationTest
-@AutoConfigureMockMvc
+@AcceptanceTest("acceptance/article/get-articles.json")
 class BookmarkControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private BookmarkRepository bookmarkRepository;
+    @Test
+    void 북마크_목록을_조회한다() {
+        Map<String, Object> result = getBookmarks(Map.of());
 
-    @Autowired
-    private MemberRepository memberRepository;
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("totalElements")).isEqualTo(1);
+            softly.assertThat(content(result).getFirst().get("title")).isEqualTo("뉴스");
+        });
+    }
 
-    @Autowired
-    private ArticleRepository articleRepository;
+    @Test
+    void 북마크_상태를_조회한다() {
+        Map<String, Object> result = getBookmarkStatus(1);
 
-    @Autowired
-    private NewsletterRepository newsletterRepository;
+        assertThat(result.get("bookmarkStatus")).isEqualTo(true);
+    }
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    @Test
+    @ResetsAcceptanceData
+    void 북마크를_추가한다() {
+        postBookmark(2).then().statusCode(204);
 
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
+        assertThat(countBookmarks(1, 2)).isEqualTo(1);
+    }
 
-    @MockitoBean
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    @Test
+    @ResetsAcceptanceData
+    void 북마크를_삭제한다() {
+        deleteBookmark(1).then().statusCode(204);
 
-    private Member member;
-    private CustomOAuth2User customOAuth2User;
-    private OAuth2AuthenticationToken authToken;
+        assertThat(countBookmarks(1, 1)).isZero();
+    }
 
-    @BeforeEach
-    void setUp() {
-        bookmarkRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
+    @Test
+    void 뉴스레터별_북마크_통계를_조회한다() {
+        Map<String, Object> result = getBookmarkNewsletterStatistics();
 
-        newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails());
+        assertThat(result.get("totalCount")).isEqualTo(1);
+    }
 
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+    @Test
+    @ResetsAcceptanceData
+    void 뉴스레터로_북마크_목록을_필터링한다() {
+        postBookmark(2).then().statusCode(204);
 
-        List<Category> categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
+        Map<String, Object> result = getBookmarks(Map.of("newsletterId", 2));
 
-        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(newsletterDetails);
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("totalElements")).isEqualTo(1);
+            softly.assertThat(content(result).getFirst().get("articleId")).isEqualTo(2);
+        });
+    }
 
-        List<Newsletter> newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
-        newsletterRepository.saveAll(newsletters);
+    @Test
+    @ResetsAcceptanceData
+    void 같은_아티클을_중복_북마크해도_한_건만_저장한다() {
+        postBookmark(2).then().statusCode(204);
+        postBookmark(2).then().statusCode(204);
 
-        List<Article> articles = TestFixture.createArticles(member, newsletters);
-        articleRepository.saveAll(articles);
+        assertThat(countBookmarks(1, 2)).isEqualTo(1);
+    }
 
-        Bookmark bookmark = Bookmark.builder()
-                .memberId(member.getId())
-                .articleId(articles.get(0).getId())
-                .build();
-        bookmarkRepository.save(bookmark);
+    @Test
+    void 다른_사용자의_아티클은_북마크할_수_없다() {
+        postBookmark(12).then().statusCode(403);
+    }
 
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
+    @Test
+    void 다른_사용자의_아티클_북마크는_삭제할_수_없다() {
+        deleteBookmark(12).then().statusCode(403);
+    }
+
+    private static Map<String, Object> getBookmarks(Map<String, ?> query) {
+        return authenticatedRequest()
+                .queryParams(query)
+                .when()
+                .get("/api/v1/bookmarks")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getBookmarkStatus(long articleId) {
+        return authenticatedRequest()
+                .when()
+                .get("/api/v1/bookmarks/status/articles/{articleId}", articleId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getBookmarkNewsletterStatistics() {
+        return authenticatedRequest()
+                .when()
+                .get("/api/v1/bookmarks/statistics/newsletters")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Response postBookmark(long articleId) {
+        return authenticatedRequest()
+                .when()
+                .post("/api/v1/bookmarks/articles/{articleId}", articleId);
+    }
+
+    private static Response deleteBookmark(long articleId) {
+        return authenticatedRequest()
+                .when()
+                .delete("/api/v1/bookmarks/articles/{articleId}", articleId);
+    }
+
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+    }
+
+    private int countBookmarks(long memberId, long articleId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from bookmark where member_id = ? and article_id = ?",
+                Integer.class,
+                memberId,
+                articleId
         );
-        customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-        
-        authToken = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
+        return count == null ? 0 : count;
     }
 
-    @Test
-    @DisplayName("북마크 목록 조회 성공")
-    void getBookmarks_success() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/bookmarks")
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].title").value("뉴스"));
-    }
-
-    @Test
-    @DisplayName("북마크 상태 조회 성공")
-    void getBookmarkStatus_success() throws Exception {
-        // given
-        Article article = articleRepository.findAll().get(0);
-
-        // when & then
-        mockMvc.perform(get("/api/v1/bookmarks/status/articles/" + article.getId())
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.bookmarkStatus").value(true));
-    }
-
-    @Test
-    @DisplayName("북마크 추가 성공")
-    void addBookmark_success() throws Exception {
-        // given
-        Article article = articleRepository.findAll().get(1);
-
-        // when & then
-        mockMvc.perform(post("/api/v1/bookmarks/articles/" + article.getId())
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("북마크 삭제 성공")
-    void deleteBookmark_success() throws Exception {
-        // given
-        Article article = articleRepository.findAll().get(0);
-
-        // when & then
-        mockMvc.perform(delete("/api/v1/bookmarks/articles/" + article.getId())
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("뉴스레터별 북마크 통계 조회 성공")
-    void getBookmarkNewsletterStatistics_success() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/bookmarks/statistics/newsletters")
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCount").value(1));
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> content(Map<String, Object> page) {
+        return (List<Map<String, Object>>) page.get("content");
     }
 }

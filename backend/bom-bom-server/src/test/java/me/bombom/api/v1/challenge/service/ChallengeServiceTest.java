@@ -3,16 +3,13 @@ package me.bombom.api.v1.challenge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeFilter;
+import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeTeam;
@@ -21,6 +18,7 @@ import me.bombom.api.v1.challenge.domain.RegistrationPhase;
 import me.bombom.api.v1.challenge.dto.response.ChallengeDetailResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeEligibilityResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeInfoResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeLandingResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.ChallengeTeamListResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
@@ -34,7 +32,6 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
@@ -42,11 +39,10 @@ import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class ChallengeServiceTest {
@@ -58,950 +54,177 @@ class ChallengeServiceTest {
     private ChallengeRepository challengeRepository;
 
     @Autowired
-    private ChallengeParticipantRepository challengeParticipantRepository;
-
-    @Autowired
     private NewsletterGroupRepository newsletterGroupRepository;
 
     @Autowired
-    private NewsletterGroupItemRepository newsletterGroupItemRepository;
+    private ChallengeParticipantRepository challengeParticipantRepository;
 
     @Autowired
-    private NewsletterRepository newsletterRepository;
-
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private ChallengeTeamRepository challengeTeamRepository;
 
     @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private NewsletterDetailRepository newsletterDetailRepository;
+
+    @Autowired
+    private NewsletterRepository newsletterRepository;
+
+    @Autowired
+    private NewsletterGroupItemRepository newsletterGroupItemRepository;
+
+    @Autowired
     private SubscribeRepository subscribeRepository;
 
     @Autowired
-    private ChallengeTeamRepository challengeTeamRepository;
-
-    @MockitoBean
-    private Clock clock;
-
-    private Member member;
-    private List<Category> categories;
-    private List<Newsletter> newsletters;
-    private LocalDate today;
-
-    @BeforeEach
-    void setUp() {
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        newsletterGroupItemRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        subscribeRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-
-        categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
-
-        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(newsletterDetails);
-
-        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
-        newsletterRepository.saveAll(newsletters);
-
-        ZoneId seoul = ZoneId.of("Asia/Seoul");
-        Instant fixedInstant = LocalDate.of(2025, 3, 15).atStartOfDay(seoul).toInstant();
-        given(clock.instant()).willReturn(fixedInstant);
-        given(clock.getZone()).willReturn(seoul);
-        today = LocalDate.now(clock);
-    }
+    private MutableClock clock;
 
     @Test
-    void 비로그인_상태로_챌린지_목록_조회() {
-        // given
-        NewsletterGroup group1 = TestFixture.createNewsletterGroup("그룹1");
-        NewsletterGroup group2 = TestFixture.createNewsletterGroup("그룹2");
-        newsletterGroupRepository.saveAll(List.of(group1, group2));
-
-        Challenge challenge1 = TestFixture.createChallenge("첫 번째 챌린지", 1, today.minusDays(10), today.plusDays(10), group1.getId());
-        Challenge challenge2 = TestFixture.createChallenge("두 번째 챌린지", 2, today.plusDays(5), today.plusDays(15), group2.getId());
-        challengeRepository.saveAll(List.of(challenge1, challenge2));
-
-        NewsletterGroupItem item1 = TestFixture.createNewsletterGroupItem(challenge1.getNewsletterGroupId(), newsletters.get(0).getId());
-        NewsletterGroupItem item2 = TestFixture.createNewsletterGroupItem(challenge2.getNewsletterGroupId(), newsletters.get(1).getId());
-        newsletterGroupItemRepository.saveAll(List.of(item1, item2));
-
+    void 챌린지_목록이_없으면_빈_리스트를_반환한다() {
         // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
-
-        // then - 시작전 챌린지만 반환되어야 함 (challenge2만)
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).id()).isEqualTo(challenge2.getId());
-            softly.assertThat(result.get(0).registrationPhase()).isEqualTo(RegistrationPhase.EARLY);
-            softly.assertThat(result.get(0).participationInfo().isJoined()).isFalse();
-            softly.assertThat(result.get(0).participationInfo().progress()).isEqualTo(0);
-        });
-    }
-
-    @Test
-    void 로그인_상태로_챌린지_목록_조회() {
-        // given
-        NewsletterGroup group1 = TestFixture.createNewsletterGroup("그룹1");
-        NewsletterGroup group2 = TestFixture.createNewsletterGroup("그룹2");
-        newsletterGroupRepository.saveAll(List.of(group1, group2));
-
-        Challenge challenge1 = TestFixture.createChallenge("첫 번째 챌린지", 1, today.minusDays(10), today.plusDays(10), group1.getId());
-        Challenge challenge2 = TestFixture.createChallenge("두 번째 챌린지", 2, today.plusDays(5), today.plusDays(15), group2.getId());
-        challengeRepository.saveAll(List.of(challenge1, challenge2));
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
-                challenge1.getId(),
-                member.getId(),
-                5,
-                true
-        );
-        challengeParticipantRepository.save(participant);
-
-        NewsletterGroupItem item1 = TestFixture.createNewsletterGroupItem(challenge1.getNewsletterGroupId(), newsletters.get(0).getId());
-        NewsletterGroupItem item2 = TestFixture.createNewsletterGroupItem(challenge2.getNewsletterGroupId(), newsletters.get(1).getId());
-        newsletterGroupItemRepository.saveAll(List.of(item1, item2));
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(2);
-            ChallengeResponse challenge1Response = result.stream()
-                    .filter(r -> r.id().equals(challenge1.getId()))
-                    .findFirst()
-                    .orElseThrow();
-            ChallengeResponse challenge2Response = result.stream()
-                    .filter(r -> r.id().equals(challenge2.getId()))
-                    .findFirst()
-                    .orElseThrow();
-
-            softly.assertThat(challenge1Response.participationInfo().isJoined()).isTrue();
-            softly.assertThat(challenge1Response.participationInfo().progress()).isGreaterThan(0);
-            softly.assertThat(challenge1Response.registrationPhase()).isEqualTo(RegistrationPhase.CLOSED);
-            softly.assertThat(challenge2Response.participationInfo().isJoined()).isFalse();
-            softly.assertThat(challenge2Response.participationInfo().progress()).isEqualTo(0);
-            softly.assertThat(challenge2Response.registrationPhase()).isEqualTo(RegistrationPhase.EARLY);
-        });
-    }
-
-    @Test
-    void 추가_신청_기간_내_챌린지는_미참여_시에도_목록에_노출된다() {
-        // given: 시작일이 오늘, totalDays 21일 → 추가 신청 기간 내. 참여하지 않은 회원
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge(
-                "추가 신청 가능 챌린지",
-                today,
-                today.plusDays(30),
-                21,
-                group.getId()
-        );
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        // when: 참여하지 않은 member로 목록 조회
-        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
-
-        // then: 추가 신청 기간 내이므로 목록에 포함되어야 함
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).id()).isEqualTo(challenge.getId());
-            softly.assertThat(result.get(0).registrationPhase()).isEqualTo(RegistrationPhase.LATE);
-            softly.assertThat(result.get(0).participationInfo().isJoined()).isFalse();
-        });
-    }
-
-    @Test
-    void 챌린지가_없을_때_빈_리스트_반환() {
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
+        List<?> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
 
         // then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void view_summary_일_때_참여_중인_ONGOING_EARLY_LATE_챌린지만_조회된다() {
-        // given: EARLY(시작 전), LATE(진행 중 추가신청), ONGOING+참여, ONGOING+미참여(CLOSED)
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
+    void 비회원_챌린지_목록은_참여정보를_미참여로_응답한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Challenge challenge = saveChallengeWithNewsletterOnly(
+                "비회원목록챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10
+        );
 
-        Challenge early = TestFixture.createChallenge("EARLY", 1, today.plusDays(5), today.plusDays(25), group.getId());
-        Challenge late = TestFixture.createChallenge(
-                "LATE",
+        // when
+        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
+
+        // then
+        ChallengeResponse response = result.getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(response.id()).isEqualTo(challenge.getId());
+            softly.assertThat(response.participantCount()).isZero();
+            softly.assertThat(response.newsletters()).hasSize(1);
+            softly.assertThat(response.status()).isEqualTo(ChallengeStatus.BEFORE_START);
+            softly.assertThat(response.participationInfo().isJoined()).isFalse();
+        });
+    }
+
+    @Test
+    void 참여중인_진행_챌린지_목록은_진행률과_참가자수를_응답한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("진행목록회원", "challenge-list-ongoing");
+        Challenge challenge = saveChallengeWithNewsletter(
+                "진행목록챌린지",
+                today,
+                today.plusDays(9),
+                10,
+                member
+        );
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                5
+        ));
+
+        // when
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
+
+        // then
+        ChallengeResponse response = result.getFirst();
+        ChallengeDetailResponse detail = response.participationInfo();
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(response.participantCount()).isEqualTo(1L);
+            softly.assertThat(response.status()).isEqualTo(ChallengeStatus.ONGOING);
+            softly.assertThat(response.registrationPhase()).isEqualTo(RegistrationPhase.LATE);
+            softly.assertThat(detail.isJoined()).isTrue();
+            softly.assertThat(detail.progress()).isEqualTo(50);
+            softly.assertThat(detail.grade()).isNull();
+            softly.assertThat(detail.isSurvived()).isTrue();
+        });
+    }
+
+    @Test
+    void 참여중인_종료_챌린지_목록은_최종_등급을_응답한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 20);
+        clock.setDate(today);
+        Member member = saveMember("종료목록회원", "challenge-list-ended");
+        Challenge challenge = saveChallengeWithNewsletter(
+                "종료목록챌린지",
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 1, 16),
+                10,
+                member
+        );
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                10
+        ));
+
+        // when
+        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
+
+        // then
+        ChallengeDetailResponse detail = result.getFirst().participationInfo();
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(result.getFirst().status()).isEqualTo(ChallengeStatus.COMPLETED);
+            softly.assertThat(detail.isJoined()).isTrue();
+            softly.assertThat(detail.progress()).isEqualTo(100);
+            softly.assertThat(detail.grade()).isEqualTo(ChallengeGrade.GOLD);
+            softly.assertThat(detail.isSurvived()).isTrue();
+        });
+    }
+
+    @Test
+    void 요약_챌린지_목록은_참여중_지각모집_사전모집_순으로_정렬한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("요약목록회원", "challenge-summary");
+        Challenge joined = saveChallengeWithNewsletter(
+                "참여중챌린지",
                 today.minusDays(1),
-                today.plusDays(20),
-                21,
-                group.getId()
+                today.plusDays(8),
+                10,
+                member
         );
-        Challenge ongoingJoined = TestFixture.createChallenge(
-                "ONGOING_JOINED",
-                today.minusDays(10),
-                today.plusDays(10),
-                20,
-                group.getId()
-        );
-        Challenge ongoingNotJoined = TestFixture.createChallenge(
-                "ONGOING_NOT_JOINED",
-                today.minusDays(10),
-                today.plusDays(10),
-                20,
-                group.getId()
-        );
-        challengeRepository.saveAll(List.of(early, late, ongoingJoined, ongoingNotJoined));
-
-        challengeParticipantRepository.save(
-                TestFixture.createChallengeParticipant(ongoingJoined.getId(), member.getId(), 5, true)
-        );
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(group.getId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                joined.getId(),
+                member.getId(),
+                1
+        ));
+        Challenge late = saveChallengeWithNewsletterOnly("지각모집챌린지", today, today.plusDays(9), 10);
+        Challenge early = saveChallengeWithNewsletterOnly("사전모집챌린지", today.plusDays(1), today.plusDays(10), 10);
 
         // when
         List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.SUMMARY);
 
-        // then: EARLY, LATE, ONGOING+참여 3건만 포함. ONGOING+미참여(CLOSED) 제외
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(3);
-            softly.assertThat(result)
-                    .extracting(ChallengeResponse::id)
-                    .containsExactly(
-                            ongoingJoined.getId(), // ONGOING + 참여
-                            late.getId(),          // LATE
-                            early.getId()          // EARLY
-                    );
-            softly.assertThat(result)
-                    .extracting(ChallengeResponse::id)
-                    .doesNotContain(ongoingNotJoined.getId());
-        });
-    }
-
-    @Test
-    void 참가자_수_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        Member member1 = TestFixture.createUniqueMember("member1", "provider1");
-        Member member2 = TestFixture.createUniqueMember("member2", "provider2");
-        memberRepository.saveAll(List.of(member1, member2));
-
-        ChallengeParticipant participant1 = TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 5, true);
-        ChallengeParticipant participant2 = TestFixture.createChallengeParticipant(challenge.getId(), member2.getId(), 3, true);
-        challengeParticipantRepository.saveAll(List.of(participant1, participant2));
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
-
-        // then - 시작전 챌린지이므로 반환되어야 함
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).participantCount()).isEqualTo(2);
-        });
-    }
-
-    @Test
-    void 챌린지별_뉴스레터_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item1 = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        NewsletterGroupItem item2 = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(1).getId());
-        newsletterGroupItemRepository.saveAll(List.of(item1, item2));
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
-
-        // then - 시작전 챌린지이므로 반환되어야 함
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).newsletters()).hasSize(2);
-            softly.assertThat(result.get(0).newsletters())
-                    .extracting("id")
-                    .containsExactlyInAnyOrder(newsletters.get(0).getId(), newsletters.get(1).getId());
-        });
-    }
-
-    @Test
-    void 진행_중인_챌린지_상태_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("진행 중 챌린지", 1, today.minusDays(5), today.plusDays(5), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
-                challenge.getId(),
-                member.getId(),
-                3,
-                true
-        );
-        challengeParticipantRepository.save(participant);
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
-
-        // then - 참여한 진행중 챌린지이므로 반환되어야 함
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).status()).isEqualTo(ChallengeStatus.ONGOING);
-        });
-    }
-
-    @Test
-    void 종료된_챌린지_상태_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
-                challenge.getId(),
-                member.getId(),
-                15,
-                true
-        );
-        challengeParticipantRepository.save(participant);
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
-
-        // then - 참여한 종료된 챌린지이므로 반환되어야 함
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).status()).isEqualTo(ChallengeStatus.COMPLETED);
-        });
-    }
-
-    @Test
-    void 시작_전_챌린지_상태_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("시작 전 챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(null, ChallengeFilter.DEFAULT);
-
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.get(0).status()).isEqualTo(ChallengeStatus.BEFORE_START);
-        });
-    }
-
-    @Test
-    void 종료된_챌린지_참여_결과_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("종료된 챌린지", 1, today.minusDays(20), today.minusDays(1), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
-                challenge.getId(),
-                member.getId(),
-                18,
-                true
-        );
-        challengeParticipantRepository.save(participant);
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
-
-        // then
-        ChallengeDetailResponse participationInfo = result.get(0).participationInfo();
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(participationInfo.isJoined()).isTrue();
-            softly.assertThat(participationInfo.progress()).isGreaterThan(0);
-            softly.assertThat(participationInfo.grade()).isNotNull();
-            softly.assertThat(participationInfo.isSurvived()).isNotNull();
-        });
-    }
-
-    @Test
-    void 참가하지_않은_챌린지_participationInfo_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        // when
-        List<ChallengeResponse> result = challengeService.getChallenges(member, ChallengeFilter.DEFAULT);
-
-        // then - 시작전 챌린지이므로 반환되어야 함
-        ChallengeDetailResponse participationInfo = result.get(0).participationInfo();
-        assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(participationInfo).isNotNull();
-            softly.assertThat(participationInfo.isJoined()).isFalse();
-            softly.assertThat(participationInfo.progress()).isEqualTo(0);
-        });
-    }
-
-    @Test
-    void 챌린지_상세_정보를_조회할_수_있다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-
-        Challenge challenge = Challenge.builder()
-                .name("챌린지1")
-                .generation(1)
-                .startDate(LocalDate.of(2026, 1, 5))
-                .endDate(LocalDate.of(2026, 2, 4))
-                .totalDays(31)
-                .newsletterGroupId(group.getId())
-                .build();
-        challengeRepository.save(challenge);
-
-        // when
-        ChallengeInfoResponse response = challengeService.getChallengeInfo(challenge.getId());
-
-        // then
-        assertSoftly(softly -> {
-            assertThat(response.name()).isEqualTo("챌린지1");
-            assertThat(response.startDate()).isEqualTo(LocalDate.of(2026, 1, 5));
-            assertThat(response.endDate()).isEqualTo(LocalDate.of(2026, 2, 4));
-            assertThat(response.generation()).isEqualTo(1);
-        });
-    }
-
-    @Test
-    void 존재하지_않는_챌린지_ID로_조회_시_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> challengeService.getChallengeInfo(0L))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    void 비로그인_상태에서_챌린지_신청_가능_여부_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), null);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isFalse();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.NOT_LOGGED_IN);
-        });
-    }
-
-    @Test
-    void 이미_시작된_챌린지의_신청_가능_여부_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isFalse();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ALREADY_STARTED);
-        });
-    }
-
-    @Test
-    void 이미_신청한_챌린지의_신청_가능_여부_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
-        challengeParticipantRepository.save(participant);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isFalse();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ALREADY_APPLIED);
-        });
-    }
-
-    @Test
-    void 구독하지_않은_뉴스레터를_가진_챌린지의_신청_가능_여부_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isFalse();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.NOT_SUBSCRIBED);
-        });
-    }
-
-    @Test
-    void 모든_조건을_만족하는_챌린지의_신청_가능_여부_조회() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isTrue();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ELIGIBLE);
-        });
-    }
-
-    @Test
-    void 추가_신청_기간_내_시작된_챌린지_신청_가능_여부_조회() {
-        // given: 시작일이 오늘, totalDays 21일 → 허용 영업일 3일. 오늘은 1영업일차 이내이므로 신청 가능
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge(
-                "챌린지",
-                today,
-                today.plusDays(30),
-                21,
-                group.getId()
-        );
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isTrue();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ELIGIBLE);
-        });
-    }
-
-    @Test
-    void 추가_신청_기간_지난_챌린지_신청_가능_여부_조회() {
-        // given: 시작일이 10일 전, totalDays 21일 → 허용 영업일 3일. 이미 지나서 신청 불가
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge(
-                "챌린지",
-                today.minusDays(10),
-                today.plusDays(20),
-                21,
-                group.getId()
-        );
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        ChallengeEligibilityResponse response = challengeService.checkEligibility(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.canApply()).isFalse();
-            softly.assertThat(response.reason()).isEqualTo(EligibilityReason.ALREADY_STARTED);
-        });
-    }
-
-    @Test
-    void 존재하지_않는_챌린지_ID로_신청_가능_여부_조회_시_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> challengeService.checkEligibility(0L, member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    void 모든_조건을_만족하는_챌린지_신청() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        challengeService.applyChallenge(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(challengeParticipantRepository.existsByChallengeIdAndMemberId(challenge.getId(), member.getId())).isTrue();
-        });
-    }
-
-    @Test
-    void 존재하지_않는_챌린지_ID로_신청_시_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> challengeService.applyChallenge(0L, member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    void 이미_시작된_챌린지_신청_시_예외가_발생한다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when & then
-        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.INVALID_INPUT_VALUE.getMessage());
-    }
-
-    @Test
-    void 이미_신청한_챌린지_신청_시_정상_반환한다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
-        challengeParticipantRepository.save(participant);
-        long countBefore = challengeParticipantRepository.count();
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        Subscribe subscribe = TestFixture.createSubscribe(newsletters.get(0), member);
-        subscribeRepository.save(subscribe);
-
-        // when
-        challengeService.applyChallenge(challenge.getId(), member);
-        long countAfter = challengeParticipantRepository.count();
-
-        // then
-        assertThat(countBefore).isEqualTo(1);
-        assertThat(countAfter).isEqualTo(1); // 중복 신청되어도 개수 변경 없음
-    }
-
-    @Test
-    void 챌린지_시작_후_참여_시_멤버_수_가장_적은_팀에_배정된다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", today.minusDays(1), today.plusDays(20), 20, group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-        subscribeRepository.save(TestFixture.createSubscribe(newsletters.get(0), member));
-
-        ChallengeTeam team1 = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
-        ChallengeTeam team2 = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
-
-        Member otherMember1 = memberRepository.save(TestFixture.createUniqueMember("other1", "other1@test.com"));
-        Member otherMember2 = memberRepository.save(TestFixture.createUniqueMember("other2", "other2@test.com"));
-        challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(challenge.getId(), otherMember1.getId(), team1.getId(), 0, 0));
-        challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(challenge.getId(), otherMember2.getId(), team1.getId(), 0, 0));
-
-        // when
-        challengeService.applyChallenge(challenge.getId(), member);
-
-        // then
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
-                challenge.getId(),
-                member.getId()
-        ).orElseThrow();
-        assertThat(participant.getChallengeTeamId()).isEqualTo(team2.getId());
-    }
-
-    @Test
-    void 챌린지_시작_전_참여_시_팀이_배정되지_않는다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", today.plusDays(5), today.plusDays(25), 20, group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-        subscribeRepository.save(TestFixture.createSubscribe(newsletters.get(0), member));
-
-        challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
-
-        // when
-        challengeService.applyChallenge(challenge.getId(), member);
-
-        // then
-        ChallengeParticipant participant = challengeParticipantRepository.findByChallengeIdAndMemberId(
-                challenge.getId(),
-                member.getId()
-        ).orElseThrow();
-        assertThat(participant.getChallengeTeamId()).isNull();
-    }
-
-    @Test
-    void 구독하지_않은_뉴스레터를_가진_챌린지_신청_시_예외가_발생한다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        // when & then
-        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.PRECONDITION_FAILED.getMessage());
-    }
-
-    @Test
-    void 신청한_챌린지_취소() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0, true);
-        challengeParticipantRepository.save(participant);
-
-        // when
-        challengeService.cancelChallenge(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(challengeParticipantRepository.existsByChallengeIdAndMemberId(challenge.getId(), member.getId())).isFalse();
-        });
-    }
-
-    @Test
-    void 존재하지_않는_챌린지_ID로_취소_시_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> challengeService.cancelChallenge(0L, member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    void 이미_시작된_챌린지_취소_시_예외가_발생한다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(5), today.plusDays(10), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 5, true);
-        challengeParticipantRepository.save(participant);
-
-        // when & then
-        assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.INVALID_INPUT_VALUE.getMessage());
-    }
-
-    @Test
-    void 신청하지_않은_챌린지_취소_시_예외가_발생한다() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        // when & then
-        assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    void 팀_목록_조회_시_내_팀_포함() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
-        ChallengeTeam team2 = TestFixture.createChallengeTeam(challenge.getId(), 60);
-        ChallengeTeam team3 = TestFixture.createChallengeTeam(challenge.getId(), 70);
-        challengeTeamRepository.saveAll(List.of(team1, team2, team3));
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipantWithTeam(
-                challenge.getId(),
-                member.getId(),
-                team2.getId(),  // team2에 속함
-                5,
-                0
-        );
-        challengeParticipantRepository.save(participant);
-
-        // when
-        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.totalTeamCount()).isEqualTo(3);
-            softly.assertThat(result.myTeamId()).isEqualTo(team2.getId());
-            softly.assertThat(result.teams()).hasSize(3);
-            softly.assertThat(result.teams().get(0).teamId()).isEqualTo(team1.getId());
-            softly.assertThat(result.teams().get(0).teamNumber()).isEqualTo(1);
-            softly.assertThat(result.teams().get(0).isMyTeam()).isFalse();
-            softly.assertThat(result.teams().get(1).teamId()).isEqualTo(team2.getId());
-            softly.assertThat(result.teams().get(1).teamNumber()).isEqualTo(2);
-            softly.assertThat(result.teams().get(1).isMyTeam()).isTrue();
-            softly.assertThat(result.teams().get(2).teamId()).isEqualTo(team3.getId());
-            softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
-            softly.assertThat(result.teams().get(2).isMyTeam()).isFalse();
-        });
-    }
-
-    @Test
-    void 팀_목록_조회_시_내_팀이_null인_경우() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
-        ChallengeTeam team2 = TestFixture.createChallengeTeam(challenge.getId(), 60);
-        challengeTeamRepository.saveAll(List.of(team1, team2));
-
-        // 참가는 했지만 팀에 배정되지 않은 경우
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
-                challenge.getId(),
-                member.getId(),
-                5
-        );
-        challengeParticipantRepository.save(participant);
-
-        // when
-        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.totalTeamCount()).isEqualTo(2);
-            softly.assertThat(result.myTeamId()).isNull();
-            softly.assertThat(result.teams()).hasSize(2);
-            softly.assertThat(result.teams().get(0).isMyTeam()).isFalse();
-            softly.assertThat(result.teams().get(1).isMyTeam()).isFalse();
-        });
-    }
-
-    @Test
-    void 팀_목록_조회_시_팀이_없는_경우() {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        // when
-        ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(result.totalTeamCount()).isEqualTo(0);
-            softly.assertThat(result.myTeamId()).isNull();
-            softly.assertThat(result.teams()).isEmpty();
-        });
-    }
-
-    @Test
-    void 존재하지_않는_챌린지_ID로_팀_목록_조회_시_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> challengeService.getTeamList(0L, member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasMessage(ErrorDetail.ENTITY_NOT_FOUND.getMessage());
+        assertThat(result)
+                .extracting(ChallengeResponse::id)
+                .containsExactly(joined.getId(), late.getId(), early.getId());
     }
 
     @Test
     void 토요일에_진행_중인_챌린지_조회_시_빈_리스트를_반환한다() {
         // given
         LocalDate saturday = LocalDate.of(2025, 3, 15);
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        challengeRepository.save(TestFixture.createChallenge("진행 중 챌린지", saturday.minusDays(5), saturday.plusDays(5), 10, group.getId()));
+        saveChallenge("진행 중 챌린지", saturday.minusDays(1), saturday.plusDays(1), 3);
 
         // when
         List<Challenge> result = challengeService.getOngoingChallenges(saturday);
@@ -1014,9 +237,7 @@ class ChallengeServiceTest {
     void 일요일에_진행_중인_챌린지_조회_시_빈_리스트를_반환한다() {
         // given
         LocalDate sunday = LocalDate.of(2025, 3, 16);
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        challengeRepository.save(TestFixture.createChallenge("진행 중 챌린지", sunday.minusDays(5), sunday.plusDays(5), 10, group.getId()));
+        saveChallenge("진행 중 챌린지", sunday.minusDays(1), sunday.plusDays(1), 3);
 
         // when
         List<Challenge> result = challengeService.getOngoingChallenges(sunday);
@@ -1029,42 +250,442 @@ class ChallengeServiceTest {
     void 평일에_진행_중인_챌린지를_조회한다() {
         // given
         LocalDate monday = LocalDate.of(2025, 3, 17);
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = challengeRepository.save(TestFixture.createChallenge("진행 중 챌린지", monday.minusDays(5), monday.plusDays(5), 10, group.getId()));
+        Challenge ongoing = saveChallenge("진행 중 챌린지", monday.minusDays(1), monday.plusDays(1), 3);
+        saveChallenge("시작 전 챌린지", monday.plusDays(1), monday.plusDays(5), 5);
+        saveChallenge("종료된 챌린지", monday.minusDays(5), monday.minusDays(1), 5);
 
         // when
         List<Challenge> result = challengeService.getOngoingChallenges(monday);
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getId()).isEqualTo(challenge.getId());
+        assertThat(result)
+                .extracting(Challenge::getId)
+                .containsExactly(ongoing.getId());
     }
 
     @Test
-    void 팀_목록_조회_시_teamNumber가_올바르게_계산된다() {
+    void 종료됐고_뱃지를_아직_발급하지_않은_장기_챌린지만_조회한다() {
         // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
+        LocalDate today = LocalDate.of(2025, 3, 17);
+        Challenge pending = saveChallenge("뱃지 발급 대상", today.minusDays(30), today.minusDays(1), 20);
+        saveChallenge("짧은 챌린지", today.minusDays(10), today.minusDays(1), 10);
+        saveChallenge("진행 중 챌린지", today.minusDays(1), today.plusDays(10), 20);
 
-        ChallengeTeam team1 = TestFixture.createChallengeTeam(challenge.getId(), 50);
-        ChallengeTeam team2 = TestFixture.createChallengeTeam(challenge.getId(), 60);
-        ChallengeTeam team3 = TestFixture.createChallengeTeam(challenge.getId(), 70);
-        ChallengeTeam team4 = TestFixture.createChallengeTeam(challenge.getId(), 80);
-        challengeTeamRepository.saveAll(List.of(team1, team2, team3, team4));
+        Challenge issued = saveChallenge("이미 발급된 챌린지", today.minusDays(30), today.minusDays(1), 20);
+        issued.markBadgeAsIssued();
+        challengeRepository.save(issued);
+
+        // when
+        List<Challenge> result = challengeService.getEndedChallengesPendingBadge(today);
+
+        // then
+        assertThat(result)
+                .extracting(Challenge::getId)
+                .containsExactly(pending.getId());
+    }
+
+    @Test
+    void 챌린지_상세_정보를_조회한다() {
+        // given
+        Challenge challenge = saveChallenge(
+                "상세챌린지",
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 1, 16),
+                10
+        );
+
+        // when
+        ChallengeInfoResponse result = challengeService.getChallengeInfo(challenge.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.name()).isEqualTo("상세챌린지");
+            softly.assertThat(result.totalDays()).isEqualTo(10);
+            softly.assertThat(result.requiredDays()).isEqualTo(8);
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지_상세_정보는_조회할_수_없다() {
+        assertThatThrownBy(() -> challengeService.getChallengeInfo(-1L))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 챌린지_랜딩_정보는_뱃지_발급_대상과_뉴스레터를_함께_응답한다() {
+        // given
+        Challenge challenge = saveChallengeWithNewsletterOnly(
+                "랜딩챌린지",
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 1, 25),
+                15
+        );
+
+        // when
+        ChallengeLandingResponse result = challengeService.getChallengeLanding(challenge.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.name()).isEqualTo("랜딩챌린지");
+            softly.assertThat(result.grantsBadge()).isTrue();
+            softly.assertThat(result.newsletters()).hasSize(1);
+        });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지_랜딩_정보는_조회할_수_없다() {
+        assertThatThrownBy(() -> challengeService.getChallengeLanding(-1L))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 로그인하지_않은_회원은_챌린지_참여_불가_사유를_반환한다() {
+        // given
+        Challenge challenge = saveChallenge(
+                "로그인필요챌린지",
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 1, 16),
+                10
+        );
+
+        // when
+        ChallengeEligibilityResponse result = challengeService.checkEligibility(challenge.getId(), null);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.canApply()).isFalse();
+            softly.assertThat(result.reason()).isEqualTo(EligibilityReason.NOT_LOGGED_IN);
+        });
+    }
+
+    @Test
+    void 구독한_회원은_챌린지_신청_가능_사유를_응답한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("신청가능회원", "challenge-eligible");
+        Challenge challenge = saveChallengeWithNewsletter(
+                "신청가능챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10,
+                member
+        );
+
+        // when
+        ChallengeEligibilityResponse result = challengeService.checkEligibility(challenge.getId(), member);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.canApply()).isTrue();
+            softly.assertThat(result.reason()).isEqualTo(EligibilityReason.ELIGIBLE);
+        });
+    }
+
+    @Test
+    void 이미_신청한_챌린지는_중복_신청해도_참가자를_추가하지_않는다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("중복신청회원", "challenge-duplicate");
+        Challenge challenge = saveChallengeWithNewsletter(
+                "중복신청챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10,
+                member
+        );
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                0
+        ));
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+
+        // then
+        assertThat(challengeParticipantRepository.findAllByChallengeId(challenge.getId())).hasSize(1);
+    }
+
+    @Test
+    void 시작_전_챌린지_신청은_팀_없이_참가자를_생성한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("사전신청회원", "challenge-early-apply");
+        Challenge challenge = saveChallengeWithNewsletter(
+                "사전신청챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10,
+                member
+        );
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), member);
+
+        // then
+        ChallengeParticipant participant = challengeParticipantRepository
+                .findByChallengeIdAndMemberId(challenge.getId(), member.getId())
+                .orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(participant.getChallengeTeamId()).isNull();
+            softly.assertThat(participant.isSurvived()).isTrue();
+        });
+    }
+
+    @Test
+    void 구독한_뉴스레터가_없으면_챌린지를_신청할_수_없다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("미구독회원", "challenge-not-subscribed");
+        Challenge challenge = saveChallenge(
+                "미구독챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.PRECONDITION_FAILED);
+    }
+
+    @Test
+    void 모집이_마감된_챌린지는_신청할_수_없다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 8);
+        clock.setDate(today);
+        Member member = saveMember("마감신청회원", "challenge-closed");
+        Challenge challenge = saveChallenge(
+                "마감챌린지",
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 1, 16),
+                10
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.applyChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_INPUT_VALUE);
+    }
+
+    @Test
+    void 진행중_챌린지_신청은_가장_인원이_적은_팀에_배정한다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member applicant = saveMember("팀배정회원", "challenge-team-applicant");
+        Member existing = saveMember("기존팀회원", "challenge-team-existing");
+        Challenge challenge = saveChallengeWithNewsletter(
+                "팀배정챌린지",
+                today,
+                today.plusDays(10),
+                10,
+                applicant
+        );
+        ChallengeTeam firstTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+        ChallengeTeam secondTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(
+                challenge.getId(),
+                existing.getId(),
+                firstTeam.getId(),
+                0,
+                0
+        ));
+
+        // when
+        challengeService.applyChallenge(challenge.getId(), applicant);
+
+        // then
+        ChallengeParticipant participant = challengeParticipantRepository
+                .findByChallengeIdAndMemberId(challenge.getId(), applicant.getId())
+                .orElseThrow();
+        assertThat(participant.getChallengeTeamId()).isEqualTo(secondTeam.getId());
+    }
+
+    @Test
+    void 시작_전_챌린지는_신청을_취소할_수_있다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("취소회원", "challenge-cancel");
+        Challenge challenge = saveChallenge(
+                "취소챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10
+        );
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipant(
+                challenge.getId(),
+                member.getId(),
+                0
+        ));
+
+        // when
+        challengeService.cancelChallenge(challenge.getId(), member);
+
+        // then
+        assertThat(challengeParticipantRepository.findByChallengeIdAndMemberId(challenge.getId(), member.getId()))
+                .isEmpty();
+    }
+
+    @Test
+    void 신청하지_않은_시작전_챌린지는_취소할_수_없다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("미신청취소회원", "challenge-cancel-missing");
+        Challenge challenge = saveChallenge(
+                "미신청취소챌린지",
+                today.plusDays(1),
+                today.plusDays(10),
+                10
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 시작된_챌린지는_신청을_취소할_수_없다() {
+        // given
+        LocalDate today = LocalDate.of(2026, 1, 5);
+        clock.setDate(today);
+        Member member = saveMember("취소불가회원", "challenge-cancel-started");
+        Challenge challenge = saveChallenge(
+                "취소불가챌린지",
+                today,
+                today.plusDays(10),
+                10
+        );
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.cancelChallenge(challenge.getId(), member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_INPUT_VALUE);
+    }
+
+    @Test
+    void 팀_목록은_내_팀과_팀_번호를_함께_응답한다() {
+        // given
+        Member member = saveMember("팀조회회원", "challenge-team-list-success");
+        Challenge challenge = saveChallenge(
+                "팀조회챌린지",
+                LocalDate.of(2026, 1, 5),
+                LocalDate.of(2026, 1, 16),
+                10
+        );
+        ChallengeTeam firstTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+        ChallengeTeam secondTeam = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
+        challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(
+                challenge.getId(),
+                member.getId(),
+                secondTeam.getId(),
+                0,
+                0
+        ));
 
         // when
         ChallengeTeamListResponse result = challengeService.getTeamList(challenge.getId(), member);
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(result.teams()).hasSize(4);
+            softly.assertThat(result.totalTeamCount()).isEqualTo(2);
+            softly.assertThat(result.myTeamId()).isEqualTo(secondTeam.getId());
+            softly.assertThat(result.teams().get(0).teamId()).isEqualTo(firstTeam.getId());
             softly.assertThat(result.teams().get(0).teamNumber()).isEqualTo(1);
+            softly.assertThat(result.teams().get(0).isMyTeam()).isFalse();
+            softly.assertThat(result.teams().get(1).teamId()).isEqualTo(secondTeam.getId());
             softly.assertThat(result.teams().get(1).teamNumber()).isEqualTo(2);
-            softly.assertThat(result.teams().get(2).teamNumber()).isEqualTo(3);
-            softly.assertThat(result.teams().get(3).teamNumber()).isEqualTo(4);
+            softly.assertThat(result.teams().get(1).isMyTeam()).isTrue();
         });
+    }
+
+    @Test
+    void 존재하지_않는_챌린지는_팀_목록을_조회할_수_없다() {
+        // given
+        Member member = saveMember("팀목록회원", "challenge-team-list");
+
+        // when & then
+        assertThatThrownBy(() -> challengeService.getTeamList(-1L, member))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    private Challenge saveChallenge(String name, LocalDate startDate, LocalDate endDate, int totalDays) {
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup(name + " 그룹"));
+        return challengeRepository.save(TestFixture.createChallenge(
+                name,
+                startDate,
+                endDate,
+                totalDays,
+                group.getId()
+        ));
+    }
+
+    private Challenge saveChallengeWithNewsletterOnly(
+            String name,
+            LocalDate startDate,
+            LocalDate endDate,
+            int totalDays
+    ) {
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup(name + " 그룹"));
+        Newsletter newsletter = saveNewsletter(name + " 뉴스레터");
+        newsletterGroupItemRepository.save(TestFixture.createNewsletterGroupItem(group.getId(), newsletter.getId()));
+        return challengeRepository.save(TestFixture.createChallenge(
+                name,
+                startDate,
+                endDate,
+                totalDays,
+                group.getId()
+        ));
+    }
+
+    private Challenge saveChallengeWithNewsletter(
+            String name,
+            LocalDate startDate,
+            LocalDate endDate,
+            int totalDays,
+            Member subscribedMember
+    ) {
+        NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup(name + " 그룹"));
+        Newsletter newsletter = saveNewsletter(name + " 뉴스레터");
+        newsletterGroupItemRepository.save(TestFixture.createNewsletterGroupItem(group.getId(), newsletter.getId()));
+        subscribeRepository.save(Subscribe.builder()
+                .memberId(subscribedMember.getId())
+                .newsletterId(newsletter.getId())
+                .build());
+        return challengeRepository.save(TestFixture.createChallenge(
+                name,
+                startDate,
+                endDate,
+                totalDays,
+                group.getId()
+        ));
+    }
+
+    private Newsletter saveNewsletter(String name) {
+        Category category = categoryRepository.save(Category.builder()
+                .name(name + "카테고리")
+                .build());
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(false));
+        return newsletterRepository.save(TestFixture.createNewsletter(
+                name,
+                name + "@bombom.news",
+                category.getId(),
+                detail.getId()
+        ));
+    }
+
+    private Member saveMember(String nickname, String providerId) {
+        return memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
     }
 }

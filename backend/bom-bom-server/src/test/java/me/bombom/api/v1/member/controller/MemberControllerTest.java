@@ -1,105 +1,97 @@
 package me.bombom.api.v1.member.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static me.bombom.support.acceptance.AcceptanceTestHeaders.MEMBER_ID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.dto.request.MemberInfoUpdateRequest;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
-@AutoConfigureMockMvc
+@AcceptanceTest({
+        "acceptance/common/member.json",
+        "acceptance/member/member.json"
+})
 class MemberControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final long MEMBER_ID_VALUE = 1L;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    private Member member;
-    private Authentication authentication;
-
-    @BeforeEach
-    void setUp() {
-        memberRepository.deleteAllInBatch();
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
-
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
-        );
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
-        authentication = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
+    @Test
+    void 형식에_맞지_않는_닉네임으로_변경_시도_시_400_예외가_발생한다() {
+        updateMember("invalid..nickname")
+                .then()
+                .statusCode(400);
     }
 
     @Test
-    void 형식에_맞지_않는_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
-        // given
-        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("invalid..nickname", null, null, null);
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when & then
-        mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+    void 너무_짧은_닉네임으로_변경_시도_시_400_예외가_발생한다() {
+        updateMember("a")
+                .then()
+                .statusCode(400);
     }
 
     @Test
-    void 너무_짧은_닉네임으로_변경_시도_시_400_예외가_발생한다() throws Exception {
-        // given
-        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("a", null, null, null);
-        String requestBody = objectMapper.writeValueAsString(request);
+    @ResetsAcceptanceData
+    void 형식에_맞는_닉네임이면_정상_동작한다() {
+        Map<String, Object> result = updateMember("new.nickname")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
 
-        // when & then
-        mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+        assertThat(result.get("nickname")).isEqualTo("new.nickname");
     }
 
     @Test
-    void 형식에_맞는_닉네임이면_정상_동작한다() throws Exception {
-        // given
-        MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("new.nickname", null, null, null);
-        String requestBody = objectMapper.writeValueAsString(request);
+    void 회원_정보를_조회한다() {
+        Map<String, Object> result = getMember("/api/v1/members/me");
 
-        // when & then
-        mockMvc.perform(patch("/api/v1/members/me")
-                        .with(authentication(authentication))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isOk())
-                .andDo(print());
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("nickname")).isEqualTo("인수테스트회원");
+            softly.assertThat(result.get("email")).isEqualTo("acceptance@bombom.news");
+        });
+    }
+
+    @Test
+    void 회원_프로필을_조회한다() {
+        Map<String, Object> result = getMember("/api/v1/members/me/profile");
+
+        assertThat(result.get("nickname")).isEqualTo("인수테스트회원");
+    }
+
+    @Test
+    void 이미_사용중인_닉네임으로_변경하면_예외가_발생한다() {
+        updateMember("duplicated")
+                .then()
+                .statusCode(400);
+    }
+
+    private static io.restassured.response.Response updateMember(String nickname) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(MEMBER_ID, MEMBER_ID_VALUE)
+                .body(Map.of("nickname", nickname))
+                .when()
+                .patch("/api/v1/members/me");
+    }
+
+    private static Map<String, Object> getMember(String path) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(MEMBER_ID, MEMBER_ID_VALUE)
+                .when()
+                .get(path)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
     }
 }

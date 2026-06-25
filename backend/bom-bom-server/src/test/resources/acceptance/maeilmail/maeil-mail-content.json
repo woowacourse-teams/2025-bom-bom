@@ -1,0 +1,61 @@
+{
+  "maeil_mail_user_answer": [],
+  "maeil_mail_content_answer": [
+    {
+      "id": 1,
+      "content_id": 1,
+      "answer": "<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>",
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ],
+  "maeil_mail_issue_history": [
+    {
+      "id": 1,
+      "article_id": 10001,
+      "content_id": 1
+    },
+    {
+      "id": 2,
+      "article_id": 10002,
+      "content_id": 1
+    }
+  ],
+  "maeil_mail_content": [
+    {
+      "id": 1,
+      "topic_id": 1,
+      "title": "Java의 GC 동작 방식은?",
+      "content": "<p>Java의 GC 동작 방식은?</p>",
+      "contents_text": "Java의 GC 동작 방식은?",
+      "contents_summary": "GC 질문",
+      "expected_read_time": 3,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    },
+    {
+      "id": 2,
+      "topic_id": 2,
+      "title": "답변 없는 질문",
+      "content": "<p>질문</p>",
+      "contents_text": "질문",
+      "contents_summary": "질문",
+      "expected_read_time": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ],
+  "member": [
+    {
+      "id": 1,
+      "provider": "provider",
+      "provider_id": "maeil-mail-member",
+      "email": "maeilmail@bombom.news",
+      "nickname": "매일메일회원",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ]
+}

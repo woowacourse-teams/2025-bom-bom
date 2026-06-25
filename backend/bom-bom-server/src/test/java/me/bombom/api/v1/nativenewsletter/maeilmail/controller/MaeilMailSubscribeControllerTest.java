@@ -1,154 +1,150 @@
 package me.bombom.api.v1.nativenewsletter.maeilmail.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletResponse;
+import io.restassured.http.ContentType;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.common.resolver.LoginMemberArgumentResolver;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.enums.Gender;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
-import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
-import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailSubscribeService;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@WebMvcTest(controllers = MaeilMailSubscribeController.class)
-@Import({MaeilMailSubscribeController.class, MaeilMailSubscribeControllerTest.TestConfig.class})
+@AcceptanceTest({
+        "acceptance/common/member.json",
+        "acceptance/maeilmail/maeil-mail-newsletter.json"
+})
 class MaeilMailSubscribeControllerTest {
 
-    @Configuration
-    @EnableWebSecurity
-    static class TestConfig implements WebMvcConfigurer {
-
-        @Bean
-        LoginMemberArgumentResolver loginMemberArgumentResolver() {
-            return new LoginMemberArgumentResolver("JSESSIONID", "");
-        }
-
-        @Bean
-        SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                    .exceptionHandling(ex -> ex
-                            .authenticationEntryPoint((request, response,
-                                                       authException) -> response.sendError(
-                                    HttpServletResponse.SC_UNAUTHORIZED)))
-                    .build();
-        }
-
-        @Override
-        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(loginMemberArgumentResolver());
-        }
-    }
+    private static final long MEMBER_ID = 1L;
 
     @Autowired
-    private MockMvc mockMvc;
+    private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Test
+    void 미구독이면_빈_트랙을_반환한다() {
+        Map<String, Object> result = getSubscription();
 
-    @MockitoBean
-    private MaeilMailSubscribeService maeilMailSubscribeService;
-
-    private Member member;
-    private OAuth2AuthenticationToken authToken;
-
-    @BeforeEach
-    void setUp() {
-        member = Member.builder()
-                .id(1L)
-                .provider("google")
-                .providerId("providerId")
-                .email("email@bombom.news")
-                .nickname("nickname")
-                .gender(Gender.FEMALE)
-                .roleId(1L)
-                .build();
-        authToken = createAuthToken(member);
+        assertThat(result.get("tracks")).isEqualTo(List.of());
     }
 
     @Test
-    void 구독_생성과_수정은_put으로_요청한다() throws Exception {
-        MaeilMailUpdateSubscriptionRequest request = new MaeilMailUpdateSubscriptionRequest(
-                List.of(MaeilMailTrack.BE, MaeilMailTrack.FE)
-        );
+    @ResetsAcceptanceData
+    void 트랙을_보내면_매일메일을_신규_구독한다() {
+        changeSubscription(List.of("BE", "FE"))
+                .then()
+                .statusCode(200);
 
-        mockMvc.perform(put("/api/v1/subscriptions/native/maeil-mail")
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isOk());
-
-        verify(maeilMailSubscribeService).putSubscription(member, request);
+        assertThat(countSubscriptions()).isEqualTo(1);
+        assertThat(findTrackFields()).containsExactlyInAnyOrder("BE", "FE");
     }
 
     @Test
-    void 빈_트랙으로_put을_요청하면_400을_반환한다() throws Exception {
-        mockMvc.perform(put("/api/v1/subscriptions/native/maeil-mail")
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(new MaeilMailUpdateSubscriptionRequest(List.of()))))
-                .andExpect(status().isBadRequest());
+    @ResetsAcceptanceData
+    void 구독_중인_트랙을_요청한_트랙으로_치환한다() {
+        changeSubscription(List.of("BE", "FE")).then().statusCode(200);
+        changeSubscription(List.of("BE")).then().statusCode(200);
 
-        verify(maeilMailSubscribeService, never()).putSubscription(any(), any());
+        Map<String, Object> result = getSubscription();
+
+        assertThat(result.get("tracks")).isEqualTo(List.of("BE"));
     }
 
     @Test
-    void 구독_삭제는_delete로_요청한다() throws Exception {
-        mockMvc.perform(delete("/api/v1/subscriptions/native/maeil-mail")
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk());
+    @ResetsAcceptanceData
+    void 구독을_삭제하면_구독과_트랙을_모두_삭제한다() {
+        changeSubscription(List.of("BE", "FE")).then().statusCode(200);
 
-        verify(maeilMailSubscribeService).deleteSubscription(member.getId());
+        deleteSubscription().then().statusCode(200);
+
+        assertThat(countSubscriptions()).isZero();
+        assertThat(countTracks()).isZero();
     }
 
-    private OAuth2AuthenticationToken createAuthToken(Member member) {
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
-        );
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
-        return new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
+    @Test
+    void 미구독_상태의_삭제는_성공한다() {
+        deleteSubscription().then().statusCode(200);
     }
 
-    private String toJson(Object value) throws Exception {
-        return objectMapper.writeValueAsString(value);
+    @Test
+    void 빈_트랙으로_구독을_요청하면_400을_반환한다() {
+        changeSubscription(List.of())
+                .then()
+                .statusCode(400);
+
+        assertThat(countSubscriptions()).isZero();
+    }
+
+    @Test
+    void 중복된_트랙으로_구독을_요청하면_400을_반환한다() {
+        changeSubscription(List.of("BE", "BE"))
+                .then()
+                .statusCode(400);
+
+        assertThat(countSubscriptions()).isZero();
+    }
+
+    private static Map<String, Object> getSubscription() {
+        return authenticatedRequest()
+                .when()
+                .get("/api/v1/subscriptions/native/maeil-mail")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Response changeSubscription(List<String> tracks) {
+        return authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of("tracks", tracks))
+                .when()
+                .put("/api/v1/subscriptions/native/maeil-mail");
+    }
+
+    private static Response deleteSubscription() {
+        return authenticatedRequest()
+                .when()
+                .delete("/api/v1/subscriptions/native/maeil-mail");
+    }
+
+    private static RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+    }
+
+    private int countSubscriptions() {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from subscribe where member_id = ? and newsletter_id = ?",
+                Integer.class,
+                MEMBER_ID,
+                1L
+        );
+        return count == null ? 0 : count;
+    }
+
+    private int countTracks() {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from maeil_mail_subscription_track where member_id = ?",
+                Integer.class,
+                MEMBER_ID
+        );
+        return count == null ? 0 : count;
+    }
+
+    private List<String> findTrackFields() {
+        return jdbcTemplate.queryForList(
+                "select field from maeil_mail_subscription_track where member_id = ? order by field",
+                String.class,
+                MEMBER_ID
+        );
     }
 }

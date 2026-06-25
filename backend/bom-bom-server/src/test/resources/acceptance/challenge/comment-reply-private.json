@@ -1,0 +1,64 @@
+{
+  "member": [
+    {
+      "id": 2,
+      "provider": "apple",
+      "provider_id": "challengeReplyAuthor",
+      "email": "reply-author@bombom.news",
+      "nickname": "replyAuthor",
+      "gender": "FEMALE",
+      "role_id": 1
+    },
+    {
+      "id": 3,
+      "provider": "apple",
+      "provider_id": "challengeReplyViewer",
+      "email": "reply-viewer@bombom.news",
+      "nickname": "replyViewer",
+      "gender": "FEMALE",
+      "role_id": 1
+    }
+  ],
+  "challenge_participant": [
+    {
+      "id": 2,
+      "challenge_id": 1,
+      "member_id": 2,
+      "challenge_team_id": 1,
+      "completed_days": 0,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 3,
+      "challenge_id": 1,
+      "member_id": 3,
+      "challenge_team_id": 1,
+      "completed_days": 0,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    }
+  ],
+  "challenge_comment_reply": [
+    {
+      "id": 2,
+      "participant_id": 2,
+      "comment_id": 1,
+      "reply": "비공개 답글",
+      "is_private": true,
+      "created_at": "2026-01-09 10:06:00",
+      "updated_at": "2026-01-09 10:06:00"
+    },
+    {
+      "id": 3,
+      "participant_id": 2,
+      "comment_id": 1,
+      "reply": "공개 답글",
+      "is_private": false,
+      "created_at": "2026-01-09 10:07:00",
+      "updated_at": "2026-01-09 10:07:00"
+    }
+  ]
+}

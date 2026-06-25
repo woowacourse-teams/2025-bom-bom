@@ -1,0 +1,9 @@
+{
+  "stage": [
+    { "id": 1, "level": 1, "required_score": 0 },
+    { "id": 2, "level": 2, "required_score": 50 }
+  ],
+  "pet": [
+    { "id": 1, "member_id": 1, "stage_id": 1, "current_score": 10, "is_attended": false }
+  ]
+}

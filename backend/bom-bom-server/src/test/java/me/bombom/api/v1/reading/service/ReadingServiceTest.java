@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.badge.domain.Badge;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
@@ -47,8 +46,7 @@ import me.bombom.api.v1.reading.repository.ReadingSnapshotMetaRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,48 +108,10 @@ class ReadingServiceTest {
     private WeeklyReading weeklyReading;
     private MonthlyReadingSnapshot monthlyReadingSnapshot;
 
-    @BeforeEach
-    void setUp() {
-        // 기존 데이터 삭제
-        badgeRepository.deleteAllInBatch();
-        continueReadingShieldHistoryRepository.deleteAllInBatch();
-        continueReadingShieldRepository.deleteAllInBatch();
-        monthlyReadingRankHistoryRepository.deleteAllInBatch();
-        continueReadingRankHistoryRepository.deleteAllInBatch();
-        yearlyReadingRepository.deleteAllInBatch();
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        weeklyReadingRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        continueReadingRepository.deleteAllInBatch();
-        continueReadingRankingSnapshotRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
-        assertThat(continueReadingRankingSnapshotRepository.count()).isZero();
-
-        String nickname = ("test_nickname_" + UUID.randomUUID()).substring(0, 20);
-        String providerId = ("test_providerId_" + UUID.randomUUID()).substring(0, 20);
-
-        member = memberRepository.save(TestFixture.createUniqueMember(nickname, providerId));
-        todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
-        continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
-        continueReadingRankingSnapshotRepository.save(
-                ContinueReadingSnapshot.create(member.getId(), continueReading.getDayCount(), 1L)
-        );
-        weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
-        monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
-        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
-
-        memberRepository.flush();
-        todayReadingRepository.flush();
-        continueReadingRepository.flush();
-        continueReadingRankingSnapshotRepository.flush();
-        weeklyReadingRepository.flush();
-        monthlyReadingSnapshotRepository.flush();
-        monthlyReadingRealtimeRepository.flush();
-    }
-
     @Test
     void 오늘_도착한_아티클을_읽으면_오늘_및_주간_읽기_횟수가_증가한다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         int initialTodayCount = todayReading.getCurrentCount();
         int initialReadCount = todayReading.getReadCount();
         int initialWeeklyCount = weeklyReading.getCurrentCount();
@@ -170,6 +130,8 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착한_아티클을_최초로_읽을_때_연속_읽기_횟수가_증가한다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         int initialContinueCount = continueReading.getDayCount();
         int initialMaxContinueCount = continueReading.getMaxDayCount();
 
@@ -185,6 +147,8 @@ class ReadingServiceTest {
 
     @Test
     void 이미_연속_읽기_횟수가_증가하면_그날은_더이상_증가하지_않는다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         int initialContinueCount = continueReading.getDayCount();
         int initialMaxContinueCount = continueReading.getMaxDayCount();
 
@@ -201,6 +165,8 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착하지_않은_아티클을_읽으면_읽은_횟수와_연속_읽기만_증가한다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         int initialTodayCount = todayReading.getCurrentCount();
         int initialReadCount = todayReading.getReadCount();
         int initialContinueCount = continueReading.getDayCount();
@@ -224,6 +190,8 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착하지_않은_아티클을_여러_개_읽어도_연속_읽기는_하루_한_번만_증가한다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         int initialContinueCount = continueReading.getDayCount();
         int initialMaxContinueCount = continueReading.getMaxDayCount();
 
@@ -243,6 +211,8 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_읽기_횟수를_초기화하면_오늘_도착_읽기와_전체_읽기_횟수가_초기화된다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         readingService.updateReadingCount(member.getId(), true);
 
         readingService.resetTodayReadingCount();
@@ -257,6 +227,8 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_초기화_대상은_오늘_읽은_횟수로_판단한다() {
+        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+
         Member readMember = memberRepository.save(TestFixture.createUniqueMember("nickname_read", "pid_read"));
         todayReadingRepository.save(TodayReading.builder()
                 .memberId(readMember.getId())
@@ -278,6 +250,8 @@ class ReadingServiceTest {
 
     @Test
     void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
+        월간_랭킹_기본_데이터를_저장한다();
+
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_r3", "pid_r3"));
@@ -301,6 +275,8 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_일수_기준으로_상위_N명의_랭킹을_조회할_수_있다() {
+        연속_읽기_랭킹_기본_데이터를_저장한다();
+
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st2", "pid_st2"));
         continueReadingRepository.save(
                 ContinueReadingRealtime.builder()
@@ -333,6 +309,9 @@ class ReadingServiceTest {
 
     @Test
     void 가입_시_추가된_연속_읽기_스냅샷으로_신규_회원이_랭킹_최하위_공동_순위에_포함된다() {
+        연속_읽기_랭킹_기본_데이터를_저장한다();
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
+
         // given: 기존 회원 스냅샷이 있는 상태
         ContinueReadingRankingResponse initial = readingService.getContinueReadingRank(10);
         assertThat(initial.data()).hasSize(1);
@@ -368,6 +347,8 @@ class ReadingServiceTest {
 
     @Test
     void 나의_연속_읽기_순위를_조회할_수_있다() {
+        연속_읽기_랭킹_기본_데이터를_저장한다();
+
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st_me2", "pid_st_me2"));
         continueReadingRepository.save(
                 ContinueReadingRealtime.builder()
@@ -397,6 +378,8 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_일수가_0이어도_나의_순위는_최하위_공동_순위로_조회된다() {
+        연속_읽기_랭킹_기본_데이터를_저장한다();
+
         ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
         cr.resetDayCount();
         continueReadingRepository.save(cr);
@@ -408,7 +391,6 @@ class ReadingServiceTest {
                         .dayCount(5)
                         .build()
         );
-        continueReadingRepository.flush();
 
         readingService.updateContinueReadingRankingSnapshot();
 
@@ -441,6 +423,8 @@ class ReadingServiceTest {
     @Test
     @Disabled
     void 나의_월간_순위와_전체_참여자_수를_조회할_수_있다() {
+        월간_랭킹_기본_데이터를_저장한다();
+
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
@@ -500,6 +484,8 @@ class ReadingServiceTest {
 
     @Test
     void 매월_읽기_수를_연간_읽기_수에_반영하고_월간은_초기화한다() {
+        월간_초기화_기본_데이터를_저장한다();
+
         // given
         int monthlyCountBefore = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get().getCurrentCount();
 
@@ -519,10 +505,6 @@ class ReadingServiceTest {
 
     @Test
     void 매월_초기화_시_상위_3명에게_랭킹_뱃지를_발급한다() {
-        // given
-        // setUp()에서 생성된 snapshot 삭제 (rankOrder가 없어서 제외)
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("member3", "provider3"));
         Member member4 = memberRepository.save(TestFixture.createUniqueMember("member4", "provider4"));
@@ -556,8 +538,7 @@ class ReadingServiceTest {
 
     @Test
     void 매월_초기화_전에_다독왕과_연속왕_확정_랭킹_이력을_저장한다() {
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        continueReadingRepository.deleteAllInBatch();
+        member = 회원을_저장한다();
 
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("hist_member2", "hist_provider2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("hist_member3", "hist_provider3"));
@@ -609,8 +590,7 @@ class ReadingServiceTest {
 
     @Test
     void 같은_월_확정_랭킹_이력은_월간_초기화가_재실행되어도_덮어쓰지_않는다() {
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        continueReadingRepository.deleteAllInBatch();
+        member = 회원을_저장한다();
 
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 12));
         continueReadingRepository.save(ContinueReadingRealtime.builder()
@@ -641,10 +621,6 @@ class ReadingServiceTest {
 
     @Test
     void 랭킹_대상이_없을_때는_뱃지를_발급하지_않는다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-
-        // when
         readingService.migrateMonthlyCountToYearlyAndReset();
 
         // then
@@ -653,9 +629,6 @@ class ReadingServiceTest {
 
     @Test
     void 월간_랭킹_조회_시_이전달_랭킹_뱃지가_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
         
@@ -688,9 +661,6 @@ class ReadingServiceTest {
 
     @Test
     void 월간_랭킹_조회_시_가장_최근_챌린지_뱃지가_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -704,7 +674,6 @@ class ReadingServiceTest {
                 .challengeGeneration(1)
                 .build();
         badgeRepository.save(oldBadge);
-        badgeRepository.flush();
         
         // 최근 챌린지 뱃지
         ChallengeBadge recentBadge = ChallengeBadge.builder()
@@ -732,9 +701,6 @@ class ReadingServiceTest {
 
     @Test
     void 월간_랭킹_조회_시_랭킹_뱃지와_챌린지_뱃지가_모두_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -773,9 +739,6 @@ class ReadingServiceTest {
 
     @Test
     void 월간_랭킹_조회_시_가장_높은_스트릭_뱃지가_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -785,7 +748,6 @@ class ReadingServiceTest {
                 .streakDayCount(StreakBadgeTier.FIFTEEN.getDayCount())
                 .build();
         badgeRepository.save(higherBadge);
-        badgeRepository.flush();
 
         StreakBadge recentLowerBadge = StreakBadge.builder()
                 .memberId(member1.getId())
@@ -807,9 +769,6 @@ class ReadingServiceTest {
 
     @Test
     void 월간_랭킹_조회_시_뱃지가_없으면_null로_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-        
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -826,9 +785,6 @@ class ReadingServiceTest {
 
     @Test
     void 내_랭킹_조회_시_이전달_랭킹_뱃지가_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -858,9 +814,6 @@ class ReadingServiceTest {
 
     @Test
     void 내_랭킹_조회_시_가장_최근_챌린지_뱃지가_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -874,7 +827,6 @@ class ReadingServiceTest {
                 .challengeGeneration(1)
                 .build();
         badgeRepository.save(oldBadge);
-        badgeRepository.flush();
 
         // 최근 챌린지 뱃지
         ChallengeBadge recentBadge = ChallengeBadge.builder()
@@ -902,9 +854,6 @@ class ReadingServiceTest {
 
     @Test
     void 내_랭킹_조회_시_랭킹_뱃지와_챌린지_뱃지가_모두_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -943,9 +892,6 @@ class ReadingServiceTest {
 
     @Test
     void 내_랭킹_조회_시_뱃지가_없으면_null로_표시된다() {
-        // given
-        monthlyReadingSnapshotRepository.deleteAllInBatch();
-
         Member member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
 
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(member1, 30, 1, 0));
@@ -958,6 +904,38 @@ class ReadingServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(result.badges()).isNull();
         });
+    }
+
+    private void 읽기_횟수_갱신에_필요한_데이터를_저장한다() {
+        member = 회원을_저장한다();
+        todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
+        continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
+    }
+
+    private void 연속_읽기_랭킹_기본_데이터를_저장한다() {
+        member = 회원을_저장한다();
+        continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+        continueReadingRankingSnapshotRepository.save(
+                ContinueReadingSnapshot.create(member.getId(), continueReading.getDayCount(), 1L)
+        );
+    }
+
+    private void 월간_랭킹_기본_데이터를_저장한다() {
+        member = 회원을_저장한다();
+        monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
+    }
+
+    private void 월간_초기화_기본_데이터를_저장한다() {
+        member = 회원을_저장한다();
+        monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
+        monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
+        continueReadingRepository.save(TestFixture.continueReadingFixture(member));
+    }
+
+    private Member 회원을_저장한다() {
+        return memberRepository.save(TestFixture.createUniqueMember("읽기테스트회원", "reading-service-test"));
     }
 
     private RankingBadge findRankingBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {

@@ -2,12 +2,12 @@ package me.bombom.api.v1.common.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -18,9 +18,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CIllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(CIllegalArgumentException e) {
         if (!e.getContext().isEmpty()) {
-            log.info("IllegalArgumentException: {} - Context: {}", e.getMessage(), e.getContext(), e);
+            log.info("IllegalArgumentException: {} - Context: {}", e.getMessage(), e.getContext());
         } else {
-            log.info("IllegalArgumentException: ", e);
+            log.info("IllegalArgumentException: {}", e.getMessage());
         }
         return ResponseEntity.status(e.getHttpStatus())
                 .body(ErrorResponse.from(e.getErrorDetail()));
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
         if (cause instanceof CIllegalArgumentException illegalArg) {
             return handleIllegalArgumentException(illegalArg);
         }
-        log.info("Conversion failed: ", e);
+        log.info("Conversion failed: {}", e.getMessage());
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
         if (cause instanceof CIllegalArgumentException illegalArg) {
             return handleIllegalArgumentException(illegalArg);
         }
-        log.info("Method argument type mismatch: ", e);
+        log.info("Method argument type mismatch: name={}, value={}", e.getName(), e.getValue());
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
@@ -56,24 +56,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
         if (!e.getContext().isEmpty()) {
-            log.warn("UnauthorizedException: {} - Context: {}", e.getMessage(), e.getContext(), e);
+            log.warn("UnauthorizedException: {} - Context: {}", e.getMessage(), e.getContext());
         } else {
-            log.warn("UnauthorizedException: ", e);
+            log.warn("UnauthorizedException: {}", e.getMessage());
         }
         return ResponseEntity.status(e.getHttpStatus())
                 .body(ErrorResponse.from(e.getErrorDetail()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
-        log.info("Validation failed: ", e);
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.info("Validation failed: {}", e.getBindingResult().getFieldErrors());
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e){
-        log.info("Constraint violation: ", e);
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        log.info("Constraint violation: {}", e.getConstraintViolations());
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }
@@ -91,14 +91,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException e) {
-        log.warn("No resource found: ", e);
+        log.warn("No resource found: {}", e.getResourcePath());
         return ResponseEntity.status(ErrorDetail.ENTITY_NOT_FOUND.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.ENTITY_NOT_FOUND));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException e) {
-        log.info("Request body parse error: ", e);
+        log.info("Request body parse error: {}", e.getMessage());
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
     }

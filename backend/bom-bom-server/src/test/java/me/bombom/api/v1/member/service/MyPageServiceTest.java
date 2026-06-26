@@ -2,6 +2,7 @@ package me.bombom.api.v1.member.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -101,7 +102,7 @@ class MyPageServiceTest {
             softly.assertThat(response.cards().getFirst().rankHistory())
                     .extracting("month", "label", "rank")
                     .containsExactly(
-                            org.assertj.core.groups.Tuple.tuple("2026-05", "5월", 4L)
+                            tuple("2026-05", "5월", 4L)
                     );
         });
     }
@@ -140,8 +141,8 @@ class MyPageServiceTest {
             softly.assertThat(response.cards().getFirst().rankHistory())
                     .extracting("month", "label", "rank")
                     .containsExactly(
-                            org.assertj.core.groups.Tuple.tuple("2025-12", "25.12", 20L),
-                            org.assertj.core.groups.Tuple.tuple("2026-05", "5월", 3L)
+                            tuple("2025-12", "25.12", 20L),
+                            tuple("2026-05", "5월", 3L)
                     );
         });
     }
@@ -206,8 +207,8 @@ class MyPageServiceTest {
             softly.assertThat(response.categories())
                     .extracting("id", "name", "count", "percent")
                     .containsExactly(
-                            org.assertj.core.groups.Tuple.tuple(selfImprovement.getId(), "자기계발", 12L, 55),
-                            org.assertj.core.groups.Tuple.tuple(economy.getId(), "경제", 10L, 45)
+                            tuple(selfImprovement.getId(), "자기계발", 12L, 55),
+                            tuple(economy.getId(), "경제", 10L, 45)
                     );
         });
     }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members/me")
-public class MyPageController implements MyPageApi {
+public class MyPageController implements MyPageApi, MyPageControllerApi {
 
     private final MemberService memberService;
     private final MyPageService myPageService;
@@ -27,6 +27,7 @@ public class MyPageController implements MyPageApi {
         return memberService.getJoinDays(member);
     }
 
+    @Override
     @GetMapping("/rank")
     public RankSummaryResponse getRankSummary(
             @LoginMember Member member,

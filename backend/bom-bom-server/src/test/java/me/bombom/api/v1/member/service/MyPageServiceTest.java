@@ -26,6 +26,7 @@ import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
 import me.bombom.support.integration.IntegrationTest;
 import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
@@ -168,7 +169,7 @@ class MyPageServiceTest {
     }
 
     @Test
-    void yearMonth가_있으면_읽은_뉴스_카테고리_월간_통계를_조회한다() {
+    void 연월_조건이_있으면_읽은_뉴스_카테고리_월간_통계를_조회한다() {
         // given
         Category selfImprovement = categoryRepository.save(Category.builder()
                 .name("자기계발")
@@ -197,7 +198,7 @@ class MyPageServiceTest {
                 .build());
 
         // when
-        CategoryStatsResponse response = myPageService.getCategoryStats(member, "2026-05");
+        CategoryStatsResponse response = myPageService.getCategoryStats(member, new MonthlyReportRequest(2026, 5));
 
         // then
         assertSoftly(softly -> {
@@ -209,22 +210,6 @@ class MyPageServiceTest {
                             org.assertj.core.groups.Tuple.tuple(economy.getId(), "경제", 10L, 45)
                     );
         });
-    }
-
-    @Test
-    void yearMonth_형식이_잘못되면_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> myPageService.getCategoryStats(member, "2026-5"))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
-    }
-
-    @Test
-    void yearMonth가_없으면_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> myPageService.getCategoryStats(member, null))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
     }
 
     private List<ArticleReadHistory> createArticleReadHistories(int count) {

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.member.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -7,9 +8,11 @@ import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
 import me.bombom.api.v1.member.service.MemberService;
 import me.bombom.api.v1.member.service.MyPageService;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
 import me.bombom.openapi.mypage.api.MyPageApi;
 import me.bombom.openapi.mypage.model.MemberJoinDaysResponse;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,8 +47,8 @@ public class MyPageController implements MyPageApi, MyPageControllerApi {
     @GetMapping("/category-stats")
     public CategoryStatsResponse getCategoryStats(
             @LoginMember Member member,
-            @RequestParam(required = false) String yearMonth
+            @Valid @ModelAttribute MonthlyReportRequest request
     ) {
-        return myPageService.getCategoryStats(member, yearMonth);
+        return myPageService.getCategoryStats(member, request);
     }
 }

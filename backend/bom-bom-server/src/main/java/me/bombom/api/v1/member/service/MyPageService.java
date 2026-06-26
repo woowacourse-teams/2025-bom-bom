@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +24,7 @@ import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,8 +54,8 @@ public class MyPageService {
         ));
     }
 
-    public CategoryStatsResponse getCategoryStats(Member member, String yearMonthValue) {
-        YearMonth yearMonth = parseYearMonth(yearMonthValue);
+    public CategoryStatsResponse getCategoryStats(Member member, MonthlyReportRequest request) {
+        YearMonth yearMonth = YearMonth.of(request.year(), request.month());
         LocalDateTime start = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime end = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
         List<CategoryReadCount> categoryReadCounts = articleReadHistoryRepository.countReadsByCategory(
@@ -128,19 +128,6 @@ public class MyPageService {
             return null;
         }
         return rankHistories.getLast().rank();
-    }
-
-    private YearMonth parseYearMonth(String yearMonth) {
-        if (yearMonth == null || yearMonth.isBlank()) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
-                    .addContext("yearMonth", yearMonth);
-        }
-        try {
-            return YearMonth.parse(yearMonth);
-        } catch (DateTimeParseException e) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION)
-                    .addContext("yearMonth", yearMonth);
-        }
     }
 
     private CIllegalArgumentException entityNotFound(Long memberId, String entityType) {

@@ -7,10 +7,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "MyPage", description = "마이페이지 관련 API")
@@ -47,15 +51,10 @@ public interface MyPageControllerApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "마이페이지 월별 카테고리 통계 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 yearMonth 형식", content = @Content)
+            @ApiResponse(responseCode = "400", description = "잘못된 연·월 파라미터 요청", content = @Content)
     })
     CategoryStatsResponse getCategoryStats(
             @Parameter(hidden = true) @LoginMember Member member,
-            @Parameter(
-                    description = "조회할 연월",
-                    example = "2026-05",
-                    schema = @Schema(pattern = "^\\d{4}-\\d{2}$")
-            )
-            @RequestParam(required = false) String yearMonth
+            @Valid @ModelAttribute @ParameterObject MonthlyReportRequest request
     );
 }

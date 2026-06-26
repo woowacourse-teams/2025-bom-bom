@@ -383,7 +383,8 @@ class ReadingServiceTest {
     @Test
     void 보상_보호막만_남아도_나의_연속_읽기_보호막은_사용_가능으로_조회된다() {
         연속_읽기_랭킹_기본_데이터를_저장한다();
-        continueReadingShieldRepository.deleteByMemberId(member.getId());
+        Long shieldId = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow().getId();
+        continueReadingShieldRepository.deleteById(shieldId);
         continueReadingShieldRepository.save(ContinueReadingShield.builder()
                 .memberId(member.getId())
                 .monthlyRemainingCount(0)

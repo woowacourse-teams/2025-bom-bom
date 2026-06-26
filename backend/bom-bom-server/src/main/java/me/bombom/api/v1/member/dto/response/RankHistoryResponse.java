@@ -1,6 +1,7 @@
 package me.bombom.api.v1.member.dto.response;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 public record RankHistoryResponse(
         String month,
@@ -13,7 +14,7 @@ public record RankHistoryResponse(
             long rank,
             LocalDate today
     ) {
-        String month = period.toString().substring(0, 7);
+        String month = YearMonth.from(period).toString();
         String label = period.getYear() == today.getYear()
                 ? period.getMonthValue() + "월"
                 : String.format("%02d.%02d", period.getYear() % 100, period.getMonthValue());

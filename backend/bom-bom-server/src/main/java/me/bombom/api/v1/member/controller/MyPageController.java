@@ -40,6 +40,7 @@ public class MyPageController implements MyPageApi, MyPageControllerApi {
         return myPageService.getRankSummary(member, type);
     }
 
+    @Override
     @GetMapping("/category-stats")
     public CategoryStatsResponse getCategoryStats(
             @LoginMember Member member,

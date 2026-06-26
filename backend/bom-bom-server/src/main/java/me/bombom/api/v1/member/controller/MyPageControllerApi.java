@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -38,5 +39,23 @@ public interface MyPageControllerApi {
                     schema = @Schema(allowableValues = {"streak", "reading"})
             )
             @RequestParam(required = false) String type
+    );
+
+    @Operation(
+            summary = "마이페이지 월별 카테고리 통계 조회",
+            description = "로그인한 회원이 지정한 월에 읽은 뉴스의 카테고리별 통계를 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "마이페이지 월별 카테고리 통계 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 yearMonth 형식", content = @Content)
+    })
+    CategoryStatsResponse getCategoryStats(
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(
+                    description = "조회할 연월",
+                    example = "2026-05",
+                    schema = @Schema(pattern = "^\\d{4}-\\d{2}$")
+            )
+            @RequestParam(required = false) String yearMonth
     );
 }

@@ -42,7 +42,7 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
-          ./gradlew clean build --no-daemon
+          ./gradlew build --no-daemon
     
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3

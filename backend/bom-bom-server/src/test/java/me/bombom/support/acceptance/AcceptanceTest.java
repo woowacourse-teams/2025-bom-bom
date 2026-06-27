@@ -15,7 +15,12 @@ import org.springframework.test.context.TestExecutionListeners;
 /**
  * 지정한 데이터셋과 실제 HTTP RestAssured 설정을 함께 적용하는 HTTP 인수 테스트용 메타 애노테이션이다.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "discord.webhook.operationError.url=",
+        }
+)
 @ActiveProfiles("test")
 @Tag("integration")
 @Import({TestcontainerConfig.class, IntegrationTestConfig.class, AcceptanceTestConfiguration.class})

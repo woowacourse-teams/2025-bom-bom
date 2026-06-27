@@ -15,7 +15,9 @@ import org.springframework.test.context.TestExecutionListeners;
 /**
  * Spring Boot, MockMvc, Testcontainers 설정을 함께 올리는 통합 테스트용 메타 애노테이션이다.
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "discord.webhook.operationError.url=",
+})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Tag("integration")

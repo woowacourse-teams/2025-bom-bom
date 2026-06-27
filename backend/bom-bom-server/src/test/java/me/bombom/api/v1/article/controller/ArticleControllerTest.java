@@ -277,11 +277,10 @@ class ArticleControllerTest {
     @Test
     @ResetsAcceptanceData
     void 아티클을_읽으면_읽음_상태와_이력을_저장한다() {
-        patchRequest("/api/v1/articles/1/read")
-                .then()
-                .statusCode(204);
+        Map<String, Object> response = markAsRead(1);
 
         assertSoftly(softly -> {
+            softly.assertThat(response.get("readCountTokenConsumed")).isEqualTo(true);
             softly.assertThat(queryInt("select is_read from article where id = 1")).isEqualTo(1);
             softly.assertThat(queryInt("select count(*) from article_read_history where member_id = 1 and article_id = 1"))
                     .isEqualTo(1);
@@ -295,11 +294,14 @@ class ArticleControllerTest {
     @Test
     @ResetsAcceptanceData
     void 이미_읽은_아티클은_읽음_이력을_중복_저장하지_않는다() {
-        patchRequest("/api/v1/articles/1/read").then().statusCode(204);
-        patchRequest("/api/v1/articles/1/read").then().statusCode(204);
+        markAsRead(1);
+        Map<String, Object> response = markAsRead(1);
 
-        assertThat(queryInt("select count(*) from article_read_history where member_id = 1 and article_id = 1"))
-                .isEqualTo(1);
+        assertSoftly(softly -> {
+            softly.assertThat(response.get("readCountTokenConsumed")).isEqualTo(false);
+            softly.assertThat(queryInt("select count(*) from article_read_history where member_id = 1 and article_id = 1"))
+                    .isEqualTo(1);
+        });
     }
 
     @Test
@@ -373,6 +375,16 @@ class ArticleControllerTest {
 
     private static Map<String, Object> searchArticles(Map<String, ?> query) {
         return successResponse("/api/v1/articles/search", query);
+    }
+
+    private static Map<String, Object> markAsRead(long articleId) {
+        return patchRequest("/api/v1/articles/" + articleId + "/read")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
     }
 
     private static Map<String, Object> successResponse(String path, Map<String, ?> query) {

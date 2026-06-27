@@ -1,11 +1,19 @@
 package me.bombom.api.v1.member.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
 public record RankHistoryResponse(
+
+        @NotNull
         String month,
+
+        @NotNull
         String label,
+
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         long rank
 ) {
 

@@ -1,0 +1,443 @@
+{
+  "member": [
+    {
+      "id": 1,
+      "provider": "apple",
+      "provider_id": "previousMember1",
+      "email": "previous1@bombom.news",
+      "nickname": "previous1",
+      "gender": "FEMALE",
+      "role_id": 1
+    },
+    {
+      "id": 2,
+      "provider": "google",
+      "provider_id": "previousMember2",
+      "email": "previous2@bombom.news",
+      "nickname": "previous2",
+      "gender": "MALE",
+      "role_id": 1
+    }
+  ],
+  "category": [
+    { "id": 1, "name": "지난아티클" }
+  ],
+  "newsletter_detail": [
+    {
+      "id": 1,
+      "main_page_url": "https://previous.example.com",
+      "subscribe_url": "https://previous.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 2,
+      "main_page_url": "https://recent.example.com",
+      "subscribe_url": "https://recent.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 3,
+      "main_page_url": "https://inactive.example.com",
+      "subscribe_url": "https://inactive.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 4,
+      "main_page_url": "https://fixed.example.com",
+      "subscribe_url": "https://fixed.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 5,
+      "main_page_url": "https://mixed.example.com",
+      "subscribe_url": "https://mixed.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 6,
+      "main_page_url": "https://short-fixed.example.com",
+      "subscribe_url": "https://short-fixed.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 7,
+      "main_page_url": "https://detail.example.com",
+      "subscribe_url": "https://detail.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 8,
+      "main_page_url": "https://inactive-detail.example.com",
+      "subscribe_url": "https://inactive-detail.example.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    }
+  ],
+  "newsletter": [
+    {
+      "id": 1,
+      "name": "정책없음뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/no-policy.png",
+      "email": "no-policy@bombom.news",
+      "category_id": 1,
+      "detail_id": 1
+    },
+    {
+      "id": 2,
+      "name": "최근뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/recent.png",
+      "email": "recent@bombom.news",
+      "category_id": 1,
+      "detail_id": 2
+    },
+    {
+      "id": 3,
+      "name": "비활성뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/inactive.png",
+      "email": "inactive@bombom.news",
+      "category_id": 1,
+      "detail_id": 3
+    },
+    {
+      "id": 4,
+      "name": "고정뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/fixed.png",
+      "email": "fixed@bombom.news",
+      "category_id": 1,
+      "detail_id": 4
+    },
+    {
+      "id": 5,
+      "name": "고정최근뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/mixed.png",
+      "email": "mixed@bombom.news",
+      "category_id": 1,
+      "detail_id": 5
+    },
+    {
+      "id": 6,
+      "name": "고정개수부족뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/short-fixed.png",
+      "email": "short-fixed@bombom.news",
+      "category_id": 1,
+      "detail_id": 6
+    },
+    {
+      "id": 7,
+      "name": "상세조회뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/detail.png",
+      "email": "detail@bombom.news",
+      "category_id": 1,
+      "detail_id": 7
+    },
+    {
+      "id": 8,
+      "name": "비활성상세뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/inactive-detail.png",
+      "email": "inactive-detail@bombom.news",
+      "category_id": 1,
+      "detail_id": 8
+    }
+  ],
+  "previous_article": [
+    {
+      "id": 201,
+      "title": "최근 아티클 0",
+      "contents": "<h1>최근 아티클 0</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "최근 요약 0",
+      "newsletter_id": 2,
+      "arrived_date_time": "2025-07-15 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 202,
+      "title": "최근 아티클 1",
+      "contents": "<h1>최근 아티클 1</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "최근 요약 1",
+      "newsletter_id": 2,
+      "arrived_date_time": "2025-07-14 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 203,
+      "title": "최근 아티클 2",
+      "contents": "<h1>최근 아티클 2</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "최근 요약 2",
+      "newsletter_id": 2,
+      "arrived_date_time": "2025-07-13 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 204,
+      "title": "최근 아티클 3",
+      "contents": "<h1>최근 아티클 3</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "최근 요약 3",
+      "newsletter_id": 2,
+      "arrived_date_time": "2025-07-12 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 205,
+      "title": "최근 아티클 4",
+      "contents": "<h1>최근 아티클 4</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "최근 요약 4",
+      "newsletter_id": 2,
+      "arrived_date_time": "2025-07-11 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 401,
+      "title": "고정 아티클 1",
+      "contents": "<h1>고정 아티클 1</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "고정 요약 1",
+      "newsletter_id": 4,
+      "arrived_date_time": "2025-07-05 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 402,
+      "title": "고정 아티클 2",
+      "contents": "<h1>고정 아티클 2</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "고정 요약 2",
+      "newsletter_id": 4,
+      "arrived_date_time": "2025-07-04 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 403,
+      "title": "고정 아티클 3",
+      "contents": "<h1>고정 아티클 3</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "고정 요약 3",
+      "newsletter_id": 4,
+      "arrived_date_time": "2025-07-03 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 501,
+      "title": "혼합 고정 아티클 1",
+      "contents": "<h1>혼합 고정 아티클 1</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 고정 요약 1",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-05 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 502,
+      "title": "혼합 고정 아티클 2",
+      "contents": "<h1>혼합 고정 아티클 2</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 고정 요약 2",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-04 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 503,
+      "title": "혼합 고정 아티클 3",
+      "contents": "<h1>혼합 고정 아티클 3</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 고정 요약 3",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-03 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 511,
+      "title": "혼합 최근 아티클 0",
+      "contents": "<h1>혼합 최근 아티클 0</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 최근 요약 0",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-15 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 512,
+      "title": "혼합 최근 아티클 1",
+      "contents": "<h1>혼합 최근 아티클 1</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 최근 요약 1",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-14 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 513,
+      "title": "혼합 최근 아티클 2",
+      "contents": "<h1>혼합 최근 아티클 2</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 최근 요약 2",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-13 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 514,
+      "title": "혼합 최근 아티클 3",
+      "contents": "<h1>혼합 최근 아티클 3</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 최근 요약 3",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-12 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 515,
+      "title": "혼합 최근 아티클 4",
+      "contents": "<h1>혼합 최근 아티클 4</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "혼합 최근 요약 4",
+      "newsletter_id": 5,
+      "arrived_date_time": "2025-07-11 10:00:00",
+      "is_fixed": false
+    },
+    {
+      "id": 601,
+      "title": "부족 고정 아티클 1",
+      "contents": "<h1>부족 고정 아티클 1</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "부족 고정 요약 1",
+      "newsletter_id": 6,
+      "arrived_date_time": "2025-07-05 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 602,
+      "title": "부족 고정 아티클 2",
+      "contents": "<h1>부족 고정 아티클 2</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "부족 고정 요약 2",
+      "newsletter_id": 6,
+      "arrived_date_time": "2025-07-04 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 603,
+      "title": "부족 고정 아티클 3",
+      "contents": "<h1>부족 고정 아티클 3</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "부족 고정 요약 3",
+      "newsletter_id": 6,
+      "arrived_date_time": "2025-07-03 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 701,
+      "title": "상세 조회 아티클",
+      "contents": "<h1>상세 조회 아티클</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "상세 조회 요약",
+      "newsletter_id": 7,
+      "arrived_date_time": "2025-07-10 10:00:00",
+      "is_fixed": true
+    },
+    {
+      "id": 801,
+      "title": "비활성 상세 아티클",
+      "contents": "<h1>비활성 상세 아티클</h1>",
+      "expected_read_time": 5,
+      "contents_summary": "비활성 상세 요약",
+      "newsletter_id": 8,
+      "arrived_date_time": "2025-07-10 10:00:00",
+      "is_fixed": true
+    }
+  ],
+  "newsletter_previous_policy": [
+    {
+      "id": 2,
+      "newsletter_id": 2,
+      "strategy": "RECENT_ONLY",
+      "fixed_count": 0,
+      "recent_count": 3,
+      "exposure_ratio": 100
+    },
+    {
+      "id": 3,
+      "newsletter_id": 3,
+      "strategy": "INACTIVE",
+      "fixed_count": 0,
+      "recent_count": 5,
+      "exposure_ratio": 100
+    },
+    {
+      "id": 4,
+      "newsletter_id": 4,
+      "strategy": "FIXED_ONLY",
+      "fixed_count": 3,
+      "recent_count": 3,
+      "exposure_ratio": 100
+    },
+    {
+      "id": 5,
+      "newsletter_id": 5,
+      "strategy": "FIXED_WITH_RECENT",
+      "fixed_count": 2,
+      "recent_count": 3,
+      "exposure_ratio": 100
+    },
+    {
+      "id": 6,
+      "newsletter_id": 6,
+      "strategy": "FIXED_ONLY",
+      "fixed_count": 5,
+      "recent_count": 5,
+      "exposure_ratio": 100
+    },
+    {
+      "id": 7,
+      "newsletter_id": 7,
+      "strategy": "FIXED_ONLY",
+      "fixed_count": 3,
+      "recent_count": 3,
+      "exposure_ratio": 80
+    },
+    {
+      "id": 8,
+      "newsletter_id": 8,
+      "strategy": "INACTIVE",
+      "fixed_count": 0,
+      "recent_count": 0,
+      "exposure_ratio": 0
+    }
+  ],
+  "subscribe": [
+    {
+      "id": 1,
+      "member_id": 1,
+      "newsletter_id": 7,
+      "status": "SUBSCRIBED"
+    }
+  ]
+}

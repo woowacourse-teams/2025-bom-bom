@@ -2,9 +2,7 @@ package me.bombom.api.v1.challenge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.BDDMockito.given;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,12 +24,12 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +44,8 @@ class ChallengeDailyTodoServiceTest {
     // 테스트용 고정 일요일 (2025-03-09)
     private static final LocalDate FIXED_SUNDAY = LocalDate.of(2025, 3, 9);
 
-    @MockitoBean
-    private Clock clock;
+    @Autowired
+    private MutableClock clock;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -83,13 +81,6 @@ class ChallengeDailyTodoServiceTest {
     @BeforeEach
     void setUp() {
         fixClockTo(FIXED_WEEKDAY);
-
-        challengeDailyTodoRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
 
         member = memberRepository.save(TestFixture.createUniqueMember("tester", "12345"));
 
@@ -134,7 +125,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId()));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), todayArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -170,7 +161,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), pastArticle.getId()));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), pastArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -214,7 +205,7 @@ class ChallengeDailyTodoServiceTest {
         );
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), article.getId()));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), article.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -238,7 +229,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, FIXED_SATURDAY);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -260,7 +251,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, FIXED_SUNDAY);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -280,7 +271,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, FIXED_WEEKDAY);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -300,7 +291,6 @@ class ChallengeDailyTodoServiceTest {
     }
 
     private void fixClockTo(LocalDate date) {
-        given(clock.instant()).willReturn(date.atStartOfDay(SEOUL_ZONE).toInstant());
-        given(clock.getZone()).willReturn(SEOUL_ZONE);
+        clock.setDate(date);
     }
 }

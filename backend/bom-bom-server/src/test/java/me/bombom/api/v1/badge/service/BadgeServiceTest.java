@@ -24,7 +24,7 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.api.v1.reading.dto.RankerInfo;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,12 +57,6 @@ class BadgeServiceTest {
 
     @BeforeEach
     void setUp() {
-        badgeRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         member1 = memberRepository.save(TestFixture.createUniqueMember("member1", "provider1"));
         member2 = memberRepository.save(TestFixture.createUniqueMember("member2", "provider2"));
         member3 = memberRepository.save(TestFixture.createUniqueMember("member3", "provider3"));

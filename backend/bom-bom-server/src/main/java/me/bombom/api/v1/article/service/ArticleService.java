@@ -1,6 +1,7 @@
 package me.bombom.api.v1.article.service;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +15,7 @@ import me.bombom.api.v1.article.dto.response.ArticleCountPerNewsletterResponse;
 import me.bombom.api.v1.article.dto.response.ArticleDetailResponse;
 import me.bombom.api.v1.article.dto.response.ArticleNewsletterStatisticsResponse;
 import me.bombom.api.v1.article.dto.response.ArticleResponse;
+import me.bombom.api.v1.article.dto.response.MarkAsReadResponse;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.article.repository.ArticleRepository;
@@ -31,10 +33,9 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.pet.ScorePolicyConstants;
-import me.bombom.api.v1.reading.domain.TodayReading;
-import me.bombom.api.v1.reading.repository.TodayReadingRepository;
+import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -51,12 +52,12 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleReadHistoryRepository articleReadHistoryRepository;
     private final RecentArticleRepository recentArticleRepository;
-    private final TodayReadingRepository todayReadingRepository;
     private final CategoryRepository categoryRepository;
     private final NewsletterRepository newsletterRepository;
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BookmarkRepository bookmarkRepository;
+    private final ReadRateLimitService readRateLimitService;
     private final Clock clock;
 
     public Page<ArticleResponse> getArticles(
@@ -94,12 +95,12 @@ public class ArticleService {
     }
 
     @Transactional
-    public void markAsRead(Long articleId, Member member) {
+    public MarkAsReadResponse markAsRead(Long articleId, Member member) {
         Article article = findArticleById(articleId, member.getId());
-        if (article.isRead()) {
-            return;
-        }
         validateArticleOwner(article, member.getId());
+        if (article.isRead()) {
+            return MarkAsReadResponse.notCounted();
+        }
         Newsletter newsletter = findNewsletterById(article.getNewsletterId(), member.getId());
         LocalDateTime readAt = LocalDateTime.now(clock);
 
@@ -111,13 +112,27 @@ public class ArticleService {
                 readAt
         );
         if (insertedRows == 0) {
-            return;
+            return MarkAsReadResponse.notCounted();
         }
+
+        boolean isReadCountTokenConsumed = tryConsumeReadCountToken(member.getId(), articleId, readAt);
         article.markAsRead();
 
-        applicationEventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), articleId));
-        log.info("Published event: MarkAsReadEvent - memberId={}, articleId={}",
-                member.getId(), articleId);
+        applicationEventPublisher.publishEvent(
+                MarkAsReadEvent.of(member.getId(), articleId, readAt, isReadCountTokenConsumed)
+        );
+
+        return MarkAsReadResponse.from(isReadCountTokenConsumed);
+    }
+
+    private boolean tryConsumeReadCountToken(Long memberId, Long articleId, LocalDateTime readAt) {
+        try {
+            return readRateLimitService.tryConsumeReadCountToken(memberId, readAt);
+        } catch (TransientDataAccessException e) {
+            log.error("읽기 토큰 소비 실패 - countable=true로 처리합니다. memberId={}, articleId={}, readAt={}",
+                    memberId, articleId, readAt, e);
+            return true;
+        }
     }
 
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {
@@ -129,18 +144,9 @@ public class ArticleService {
         return ArticleNewsletterStatisticsResponse.of(totalCount, countResponse);
     }
 
-    public boolean canAddArticleScore(Long memberId) {
-        TodayReading todayReading = todayReadingRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
-                        .addContext(ErrorContextKeys.MEMBER_ID, memberId)
-                        .addContext(ErrorContextKeys.ENTITY_TYPE, "TodayReading"));
-
-        return todayReading.getCurrentCount() <= ScorePolicyConstants.MAX_TODAY_READING_COUNT;
-    }
-
-    public boolean isArrivedToday(Long articleId, Long memberId) {
+    public boolean isArrivedToday(Long articleId, Long memberId, LocalDate today) {
         Article article = findArticleById(articleId, memberId);
-        return article.isArrivedToday();
+        return article.isArrivedToday(today);
     }
 
     public List<ArticleHighlightResponse> getHighlights(Member member, Long articleId) {

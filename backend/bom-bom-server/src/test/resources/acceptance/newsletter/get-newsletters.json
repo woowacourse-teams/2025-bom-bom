@@ -1,0 +1,235 @@
+{
+  "member": [
+    {
+      "id": 1,
+      "provider": "apple",
+      "provider_id": "newsletterMember1",
+      "email": "newsletter1@bombom.news",
+      "nickname": "newsletter1",
+      "gender": "FEMALE",
+      "role_id": 1
+    }
+  ],
+  "category": [
+    { "id": 1, "name": "경제" },
+    { "id": 2, "name": "테크" },
+    { "id": 3, "name": "푸드" }
+  ],
+  "newsletter_detail": [
+    {
+      "id": 1,
+      "main_page_url": "https://news1.com",
+      "subscribe_url": "https://news1.com/subscribe",
+      "issue_cycle": "매일 발행",
+      "subscribe_count": 1000,
+      "sender": "발신자"
+    },
+    {
+      "id": 2,
+      "main_page_url": "https://ittimes.com",
+      "subscribe_url": "https://ittimes.com/subscribe",
+      "issue_cycle": "매주 월요일",
+      "subscribe_count": 850,
+      "sender": "발신자"
+    },
+    {
+      "id": 3,
+      "main_page_url": "https://biz.com",
+      "subscribe_url": "https://biz.com/subscribe",
+      "issue_cycle": "격주 화요일",
+      "subscribe_count": 600,
+      "sender": "발신자"
+    },
+    {
+      "id": 4,
+      "main_page_url": "https://woowa.com",
+      "subscribe_url": "https://woowa.com/subscribe",
+      "issue_cycle": "격주 토요일",
+      "subscribe_count": 900,
+      "sender": "발신자"
+    },
+    {
+      "id": 5,
+      "main_page_url": "https://suspended.com",
+      "subscribe_url": "https://suspended.com/subscribe",
+      "issue_cycle": "매월 발행",
+      "subscribe_count": 100,
+      "sender": "발신자"
+    },
+    {
+      "id": 6,
+      "main_page_url": "https://discontinued.com",
+      "subscribe_url": "https://discontinued.com/subscribe",
+      "issue_cycle": "매월 발행",
+      "subscribe_count": 100,
+      "sender": "발신자"
+    },
+    {
+      "id": 7,
+      "main_page_url": "https://recent-suspended.com",
+      "subscribe_url": "https://recent-suspended.com/subscribe",
+      "issue_cycle": "매월 발행",
+      "subscribe_count": 100,
+      "sender": "발신자"
+    },
+    {
+      "id": 8,
+      "main_page_url": "https://old-suspended.com",
+      "subscribe_url": "https://old-suspended.com/subscribe",
+      "issue_cycle": "매월 발행",
+      "subscribe_count": 100,
+      "sender": "발신자"
+    }
+  ],
+  "newsletter": [
+    {
+      "id": 1,
+      "name": "뉴스픽",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/img.png",
+      "email": "news@newspick.com",
+      "category_id": 1,
+      "detail_id": 1,
+      "status": "ACTIVE",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 2,
+      "name": "IT타임즈",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/img.png",
+      "email": "editor@ittimes.io",
+      "category_id": 2,
+      "detail_id": 2,
+      "status": "ACTIVE",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 3,
+      "name": "비즈레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/img.png",
+      "email": "biz@biz.com",
+      "category_id": 3,
+      "detail_id": 3,
+      "status": "ACTIVE",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 4,
+      "name": "우테코",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/img.png",
+      "email": "woowa@biz.com",
+      "category_id": 3,
+      "detail_id": 4,
+      "status": "ACTIVE",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 5,
+      "name": "휴재 뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/suspended.png",
+      "email": "suspended@newsletter.test",
+      "category_id": 1,
+      "detail_id": 5,
+      "status": "SUSPENDED",
+      "suspended_at": "2026-04-21",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 6,
+      "name": "폐간 뉴스레터",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/discontinued.png",
+      "email": "discontinued@newsletter.test",
+      "category_id": 1,
+      "detail_id": 6,
+      "status": "DISCONTINUED",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 7,
+      "name": "최근 휴재",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/recent-suspended.png",
+      "email": "recent@newsletter.test",
+      "category_id": 1,
+      "detail_id": 7,
+      "status": "SUSPENDED",
+      "suspended_at": "2026-01-21",
+      "source": "EXTERNAL"
+    },
+    {
+      "id": 8,
+      "name": "장기 휴재",
+      "description": "설명",
+      "image_url": "https://cdn.bombom.me/old-suspended.png",
+      "email": "old@newsletter.test",
+      "category_id": 1,
+      "detail_id": 8,
+      "status": "SUSPENDED",
+      "suspended_at": "2025-11-21",
+      "source": "EXTERNAL"
+    }
+  ],
+  "newsletter_subscription_count": [
+    {
+      "id": 1,
+      "newsletter_id": 1,
+      "total": 1000,
+      "age0s": 0,
+      "age10s": 100,
+      "age20s": 200,
+      "age30s": 300,
+      "age40s": 200,
+      "age50s": 100,
+      "age60plus": 100
+    },
+    {
+      "id": 2,
+      "newsletter_id": 2,
+      "total": 850,
+      "age0s": 0,
+      "age10s": 100,
+      "age20s": 200,
+      "age30s": 200,
+      "age40s": 150,
+      "age50s": 100,
+      "age60plus": 100
+    },
+    {
+      "id": 3,
+      "newsletter_id": 3,
+      "total": 600,
+      "age0s": 0,
+      "age10s": 100,
+      "age20s": 150,
+      "age30s": 150,
+      "age40s": 100,
+      "age50s": 50,
+      "age60plus": 50
+    },
+    {
+      "id": 4,
+      "newsletter_id": 4,
+      "total": 900,
+      "age0s": 0,
+      "age10s": 100,
+      "age20s": 200,
+      "age30s": 250,
+      "age40s": 150,
+      "age50s": 100,
+      "age60plus": 100
+    }
+  ],
+  "subscribe": [
+    {
+      "id": 1,
+      "member_id": 1,
+      "newsletter_id": 1,
+      "status": "SUBSCRIBED"
+    }
+  ]
+}

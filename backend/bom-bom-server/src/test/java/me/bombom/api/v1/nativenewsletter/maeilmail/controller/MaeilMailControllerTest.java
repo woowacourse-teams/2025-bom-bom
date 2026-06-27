@@ -2,128 +2,64 @@ package me.bombom.api.v1.nativenewsletter.maeilmail.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.ErrorResponse;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContent;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailContentAnswer;
-import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailUserAnswer;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentAnswerRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailContentRepository;
-import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailIssueHistoryRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-@IntegrationTest
-@AutoConfigureMockMvc
+@AcceptanceTest("acceptance/maeilmail/maeil-mail-content.json")
 class MaeilMailControllerTest {
 
+    private static final Long MEMBER_ID = 1L;
+    private static final Long CONTENT_ID = 1L;
+    private static final Long CONTENT_WITHOUT_ANSWER_ID = 2L;
+    private static final Long ISSUE_HISTORY_ID = 1L;
+    private static final Long SECOND_ISSUE_HISTORY_ID = 2L;
     private static final Long ARTICLE_ID = 10_001L;
     private static final Long SECOND_ARTICLE_ID = 10_002L;
     private static final Long UNKNOWN_ARTICLE_ID = 99_999L;
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private MaeilMailContentRepository contentRepository;
-
-    @Autowired
-    private MaeilMailContentAnswerRepository contentAnswerRepository;
-
-    @Autowired
-    private MaeilMailIssueHistoryRepository issueHistoryRepository;
-
-    @Autowired
     private MaeilMailUserAnswerRepository userAnswerRepository;
 
-    @MockitoBean
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    @Test
+    void 아티클_ID로_매일메일_콘텐츠_정보를_조회한다() {
+        MaeilMailInformationResponse response = authenticatedRequest()
+                .queryParam("articleId", ARTICLE_ID)
+                .when()
+                .get("/api/v1/maeil-mail/content")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(MaeilMailInformationResponse.class);
 
-    private Member member;
-    private MaeilMailContent content;
-    private MaeilMailIssueHistory issueHistory;
-    private OAuth2AuthenticationToken authToken;
-
-    @BeforeEach
-    void setUp() {
-        userAnswerRepository.deleteAllInBatch();
-        contentAnswerRepository.deleteAllInBatch();
-        issueHistoryRepository.deleteAllInBatch();
-        contentRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
-        member = memberRepository.save(TestFixture.normalMemberFixture());
-        content = contentRepository.save(createContent());
-        contentAnswerRepository.save(createContentAnswer(content.getId()));
-        issueHistory = issueHistoryRepository.save(createIssueHistory(ARTICLE_ID, content.getId()));
-
-        authToken = createAuthToken(member);
+        assertThat(response.contentId()).isEqualTo(CONTENT_ID);
     }
 
     @Test
-    @DisplayName("아티클 id로 매일메일 컨텐츠 정보를 조회한다")
-    void getContentInformationByArticle_success() throws Exception {
-        // given
-        Long articleId = issueHistory.getArticleId();
+    void 매일메일_콘텐츠의_모범_답변을_조회한다() {
+        MaeilMailIdealAnswerResponse response = authenticatedRequest()
+                .when()
+                .get("/api/v1/maeil-mail/{contentId}/answer", CONTENT_ID)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(MaeilMailIdealAnswerResponse.class);
 
-        // when
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/content")
-                        .with(authentication(authToken))
-                        .param("articleId", articleId.toString()))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        // then
-        MaeilMailInformationResponse response = readResponse(result, MaeilMailInformationResponse.class);
-        assertThat(response.contentId()).isEqualTo(content.getId());
-    }
-
-    @Test
-    @DisplayName("매일메일 컨텐츠의 모범 답변을 조회한다")
-    void getIdealAnswer_success() throws Exception {
-        // given
-        Long contentId = content.getId();
-
-        // when
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/{contentId}/answer", contentId)
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        // then
-        MaeilMailIdealAnswerResponse response = readResponse(result, MaeilMailIdealAnswerResponse.class);
         assertSoftly(softly -> {
             softly.assertThat(response.title()).isEqualTo("Java의 GC 동작 방식은?");
             softly.assertThat(response.answer()).isEqualTo("<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>");
@@ -131,79 +67,58 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("아티클 id로 사용자 답변을 제출하고 다시 조회한다")
-    void submitAnswerAndGetSubmittedAnswer_success() throws Exception {
-        // given
-        Long articleId = issueHistory.getArticleId();
+    void 모범_답변이_없는_컨텐츠는_404를_반환한다() {
+        authenticatedRequest()
+                .when()
+                .get("/api/v1/maeil-mail/{contentId}/answer", CONTENT_WITHOUT_ANSWER_ID)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 아티클_ID로_사용자_답변을_제출하고_다시_조회한다() {
         String answer = "GC Root에서 도달할 수 없는 객체를 수거한다.";
 
-        // when
-        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", answer))))
-                .andExpect(status().isCreated());
+        submitAnswer(ARTICLE_ID, answer)
+                .then()
+                .statusCode(201);
 
-        // then
         MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
         assertSoftly(softly -> {
-            softly.assertThat(savedAnswer.getMemberId()).isEqualTo(member.getId());
-            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(issueHistory.getId());
+            softly.assertThat(savedAnswer.getMemberId()).isEqualTo(MEMBER_ID);
+            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(ISSUE_HISTORY_ID);
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
 
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk())
-                .andReturn();
+        MaeilMailSubmittedAnswerResponse response = getSubmittedAnswer(ARTICLE_ID, 200)
+                .as(MaeilMailSubmittedAnswerResponse.class);
 
-        MaeilMailSubmittedAnswerResponse response = readResponse(result, MaeilMailSubmittedAnswerResponse.class);
         assertThat(response.answer()).isEqualTo(answer);
     }
 
     @Test
-    @DisplayName("같은 컨텐츠라도 발행 아티클이 다르면 각각 답변을 제출하고 조회한다")
-    void submitAnswer_sameContentDifferentArticles_success() throws Exception {
-        // given
-        MaeilMailIssueHistory secondIssueHistory = issueHistoryRepository.save(
-                createIssueHistory(SECOND_ARTICLE_ID, content.getId())
-        );
+    @ResetsAcceptanceData
+    void 같은_콘텐츠라도_발행_아티클이_다르면_각각_답변을_제출하고_조회한다() {
         String firstAnswer = "첫 번째 발행 아티클에 대한 답변";
         String secondAnswer = "두 번째 발행 아티클에 대한 답변";
 
-        // when
-        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", issueHistory.getArticleId())
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", firstAnswer))))
-                .andExpect(status().isCreated());
+        submitAnswer(ARTICLE_ID, firstAnswer)
+                .then()
+                .statusCode(201);
+        submitAnswer(SECOND_ARTICLE_ID, secondAnswer)
+                .then()
+                .statusCode(201);
 
-        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", secondIssueHistory.getArticleId())
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", secondAnswer))))
-                .andExpect(status().isCreated());
-
-        MvcResult firstResult = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
-                        issueHistory.getArticleId())
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        MvcResult secondResult = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
-                        secondIssueHistory.getArticleId())
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        // then
-        MaeilMailSubmittedAnswerResponse firstResponse = readResponse(firstResult, MaeilMailSubmittedAnswerResponse.class);
-        MaeilMailSubmittedAnswerResponse secondResponse = readResponse(secondResult, MaeilMailSubmittedAnswerResponse.class);
+        MaeilMailSubmittedAnswerResponse firstResponse = getSubmittedAnswer(ARTICLE_ID, 200)
+                .as(MaeilMailSubmittedAnswerResponse.class);
+        MaeilMailSubmittedAnswerResponse secondResponse = getSubmittedAnswer(SECOND_ARTICLE_ID, 200)
+                .as(MaeilMailSubmittedAnswerResponse.class);
         MaeilMailUserAnswer savedFirstAnswer = userAnswerRepository
-                .findByMemberIdAndIssueHistoryId(member.getId(), issueHistory.getId())
+                .findByMemberIdAndIssueHistoryId(MEMBER_ID, ISSUE_HISTORY_ID)
                 .orElseThrow();
         MaeilMailUserAnswer savedSecondAnswer = userAnswerRepository
-                .findByMemberIdAndIssueHistoryId(member.getId(), secondIssueHistory.getId())
+                .findByMemberIdAndIssueHistoryId(MEMBER_ID, SECOND_ISSUE_HISTORY_ID)
                 .orElseThrow();
 
         assertSoftly(softly -> {
@@ -216,177 +131,113 @@ class MaeilMailControllerTest {
     }
 
     @Test
-    @DisplayName("답변이 1500자면 제출할 수 있다")
-    void submitAnswer_answerMaxLength_success() throws Exception {
-        // given
-        Long articleId = issueHistory.getArticleId();
+    @ResetsAcceptanceData
+    void 답변이_1500자면_제출할_수_있다() {
         String answer = "가".repeat(1_500);
 
-        // when
-        mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", answer))))
-                .andExpect(status().isCreated());
+        submitAnswer(ARTICLE_ID, answer)
+                .then()
+                .statusCode(201);
 
-        // then
         MaeilMailUserAnswer savedAnswer = userAnswerRepository.findAll().getFirst();
         assertSoftly(softly -> {
-            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(issueHistory.getId());
+            softly.assertThat(savedAnswer.getIssueHistoryId()).isEqualTo(ISSUE_HISTORY_ID);
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
     }
 
     @Test
-    @DisplayName("존재하지 않는 아티클에 답변을 제출하면 404를 반환한다")
-    void submitAnswer_articleNotFound() throws Exception {
-        // given
-        String answer = "존재하지 않는 아티클에는 저장되지 않는다.";
+    void 존재하지_않는_아티클에_답변을_제출하면_404를_반환한다() {
+        ErrorResponse response = submitAnswer(UNKNOWN_ARTICLE_ID, "존재하지 않는 아티클에는 저장되지 않는다.")
+                .then()
+                .statusCode(404)
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(ErrorResponse.class);
 
-        // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", UNKNOWN_ARTICLE_ID)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", answer))))
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        ErrorResponse response = readResponse(result, ErrorResponse.class);
         assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
     @Test
-    @DisplayName("기존 컨텐츠 id 기반 답변 제출 URL은 더 이상 사용하지 않는다")
-    void submitAnswer_legacyContentIdPathNotFound() throws Exception {
-        // given
-        Long contentId = issueHistory.getContentId();
-        String answer = "기존 URL로는 저장되지 않는다.";
-
-        // when & then
-        mockMvc.perform(post("/api/v1/maeil-mail/{contentId}/answer/me", contentId)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", answer))))
-                .andExpect(status().isNotFound());
+    void 기존_콘텐츠_ID_기반_답변_제출_URL은_더_이상_사용하지_않는다() {
+        authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of("answer", "기존 URL로는 저장되지 않는다."))
+                .when()
+                .post("/api/v1/maeil-mail/{contentId}/answer/me", CONTENT_ID)
+                .then()
+                .statusCode(404);
 
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
     @Test
-    @DisplayName("답변이 공백이면 제출할 수 없다")
-    void submitAnswer_blankAnswer() throws Exception {
-        // given
-        Long articleId = issueHistory.getArticleId();
+    void 답변이_공백이면_제출할_수_없다() {
+        ErrorResponse response = submitAnswer(ARTICLE_ID, " ")
+                .then()
+                .statusCode(400)
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(ErrorResponse.class);
 
-        // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", " "))))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        ErrorResponse response = readResponse(result, ErrorResponse.class);
         assertThat(response.code()).isEqualTo(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getCode());
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
     @Test
-    @DisplayName("답변이 1500자를 초과하면 제출할 수 없다")
-    void submitAnswer_answerTooLong() throws Exception {
-        // given
-        Long articleId = issueHistory.getArticleId();
-        String answer = "가".repeat(1_501);
+    void 답변이_1500자를_초과하면_제출할_수_없다() {
+        ErrorResponse response = submitAnswer(ARTICLE_ID, "가".repeat(1_501))
+                .then()
+                .statusCode(400)
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(ErrorResponse.class);
 
-        // when & then
-        MvcResult result = mockMvc.perform(post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
-                        .with(authentication(authToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("answer", answer))))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        ErrorResponse response = readResponse(result, ErrorResponse.class);
         assertThat(response.code()).isEqualTo(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getCode());
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
     @Test
-    @DisplayName("아직 제출하지 않은 답변을 조회하면 404를 반환한다")
-    void getSubmittedAnswer_notFound() throws Exception {
-        // given
-        Long articleId = issueHistory.getArticleId();
+    void 아직_제출하지_않은_답변을_조회하면_404를_반환한다() {
+        ErrorResponse response = getSubmittedAnswer(ARTICLE_ID, 404)
+                .as(ErrorResponse.class);
 
-        // when & then
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
-                        .with(authentication(authToken)))
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        ErrorResponse response = readResponse(result, ErrorResponse.class);
         assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
     }
 
     @Test
-    @DisplayName("존재하지 않는 아티클의 제출 답변을 조회하면 404를 반환한다")
-    void getSubmittedAnswer_articleNotFound() throws Exception {
-        // when & then
-        MvcResult result = mockMvc.perform(get("/api/v1/maeil-mail/articles/{articleId}/answers/me",
-                        UNKNOWN_ARTICLE_ID)
-                        .with(authentication(authToken)))
-                .andExpect(status().isNotFound())
-                .andReturn();
+    void 존재하지_않는_아티클의_제출_답변을_조회하면_404를_반환한다() {
+        ErrorResponse response = getSubmittedAnswer(UNKNOWN_ARTICLE_ID, 404)
+                .as(ErrorResponse.class);
 
-        ErrorResponse response = readResponse(result, ErrorResponse.class);
         assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
     }
 
-    private MaeilMailContent createContent() {
-        return MaeilMailContent.builder()
-                .topicId(1L)
-                .title("Java의 GC 동작 방식은?")
-                .content("<p>Java의 GC 동작 방식은?</p>")
-                .contentsText("Java의 GC 동작 방식은?")
-                .contentsSummary("GC 질문")
-                .expectedReadTime(3)
-                .build();
+    private io.restassured.response.Response submitAnswer(Long articleId, String answer) {
+        return authenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(Map.of("answer", answer))
+                .when()
+                .post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId);
     }
 
-    private MaeilMailContentAnswer createContentAnswer(Long contentId) {
-        return MaeilMailContentAnswer.builder()
-                .contentId(contentId)
-                .answer("<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>")
-                .build();
+    private io.restassured.response.ExtractableResponse<io.restassured.response.Response> getSubmittedAnswer(
+            Long articleId,
+            int statusCode
+    ) {
+        return authenticatedRequest()
+                .when()
+                .get("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId)
+                .then()
+                .statusCode(statusCode)
+                .contentType(ContentType.JSON)
+                .extract();
     }
 
-    private MaeilMailIssueHistory createIssueHistory(Long articleId, Long contentId) {
-        return MaeilMailIssueHistory.builder()
-                .articleId(articleId)
-                .contentId(contentId)
-                .build();
-    }
-
-    private OAuth2AuthenticationToken createAuthToken(Member member) {
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
-        );
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
-        return new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
-    }
-
-    private String toJson(Object value) throws Exception {
-        return objectMapper.writeValueAsString(value);
-    }
-
-    private <T> T readResponse(MvcResult result, Class<T> responseType) throws Exception {
-        return objectMapper.readValue(result.getResponse().getContentAsString(), responseType);
+    private io.restassured.specification.RequestSpecification authenticatedRequest() {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
     }
 }

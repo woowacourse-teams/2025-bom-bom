@@ -2,6 +2,7 @@ package me.bombom.api.v1.article.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import me.bombom.api.v1.TestFixture;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class ArticleTest {
         );
 
         // when
-        boolean result = article.isArrivedToday();
+        boolean result = article.isArrivedToday(LocalDate.now());
 
         // then
         assertThat(result).isTrue();
@@ -57,7 +58,7 @@ class ArticleTest {
         );
 
         // when
-        boolean result = article.isArrivedToday();
+        boolean result = article.isArrivedToday(LocalDate.now());
 
         // then
         assertThat(result).isFalse();

@@ -2,12 +2,8 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -20,17 +16,13 @@ import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 @IntegrationTest
-@Import(ContinueReadingShieldServiceTest.FixedClockConfig.class)
 class ContinueReadingShieldServiceTest {
 
     private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
@@ -59,16 +51,11 @@ class ContinueReadingShieldServiceTest {
     private ContinueReadingShieldHistoryRepository continueReadingShieldHistoryRepository;
 
     @Autowired
-    private Clock clock;
+    private MutableClock clock;
 
     @BeforeEach
     void setUp() {
         fixClockTo(MONTH_START_DATE);
-        continueReadingShieldHistoryRepository.deleteAllInBatch();
-        continueReadingShieldRepository.deleteAllInBatch();
-        continueReadingRealtimeRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
     }
 
     @Test
@@ -259,51 +246,10 @@ class ContinueReadingShieldServiceTest {
     }
 
     private Member createMember() {
-        String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-        return memberRepository.save(TestFixture.createUniqueMember("shield_" + suffix, "shield_pid_" + suffix));
+        return memberRepository.save(TestFixture.createUniqueMember("보호막테스트회원", "shield-service-test"));
     }
 
     private void fixClockTo(LocalDate date) {
-        ((MutableClock) clock).setDate(date);
-    }
-
-    @TestConfiguration
-    static class FixedClockConfig {
-
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return new MutableClock(MONTH_START_DATE, SEOUL_ZONE);
-        }
-    }
-
-    private static class MutableClock extends Clock {
-
-        private final ZoneId zone;
-        private Instant instant;
-
-        private MutableClock(LocalDate date, ZoneId zone) {
-            this.zone = zone;
-            setDate(date);
-        }
-
-        private void setDate(LocalDate date) {
-            this.instant = date.atStartOfDay(zone).toInstant();
-        }
-
-        @Override
-        public ZoneId getZone() {
-            return zone;
-        }
-
-        @Override
-        public Clock withZone(ZoneId zone) {
-            return Clock.fixed(instant, zone);
-        }
-
-        @Override
-        public Instant instant() {
-            return instant;
-        }
+        clock.setDate(date);
     }
 }

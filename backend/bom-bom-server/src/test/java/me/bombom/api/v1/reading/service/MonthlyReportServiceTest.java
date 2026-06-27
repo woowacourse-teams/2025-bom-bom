@@ -19,7 +19,7 @@ import me.bombom.openapi.monthlyreport.model.MonthlyReportDashboardRequest;
 import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
 import me.bombom.openapi.monthlyreport.model.ReadingCalendarDayResponse;
 import me.bombom.openapi.monthlyreport.model.ReadingDashboardResponse;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

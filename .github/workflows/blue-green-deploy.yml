@@ -60,7 +60,14 @@ jobs:
           printf '%s' "${APPLICATION_PROD_PROPERTIES}" > src/main/resources/application.yml
 
       - name: Gradle 빌드
-        run: ./gradlew clean assemble --no-daemon --stacktrace --info
+        run: ./gradlew assemble --profile --no-daemon --stacktrace --info
+
+      - name: Gradle 빌드 profile 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gradle-profile-blue-green-build
+          path: ./backend/bom-bom-server/build/reports/profile/*.html
 
       - name: JAR 업로드
         uses: actions/upload-artifact@v4
@@ -103,7 +110,14 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          ./gradlew test --no-daemon --stacktrace --info
+          ./gradlew test --profile --no-daemon --stacktrace --info
+
+      - name: Gradle 테스트 profile 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gradle-profile-blue-green-test
+          path: ./backend/bom-bom-server/build/reports/profile/*.html
 
   docker-image:
     runs-on: ubuntu-latest

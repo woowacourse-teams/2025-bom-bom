@@ -19,7 +19,6 @@ import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -78,8 +77,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("Member 타입과 Long 타입을 모두 지원한다")
-    void supportsParameter() throws Exception {
+    void Member와_Long_타입을_모두_지원한다() throws Exception {
         assertSoftly(softly -> {
             softly.assertThat(resolver.supportsParameter(paramMember())).isTrue();
             softly.assertThat(resolver.supportsParameter(paramLong())).isTrue();
@@ -87,8 +85,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("로그인하지 않은 유저가 익명 허용 엔드포인트에 접근하면 null을 반환한다")
-    void anonymousTrue_WhenNotLoggedIn_ReturnsNull() throws Exception {
+    void 비로그인_사용자가_익명_허용_엔드포인트에_접근하면_null을_반환한다() throws Exception {
         setAnonymousAuthentication();
 
         Object result = resolver.resolveArgument(paramMemberAnonymousTrue(), null, null, null);
@@ -96,8 +93,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("로그인하지 않은 유저가 익명 비허용 엔드포인트에 접근하면 UNAUTHORIZED 예외를 던진다")
-    void anonymousFalse_WhenNotLoggedIn_ThrowsException() throws Exception {
+    void 비로그인_사용자가_익명_비허용_엔드포인트에_접근하면_UNAUTHORIZED_예외를_던진다() throws Exception {
         setAnonymousAuthentication();
 
         assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, null, null))
@@ -106,8 +102,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("정상 로그인 유저에 대해 Member 객체를 반환한다")
-    void resolveMember_WhenLoggedIn() throws Exception {
+    void 로그인_사용자의_Member_객체를_반환한다() throws Exception {
         Member member = mock(Member.class);
         setLoggedInAuthentication(member);
 
@@ -117,8 +112,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("정상 로그인 유저에 대해 Long memberId를 반환한다")
-    void resolveLong_WhenLoggedIn() throws Exception {
+    void 로그인_사용자의_Long_memberId를_반환한다() throws Exception {
         Member member = mock(Member.class);
         given(member.getId()).willReturn(1L);
         setLoggedInAuthentication(member);
@@ -129,8 +123,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("OAuth2 유저 정보가 비정상(Member null)이면 UNAUTHORIZED 예외를 던진다")
-    void resolve_WhenMemberIsNullInPrincipal_ThrowsException() throws Exception {
+    void OAuth2_사용자의_Member가_null이면_UNAUTHORIZED_예외를_던진다() throws Exception {
         setLoggedInAuthentication(null);
 
         assertThatThrownBy(() -> resolver.resolveArgument(paramMember(), null, null, null))
@@ -139,8 +132,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("principal 타입은 정상이지만 member가 null이고 세션 쿠키가 있으면 UNAUTHORIZED 예외와 함께 세션/쿠키를 정리한다")
-    void resolve_WhenMemberIsNullWithSessionCookie_ClearsInvalidSession() throws Exception {
+    void Member가_null이고_세션_쿠키가_있으면_UNAUTHORIZED_예외와_함께_세션과_쿠키를_정리한다() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
@@ -157,8 +149,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("비정상적인 Principal 타입이면 INVALID_TOKEN 예외를 던진다")
-    void resolve_WhenInvalidPrincipal_ThrowsException() throws Exception {
+    void Principal_타입이_비정상이면_INVALID_TOKEN_예외를_던진다() throws Exception {
         TestingAuthenticationToken auth = new TestingAuthenticationToken("notCustomUser", null);
         auth.setAuthenticated(true);
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -169,8 +160,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("비정상적인 Principal 타입이어도 allowInvalidToken이면 null을 반환한다")
-    void resolve_WhenInvalidPrincipalAndAllowInvalidToken_ReturnsNull() throws Exception {
+    void Principal_타입이_비정상이어도_allowInvalidToken이면_null을_반환한다() throws Exception {
         TestingAuthenticationToken auth = new TestingAuthenticationToken("notCustomUser", null);
         auth.setAuthenticated(true);
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -181,8 +171,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("allowInvalidToken=true 는 anonymous=true 없이 사용할 수 없다")
-    void resolve_WhenAllowInvalidTokenWithoutAnonymous_ThrowsIllegalArgumentException() throws Exception {
+    void allowInvalidToken은_anonymous_없이_사용할_수_없다() throws Exception {
         setAnonymousAuthentication();
 
         assertThatThrownBy(() -> resolver.resolveArgument(paramMemberAllowInvalidTokenOnly(), null, null, null))
@@ -191,8 +180,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("비로그인(anonymous) 요청에서 세션 쿠키가 있으면 세션/쿠키를 정리한다")
-    void resolve_WhenAnonymousWithSessionCookie_ClearsInvalidSession() throws Exception {
+    void 비로그인_요청에_세션_쿠키가_있으면_세션과_쿠키를_정리한다() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
@@ -209,8 +197,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("principal 타입이 비정상이고 세션 쿠키가 있으면 INVALID_TOKEN 예외와 함께 세션/쿠키를 정리한다")
-    void resolve_WhenInvalidPrincipalWithSessionCookie_ClearsInvalidSession() throws Exception {
+    void Principal_타입이_비정상이고_세션_쿠키가_있으면_INVALID_TOKEN_예외와_함께_세션과_쿠키를_정리한다() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
@@ -229,8 +216,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("principal 타입이 비정상이고 allowInvalidToken이며 세션 쿠키가 있으면 null과 함께 세션/쿠키를 정리한다")
-    void resolve_WhenInvalidPrincipalWithSessionCookieAndAllowInvalidToken_ReturnsNull() throws Exception {
+    void Principal_타입이_비정상이고_allowInvalidToken이며_세션_쿠키가_있으면_null과_함께_세션과_쿠키를_정리한다() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));
@@ -249,8 +235,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("OAuth2 유저의 member가 null이어도 allowInvalidToken이면 null을 반환한다")
-    void resolve_WhenMemberIsNullAndAllowInvalidToken_ReturnsNull() throws Exception {
+    void OAuth2_사용자의_Member가_null이어도_allowInvalidToken이면_null을_반환한다() throws Exception {
         setLoggedInAuthentication(null);
 
         Object result = resolver.resolveArgument(paramMemberAnonymousTrueAllowInvalidToken(), null, null, null);
@@ -259,8 +244,7 @@ class LoginMemberArgumentResolverTest {
     }
 
     @Test
-    @DisplayName("OAuth2 유저의 member가 null이고 allowInvalidToken이며 세션 쿠키가 있으면 null과 함께 세션/쿠키를 정리한다")
-    void resolve_WhenMemberIsNullWithSessionCookieAndAllowInvalidToken_ReturnsNull() throws Exception {
+    void OAuth2_사용자의_Member가_null이고_allowInvalidToken이며_세션_쿠키가_있으면_null과_함께_세션과_쿠키를_정리한다() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setCookies(new Cookie(SESSION_COOKIE_NAME, "session-token"));

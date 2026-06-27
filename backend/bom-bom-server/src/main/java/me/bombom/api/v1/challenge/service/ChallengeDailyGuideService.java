@@ -260,7 +260,7 @@ public class ChallengeDailyGuideService {
 
         challengeTodoService.insertMindsetDone(participant, today);
         // READ 투두 자동 생성 (뉴스레터 1개 읽기)
-        challengeDailyTodoService.updateChallengeDailyTodo(memberId, null);
+        challengeDailyTodoService.updateChallengeDailyTodo(memberId, null, today);
         // COMMENT 투두 생성 (한 줄 코멘트 작성)
         challengeTodoService.insertCommentDone(participant, today);
 

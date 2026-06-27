@@ -84,8 +84,8 @@ public class Article extends BaseEntity {
         isRead = true;
     }
 
-    public boolean isArrivedToday() {
-        return arrivedDateTime.toLocalDate().isEqual(LocalDate.now());
+    public boolean isArrivedToday(LocalDate today) {
+        return arrivedDateTime.toLocalDate().isEqual(today);
     }
 
     public boolean isNotOwner(Long memberId) {

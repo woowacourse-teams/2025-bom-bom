@@ -1,8 +1,10 @@
 package me.bombom.api.v1.reading.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +15,19 @@ public interface ContinueReadingRankHistoryRepository extends JpaRepository<Cont
     Optional<ContinueReadingRankHistory> findByMemberIdAndPeriod(
             Long memberId,
             LocalDate period
+    );
+
+    @Query("""
+            SELECT h
+            FROM ContinueReadingRankHistory h
+            WHERE h.memberId = :memberId
+              AND h.period < :period
+            ORDER BY h.period DESC
+            """)
+    List<ContinueReadingRankHistory> findRecentBeforePeriodByMemberId(
+            @Param("memberId") Long memberId,
+            @Param("period") LocalDate period,
+            Pageable pageable
     );
 
     @Modifying

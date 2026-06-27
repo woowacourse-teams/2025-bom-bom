@@ -21,6 +21,9 @@
   "continue_reading_snapshot": [
     { "id": 1, "member_id": 1, "day_count": 10, "rank_order": 1 }
   ],
+  "continue_reading_shield": [
+    { "id": 1, "member_id": 1, "monthly_remaining_count": 1, "reward_remaining_count": 0 }
+  ],
   "monthly_reading_snapshot": [
     { "id": 1, "member_id": 1, "current_count": 7, "rank_order": 1, "next_rank_difference": 0 }
   ],

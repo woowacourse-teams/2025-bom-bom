@@ -39,6 +39,7 @@ import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.dto.response.StreakShieldResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
 import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
@@ -319,7 +320,10 @@ public class ReadingService {
                 member.getId(),
                 lastMonth.getYear(),
                 lastMonth.getMonthValue()
-            ).map(MemberContinueReadingRankResponse::from)
+            ).map(flat -> {
+                StreakShieldResponse streakShield = continueReadingShieldService.getStreakShield(member.getId());
+                return MemberContinueReadingRankResponse.of(flat, streakShield);
+            })
             .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                 .addContext(ErrorContextKeys.MEMBER_ID, member.getId())
                 .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingSnapshot"));

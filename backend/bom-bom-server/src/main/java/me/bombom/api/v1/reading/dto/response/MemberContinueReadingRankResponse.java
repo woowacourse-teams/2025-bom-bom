@@ -16,15 +16,22 @@ public record MemberContinueReadingRankResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         int dayCount,
 
-        BadgesResponse badges
+        BadgesResponse badges,
+
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+        StreakShieldResponse streakShield
 ) {
 
-    public static MemberContinueReadingRankResponse from(ContinueReadingRankFlat flat) {
+    public static MemberContinueReadingRankResponse of(
+            ContinueReadingRankFlat flat,
+            StreakShieldResponse streakShield
+    ) {
         return new MemberContinueReadingRankResponse(
                 flat.nickname(),
                 flat.rank(),
                 flat.dayCount(),
-                BadgesResponse.from(flat)
+                BadgesResponse.from(flat),
+                streakShield
         );
     }
 }

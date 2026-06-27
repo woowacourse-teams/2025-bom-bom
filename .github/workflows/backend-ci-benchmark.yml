@@ -1,0 +1,61 @@
+name: Backend CI Benchmark
+
+on:
+  push:
+    branches:
+      - 'codex/ci-benchmark-*'
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml(메인/테스트) 생성
+        shell: bash
+        env:
+          APPLICATION_DEV_PROPERTIES: ${{ secrets.APPLICATION_DEV_PROPERTIES }}
+          APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
+        run: |
+          mkdir -p src/main/resources src/test/resources
+          printf '%s' "${APPLICATION_DEV_PROPERTIES:-}" > src/main/resources/application.yml
+          printf '%s' "${APPLICATION_TEST_PROPERTIES:-}" > src/test/resources/application.yml
+
+      - name: 빌드 및 테스트 profile
+        shell: bash
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
+          ./gradlew build --profile --no-daemon
+
+      - name: Gradle profile 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-ci-benchmark-profile
+          path: backend/bom-bom-server/build/reports/profile/*.html
+
+      - name: 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-ci-benchmark-test-results
+          path: backend/bom-bom-server/build/test-results/test/*.xml
+          if-no-files-found: ignore

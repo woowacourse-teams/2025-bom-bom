@@ -125,7 +125,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), todayArticle.getId()));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), todayArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -161,7 +161,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), pastArticle.getId()));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), pastArticle.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -205,7 +205,7 @@ class ChallengeDailyTodoServiceTest {
         );
 
         // when
-        eventPublisher.publishEvent(new MarkAsReadEvent(member.getId(), article.getId()));
+        eventPublisher.publishEvent(MarkAsReadEvent.of(member.getId(), article.getId(), LocalDateTime.of(FIXED_WEEKDAY, java.time.LocalTime.of(10, 0)), true));
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -229,7 +229,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, FIXED_SATURDAY);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -251,7 +251,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, FIXED_SUNDAY);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -271,7 +271,7 @@ class ChallengeDailyTodoServiceTest {
                 challenge.getId(), member.getId()).orElseThrow();
 
         // when
-        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null);
+        challengeDailyTodoService.updateChallengeDailyTodo(member.getId(), null, FIXED_WEEKDAY);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 

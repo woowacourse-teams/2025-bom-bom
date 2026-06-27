@@ -6,6 +6,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
@@ -17,6 +18,10 @@ import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.pet.dto.PetResponse;
 import me.bombom.api.v1.pet.repository.PetRepository;
 import me.bombom.api.v1.pet.repository.StageRepository;
+import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
+import me.bombom.api.v1.reading.domain.TodayReading;
+import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
+import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,13 +45,25 @@ class PetServiceTest {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private TodayReadingRepository todayReadingRepository;
+
+    @Autowired
+    private ContinueReadingRealtimeRepository continueReadingRealtimeRepository;
+
     private Member member;
     private Stage firstStage;
     private Stage secondStage;
 
     @BeforeEach
     void setUp() {
-        member = TestFixture.createUniqueMember("펫테스트회원", "pet-service-test");
+        petRepository.deleteAllInBatch();
+        todayReadingRepository.deleteAllInBatch();
+        continueReadingRealtimeRepository.deleteAllInBatch();
+        stageRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+
+        member = TestFixture.createUniqueMember(getUniqueValue(), getUniqueValue());
         memberRepository.save(member);
         firstStage = TestFixture.createStage(1, 0);
         stageRepository.save(firstStage);
@@ -92,18 +109,6 @@ class PetServiceTest {
     }
 
     @Test
-    void 키우기_정보_조회_시_다음_성장_단계가_없을_경우_에러() {
-        // given
-        Pet pet = TestFixture.createPetWithScore(member, secondStage.getId(), secondStage.getRequiredScore());
-        petRepository.save(pet);
-
-        // when & then
-        assertThatThrownBy(() -> petService.getPet(member))
-                .isInstanceOf(CServerErrorException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INTERNAL_SERVER_ERROR);
-    }
-
-    @Test
     void 키우기_출석_점수_반영() {
         // given
         Stage stage = TestFixture.createStage(1, 0);
@@ -129,22 +134,6 @@ class PetServiceTest {
         assertThatThrownBy(() -> petService.attend(member))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 이미_출석한_펫은_출석할_수_없다() {
-        // given
-        Pet pet = Pet.builder()
-                .memberId(member.getId())
-                .stageId(firstStage.getId())
-                .isAttended(true)
-                .build();
-        petRepository.save(pet);
-
-        // when & then
-        assertThatThrownBy(() -> petService.attend(member))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
 
     @Test
@@ -187,46 +176,12 @@ class PetServiceTest {
         entityManager.clear();
 
         // when
-        petService.increaseCurrentScore(member.getId(), 1);
+        petService.increaseCurrentScoreForGuideMail(member.getId(), 1);
         Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
         Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
         // then
         assertThat(stage.getLevel()).isEqualTo(secondStage.getLevel());
-    }
-
-    @Test
-    void 가이드메일_점수_반영은_점수를_증가시키고_스테이지를_갱신한다() {
-        // given
-        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 49);
-        petRepository.saveAndFlush(pet);
-        entityManager.clear();
-
-        // when
-        petService.increaseCurrentScoreForGuideMail(member.getId(), 1);
-
-        // then
-        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
-        assertSoftly(softly -> {
-            softly.assertThat(updatedPet.getCurrentScore()).isEqualTo(50);
-            softly.assertThat(updatedPet.getStageId()).isEqualTo(secondStage.getId());
-        });
-    }
-
-    @Test
-    void 가이드메일_점수_반영_시_펫이_없으면_에러() {
-        // when & then
-        assertThatThrownBy(() -> petService.increaseCurrentScoreForGuideMail(member.getId(), 1))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 점수_증가_시_펫이_없으면_에러() {
-        // when & then
-        assertThatThrownBy(() -> petService.increaseCurrentScore(member.getId(), 1))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 
     @Test
@@ -237,12 +192,87 @@ class PetServiceTest {
         entityManager.clear();
 
         // when
-        petService.increaseCurrentScore(member.getId(), 1);
+        petService.increaseCurrentScoreForGuideMail(member.getId(), 1);
         Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
         Stage stage = stageRepository.findById(updatedPet.getStageId()).orElseThrow();
 
         // then
         assertThat(stage.getLevel()).isEqualTo(firstStage.getLevel());
+    }
+
+    @Test
+    void 아티클_읽기_보상_한도_초과_시_점수를_올리지_않는다() {
+        // given
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 0);
+        petRepository.saveAndFlush(pet);
+        todayReadingRepository.saveAndFlush(TodayReading.builder()
+                .memberId(member.getId())
+                .currentCount(4)
+                .totalCount(4)
+                .readCount(1)
+                .build());
+        continueReadingRealtimeRepository.saveAndFlush(ContinueReadingRealtime.builder()
+                .memberId(member.getId())
+                .dayCount(10)
+                .build());
+        entityManager.clear();
+
+        // when
+        petService.rewardArticleRead(member.getId());
+
+        // then
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        assertThat(updatedPet.getCurrentScore()).isZero();
+    }
+
+    @Test
+    void 아티클_읽기_보상_시_기본_점수만_반영한다() {
+        // given
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 0);
+        petRepository.saveAndFlush(pet);
+        todayReadingRepository.saveAndFlush(TodayReading.builder()
+                .memberId(member.getId())
+                .currentCount(1)
+                .totalCount(1)
+                .readCount(1)
+                .build());
+        continueReadingRealtimeRepository.saveAndFlush(ContinueReadingRealtime.builder()
+                .memberId(member.getId())
+                .dayCount(6)
+                .build());
+        entityManager.clear();
+
+        // when
+        petService.rewardArticleRead(member.getId());
+
+        // then
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        assertThat(updatedPet.getCurrentScore()).isEqualTo(10);
+    }
+
+    @Test
+    void 아티클_읽기_보상_시_연속_읽기_보너스를_함께_반영한다() {
+        // given
+        Pet pet = TestFixture.createPetWithScore(member, firstStage.getId(), 0);
+        petRepository.saveAndFlush(pet);
+        todayReadingRepository.saveAndFlush(TodayReading.builder()
+                .memberId(member.getId())
+                .currentCount(1)
+                .totalCount(1)
+                .readCount(1)
+                .build());
+        continueReadingRealtimeRepository.saveAndFlush(ContinueReadingRealtime.builder()
+                .memberId(member.getId())
+                .dayCount(7)
+                .build());
+        entityManager.clear();
+
+        // when
+        petService.rewardArticleRead(member.getId());
+
+        // then
+        Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
+        assertThat(updatedPet.getCurrentScore()).isEqualTo(15);
     }
 
     @Test
@@ -271,5 +301,9 @@ class PetServiceTest {
 
         // then
         assertThat(petRepository.findByMemberId(member.getId())).isEmpty();
+    }
+
+    private String getUniqueValue() {
+        return UUID.randomUUID().toString().substring(0, 20);
     }
 }

@@ -9,7 +9,6 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.pet.ScorePolicyConstants;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
@@ -121,44 +120,6 @@ class ReadingServiceLifecycleTest {
         assertThatThrownBy(() -> readingService.updateWeeklyGoalCount(member.getId(), 5))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 아티클_점수_계산_시_연속읽기정보가_없으면_에러() {
-        // given
-        Member member = memberRepository.save(TestFixture.createUniqueMember("점수없음회원", "score-missing"));
-
-        // when & then
-        assertThatThrownBy(() -> readingService.calculateArticleScore(member.getId()))
-                .isInstanceOf(CIllegalArgumentException.class)
-                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
-    }
-
-    @Test
-    void 아티클_점수는_연속읽기_일수에_따라_보너스를_반영한다() {
-        // given
-        Member bonusMember = memberRepository.save(TestFixture.createUniqueMember("보너스회원", "score-bonus"));
-        Member normalMember = memberRepository.save(TestFixture.createUniqueMember("일반회원", "score-normal"));
-        continueReadingRepository.save(ContinueReadingRealtime.builder()
-                .memberId(bonusMember.getId())
-                .dayCount(ScorePolicyConstants.MIN_CONTINUE_READING_COUNT)
-                .build());
-        continueReadingRepository.save(ContinueReadingRealtime.builder()
-                .memberId(normalMember.getId())
-                .dayCount(ScorePolicyConstants.MIN_CONTINUE_READING_COUNT - 1)
-                .build());
-
-        // when
-        int bonusScore = readingService.calculateArticleScore(bonusMember.getId());
-        int normalScore = readingService.calculateArticleScore(normalMember.getId());
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(bonusScore)
-                    .isEqualTo(ScorePolicyConstants.ARTICLE_READING_SCORE
-                            + ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE);
-            softly.assertThat(normalScore).isEqualTo(ScorePolicyConstants.ARTICLE_READING_SCORE);
-        });
     }
 
     @Test

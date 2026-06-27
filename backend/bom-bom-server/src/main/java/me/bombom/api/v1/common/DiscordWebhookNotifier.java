@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.article.event.MarkAsReadEvent;
 import me.bombom.api.v1.member.service.MemberService;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
@@ -20,8 +21,8 @@ public class DiscordWebhookNotifier {
     @Value("${discord.webhook.new_member.url}")
     private String newMemberWebhookUrl;
 
-    @Value("${discord.webhook.unsubscribeError.url}")
-    private String unsubscribeErrorWebhookUrl;
+    @Value("${discord.webhook.operationError.url}")
+    private String operationErrorWebhookUrl;
 
     private final WebhookHttpClient webhookClient;
     private final MemberService memberService;
@@ -64,7 +65,23 @@ public class DiscordWebhookNotifier {
                                                 + " / Member: " + subscribe.getMemberId())),
                         "timestamp", Instant.now().toString())));
 
-        webhookClient.post(unsubscribeErrorWebhookUrl, body);
+        webhookClient.post(operationErrorWebhookUrl, body);
+    }
+
+    public void sendMarkAsReadErrorNotification(MarkAsReadEvent event, Exception exception) {
+        String message = exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage();
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of("title", "🚨 읽기 카운트 처리 최종 실패",
+                        "description", message,
+                        "color", 0xE74C3C,
+                        "fields", List.of(
+                                Map.of("name", "👤 멤버 ID", "value", String.valueOf(event.memberId()), "inline", true),
+                                Map.of("name", "📰 아티클 ID", "value", String.valueOf(event.articleId()), "inline", true),
+                                Map.of("name", "🕒 읽은 시각", "value", String.valueOf(event.readAt()))
+                        ),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(operationErrorWebhookUrl, body);
     }
 
     private String getNewsletterInfo(Long newsletterId) {

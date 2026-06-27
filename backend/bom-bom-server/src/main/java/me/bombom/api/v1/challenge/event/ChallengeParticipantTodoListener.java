@@ -20,7 +20,7 @@ public class ChallengeParticipantTodoListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void on(MarkAsReadEvent event) {
         try {
-            challengeDailyTodoService.updateChallengeDailyTodo(event.memberId(), event.articleId());
+            challengeDailyTodoService.updateChallengeDailyTodo(event.memberId(), event.articleId(), event.readAt().toLocalDate());
         } catch (Exception e) {
             log.error("챌린지 데일리 투두 저장 중 오류가 발생했습니다. memberId={}", event.memberId(), e);
         }

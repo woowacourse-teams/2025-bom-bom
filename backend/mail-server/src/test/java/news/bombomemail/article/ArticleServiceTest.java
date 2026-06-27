@@ -1,0 +1,249 @@
+package news.bombomemail.article;
+
+import static org.assertj.core.api.SoftAssertions.*;
+
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import java.util.List;
+import java.util.Properties;
+import news.bombomemail.article.domain.Article;
+import news.bombomemail.article.event.ArticleArrivedEvent;
+import news.bombomemail.article.event.ArticleSource;
+import news.bombomemail.article.repository.ArticleRepository;
+import news.bombomemail.article.service.ArticleService;
+import news.bombomemail.article.util.html.HtmlCleanerConfig;
+import news.bombomemail.email.extractor.EmailContentExtractor;
+import news.bombomemail.member.domain.Gender;
+import news.bombomemail.member.domain.Member;
+import news.bombomemail.member.repository.MemberRepository;
+import news.bombomemail.newsletter.domain.Newsletter;
+import news.bombomemail.newsletter.repository.NewsletterRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
+
+@DataJpaTest
+@ActiveProfiles("test")
+@Import({ArticleService.class, HtmlCleanerConfig.class})
+@RecordApplicationEvents
+class ArticleServiceTest {
+
+    @Autowired
+    ArticleService articleService;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
+    NewsletterRepository newsletterRepository;
+
+    @Autowired
+    ArticleRepository articleRepository;
+
+    @Autowired
+    ApplicationEvents applicationEvents;
+
+    private Session session;
+
+    @BeforeEach
+    void setup() {
+        session = Session.getDefaultInstance(new Properties());
+        memberRepository.save(Member.builder()
+                .email("test-member@example.com")
+                .nickname("테스트멤버")
+                .gender(Gender.MALE)
+                .roleId(1L)
+                .providerId("test")
+                .provider("google")
+                .build());
+        newsletterRepository.save(Newsletter.builder()
+                .name("테스트뉴스레터")
+                .description("설명")
+                .imageUrl("이미지")
+                .email("test-newsletter@example.com")
+                .categoryId(1L)
+                .detailId(1L)
+                .build());
+    }
+
+    @Test
+    void TO_수신자가_없으면_저장되지_않고_false_반환() throws Exception {
+        // given
+        MimeMessage msg = new MimeMessage(session);
+        msg.setSubject("제목만");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = EmailContentExtractor.extractContents(msg);
+
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(articleRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 등록된_회원과_뉴스레터가_있으면_Article_저장_후_true_반환() throws Exception {
+        // given
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("test-member@example.com"));
+        msg.setFrom(new InternetAddress("test-newsletter@example.com"));
+        msg.setSubject("테스트 이메일 제목");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = EmailContentExtractor.extractContents(msg);
+
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            List<Article> all = articleRepository.findAll();
+            softly.assertThat(all).hasSize(1);
+            Article article = all.get(0);
+            softly.assertThat(article.getTitle()).isEqualTo("테스트 이메일 제목");
+            softly.assertThat(article.getContents()).contains("테스트용 이메일 본문입니다");
+            softly.assertThat(article.getExpectedReadTime()).isOne();
+            softly.assertThat(article.getContentsSummary()).isEqualTo("이것은 테스트용 이메일 본문입니다.");
+        });
+    }
+
+    @Test
+    void article_저장_후_EMAIL_RECEIVED_source와_제목_unsubscribeUrl을_이벤트로_발행한다() throws Exception {
+        // given
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("test-member@example.com"));
+        msg.setFrom(new InternetAddress("test-newsletter@example.com"));
+        msg.setSubject("테스트 이메일 제목");
+        String content = """
+                <p>이것은 테스트용 이메일 본문입니다.</p>
+                <a href="https://example.com/unsubscribe?id=123">구독 취소</a>
+                """;
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        Article article = articleRepository.findAll().getFirst();
+        Member member = memberRepository.findByEmail("test-member@example.com").orElseThrow();
+        Newsletter newsletter = newsletterRepository.findByEmail("test-newsletter@example.com").orElseThrow();
+        ArticleArrivedEvent event = applicationEvents.stream(ArticleArrivedEvent.class)
+                .findFirst()
+                .orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            softly.assertThat(event.newsletterId()).isEqualTo(newsletter.getId());
+            softly.assertThat(event.newsletterName()).isEqualTo("테스트뉴스레터");
+            softly.assertThat(event.articleId()).isEqualTo(article.getId());
+            softly.assertThat(event.articleTitle()).isEqualTo("테스트 이메일 제목");
+            softly.assertThat(event.memberId()).isEqualTo(member.getId());
+            softly.assertThat(event.unsubscribeUrl()).isEqualTo("https://example.com/unsubscribe?id=123");
+            softly.assertThat(event.contents()).isEqualTo(content);
+            softly.assertThat(event.source()).isEqualTo(ArticleSource.EMAIL_RECEIVED);
+        });
+    }
+
+    @Test
+    void 회원이_등록되어_있지_않으면_저장되지_않고_false_반환() throws Exception {
+        // given
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("no-member@example.com"));
+        msg.setFrom(new InternetAddress("test-newsletter@example.com"));
+        msg.setSubject("테스트");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = EmailContentExtractor.extractContents(msg);
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(articleRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 뉴스레터가_등록되어_있지_않으면_저장되지_않고_false_반환() throws Exception {
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("test-member@example.com"));
+        msg.setFrom(new InternetAddress("no-news@example.com"));
+        msg.setSubject("테스트");
+        msg.setText("이것은 테스트용 이메일 본문입니다.");
+        String content = EmailContentExtractor.extractContents(msg);
+
+        boolean result = articleService.save(msg, content);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result).isFalse();
+            softly.assertThat(articleRepository.findAll()).isEmpty();
+        });
+    }
+
+    @Test
+    void 본문이_빈_문자열인_경우_expectedReadTime_0_summary_는_빈_문자열로_저장() throws Exception {
+        // given
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("test-member@example.com"));
+        msg.setFrom(new InternetAddress("test-newsletter@example.com"));
+        msg.setSubject("제목만");
+        msg.setText("");
+        String content = EmailContentExtractor.extractContents(msg);
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            Article a = articleRepository.findAll().get(0);
+            softly.assertThat(a.getContents()).isEmpty();
+            softly.assertThat(a.getExpectedReadTime()).isZero();
+            softly.assertThat(a.getContentsSummary()).isEmpty();
+        });
+    }
+
+    @Test
+    void 긴_본문은_summary가_100자_뒤에_점점점_을_붙여_저장() throws Exception {
+        // given
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 200; i++) {
+            sb.append("a");
+        }
+        String longBody = sb.toString();
+
+        MimeMessage msg = new MimeMessage(session);
+        msg.addRecipient(MimeMessage.RecipientType.TO,
+                new InternetAddress("test-member@example.com"));
+        msg.setFrom(new InternetAddress("test-newsletter@example.com"));
+        msg.setSubject("긴본문테스트");
+        msg.setText(longBody);
+        String content = EmailContentExtractor.extractContents(msg);
+
+        // when
+        boolean result = articleService.save(msg, content);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isTrue();
+            Article a = articleRepository.findAll().get(0);
+            softly.assertThat(a.getContentsSummary()).hasSize(103);
+            softly.assertThat(a.getContentsSummary()).endsWith("...");
+        });
+    }
+}

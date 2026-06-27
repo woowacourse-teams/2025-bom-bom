@@ -1,200 +1,354 @@
 package me.bombom.api.v1.challenge.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import io.restassured.http.ContentType;
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.Category;
-import me.bombom.api.v1.newsletter.domain.Newsletter;
-import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroupItem;
-import me.bombom.api.v1.newsletter.repository.CategoryRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupItemRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.time.MutableClock;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;
+import me.bombom.support.acceptance.ResetsAcceptanceData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-@IntegrationTest
-@AutoConfigureMockMvc
+@AcceptanceTest("acceptance/challenge/list-base.json")
 class ChallengeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 26);
 
     @Autowired
-    private ChallengeRepository challengeRepository;
+    private MutableClock clock;
 
     @Autowired
-    private ChallengeParticipantRepository challengeParticipantRepository;
-
-    @Autowired
-    private NewsletterGroupRepository newsletterGroupRepository;
-
-    @Autowired
-    private NewsletterGroupItemRepository newsletterGroupItemRepository;
-
-    @Autowired
-    private NewsletterRepository newsletterRepository;
-
-    @Autowired
-    private NewsletterDetailRepository newsletterDetailRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @MockitoBean
-    private me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
-    private Member member;
-    private CustomOAuth2User customOAuth2User;
-    private OAuth2AuthenticationToken authToken;
-    private List<Newsletter> newsletters;
-    private LocalDate today;
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void setUp() {
-        challengeParticipantRepository.deleteAllInBatch();
-        newsletterGroupItemRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
+    void 시간을_고정한다() {
+        clock.setDate(TODAY);
+    }
 
-        member = TestFixture.normalMemberFixture();
-        memberRepository.save(member);
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-not-joined.json")
+    void 비로그인_상태로_챌린지_목록_조회() {
+        List<Map<String, Object>> result = getChallenges(null, null);
+        Map<String, Object> challenge = result.getFirst();
 
-        List<Category> categories = TestFixture.createCategories();
-        categoryRepository.saveAll(categories);
+        assertSoftly(softly -> {
+            softly.assertThat(challenge.get("id")).isEqualTo(1);
+            softly.assertThat(challenge.get("title")).isEqualTo("챌린지");
+            softly.assertThat(challenge).containsKeys("participantCount", "newsletters", "status");
+            softly.assertThat(participationInfo(challenge).get("isJoined")).isEqualTo(false);
+            softly.assertThat(newsletters(challenge)).isNotEmpty();
+        });
+    }
 
-        List<NewsletterDetail> newsletterDetails = TestFixture.createNewsletterDetails();
-        newsletterDetailRepository.saveAll(newsletterDetails);
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-joined.json")
+    void 로그인_상태로_챌린지_목록_조회() {
+        List<Map<String, Object>> result = getChallenges(MEMBER_ID, null);
+        Map<String, Object> challenge = result.getFirst();
 
-        newsletters = TestFixture.createNewslettersWithDetails(categories, newsletterDetails);
-        newsletterRepository.saveAll(newsletters);
+        assertSoftly(softly -> {
+            softly.assertThat(challenge.get("id")).isEqualTo(1);
+            softly.assertThat(participationInfo(challenge).get("isJoined")).isEqualTo(true);
+            softly.assertThat(participationInfo(challenge)).containsKey("progress");
+        });
+    }
 
-        today = LocalDate.now();
+    @Test
+    void 챌린지가_없을_때_빈_배열_반환() {
+        List<Map<String, Object>> result = getChallenges(null, null);
 
-        Map<String, Object> attributes = Map.of(
-                "id", member.getId().toString(),
-                "email", member.getEmail(),
-                "name", member.getNickname()
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-not-joined.json")
+    void view_summary_파라미터로_요약_목록_조회() {
+        List<Map<String, Object>> result = getChallenges(null, "summary");
+
+        assertThat(result.getFirst().get("id")).isEqualTo(1);
+    }
+
+    @Test
+    void view_허용되지_않은_값이면_400_반환() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .queryParam("view", "invalid")
+                .when()
+                .get("/api/v1/challenges")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-not-joined.json")
+    void 챌린지_상세_정보를_조회한다() {
+        Map<String, Object> result = getChallengeInfo(1);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("name")).isEqualTo("챌린지");
+            softly.assertThat(result.get("generation")).isEqualTo(1);
+            softly.assertThat(result.get("startDate")).isEqualTo("2026-01-31");
+            softly.assertThat(result.get("endDate")).isEqualTo("2026-02-10");
+            softly.assertThat(result.get("totalDays")).isEqualTo(10);
+            softly.assertThat(result.get("requiredDays")).isEqualTo(8);
+        });
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-not-joined.json")
+    void 챌린지_랜딩_정보를_조회한다() {
+        Map<String, Object> result = getChallengeLanding(1);
+        List<Map<String, Object>> newsletters = newsletters(result);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("name")).isEqualTo("챌린지");
+            softly.assertThat(result.get("generation")).isEqualTo(1);
+            softly.assertThat(result.get("grantsBadge")).isEqualTo(false);
+            softly.assertThat(newsletters).hasSize(1);
+            softly.assertThat(newsletters.getFirst().get("name")).isEqualTo("뉴스픽");
+            softly.assertThat(newsletters.getFirst().get("category")).isEqualTo("경제");
+        });
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-teams.json")
+    void 팀_목록을_조회한다() {
+        Map<String, Object> result = getTeamList(1, MEMBER_ID);
+        List<Map<String, Object>> teams = teams(result);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("totalTeamCount")).isEqualTo(3);
+            softly.assertThat(result.get("myTeamId")).isEqualTo(2);
+            softly.assertThat(teams).hasSize(3);
+            softly.assertThat(teams.get(0).get("teamId")).isEqualTo(1);
+            softly.assertThat(teams.get(0).get("teamNumber")).isEqualTo(1);
+            softly.assertThat(teams.get(0).get("isMyTeam")).isEqualTo(false);
+            softly.assertThat(teams.get(1).get("teamId")).isEqualTo(2);
+            softly.assertThat(teams.get(1).get("teamNumber")).isEqualTo(2);
+            softly.assertThat(teams.get(1).get("isMyTeam")).isEqualTo(true);
+            softly.assertThat(teams.get(2).get("teamId")).isEqualTo(3);
+            softly.assertThat(teams.get(2).get("teamNumber")).isEqualTo(3);
+            softly.assertThat(teams.get(2).get("isMyTeam")).isEqualTo(false);
+        });
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet({
+            "acceptance/challenge/list-not-joined.json",
+            "acceptance/challenge/list-subscribe.json"
+    })
+    void 챌린지_신청_가능_여부를_조회한다() {
+        Map<String, Object> result = getEligibility(1, MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("canApply")).isEqualTo(true);
+            softly.assertThat(result.get("reason")).isEqualTo("ELIGIBLE");
+        });
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-not-joined.json")
+    void 구독하지_않은_뉴스레터가_있으면_챌린지_신청_불가를_응답한다() {
+        Map<String, Object> result = getEligibility(1, MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("canApply")).isEqualTo(false);
+            softly.assertThat(result.get("reason")).isEqualTo("NOT_SUBSCRIBED");
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    @AdditionalAcceptanceDataSet({
+            "acceptance/challenge/list-not-joined.json",
+            "acceptance/challenge/list-subscribe.json"
+    })
+    void 챌린지를_신청한다() {
+        request(MEMBER_ID)
+                .when()
+                .post("/api/v1/challenges/{id}/application", 1)
+                .then()
+                .statusCode(201);
+
+        assertThat(countParticipants(1, MEMBER_ID)).isEqualTo(1);
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    @AdditionalAcceptanceDataSet("acceptance/challenge/list-applied-future.json")
+    void 신청한_챌린지를_취소한다() {
+        request(MEMBER_ID)
+                .when()
+                .delete("/api/v1/challenges/{id}/application", 1)
+                .then()
+                .statusCode(204);
+
+        assertThat(countParticipants(1, MEMBER_ID)).isZero();
+    }
+
+    @Test
+    void 챌린지_상세_조회에서_id가_양수가_아니면_400을_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/challenges/{id}", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_신청_가능_여부_조회에서_id가_양수가_아니면_400을_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/challenges/{id}/eligibility", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_신청에서_id가_양수가_아니면_400을_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
+                .when()
+                .post("/api/v1/challenges/{id}/application", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_취소에서_id가_양수가_아니면_400을_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
+                .when()
+                .delete("/api/v1/challenges/{id}/application", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 팀_목록_조회에서_id가_양수가_아니면_400을_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{id}/teams", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    private static List<Map<String, Object>> getChallenges(Long memberId, String view) {
+        RequestSpecification request = RestAssured.given()
+                .accept(ContentType.JSON);
+        if (memberId != null) {
+            request.header(AcceptanceTestHeaders.MEMBER_ID, memberId);
+        }
+        if (view != null) {
+            request.queryParam("view", view);
+        }
+
+        return request
+                .when()
+                .get("/api/v1/challenges")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getList("$");
+    }
+
+    private static Map<String, Object> getChallengeInfo(long challengeId) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/challenges/{id}", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getChallengeLanding(long challengeId) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/challenges/{id}/landing", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getTeamList(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{id}/teams", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getEligibility(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{id}/eligibility", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static RequestSpecification request(long memberId) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
+    }
+
+    private int countParticipants(long challengeId, long memberId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from challenge_participant where challenge_id = ? and member_id = ?",
+                Integer.class,
+                challengeId,
+                memberId
         );
-        customOAuth2User = new CustomOAuth2User(attributes, member, null, null);
-
-        authToken = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "registrationId"
-        );
+        return count == null ? 0 : count;
     }
 
-    @Test
-    void 비로그인_상태로_챌린지_목록_조회() throws Exception {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        // when & then - 시작전 챌린지이므로 반환되어야 함
-        mockMvc.perform(get("/api/v1/challenges"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].id").value(challenge.getId()))
-                .andExpect(jsonPath("$[0].title").value("챌린지"))
-                .andExpect(jsonPath("$[0].participantCount").exists())
-                .andExpect(jsonPath("$[0].newsletters").isArray())
-                .andExpect(jsonPath("$[0].status").exists())
-                .andExpect(jsonPath("$[0].participationInfo.isJoined").value(false));
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> participationInfo(Map<String, Object> challenge) {
+        return (Map<String, Object>) challenge.get("participationInfo");
     }
 
-    @Test
-    void 로그인_상태로_챌린지_목록_조회() throws Exception {
-        // given
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.minusDays(10), today.plusDays(10), group.getId());
-        challengeRepository.save(challenge);
-
-        ChallengeParticipant participant = TestFixture.createChallengeParticipant(
-                challenge.getId(),
-                member.getId(),
-                5,
-                true
-        );
-        challengeParticipantRepository.save(participant);
-
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges")
-                        .with(authentication(authToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].id").value(challenge.getId()))
-                .andExpect(jsonPath("$[0].participationInfo.isJoined").value(true))
-                .andExpect(jsonPath("$[0].participationInfo.progress").exists());
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> newsletters(Map<String, Object> challenge) {
+        return (List<Map<String, Object>>) challenge.get("newsletters");
     }
 
-    @Test
-    void 챌린지가_없을_때_빈_배열_반환() throws Exception {
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
-    }
-
-    @Test
-    void view_summary_파라미터로_요약_목록_조회() throws Exception {
-        // given: EARLY 챌린지 하나
-        NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-        newsletterGroupRepository.save(group);
-        Challenge challenge = TestFixture.createChallenge("챌린지", 1, today.plusDays(5), today.plusDays(15), group.getId());
-        challengeRepository.save(challenge);
-        NewsletterGroupItem item = TestFixture.createNewsletterGroupItem(challenge.getNewsletterGroupId(), newsletters.get(0).getId());
-        newsletterGroupItemRepository.save(item);
-
-        // when & then
-        mockMvc.perform(get("/api/v1/challenges").param("view", "summary"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].id").value(challenge.getId()));
-    }
-
-    @Test
-    void view_허용되지_않은_값이면_400_반환() throws Exception {
-        mockMvc.perform(get("/api/v1/challenges").param("view", "invalid"))
-                .andExpect(status().isBadRequest());
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> teams(Map<String, Object> response) {
+        return (List<Map<String, Object>>) response.get("teams");
     }
 }
-

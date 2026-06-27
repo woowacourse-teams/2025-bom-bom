@@ -1,0 +1,30 @@
+{
+  "reading_snapshot_meta": [
+    {
+      "snapshot_type": "MONTHLY",
+      "snapshot_at": "${CURRENT_DATE_TIME}"
+    },
+    {
+      "snapshot_type": "CONTINUE",
+      "snapshot_at": "${CURRENT_DATE_TIME}"
+    }
+  ],
+  "today_reading": [
+    { "id": 1, "member_id": 1, "total_count": 3, "current_count": 1, "read_count": 1 }
+  ],
+  "weekly_reading": [
+    { "id": 1, "member_id": 1, "goal_count": 5, "current_count": 3 }
+  ],
+  "continue_reading_realtime": [
+    { "id": 1, "member_id": 1, "day_count": 10, "max_day_count": 10 }
+  ],
+  "continue_reading_snapshot": [
+    { "id": 1, "member_id": 1, "day_count": 10, "rank_order": 1 }
+  ],
+  "monthly_reading_snapshot": [
+    { "id": 1, "member_id": 1, "current_count": 7, "rank_order": 1, "next_rank_difference": 0 }
+  ],
+  "monthly_reading_realtime": [
+    { "id": 1, "member_id": 1, "current_count": 7 }
+  ]
+}

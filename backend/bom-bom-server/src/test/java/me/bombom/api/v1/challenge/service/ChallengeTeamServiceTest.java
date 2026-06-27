@@ -19,7 +19,7 @@ import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,13 +56,6 @@ class ChallengeTeamServiceTest {
 
     @BeforeEach
     void setUp() {
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         var group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("테스트 그룹"));
         challenge = challengeRepository.save(TestFixture.createChallenge(
                 "테스트 챌린지",

@@ -1,8 +1,10 @@
 package me.bombom.api.v1.reading.scheduler;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.reading.service.ContinueReadingShieldService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,12 +21,15 @@ public class ReadingScheduler {
     private static final String MONTHLY_CRON = "0 0 0 1 * ?";
 
     private final ReadingService readingService;
+    private final ContinueReadingShieldService continueReadingShieldService;
+    private final Clock clock;
 
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "daily_reset_reading_count", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
     public void dailyResetReadingCount() {
         log.info("오늘 읽기 초기화 실행");
         readingService.resetContinueReadingCount();
+        continueReadingShieldService.resetMonthlyShieldsIfFirstDay();
         readingService.resetTodayReadingCount();
     }
 
@@ -84,7 +89,7 @@ public class ReadingScheduler {
      * - 00:10분부터: 업데이트 (10분간 데이터 쌓임)
      */
     private boolean shouldSkipRankingUpdate() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
 
         // 매월 1일이고 시간이 00:00~00:09분 사이인 경우 스킵
         if (now.getDayOfMonth() == 1) {

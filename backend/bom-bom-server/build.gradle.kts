@@ -2,6 +2,8 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.openapi.generator") version "7.10.0"
+    id("com.diffplug.spotless") version "7.2.1"
 }
 
 group = "me.bombom"
@@ -31,7 +33,6 @@ dependencyManagement {
 }
 
 dependencies {
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -60,6 +61,7 @@ dependencies {
 
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.rest-assured:spring-mock-mvc")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:testcontainers-mysql")
@@ -103,11 +105,53 @@ dependencies {
     implementation("org.springframework:spring-aspects")
 }
 
-// Querydsl 생성된 파일 정리
+// Querydsl/OpenAPI 생성된 파일 정리
 tasks.named<Delete>("clean") {
-    delete("src/main/generated")
+    delete(layout.buildDirectory.dir("generated"))
+}
+
+val reuseTestcontainers = providers.gradleProperty("reuseTestcontainers")
+    .map(String::toBoolean)
+    .orElse(false)
+
+fun Test.configureIntegrationExecution() {
+    maxParallelForks = 2
+
+    if (reuseTestcontainers.get()) {
+        environment("TESTCONTAINERS_REUSE_ENABLE", "true")
+        systemProperty("bombom.testcontainers.reuse", "true")
+    }
 }
 
 tasks.test {
     useJUnitPlatform()
+    configureIntegrationExecution()
 }
+
+val testSourceSet = sourceSets.named("test")
+
+tasks.register<Test>("unitTest") {
+    group = "verification"
+    description = "Spring Context 없이 실행되는 단위 테스트만 실행합니다."
+    testClassesDirs = testSourceSet.get().output.classesDirs
+    classpath = testSourceSet.get().runtimeClasspath
+    useJUnitPlatform {
+        excludeTags("integration")
+    }
+    maxParallelForks = 2
+}
+
+tasks.register<Test>("integrationTest") {
+    group = "verification"
+    description = "Spring Context 또는 DB를 사용하는 통합 테스트만 실행합니다."
+    testClassesDirs = testSourceSet.get().output.classesDirs
+    classpath = testSourceSet.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("integration")
+    }
+    configureIntegrationExecution()
+    shouldRunAfter(tasks.named("unitTest"))
+}
+
+apply(from = "$projectDir/gradle/openapi-generator.gradle")
+apply(from = "$projectDir/gradle/openapi-generated-format.gradle")

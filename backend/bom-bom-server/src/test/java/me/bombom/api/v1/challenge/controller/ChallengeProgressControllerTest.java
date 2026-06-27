@@ -1,166 +1,247 @@
 package me.bombom.api.v1.challenge.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import io.restassured.http.ContentType;
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.auth.dto.CustomOAuth2User;
-import me.bombom.api.v1.challenge.domain.Challenge;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyResult;
-import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
-import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
-import me.bombom.api.v1.challenge.domain.ChallengeTeam;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeTeamRepository;
-import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.member.repository.MemberRepository;
-import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
-import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
+import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
-@AutoConfigureMockMvc
+@AcceptanceTest("acceptance/challenge/progress.json")
 class ChallengeProgressControllerTest {
 
-        @Autowired
-        private MockMvc mockMvc;
+    private static final long MEMBER_ID = 1L;
+    private static final long OTHER_MEMBER_ID = 2L;
+    private static final LocalDate TODAY = LocalDate.of(2026, 6, 22);
 
-        @Autowired
-        private MemberRepository memberRepository;
+    @Autowired
+    private MutableClock clock;
 
-        @Autowired
-        private ChallengeRepository challengeRepository;
+    @BeforeEach
+    void 시간을_고정한다() {
+        clock.setDate(TODAY);
+    }
 
-        @Autowired
-        private ChallengeParticipantRepository challengeParticipantRepository;
+    @Test
+    void 내_진행상황을_조회한다() {
+        Map<String, Object> result = getMemberProgress(1, MEMBER_ID);
+        List<Map<String, Object>> todayTodos = todayTodos(result);
 
-        @Autowired
-        private ChallengeTeamRepository challengeTeamRepository;
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("nickname")).isEqualTo("userA");
+            softly.assertThat(result.get("totalDays")).isEqualTo(10);
+            softly.assertThat(result.get("isSurvived")).isEqualTo(false);
+            softly.assertThat(result.get("completedDays")).isEqualTo(2);
+            softly.assertThat(result.get("streak")).isEqualTo(2);
+            softly.assertThat(result.get("shield")).isEqualTo(0);
+            softly.assertThat(todayTodos).hasSize(2);
+            softly.assertThat(todayTodos)
+                    .extracting(todo -> todo.get("challengeTodoType"))
+                    .containsExactlyInAnyOrder("READ", "COMMENT");
+            softly.assertThat(todayTodos)
+                    .filteredOn(todo -> "READ".equals(todo.get("challengeTodoType")))
+                    .extracting(todo -> todo.get("challengeTodoStatus"))
+                    .containsExactly("COMPLETE");
+        });
+    }
 
-        @Autowired
-        private ChallengeDailyResultRepository challengeDailyResultRepository;
+    @Test
+    void 특정_팀_진행상황을_조회한다() {
+        Map<String, Object> result = getTeamProgress(1, 1);
+        List<Map<String, Object>> members = members(result);
+        List<Map<String, Object>> firstMemberProgresses = dailyProgresses(members.getFirst());
 
-        @Autowired
-        private NewsletterGroupRepository newsletterGroupRepository;
+        assertSoftly(softly -> {
+            softly.assertThat(teamSummary(result).get("achievementAverage")).isEqualTo(77);
+            softly.assertThat(members).hasSize(2);
+            softly.assertThat(members.get(0).get("nickname")).isEqualTo("userB");
+            softly.assertThat(firstMemberProgresses).hasSize(2);
+            softly.assertThat(firstMemberProgresses.get(0).get("status")).isEqualTo("COMPLETE");
+            softly.assertThat(firstMemberProgresses.get(1).get("status")).isEqualTo("SHIELD");
+            softly.assertThat(members.get(1).get("nickname")).isEqualTo("userA");
+        });
+    }
 
-        private Member memberA;
-        private Challenge challenge;
-        private OAuth2AuthenticationToken authToken;
+    @Test
+    void 챌린지_스트릭을_조회한다() {
+        Map<String, Object> result = getMemberStreak(1, MEMBER_ID, null);
+        List<Map<String, Object>> streakDays = streakDays(result);
 
-        @AfterEach
-        void tearDown() {
-                challengeDailyResultRepository.deleteAllInBatch();
-                challengeParticipantRepository.deleteAllInBatch();
-                challengeTeamRepository.deleteAllInBatch();
-                challengeRepository.deleteAllInBatch();
-                memberRepository.deleteAllInBatch();
-                newsletterGroupRepository.deleteAllInBatch();
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("streak")).isEqualTo(2);
+            softly.assertThat(streakDays).hasSize(2);
+            softly.assertThat(streakDays.get(0).get("date")).isEqualTo("2026-06-21");
+            softly.assertThat(streakDays.get(0).get("isCompleted")).isEqualTo(true);
+            softly.assertThat(streakDays.get(0).get("isShieldApplied")).isEqualTo(false);
+            softly.assertThat(streakDays.get(1).get("date")).isEqualTo("2026-06-22");
+            softly.assertThat(streakDays.get(1).get("isShieldApplied")).isEqualTo(true);
+        });
+    }
+
+    @Test
+    void 챌린지_스트릭_limit_파라미터를_적용한다() {
+        Map<String, Object> result = getMemberStreak(1, MEMBER_ID, 1);
+        List<Map<String, Object>> streakDays = streakDays(result);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("streak")).isEqualTo(2);
+            softly.assertThat(streakDays).hasSize(1);
+            softly.assertThat(streakDays.getFirst().get("date")).isEqualTo("2026-06-22");
+        });
+    }
+
+    @Test
+    void 수료증_정보를_조회한다() {
+        clock.setDate(LocalDate.of(2026, 6, 28));
+
+        Map<String, Object> result = getCertificationInfo(1, OTHER_MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("nickname")).isEqualTo("userB");
+            softly.assertThat(result.get("challengeName")).isEqualTo("Test Challenge");
+            softly.assertThat(result.get("generation")).isEqualTo(1);
+            softly.assertThat(result.get("startDate")).isEqualTo("2026-06-17");
+            softly.assertThat(result.get("endDate")).isEqualTo("2026-06-27");
+            softly.assertThat(result.get("medal")).isEqualTo("FAIL");
+            softly.assertThat(result.get("medalCondition")).isEqualTo(0);
+        });
+    }
+
+    @Test
+    void 내_진행상황_조회에서_id가_양수가_아니면_400을_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/me", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 팀_진행상황_조회에서_챌린지_id가_양수가_아니면_400을_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/teams/{teamId}", -1, 1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 팀_진행상황_조회에서_팀_id가_양수가_아니면_400을_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/teams/{teamId}", 1, -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_스트릭_조회에서_id가_양수가_아니면_400을_반환한다() {
+        request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/me/streak", -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 챌린지_스트릭_조회에서_limit가_양수가_아니면_400을_반환한다() {
+        request(MEMBER_ID)
+                .queryParam("limit", 0)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/me/streak", 1)
+                .then()
+                .statusCode(400);
+    }
+
+    private static Map<String, Object> getMemberProgress(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/me", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getTeamProgress(long challengeId, long teamId) {
+        return request(MEMBER_ID)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/teams/{teamId}", challengeId, teamId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static Map<String, Object> getMemberStreak(long challengeId, long memberId, Integer limit) {
+        RequestSpecification request = request(memberId);
+        if (limit != null) {
+            request.queryParam("limit", limit);
         }
 
-        @BeforeEach
-        void setUp() {
-                memberA = memberRepository.save(TestFixture.createUniqueMember("userA", "A"));
+        return request
+                .when()
+                .get("/api/v1/challenges/{challengeId}/progress/me/streak", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
 
-                NewsletterGroup group = TestFixture.createNewsletterGroup("그룹");
-                newsletterGroupRepository.save(group);
-                challenge = challengeRepository.save(TestFixture.createChallenge(
-                                "Test Challenge",
-                                LocalDate.now().minusDays(5),
-                                LocalDate.now().plusDays(5),
-                                10,
-                                group.getId()));
+    private static Map<String, Object> getCertificationInfo(long challengeId, long memberId) {
+        return request(memberId)
+                .when()
+                .get("/api/v1/challenges/{challengeId}/certification", challengeId)
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
 
-                Map<String, Object> attributes = Map.of(
-                                "id", memberA.getId().toString(),
-                                "email", memberA.getEmail(),
-                                "name", memberA.getNickname());
+    private static RequestSpecification request(long memberId) {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, memberId);
+    }
 
-                CustomOAuth2User customOAuth2User = new CustomOAuth2User(attributes, memberA, null, null);
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> todayTodos(Map<String, Object> result) {
+        return (List<Map<String, Object>>) result.get("todayTodos");
+    }
 
-                authToken = new OAuth2AuthenticationToken(
-                                customOAuth2User,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                                "google");
-        }
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> streakDays(Map<String, Object> result) {
+        return (List<Map<String, Object>>) result.get("streakDays");
+    }
 
-        private ChallengeParticipant createTeamParticipant(Long challengeId, Long memberId, Long teamId,
-                        int completedDays, boolean isSurvived) {
-                return ChallengeParticipant.builder()
-                                .challengeId(challengeId)
-                                .memberId(memberId)
-                                .challengeTeamId(teamId)
-                                .completedDays(completedDays)
-                                .isSurvived(isSurvived)
-                                .shield(0)
-                                .build();
-        }
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> teamSummary(Map<String, Object> result) {
+        return (Map<String, Object>) result.get("teamSummary");
+    }
 
-        private ChallengeTeam createChallengeTeam(Long challengeId, int progress) {
-                return ChallengeTeam.builder()
-                                .challengeId(challengeId)
-                                .progress(progress)
-                                .build();
-        }
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> members(Map<String, Object> result) {
+        return (List<Map<String, Object>>) result.get("members");
+    }
 
-        private ChallengeDailyResult createChallengeDailyResult(Long participantId, LocalDate date,
-                        ChallengeDailyStatus status) {
-                return ChallengeDailyResult.builder()
-                                .participantId(participantId)
-                                .date(date)
-                                .status(status)
-                                .build();
-        }
-
-        @Test
-        void 특정_팀_진행상황을_조회한다() throws Exception {
-                // given
-                Member memberB = memberRepository.save(TestFixture.createUniqueMember("userB", "B"));
-                ChallengeTeam team = challengeTeamRepository.save(createChallengeTeam(challenge.getId(), 77));
-
-                // Member A: Completed 2 days
-                challengeParticipantRepository.save(
-                                createTeamParticipant(challenge.getId(), memberA.getId(), team.getId(), 2, false));
-
-                // Member B: Completed 3 days
-                ChallengeParticipant participantB = challengeParticipantRepository.save(
-                                createTeamParticipant(challenge.getId(), memberB.getId(), team.getId(), 3, true));
-
-                // Daily Results for Member B
-                ChallengeDailyResult resultB1 = createChallengeDailyResult(participantB.getId(), LocalDate.now(),
-                                ChallengeDailyStatus.COMPLETE);
-                ChallengeDailyResult resultB2 = createChallengeDailyResult(participantB.getId(),
-                                LocalDate.now().plusDays(1),
-                                ChallengeDailyStatus.SHIELD);
-                challengeDailyResultRepository.saveAll(List.of(resultB1, resultB2));
-
-                // when & then
-                mockMvc.perform(get("/api/v1/challenges/{id}/progress/teams/{teamId}", challenge.getId(), team.getId())
-                                .with(authentication(authToken)))
-                                .andExpect(status().isOk())
-                                .andDo(print())
-                                .andExpect(jsonPath("$.teamSummary.achievementAverage").value(team.getProgress()))
-                                .andExpect(jsonPath("$.members").isArray())
-                                .andExpect(jsonPath("$.members[0].nickname").value(memberB.getNickname())) // Sorted by completedDays
-                                .andExpect(jsonPath("$.members[0].dailyProgresses").isArray())
-                                .andExpect(jsonPath("$.members[0].dailyProgresses[0].status").value("COMPLETE"))
-                                .andExpect(jsonPath("$.members[0].dailyProgresses[1].status").value("SHIELD"))
-                                .andExpect(jsonPath("$.members[1].nickname").value(memberA.getNickname()))
-                                .andDo(print());
-        }
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> dailyProgresses(Map<String, Object> member) {
+        return (List<Map<String, Object>>) member.get("dailyProgresses");
+    }
 }

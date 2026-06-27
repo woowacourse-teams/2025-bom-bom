@@ -22,7 +22,7 @@ import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
-import me.bombom.support.IntegrationTest;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,6 +273,34 @@ class PetServiceTest {
         // then
         Pet updatedPet = petRepository.findById(pet.getId()).orElseThrow();
         assertThat(updatedPet.getCurrentScore()).isEqualTo(15);
+    }
+
+    @Test
+    void 신규_펫을_생성한다() {
+        // when
+        petService.createPet(member.getId());
+
+        // then
+        Pet pet = petRepository.findByMemberId(member.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(pet.getMemberId()).isEqualTo(member.getId());
+            softly.assertThat(pet.getStageId()).isEqualTo(1L);
+            softly.assertThat(pet.getCurrentScore()).isZero();
+            softly.assertThat(pet.isAttended()).isFalse();
+        });
+    }
+
+    @Test
+    void 회원의_펫을_삭제한다() {
+        // given
+        Pet pet = TestFixture.createPet(member, firstStage.getId());
+        petRepository.save(pet);
+
+        // when
+        petService.deleteByMemberId(member.getId());
+
+        // then
+        assertThat(petRepository.findByMemberId(member.getId())).isEmpty();
     }
 
     private String getUniqueValue() {

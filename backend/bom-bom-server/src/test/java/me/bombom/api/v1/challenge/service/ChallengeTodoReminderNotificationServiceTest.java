@@ -14,7 +14,6 @@ import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderNotif
 import me.bombom.api.v1.challenge.domain.notification.ChallengeTodoReminderPhase;
 import me.bombom.api.v1.challenge.domain.notification.NotificationStatus;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
-import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeTodoReminderNotificationRepository;
@@ -25,8 +24,7 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.NewsletterGroup;
 import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,9 +36,6 @@ class ChallengeTodoReminderNotificationServiceTest {
 
     @Autowired
     private ChallengeTodoReminderNotificationRepository challengeTodoReminderNotificationRepository;
-
-    @Autowired
-    private ChallengeDailyTodoRepository challengeDailyTodoRepository;
 
     @Autowired
     private ChallengeDailyResultRepository challengeDailyResultRepository;
@@ -62,19 +57,6 @@ class ChallengeTodoReminderNotificationServiceTest {
 
     @Autowired
     private HolidayRepository holidayRepository;
-
-    @BeforeEach
-    void setUp() {
-        challengeTodoReminderNotificationRepository.deleteAllInBatch();
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-        holidayRepository.deleteAllInBatch();
-    }
 
     @Test
     void 오늘_COMPLETE_DailyResult가_없는_참여자에게만_PENDING_알림을_생성한다() {

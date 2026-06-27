@@ -2,19 +2,10 @@ package me.bombom.api.v1.subscribe.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
-import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
@@ -29,15 +20,17 @@ import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
+import me.bombom.api.v1.subscribe.domain.UnsubscribeRetry;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
-import me.bombom.support.IntegrationTest;
-import org.junit.jupiter.api.AfterEach;
+import me.bombom.api.v1.subscribe.repository.UnsubscribeRetryRepository;
+import me.bombom.support.notification.FakeDiscordWebhookNotifier;
+import me.bombom.support.subscribe.FakeUnsubscribeAgent;
+import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 class SubscribeServiceTest {
@@ -63,24 +56,14 @@ class SubscribeServiceTest {
     @Autowired
     private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
 
-    @MockitoBean
-    private UnsubscribeAgent unsubscribeAgent;
+    @Autowired
+    private FakeUnsubscribeAgent unsubscribeAgent;
 
-    @MockitoBean
-    private DiscordWebhookNotifier discordNotifier;
+    @Autowired
+    private FakeDiscordWebhookNotifier discordNotifier;
 
-    @MockitoBean
-    private UnsubscribeRetryService unsubscribeRetryService;
-
-    @AfterEach
-    void tearDown() {
-        subscribeRepository.deleteAllInBatch();
-        newsletterSubscriptionCountRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-    }
+    @Autowired
+    private UnsubscribeRetryRepository unsubscribeRetryRepository;
 
     @Test
     void 구독중인_뉴스레터를_조회한다() {
@@ -428,6 +411,54 @@ class SubscribeServiceTest {
     }
 
     @Test
+    void 해지_결과_대상_구독이_없으면_무시한다() {
+        subscribeService.handleUnsubscribeResult(-1L, true);
+
+        assertThat(subscribeRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void 재시도할_구독이_없으면_재시도_항목을_삭제한다() {
+        // given
+        UnsubscribeRetry retry = unsubscribeRetryRepository.save(UnsubscribeRetry.builder()
+                .subscribeId(-1L)
+                .nextRetryAt(LocalDateTime.now())
+                .lastError("not found")
+                .build());
+
+        // when
+        subscribeService.retryUnsubscribe(retry.getSubscribeId());
+
+        // then
+        assertThat(unsubscribeRetryRepository.findById(retry.getId())).isEmpty();
+        assertThat(unsubscribeAgent.getRequests()).isEmpty();
+    }
+
+    @Test
+    void 재시도할_구독이_있으면_해지_처리하고_재시도_항목을_삭제한다() {
+        // given
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Subscribe subscribe = saveSubscribe(member);
+        UnsubscribeRetry retry = unsubscribeRetryRepository.save(UnsubscribeRetry.builder()
+                .subscribeId(subscribe.getId())
+                .nextRetryAt(LocalDateTime.now())
+                .lastError("retry")
+                .build());
+
+        // when
+        subscribeService.retryUnsubscribe(subscribe.getId());
+
+        // then
+        assertThat(unsubscribeAgent.getRequests())
+                .containsExactly(new FakeUnsubscribeAgent.UnsubscribeRequest(
+                        subscribe.getUnsubscribeUrl(),
+                        subscribe.getNewsletterId()
+                ));
+        assertThat(unsubscribeRetryRepository.findById(retry.getId())).isEmpty();
+        assertThat(subscribeRepository.findById(subscribe.getId())).isEmpty();
+    }
+
+    @Test
     void 구독_해지_성공_시_람다를_호출하고_완료_처리한다() {
         // given
         Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
@@ -450,8 +481,9 @@ class SubscribeServiceTest {
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(unsubscribeAgent, times(1)).unsubscribe(unsubscribeUrl, newsletterId);
-        verify(unsubscribeRetryService, times(1)).deleteIfExists(subscribeId);
+        assertThat(unsubscribeAgent.getRequests())
+                .containsExactly(new FakeUnsubscribeAgent.UnsubscribeRequest(unsubscribeUrl, newsletterId));
+        assertThat(unsubscribeRetryRepository.findBySubscribeId(subscribeId)).isEmpty();
         assertThat(subscribeRepository.findById(subscribeId)).isEmpty();
     }
 
@@ -473,15 +505,73 @@ class SubscribeServiceTest {
         Long subscribeId = s.getId();
         Long newsletterId = newsletter.getId();
         String unsubscribeUrl = "https://example.com/unsub";
-        doThrow(new RetryableException("Server Error"))
-                .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
-        given(unsubscribeRetryService.scheduleRetry(anyLong(), anyString())).willReturn(true);
+        unsubscribeAgent.failWith(new RetryableException("Server Error"));
 
         // when
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(unsubscribeRetryService, times(1)).scheduleRetry(eq(subscribeId), eq("Server Error"));
+        assertThat(unsubscribeRetryRepository.findBySubscribeId(subscribeId))
+                .hasValueSatisfying(retry -> {
+                    assertThat(retry.getRetryCount()).isEqualTo(1);
+                    assertThat(retry.getLastError()).isEqualTo("Server Error");
+                });
+    }
+
+    @Test
+    void 재시도_횟수가_초과되면_FAILED_상태로_변경하고_재시도_항목을_삭제한다() {
+        // given
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Subscribe subscribe = saveSubscribe(member);
+        Long subscribeId = subscribe.getId();
+        String unsubscribeUrl = subscribe.getUnsubscribeUrl();
+        UnsubscribeRetry retry = UnsubscribeRetry.builder()
+                .subscribeId(subscribeId)
+                .nextRetryAt(LocalDateTime.now())
+                .lastError("previous")
+                .build();
+        retry.increaseRetryCount(LocalDateTime.now(), "first");
+        retry.increaseRetryCount(LocalDateTime.now(), "second");
+        retry.increaseRetryCount(LocalDateTime.now(), "third");
+        unsubscribeRetryRepository.save(retry);
+        unsubscribeAgent.failWith(new RetryableException("Server Error"));
+
+        // when
+        subscribeService.processUnsubscribe(subscribeId, subscribe.getNewsletterId(), unsubscribeUrl);
+
+        // then
+        assertThat(unsubscribeRetryRepository.findBySubscribeId(subscribeId)).isEmpty();
+        assertThat(discordNotifier.getUnsubscribeErrorNotifications())
+                .containsExactly(new FakeDiscordWebhookNotifier.UnsubscribeErrorNotification(
+                        "최대 재시도 횟수에 도달했습니다 : Server Error",
+                        subscribeId,
+                        unsubscribeUrl
+                ));
+        Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);
+    }
+
+    @Test
+    void 예상치_못한_에러_발생시_FAILED_상태로_변경하고_알림을_보낸다() {
+        // given
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Subscribe subscribe = saveSubscribe(member);
+        Long subscribeId = subscribe.getId();
+        String unsubscribeUrl = subscribe.getUnsubscribeUrl();
+        unsubscribeAgent.failWith(new RuntimeException("boom"));
+
+        // when
+        subscribeService.processUnsubscribe(subscribeId, subscribe.getNewsletterId(), unsubscribeUrl);
+
+        // then
+        assertThat(discordNotifier.getUnsubscribeErrorNotifications())
+                .containsExactly(new FakeDiscordWebhookNotifier.UnsubscribeErrorNotification(
+                        "예상치 못한 예외: boom",
+                        subscribeId,
+                        unsubscribeUrl
+                ));
+        Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);
     }
 
     @Test
@@ -502,19 +592,18 @@ class SubscribeServiceTest {
         Long subscribeId = s.getId();
         Long newsletterId = newsletter.getId();
         String unsubscribeUrl = "https://example.com/unsub";
-        doThrow(new AutoUnsubscribeFailedException("Invalid URL", newsletterId, unsubscribeUrl))
-                .when(unsubscribeAgent).unsubscribe(anyString(), anyLong());
+        unsubscribeAgent.failWith(new AutoUnsubscribeFailedException("Invalid URL", newsletterId, unsubscribeUrl));
 
         // when
         subscribeService.processUnsubscribe(subscribeId, newsletterId, unsubscribeUrl);
 
         // then
-        verify(discordNotifier, times(1))
-                .sendUnsubscribeErrorNotification(
-                        eq("Invalid URL"),
-                        argThat(sub -> sub.getId().equals(s.getId())),
-                        eq(unsubscribeUrl)
-                );
+        assertThat(discordNotifier.getUnsubscribeErrorNotifications())
+                .containsExactly(new FakeDiscordWebhookNotifier.UnsubscribeErrorNotification(
+                        "Invalid URL",
+                        s.getId(),
+                        unsubscribeUrl
+                ));
 
         Subscribe result = subscribeRepository.findById(subscribeId).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(SubscribeStatus.UNSUBSCRIBE_FAILED);
@@ -532,5 +621,23 @@ class SubscribeServiceTest {
                 .gender(member.getGender())
                 .roleId(member.getRoleId())
                 .build();
+    }
+
+    private Subscribe saveSubscribe(Member member) {
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail newsletterDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter newsletter = newsletterRepository.save(
+                TestFixture.createNewsletter(
+                        "테스트 뉴스레터",
+                        "test@test.com",
+                        category.getId(),
+                        newsletterDetail.getId()
+                )
+        );
+        return subscribeRepository.save(Subscribe.builder()
+                .memberId(member.getId())
+                .newsletterId(newsletter.getId())
+                .unsubscribeUrl("https://example.com/unsub")
+                .build());
     }
 }

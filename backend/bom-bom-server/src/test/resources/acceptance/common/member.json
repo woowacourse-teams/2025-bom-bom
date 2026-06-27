@@ -1,0 +1,15 @@
+{
+  "member": [
+    {
+      "id": 1,
+      "provider": "provider",
+      "provider_id": "acceptance-member",
+      "email": "acceptance@bombom.news",
+      "nickname": "인수테스트회원",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ]
+}

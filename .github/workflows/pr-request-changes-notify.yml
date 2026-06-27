@@ -7,7 +7,15 @@ on:
 jobs:
   notify-on-request-changes:
     runs-on: ubuntu-latest
-    if: ${{ github.event.review.state == 'changes_requested' }}
+    if: >-
+      ${{
+        github.event.review.state == 'changes_requested' &&
+        (
+          github.event.pull_request.base.ref == 'server-dev' ||
+          github.event.pull_request.base.ref == 'email-server-dev' ||
+          github.event.pull_request.base.ref == 'fcm-server'
+        )
+      }}
 
     steps:
       - uses: actions/checkout@v3

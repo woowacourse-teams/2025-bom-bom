@@ -1,0 +1,68 @@
+{{! 로그인 멤버 주입 }}
+{{#vendorExtensions.x-needs-login-member}}
+{{>login_member_parameter}}
+{{#vendorExtensions.x-spring-query-model}},
+{{/vendorExtensions.x-spring-query-model}}
+{{^vendorExtensions.x-spring-query-model}}
+{{#hasParams}},
+{{/hasParams}}
+{{^hasParams}}
+{{#vendorExtensions.x-spring-paginated}},
+{{/vendorExtensions.x-spring-paginated}}
+{{/hasParams}}
+{{/vendorExtensions.x-spring-query-model}}
+{{/vendorExtensions.x-needs-login-member}}
+
+{{! 백엔드 query model 주입 }}
+{{#vendorExtensions.x-spring-query-model}}
+{{#useBeanValidation}}@Valid {{/useBeanValidation}}@ModelAttribute {{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}{{{vendorExtensions.x-spring-query-model}}} request
+{{/vendorExtensions.x-spring-query-model}}
+
+{{! OpenAPI에 선언된 일반 파라미터 }}
+{{^vendorExtensions.x-spring-query-model}}
+{{#allParams}}
+{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{>cookieParams}}
+{{^-last}},
+{{/-last}}
+{{/allParams}}
+{{/vendorExtensions.x-spring-query-model}}
+
+{{! reactive 서버 전용 교환 객체 }}
+{{#reactive}}
+{{#hasParams}},
+{{/hasParams}}
+{{#swagger2AnnotationLibrary}}@Parameter(hidden = true){{/swagger2AnnotationLibrary}}
+{{#springFoxDocumentationProvider}}@ApiIgnore{{/springFoxDocumentationProvider}}
+final ServerWebExchange exchange
+{{/reactive}}
+
+{{! Spring Pageable 주입 }}
+{{#vendorExtensions.x-spring-paginated}}
+{{#hasParams}},
+{{/hasParams}}
+{{^hasParams}}
+{{#reactive}},
+{{/reactive}}
+{{/hasParams}}
+{{#springFoxDocumentationProvider}}@ApiIgnore {{/springFoxDocumentationProvider}}
+{{#springDocDocumentationProvider}}@ParameterObject {{/springDocDocumentationProvider}}
+final Pageable pageable
+{{/vendorExtensions.x-spring-paginated}}
+
+{{! vendor extension으로 추가 주입하는 서버 전용 인자 }}
+{{#vendorExtensions.x-spring-provide-args}}
+{{#hasParams}},
+{{/hasParams}}
+{{^hasParams}}
+{{#reactive}},
+{{/reactive}}
+{{/hasParams}}
+{{#swagger2AnnotationLibrary}}@Parameter(hidden = true){{/swagger2AnnotationLibrary}}
+{{#springFoxDocumentationProvider}}@ApiIgnore{{/springFoxDocumentationProvider}}
+{{{.}}}
+{{^hasParams}}
+{{^-last}}
+{{^reactive}},{{/reactive}}
+{{/-last}}
+{{/hasParams}}
+{{/vendorExtensions.x-spring-provide-args}}

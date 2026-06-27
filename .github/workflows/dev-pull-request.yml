@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: JDK v21 설치
         uses: actions/setup-java@v4
@@ -25,11 +27,11 @@ jobs:
       - name: 설정 파일 생성(메인/테스트)
         shell: bash
         env:
-          APPLICATION_MAIN_PROPERTIES: ${{ secrets.APPLICATION_MAIN_PROPERTIES }}
+          APPLICATION_DEV_PROPERTIES: ${{ secrets.APPLICATION_DEV_PROPERTIES }}
           APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
           mkdir -p src/main/resources src/test/resources
-          printf '%s' "$APPLICATION_MAIN_PROPERTIES" > src/main/resources/application.yml
+          printf '%s' "${APPLICATION_DEV_PROPERTIES:-}" > src/main/resources/application.yml
           printf '%s' "$APPLICATION_TEST_PROPERTIES" > src/test/resources/application.yml
 
       - name: 빌드 및 테스트
@@ -39,7 +41,7 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
-          ./gradlew clean build --no-daemon
+          ./gradlew build --no-daemon
 
       - name: 테스트 리포트 생성
         uses: dorny/test-reporter@v1

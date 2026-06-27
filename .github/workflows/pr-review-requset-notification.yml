@@ -3,6 +3,10 @@ name: Notify Discord (PR-Review Request)
 on:
   pull_request:
     types: [review_requested]
+    branches:
+      - server-dev
+      - email-server-dev
+      - fcm-server
 
 jobs:
   notify-review-request:

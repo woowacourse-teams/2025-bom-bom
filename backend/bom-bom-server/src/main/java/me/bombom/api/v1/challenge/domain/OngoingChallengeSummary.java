@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import me.bombom.api.v1.challenge.dto.OngoingChallengeParticipantFlat;
 import me.bombom.api.v1.common.exception.CServerErrorException;
+import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 
 /**
@@ -80,6 +81,7 @@ public record OngoingChallengeSummary(
                 .findFirst()
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
                         .addContext("memberId", memberId)
+                        .addContext(ErrorContextKeys.DETAIL, "챌린지 정합성 오류 - 회원이 참여한 챌린지 그룹에 해당 회원 정보 없음")
                 );
     }
 

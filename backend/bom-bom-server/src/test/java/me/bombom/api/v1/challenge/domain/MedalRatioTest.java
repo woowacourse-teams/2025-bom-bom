@@ -1,0 +1,67 @@
+package me.bombom.api.v1.challenge.domain;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import org.junit.jupiter.api.Test;
+
+class MedalRatioTest {
+
+    @Test
+    void 수료한_챌린지가_없으면_모든_비율이_0이다() {
+        MedalRatio ratio = MedalRatio.of(0, 0, 0);
+
+        assertSoftly(softly -> {
+            softly.assertThat(ratio.getGold()).isZero();
+            softly.assertThat(ratio.getSilver()).isZero();
+            softly.assertThat(ratio.getBronze()).isZero();
+        });
+    }
+
+    @Test
+    void 한_등급만_있으면_해당_등급이_100이다() {
+        MedalRatio ratio = MedalRatio.of(3, 0, 0);
+
+        assertSoftly(softly -> {
+            softly.assertThat(ratio.getGold()).isEqualTo(100);
+            softly.assertThat(ratio.getSilver()).isZero();
+            softly.assertThat(ratio.getBronze()).isZero();
+        });
+    }
+
+    @Test
+    void 등급별_개수에_비례해_비율을_계산한다() {
+        MedalRatio ratio = MedalRatio.of(4, 4, 2);
+
+        assertSoftly(softly -> {
+            softly.assertThat(ratio.getGold()).isEqualTo(40);
+            softly.assertThat(ratio.getSilver()).isEqualTo(40);
+            softly.assertThat(ratio.getBronze()).isEqualTo(20);
+        });
+    }
+
+    @Test
+    void 반올림_잔차는_개수가_가장_많은_등급에_더해_합계_100을_맞춘다() {
+        // 1/1/1 → 각 33.33 반올림 33, 합 99, 잔차 1을 최다(동률 시 gold)에 가산
+        MedalRatio ratio = MedalRatio.of(1, 1, 1);
+
+        assertSoftly(softly -> {
+            softly.assertThat(ratio.getGold() + ratio.getSilver() + ratio.getBronze()).isEqualTo(100);
+            softly.assertThat(ratio.getGold()).isEqualTo(34);
+            softly.assertThat(ratio.getSilver()).isEqualTo(33);
+            softly.assertThat(ratio.getBronze()).isEqualTo(33);
+        });
+    }
+
+    @Test
+    void 어떤_분포에서도_합계는_항상_100이다() {
+        assertSoftly(softly -> {
+            softly.assertThat(sum(MedalRatio.of(1, 2, 4))).isEqualTo(100);
+            softly.assertThat(sum(MedalRatio.of(7, 1, 1))).isEqualTo(100);
+            softly.assertThat(sum(MedalRatio.of(2, 3, 1))).isEqualTo(100);
+        });
+    }
+
+    private static int sum(MedalRatio ratio) {
+        return ratio.getGold() + ratio.getSilver() + ratio.getBronze();
+    }
+}

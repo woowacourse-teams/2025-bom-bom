@@ -8,6 +8,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
 import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
+import me.bombom.api.v1.challenge.dto.OngoingChallengeParticipantFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
@@ -131,6 +132,32 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     );
 
     List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);
+
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.OngoingChallengeParticipantFlat(
+            c.id,
+            c.name,
+            c.startDate,
+            c.endDate,
+            c.totalDays,
+            cp.challengeTeamId,
+            cp.memberId,
+            cp.completedDays
+        )
+        FROM ChallengeParticipant cp
+        JOIN Challenge c ON cp.challengeId = c.id
+        WHERE c.id IN (
+            SELECT cp2.challengeId
+            FROM ChallengeParticipant cp2
+            WHERE cp2.memberId = :memberId
+        )
+          AND c.startDate <= :today
+          AND c.endDate >= :today
+    """)
+    List<OngoingChallengeParticipantFlat> findParticipantsOfMemberOngoingChallenges(
+            @Param("memberId") Long memberId,
+            @Param("today") LocalDate today
+    );
 
     List<ChallengeParticipant> findAllByChallengeId(Long challengeId);
 

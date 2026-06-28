@@ -1,0 +1,22 @@
+{
+  "member": [
+    { "id": 1, "provider": "apple", "provider_id": "completedMe",   "email": "completed-me@bombom.news",   "nickname": "나밍곰", "gender": "FEMALE", "role_id": 1 },
+    { "id": 6, "provider": "apple", "provider_id": "completedNone", "email": "completed-none@bombom.news", "nickname": "진행중만", "gender": "FEMALE", "role_id": 1 }
+  ],
+  "newsletter_group": [
+    { "id": 1, "name": "그룹A" }
+  ],
+  "challenge": [
+    { "id": 301, "name": "30일 독서 챌린지",   "generation": 1, "start_date": "2024-04-10", "end_date": "2024-05-09", "total_days": 10, "is_badge_issued": true,  "newsletter_group_id": 1 },
+    { "id": 302, "name": "한 달 뉴스레터 챌린지", "generation": 2, "start_date": "2025-02-19", "end_date": "2025-03-20", "total_days": 10, "is_badge_issued": true,  "newsletter_group_id": 1 },
+    { "id": 303, "name": "1월 완독 챌린지",     "generation": 3, "start_date": "2026-01-01", "end_date": "2026-01-31", "total_days": 10, "is_badge_issued": true,  "newsletter_group_id": 1 },
+    { "id": 304, "name": "진행중 챌린지",       "generation": 4, "start_date": "2026-06-01", "end_date": "2026-12-31", "total_days": 10, "is_badge_issued": false, "newsletter_group_id": 1 }
+  ],
+  "challenge_participant": [
+    { "id": 1, "challenge_id": 301, "member_id": 1, "completed_days": 10, "is_survived": true,  "shield": 0, "streak": 0 },
+    { "id": 2, "challenge_id": 302, "member_id": 1, "completed_days": 9,  "is_survived": true,  "shield": 0, "streak": 0 },
+    { "id": 3, "challenge_id": 303, "member_id": 1, "completed_days": 7,  "is_survived": true,  "shield": 0, "streak": 0 },
+    { "id": 4, "challenge_id": 304, "member_id": 1, "completed_days": 3,  "is_survived": true,  "shield": 0, "streak": 0 },
+    { "id": 5, "challenge_id": 304, "member_id": 6, "completed_days": 2,  "is_survived": true,  "shield": 0, "streak": 0 }
+  ]
+}

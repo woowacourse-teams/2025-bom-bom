@@ -1,7 +1,9 @@
 package me.bombom.api.v1.challenge.domain;
 
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 
 /**
  * 수료한 챌린지의 등급별 비율(%). 세 값의 합은 항상 100(수료 0건이면 0/0/0)
@@ -20,6 +22,33 @@ public final class MedalRatio {
         this.gold = gold;
         this.silver = silver;
         this.bronze = bronze;
+    }
+
+    /**
+     * 한 회원의 종료 챌린지 참여 기록을 수료 등급({@link ChallengeGrade})으로 분류해 메달 비율을 계산한다.
+     */
+    public static MedalRatio from(List<MemberMedalParticipationFlat> participations) {
+        int gold = 0;
+        int silver = 0;
+        int bronze = 0;
+        for (MemberMedalParticipationFlat participation : participations) {
+            int progress = calculateProgress(participation.attendedDays(), participation.totalDays());
+            switch (ChallengeGrade.calculate(progress, participation.isSurvived())) {
+                case GOLD -> gold++;
+                case SILVER -> silver++;
+                case BRONZE -> bronze++;
+                case FAIL -> {
+                }
+            }
+        }
+        return of(gold, silver, bronze);
+    }
+
+    private static int calculateProgress(int attendedDays, int totalDays) {
+        if (totalDays <= 0) {
+            return 0;
+        }
+        return Math.min((int) ((double) attendedDays / totalDays * 100), 100);
     }
 
     /**

@@ -6,7 +6,8 @@ import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
-import me.bombom.api.v1.challenge.dto.EndedChallengeParticipationFlat;
+import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
+import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
@@ -96,7 +97,24 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     List<TeamChallengeProgressFlat> findTeamProgress(@Param("teamId") Long teamId);
 
     @Query("""
-        SELECT new me.bombom.api.v1.challenge.dto.EndedChallengeParticipationFlat(
+        SELECT new me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat(
+            cp.memberId,
+            COUNT(cp.id),
+            SUM(CASE WHEN cp.isSurvived = true THEN 1L ELSE 0L END),
+            AVG(CASE
+                    WHEN c.totalDays <= 0 THEN 0.0
+                    ELSE FLOOR(cp.completedDays * 100.0 / c.totalDays)
+                END)
+        )
+        FROM ChallengeParticipant cp
+        JOIN Challenge c ON cp.challengeId = c.id
+        WHERE c.endDate < :today
+        GROUP BY cp.memberId
+    """)
+    List<MemberChallengeRankingStatsFlat> findEndedChallengeAggregates(@Param("today") LocalDate today);
+
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat(
             cp.memberId,
             cp.completedDays,
             c.totalDays,
@@ -105,8 +123,12 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         FROM ChallengeParticipant cp
         JOIN Challenge c ON cp.challengeId = c.id
         WHERE c.endDate < :today
+          AND cp.memberId = :memberId
     """)
-    List<EndedChallengeParticipationFlat> findEndedChallengeParticipations(@Param("today") LocalDate today);
+    List<MemberMedalParticipationFlat> findEndedChallengeParticipationsByMemberId(
+            @Param("memberId") Long memberId,
+            @Param("today") LocalDate today
+    );
 
     List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);
 

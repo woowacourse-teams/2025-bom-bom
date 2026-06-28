@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import me.bombom.api.v1.challenge.dto.EndedChallengeParticipationFlat;
+import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
+import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
 
 public record MyChallengeSummary(
         int completedChallengeCount,
@@ -19,33 +20,27 @@ public record MyChallengeSummary(
             new MyChallengeSummary(0, 0.0, 0, 0.0, 0, MedalRatio.ZERO);
 
     public static MyChallengeSummary of(
-            List<EndedChallengeParticipationFlat> endedParticipations,
+            List<MemberChallengeRankingStatsFlat> aggregates,
+            List<MemberMedalParticipationFlat> myParticipations,
             Long memberId
     ) {
-        Map<Long, List<EndedChallengeParticipationFlat>> participationsByMember = groupByMember(endedParticipations);
-        if (!participationsByMember.containsKey(memberId)) {
+        Map<Long, MemberChallengeStats> statsByMember = aggregates.stream()
+                .collect(Collectors.toMap(
+                        MemberChallengeRankingStatsFlat::memberId,
+                        MemberChallengeStats::from
+                ));
+        if (!statsByMember.containsKey(memberId)) {
             return EMPTY;
         }
 
-        Map<Long, MemberChallengeStats> statsByMember = toStatsByMember(participationsByMember);
-        return from(statsByMember.get(memberId), statsByMember.values());
+        return from(statsByMember.get(memberId), statsByMember.values(), MedalRatio.from(myParticipations));
     }
 
-    private static Map<Long, List<EndedChallengeParticipationFlat>> groupByMember(
-            List<EndedChallengeParticipationFlat> endedParticipations
+    private static MyChallengeSummary from(
+            MemberChallengeStats myStats,
+            Collection<MemberChallengeStats> population,
+            MedalRatio medalRatio
     ) {
-        return endedParticipations.stream()
-                .collect(Collectors.groupingBy(EndedChallengeParticipationFlat::memberId));
-    }
-
-    private static Map<Long, MemberChallengeStats> toStatsByMember(
-            Map<Long, List<EndedChallengeParticipationFlat>> participationsByMember
-    ) {
-        return participationsByMember.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> MemberChallengeStats.from(entry.getValue())));
-    }
-
-    private static MyChallengeSummary from(MemberChallengeStats myStats, Collection<MemberChallengeStats> population) {
         double completionTopPercent = topPercent(
                 myStats.getCompletionRate(),
                 population.stream().map(MemberChallengeStats::getCompletionRate).toList()
@@ -61,7 +56,7 @@ public record MyChallengeSummary(
                 myStats.getCompletionRate(),
                 attendanceTopPercent,
                 myStats.getAverageAttendanceRate(),
-                myStats.getMedalRatio()
+                medalRatio
         );
     }
 

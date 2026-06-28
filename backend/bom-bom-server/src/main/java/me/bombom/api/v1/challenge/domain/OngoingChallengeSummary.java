@@ -25,10 +25,27 @@ public record OngoingChallengeSummary(
         AttendanceComparison teamAttendanceComparison
 ) {
 
-    public record Rank(int rank, int total) {
-    }
-
-    public record AttendanceComparison(int attendanceRate, int differencePoint) {
+    public OngoingChallengeSummary(
+            OngoingChallengeParticipantFlat participation,
+            int remainingDays,
+            int progressRate,
+            Rank myTeamRank,
+            Rank teamRank,
+            AttendanceComparison myAttendanceComparison,
+            AttendanceComparison teamAttendanceComparison
+    ) {
+        this(
+                participation.challengeId(),
+                participation.title(),
+                participation.startDate(),
+                participation.endDate(),
+                remainingDays,
+                progressRate,
+                myTeamRank,
+                teamRank,
+                myAttendanceComparison,
+                teamAttendanceComparison
+        );
     }
 
     public static OngoingChallengeSummary of(
@@ -37,41 +54,20 @@ public record OngoingChallengeSummary(
             LocalDate today
     ) {
         OngoingChallengeParticipantFlat me = getMine(participants, memberId);
+        Map<Long, List<OngoingChallengeParticipantFlat>> byTeam = groupByTeam(participants);
+        Map<Long, Double> teamAverageById = teamAverages(byTeam);
 
         double myAttendance = attendance(me);
-
-        Map<Long, List<OngoingChallengeParticipantFlat>> byTeam = participants.stream()
-                .collect(Collectors.groupingBy(OngoingChallengeParticipantFlat::challengeTeamId));
-        Map<Long, Double> teamAverageById = byTeam.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> averageAttendance(entry.getValue())));
-
         double myTeamAverage = teamAverageById.get(me.challengeTeamId());
-        double overallAverage = averageAttendance(participants);
-        double overallTeamAverage = teamAverageById.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(0.0);
-
-        Rank myTeamRank = new Rank(
-                competitionRank(myAttendance, attendances(byTeam.get(me.challengeTeamId()))),
-                byTeam.get(me.challengeTeamId()).size()
-        );
-        Rank teamRank = new Rank(
-                competitionRank(myTeamAverage, List.copyOf(teamAverageById.values())),
-                teamAverageById.size()
-        );
 
         return new OngoingChallengeSummary(
-                me.challengeId(),
-                me.title(),
-                me.startDate(),
-                me.endDate(),
+                me,
                 (int) ChronoUnit.DAYS.between(today, me.endDate()),
                 round(myAttendance),
-                myTeamRank,
-                teamRank,
-                new AttendanceComparison(round(myAttendance), round(myAttendance - overallAverage)),
-                new AttendanceComparison(round(myTeamAverage), round(myTeamAverage - overallTeamAverage))
+                myTeamRank(me, byTeam),
+                teamRank(myTeamAverage, teamAverageById),
+                comparison(myAttendance, averageAttendance(participants)),
+                comparison(myTeamAverage, overallTeamAverage(teamAverageById))
         );
     }
 
@@ -85,6 +81,44 @@ public record OngoingChallengeSummary(
                 .orElseThrow(() -> new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
                         .addContext("memberId", memberId)
                 );
+    }
+
+    private static Map<Long, List<OngoingChallengeParticipantFlat>> groupByTeam(
+            List<OngoingChallengeParticipantFlat> participants
+    ) {
+        return participants.stream()
+                .collect(Collectors.groupingBy(OngoingChallengeParticipantFlat::challengeTeamId));
+    }
+    private static Map<Long, Double> teamAverages(Map<Long, List<OngoingChallengeParticipantFlat>> byTeam) {
+        return byTeam.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> averageAttendance(entry.getValue())));
+    }
+
+    private static Rank myTeamRank(
+            OngoingChallengeParticipantFlat me,
+            Map<Long, List<OngoingChallengeParticipantFlat>> byTeam
+    ) {
+        List<OngoingChallengeParticipantFlat> myTeam = byTeam.get(me.challengeTeamId());
+        return new Rank(competitionRank(attendance(me), attendances(myTeam)), myTeam.size());
+    }
+
+    private static Rank teamRank(double myTeamAverage, Map<Long, Double> teamAverageById) {
+        return new Rank(
+                competitionRank(myTeamAverage, List.copyOf(teamAverageById.values())),
+                teamAverageById.size()
+        );
+    }
+
+    private static double overallTeamAverage(Map<Long, Double> teamAverageById) {
+        return teamAverageById.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+    }
+
+    private static AttendanceComparison comparison(double value, double reference) {
+        return new AttendanceComparison(round(value), round(value - reference));
     }
 
     private static double attendance(OngoingChallengeParticipantFlat participant) {
@@ -116,5 +150,11 @@ public record OngoingChallengeSummary(
 
     private static int round(double value) {
         return (int) Math.round(value);
+    }
+
+    public record Rank(int rank, int total) {
+    }
+
+    public record AttendanceComparison(int attendanceRate, int differencePoint) {
     }
 }

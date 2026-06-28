@@ -1,0 +1,36 @@
+{
+  "member": [
+    { "id": 1, "provider": "apple", "provider_id": "ongoingMe",  "email": "ongoing-me@bombom.news",  "nickname": "나밍곰", "gender": "FEMALE", "role_id": 1 },
+    { "id": 2, "provider": "apple", "provider_id": "ongoingA",   "email": "ongoing-a@bombom.news",   "nickname": "제나",   "gender": "FEMALE", "role_id": 1 },
+    { "id": 3, "provider": "apple", "provider_id": "ongoingB",   "email": "ongoing-b@bombom.news",   "nickname": "익명",   "gender": "FEMALE", "role_id": 1 },
+    { "id": 4, "provider": "apple", "provider_id": "ongoingC",   "email": "ongoing-c@bombom.news",   "nickname": "지나",   "gender": "FEMALE", "role_id": 1 },
+    { "id": 5, "provider": "apple", "provider_id": "ongoingD",   "email": "ongoing-d@bombom.news",   "nickname": "타인",   "gender": "FEMALE", "role_id": 1 },
+    { "id": 6, "provider": "apple", "provider_id": "ongoingNone","email": "ongoing-none@bombom.news","nickname": "종료만", "gender": "FEMALE", "role_id": 1 }
+  ],
+  "newsletter_group": [
+    { "id": 1, "name": "그룹A" }
+  ],
+  "challenge": [
+    { "id": 101, "name": "진행중 챌린지A", "generation": 1, "start_date": "2026-06-01", "end_date": "2026-06-30", "total_days": 10, "is_badge_issued": false, "newsletter_group_id": 1 },
+    { "id": 102, "name": "진행중 챌린지B", "generation": 1, "start_date": "2026-06-05", "end_date": "2026-07-10", "total_days": 10, "is_badge_issued": false, "newsletter_group_id": 1 },
+    { "id": 103, "name": "내가 없는 진행중 챌린지", "generation": 1, "start_date": "2026-06-01", "end_date": "2026-06-30", "total_days": 10, "is_badge_issued": false, "newsletter_group_id": 1 },
+    { "id": 200, "name": "종료된 챌린지", "generation": 1, "start_date": "2026-05-01", "end_date": "2026-05-20", "total_days": 10, "is_badge_issued": false, "newsletter_group_id": 1 }
+  ],
+  "challenge_team": [
+    { "id": 1001, "challenge_id": 101, "progress": 0 },
+    { "id": 1002, "challenge_id": 101, "progress": 0 },
+    { "id": 2001, "challenge_id": 102, "progress": 0 },
+    { "id": 3001, "challenge_id": 103, "progress": 0 },
+    { "id": 4001, "challenge_id": 200, "progress": 0 }
+  ],
+  "challenge_participant": [
+    { "id": 1, "challenge_id": 101, "member_id": 1, "challenge_team_id": 1001, "completed_days": 8,  "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 2, "challenge_id": 101, "member_id": 2, "challenge_team_id": 1001, "completed_days": 10, "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 3, "challenge_id": 101, "member_id": 3, "challenge_team_id": 1002, "completed_days": 6,  "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 4, "challenge_id": 101, "member_id": 4, "challenge_team_id": 1002, "completed_days": 4,  "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 5, "challenge_id": 102, "member_id": 1, "challenge_team_id": 2001, "completed_days": 5,  "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 6, "challenge_id": 103, "member_id": 5, "challenge_team_id": 3001, "completed_days": 7,  "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 7, "challenge_id": 200, "member_id": 1, "challenge_team_id": 4001, "completed_days": 10, "is_survived": true, "shield": 0, "streak": 0 },
+    { "id": 8, "challenge_id": 200, "member_id": 6, "challenge_team_id": 4001, "completed_days": 3,  "is_survived": true, "shield": 0, "streak": 0 }
+  ]
+}

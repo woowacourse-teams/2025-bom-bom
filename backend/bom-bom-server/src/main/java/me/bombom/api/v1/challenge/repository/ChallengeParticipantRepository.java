@@ -6,12 +6,15 @@ import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
+import me.bombom.api.v1.challenge.dto.CompletedChallengeFlat;
 import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
 import me.bombom.api.v1.challenge.dto.OngoingChallengeParticipantFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -129,6 +132,35 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
     List<MemberMedalParticipationFlat> findEndedChallengeParticipationsByMemberId(
             @Param("memberId") Long memberId,
             @Param("today") LocalDate today
+    );
+
+    @Query(value = """
+        SELECT new me.bombom.api.v1.challenge.dto.CompletedChallengeFlat(
+            c.id,
+            c.name,
+            c.startDate,
+            c.endDate,
+            cp.completedDays,
+            c.totalDays,
+            cp.isSurvived
+        )
+        FROM ChallengeParticipant cp
+        JOIN Challenge c ON cp.challengeId = c.id
+        WHERE cp.memberId = :memberId
+          AND c.endDate < :today
+        ORDER BY c.endDate DESC
+    """,
+    countQuery = """
+        SELECT COUNT(cp)
+        FROM ChallengeParticipant cp
+        JOIN Challenge c ON cp.challengeId = c.id
+        WHERE cp.memberId = :memberId
+          AND c.endDate < :today
+    """)
+    Page<CompletedChallengeFlat> findCompletedChallenges(
+            @Param("memberId") Long memberId,
+            @Param("today") LocalDate today,
+            Pageable pageable
     );
 
     List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);

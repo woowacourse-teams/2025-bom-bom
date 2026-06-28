@@ -1,8 +1,12 @@
 package me.bombom.api.v1.challenge.domain;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 
 /**
@@ -28,20 +32,20 @@ public final class MedalRatio {
      * 한 회원의 종료 챌린지 참여 기록을 수료 등급({@link ChallengeGrade})으로 분류해 메달 비율을 계산한다.
      */
     public static MedalRatio from(List<MemberMedalParticipationFlat> participations) {
-        int gold = 0;
-        int silver = 0;
-        int bronze = 0;
-        for (MemberMedalParticipationFlat participation : participations) {
-            int progress = calculateProgress(participation.attendedDays(), participation.totalDays());
-            switch (ChallengeGrade.calculate(progress, participation.isSurvived())) {
-                case GOLD -> gold++;
-                case SILVER -> silver++;
-                case BRONZE -> bronze++;
-                case FAIL -> {
-                }
-            }
-        }
-        return of(gold, silver, bronze);
+        Map<BadgeGrade, Long> countByGrade = participations.stream()
+                .map(participation -> ChallengeGrade.calculate(
+                        calculateProgress(participation.attendedDays(), participation.totalDays()),
+                        participation.isSurvived()
+                ))
+                .map(ChallengeGrade::toBadge)
+                .flatMap(Optional::stream)
+                .collect(Collectors.groupingBy(grade -> grade, Collectors.counting()));
+
+        return of(
+                countByGrade.getOrDefault(BadgeGrade.GOLD, 0L).intValue(),
+                countByGrade.getOrDefault(BadgeGrade.SILVER, 0L).intValue(),
+                countByGrade.getOrDefault(BadgeGrade.BRONZE, 0L).intValue()
+        );
     }
 
     private static int calculateProgress(int attendedDays, int totalDays) {

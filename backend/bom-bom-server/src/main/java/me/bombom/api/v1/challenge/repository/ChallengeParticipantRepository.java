@@ -6,6 +6,7 @@ import java.util.Optional;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyStatus;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.ChallengeParticipantCount;
+import me.bombom.api.v1.challenge.dto.EndedChallengeParticipationFlat;
 import me.bombom.api.v1.challenge.dto.ChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamChallengeProgressFlat;
 import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
@@ -93,6 +94,19 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
         ORDER BY cp.completedDays DESC, m.id, cdr.date
     """)
     List<TeamChallengeProgressFlat> findTeamProgress(@Param("teamId") Long teamId);
+
+    @Query("""
+        SELECT new me.bombom.api.v1.challenge.dto.EndedChallengeParticipationFlat(
+            cp.memberId,
+            cp.completedDays,
+            c.totalDays,
+            cp.isSurvived
+        )
+        FROM ChallengeParticipant cp
+        JOIN Challenge c ON cp.challengeId = c.id
+        WHERE c.endDate < :today
+    """)
+    List<EndedChallengeParticipationFlat> findEndedChallengeParticipations(@Param("today") LocalDate today);
 
     List<ChallengeParticipant> findByMemberIdAndChallengeIdIn(Long memberId, List<Long> challengeIds);
 

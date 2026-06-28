@@ -6,14 +6,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.challenge.domain.CompletedChallengeSummary;
 import me.bombom.api.v1.challenge.domain.MyChallengeSummary;
 import me.bombom.api.v1.challenge.domain.OngoingChallengeSummary;
 import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
 import me.bombom.api.v1.challenge.dto.OngoingChallengeParticipantFlat;
+import me.bombom.api.v1.challenge.dto.response.CompletedChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeSummaryResponse;
 import me.bombom.api.v1.challenge.dto.response.OngoingChallengesResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,5 +54,14 @@ public class ChallengeSummaryService {
                 .toList();
 
         return OngoingChallengesResponse.from(summaries);
+    }
+
+    public Page<CompletedChallengeResponse> getCompletedChallenges(Long memberId, Pageable pageable) {
+        LocalDate today = LocalDate.now(clock);
+        Pageable enforcedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+
+        return challengeParticipantRepository.findCompletedChallenges(memberId, today, enforcedPageable)
+                .map(CompletedChallengeSummary::of)
+                .map(CompletedChallengeResponse::from);
     }
 }

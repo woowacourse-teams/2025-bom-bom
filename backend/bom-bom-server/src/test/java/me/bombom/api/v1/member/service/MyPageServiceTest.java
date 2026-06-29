@@ -2,6 +2,7 @@ package me.bombom.api.v1.member.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,14 +16,18 @@ import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.dto.response.CategoryStatsResponse;
 import me.bombom.api.v1.member.dto.response.RankSummaryResponse;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.newsletter.domain.Category;
+import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRankHistory;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRankHistory;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
+import me.bombom.openapi.monthlyreport.model.MonthlyReportRequest;
 import me.bombom.support.integration.IntegrationTest;
 import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +58,9 @@ class MyPageServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
     private MutableClock clock;
 
     private Member member;
@@ -64,6 +72,7 @@ class MyPageServiceTest {
         continueReadingRankHistoryRepository.deleteAllInBatch();
         continueReadingRealtimeRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
 
         clock.setInstant(Instant.parse("2026-06-17T00:00:00Z"), SEOUL_ZONE);
 
@@ -93,7 +102,7 @@ class MyPageServiceTest {
             softly.assertThat(response.cards().getFirst().rankHistory())
                     .extracting("month", "label", "rank")
                     .containsExactly(
-                            org.assertj.core.groups.Tuple.tuple("2026-05", "5월", 4L)
+                            tuple("2026-05", "5월", 4L)
                     );
         });
     }
@@ -132,8 +141,8 @@ class MyPageServiceTest {
             softly.assertThat(response.cards().getFirst().rankHistory())
                     .extracting("month", "label", "rank")
                     .containsExactly(
-                            org.assertj.core.groups.Tuple.tuple("2025-12", "25.12", 20L),
-                            org.assertj.core.groups.Tuple.tuple("2026-05", "5월", 3L)
+                            tuple("2025-12", "25.12", 20L),
+                            tuple("2026-05", "5월", 3L)
                     );
         });
     }
@@ -160,14 +169,72 @@ class MyPageServiceTest {
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION);
     }
 
+    @Test
+    void 연월_조건이_있으면_읽은_뉴스_카테고리_월간_통계를_조회한다() {
+        // given
+        Category selfImprovement = categoryRepository.save(Category.builder()
+                .name("자기계발")
+                .build());
+        Category economy = categoryRepository.save(Category.builder()
+                .name("경제")
+                .build());
+        articleReadHistoryRepository.saveAll(createArticleReadHistories(
+                selfImprovement.getId(),
+                12,
+                1,
+                LocalDateTime.of(2026, 5, 1, 0, 0)
+        ));
+        articleReadHistoryRepository.saveAll(createArticleReadHistories(
+                economy.getId(),
+                10,
+                100,
+                LocalDateTime.of(2026, 5, 2, 0, 0)
+        ));
+        articleReadHistoryRepository.save(ArticleReadHistory.builder()
+                .memberId(member.getId())
+                .articleId(1_000L)
+                .newsletterId(1L)
+                .categoryId(selfImprovement.getId())
+                .readAt(LocalDateTime.of(2026, 6, 1, 0, 0))
+                .build());
+
+        // when
+        CategoryStatsResponse response = myPageService.getCategoryStats(member, new MonthlyReportRequest(2026, 5));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.total()).isEqualTo(22);
+            softly.assertThat(response.categories())
+                    .extracting("id", "name", "count", "percent")
+                    .containsExactly(
+                            tuple(selfImprovement.getId(), "자기계발", 12L, 55),
+                            tuple(economy.getId(), "경제", 10L, 45)
+                    );
+        });
+    }
+
     private List<ArticleReadHistory> createArticleReadHistories(int count) {
-        return LongStream.rangeClosed(1, count)
+        return createArticleReadHistories(
+                1L,
+                count,
+                1,
+                LocalDateTime.of(2026, 5, 1, 0, 0)
+        );
+    }
+
+    private List<ArticleReadHistory> createArticleReadHistories(
+            Long categoryId,
+            int count,
+            long startArticleId,
+            LocalDateTime readAt
+    ) {
+        return LongStream.range(startArticleId, startArticleId + count)
                 .mapToObj(articleId -> ArticleReadHistory.builder()
                         .memberId(member.getId())
                         .articleId(articleId)
                         .newsletterId(1L)
-                        .categoryId(1L)
-                        .readAt(LocalDateTime.of(2026, 5, 1, 0, 0))
+                        .categoryId(categoryId)
+                        .readAt(readAt)
                         .build())
                 .toList();
     }

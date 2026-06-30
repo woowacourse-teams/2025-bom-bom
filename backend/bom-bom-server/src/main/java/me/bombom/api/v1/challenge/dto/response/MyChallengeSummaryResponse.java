@@ -58,7 +58,7 @@ public record MyChallengeSummaryResponse(
     ) {
     }
 
-    @Schema(description = "메달 획득 비율 (%) - 세 값의 합은 100, 수료 0건이면 0/0/0")
+    @Schema(description = "메달 획득 비율 (%) - 소수점 버림이라 합은 100 이하 가능, 수료 0건이면 0/0/0")
     public record MedalRatioResponse(
 
             @Schema(description = "금메달 획득 비율 (%)", example = "40")

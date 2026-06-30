@@ -19,7 +19,7 @@ class MedalRatioTest {
         ));
 
         assertSoftly(softly -> {
-            softly.assertThat(ratio.getGold()).isEqualTo(34);
+            softly.assertThat(ratio.getGold()).isEqualTo(33);
             softly.assertThat(ratio.getSilver()).isEqualTo(33);
             softly.assertThat(ratio.getBronze()).isEqualTo(33);
         });
@@ -73,24 +73,24 @@ class MedalRatioTest {
     }
 
     @Test
-    void 반올림_잔차는_개수가_가장_많은_등급에_더해_합계_100을_맞춘다() {
-        // 1/1/1 → 각 33.33 반올림 33, 합 99, 잔차 1을 최다(동률 시 gold)에 가산
+    void 소수점은_버림하므로_합계가_100_미만일_수_있다() {
+        // 1/1/1 → 각 33.33 버림 33, 합 99 (남는 1%는 클라이언트가 배분)
         MedalRatio ratio = MedalRatio.of(1, 1, 1);
 
         assertSoftly(softly -> {
-            softly.assertThat(ratio.getGold() + ratio.getSilver() + ratio.getBronze()).isEqualTo(100);
-            softly.assertThat(ratio.getGold()).isEqualTo(34);
+            softly.assertThat(ratio.getGold()).isEqualTo(33);
             softly.assertThat(ratio.getSilver()).isEqualTo(33);
             softly.assertThat(ratio.getBronze()).isEqualTo(33);
+            softly.assertThat(sum(ratio)).isEqualTo(99);
         });
     }
 
     @Test
-    void 어떤_분포에서도_합계는_항상_100이다() {
+    void 버림_처리로_합계가_100을_넘지_않는다() {
         assertSoftly(softly -> {
-            softly.assertThat(sum(MedalRatio.of(1, 2, 4))).isEqualTo(100);
-            softly.assertThat(sum(MedalRatio.of(7, 1, 1))).isEqualTo(100);
-            softly.assertThat(sum(MedalRatio.of(2, 3, 1))).isEqualTo(100);
+            softly.assertThat(sum(MedalRatio.of(1, 2, 4))).isLessThanOrEqualTo(100);
+            softly.assertThat(sum(MedalRatio.of(7, 1, 1))).isLessThanOrEqualTo(100);
+            softly.assertThat(sum(MedalRatio.of(2, 3, 1))).isLessThanOrEqualTo(100);
         });
     }
 

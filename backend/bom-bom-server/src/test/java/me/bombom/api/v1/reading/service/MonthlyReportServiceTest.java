@@ -54,13 +54,6 @@ class MonthlyReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        articleReadHistoryRepository.deleteAllInBatch();
-        bookmarkRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createUniqueMember("member", "memberProvider"));
         otherMember = memberRepository.save(TestFixture.createUniqueMember("other", "otherProvider"));
 

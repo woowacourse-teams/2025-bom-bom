@@ -66,12 +66,6 @@ class ArticleServiceRateLimitTransactionTest {
 
     @BeforeEach
     void setUp() {
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.normalMemberFixture());
 
         Category category = categoryRepository.save(TestFixture.createCategory());

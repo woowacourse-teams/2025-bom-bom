@@ -86,17 +86,6 @@ class MarkAsReadListenerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        markAsReadEventLogRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        continueReadingRealtimeRepository.deleteAllInBatch();
-        weeklyReadingRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createMemberFixture("test@test.com", "testUser"));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
         todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));

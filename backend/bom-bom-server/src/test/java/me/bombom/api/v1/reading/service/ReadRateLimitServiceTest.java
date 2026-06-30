@@ -34,10 +34,6 @@ class ReadRateLimitServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberReadTokenBucketRepository.deleteAllInBatch();
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createMemberFixture("test@test.com", "testUser"));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
     }

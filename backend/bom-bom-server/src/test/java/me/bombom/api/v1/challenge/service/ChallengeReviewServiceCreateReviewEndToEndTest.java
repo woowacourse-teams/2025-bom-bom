@@ -87,16 +87,6 @@ class ChallengeReviewServiceCreateReviewEndToEndTest {
     void setUp() {
         pinClockTo(END_DATE.atTime(10, 0));
 
-        challengeDailyResultRepository.deleteAllInBatch();
-        challengeDailyTodoRepository.deleteAllInBatch();
-        challengeReviewRepository.deleteAllInBatch();
-        challengeTodoRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-        challengeTeamRepository.deleteAllInBatch();
-        challengeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        newsletterGroupRepository.deleteAllInBatch();
-
         viewer = memberRepository.save(TestFixture.createUniqueMember("나밍곰", "viewer-provider"));
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("그룹"));
 

@@ -113,13 +113,6 @@ class ArticleServiceTest {
     @BeforeEach
     public void setup() {
         ensureRoles();
-        articleReadHistoryRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        bookmarkRepository.deleteAllInBatch();
-        highlightRepository.deleteAllInBatch();
 
         member = memberRepository.save(TestFixture.createMemberWithRole("nickname", "providerId", userRoleId));
         categories = TestFixture.createCategories();

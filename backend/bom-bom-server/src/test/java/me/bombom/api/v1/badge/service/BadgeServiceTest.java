@@ -437,47 +437,61 @@ class BadgeServiceTest {
     }
 
     @Test
-    void 진행률_경계값_테스트() {
+    void 진행률이_100퍼센트면_금메달을_발급한다() {
+        assertChallengeBadgeIssued(10, BadgeGrade.GOLD);
+    }
+
+    @Test
+    void 진행률이_90퍼센트면_은메달을_발급한다() {
+        assertChallengeBadgeIssued(9, BadgeGrade.SILVER);
+    }
+
+    @Test
+    void 진행률이_80퍼센트면_동메달을_발급한다() {
+        assertChallengeBadgeIssued(8, BadgeGrade.BRONZE);
+    }
+
+    @Test
+    void 진행률이_80퍼센트_미만이면_뱃지를_발급하지_않는다() {
         // given
+        Challenge challenge = createBoundaryChallenge();
+        ChallengeParticipant participant = saveChallengeParticipant(challenge, 7);
+
+        // when
+        badgeService.issueChallengeBadges(challenge, List.of(participant));
+
+        // then
+        assertThat(badgeRepository.count()).isZero();
+    }
+
+    private void assertChallengeBadgeIssued(int todoCount, BadgeGrade grade) {
+        // given
+        Challenge challenge = createBoundaryChallenge();
+        ChallengeParticipant participant = saveChallengeParticipant(challenge, todoCount);
+
+        // when
+        badgeService.issueChallengeBadges(challenge, List.of(participant));
+
+        // then
+        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), grade)).isPresent();
+    }
+
+    private Challenge createBoundaryChallenge() {
         NewsletterGroup boundaryGroup = TestFixture.createNewsletterGroup("경계값 그룹");
         newsletterGroupRepository.save(boundaryGroup);
-        Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
+        return challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
             LocalDate.now().minusDays(10),
             LocalDate.now().minusDays(1),
             10,
             boundaryGroup.getId()
         ));
+    }
 
-        // when & then: 100% (10/10) → 금메달
-        ChallengeParticipant gold100 = challengeParticipantRepository.save(
-            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 10, true));
-        badgeService.issueChallengeBadges(challenge, List.of(gold100));
-        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.GOLD)).isPresent();
-        badgeRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-
-        // when & then: 90% (9/10) → 은메달
-        ChallengeParticipant silver90 = challengeParticipantRepository.save(
-            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 9, true));
-        badgeService.issueChallengeBadges(challenge, List.of(silver90));
-        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.SILVER)).isPresent();
-        badgeRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-
-        // when & then: 80% (8/10) → 동메달
-        ChallengeParticipant bronze80 = challengeParticipantRepository.save(
-            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 8, true));
-        badgeService.issueChallengeBadges(challenge, List.of(bronze80));
-        assertThat(findChallengeBadge(badgeRepository.findAll(), member1.getId(), BadgeGrade.BRONZE)).isPresent();
-        badgeRepository.deleteAllInBatch();
-        challengeParticipantRepository.deleteAllInBatch();
-
-        // when & then: 79% (7/10) → 뱃지 없음
-        ChallengeParticipant noBadge = challengeParticipantRepository.save(
-            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), 7, true));
-        badgeService.issueChallengeBadges(challenge, List.of(noBadge));
-        assertThat(badgeRepository.count()).isZero();
+    private ChallengeParticipant saveChallengeParticipant(Challenge challenge, int todoCount) {
+        return challengeParticipantRepository.save(
+            TestFixture.createChallengeParticipant(challenge.getId(), member1.getId(), todoCount, true)
+        );
     }
 
     private Optional<ChallengeBadge> findChallengeBadge(List<Badge> badges, Long memberId, BadgeGrade grade) {

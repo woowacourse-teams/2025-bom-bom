@@ -8,6 +8,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +34,7 @@ class ChallengeReviewControllerTest {
     private static final long CHALLENGE_ID = 1L;
     private static final long PARTICIPANT_ID = 1L;
     private static final LocalDate TODAY = LocalDate.of(2026, 1, 26);
+    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
 
     @Autowired
     private MutableClock clock;
@@ -161,6 +163,51 @@ class ChallengeReviewControllerTest {
             softly.assertThat(findReviewIsPrivate(CHALLENGE_ID, MEMBER_ID)).isTrue();
             softly.assertThat(existsDailyResult(PARTICIPANT_ID, TODAY)).isTrue();
             softly.assertThat(countDailyTodos(PARTICIPANT_ID, TODAY, "REVIEW")).isEqualTo(1);
+            softly.assertThat(findCompletedDays(PARTICIPANT_ID)).isEqualTo(1);
+            softly.assertThat(findStreak(PARTICIPANT_ID)).isEqualTo(1);
+            softly.assertThat(findLastParticipatedDate(PARTICIPANT_ID)).isEqualTo(TODAY);
+            softly.assertThat(findTeamProgress(1)).isEqualTo(100);
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void createReview_종료일_23시_59분에_작성해도_종료일_출석으로_인정된다() {
+        clock.setInstant(TODAY.atTime(23, 59, 30).atZone(SEOUL_ZONE).toInstant(), SEOUL_ZONE);
+
+        createReview(CHALLENGE_ID, MEMBER_ID, "종료 직전 리뷰", true)
+                .then()
+                .statusCode(201);
+
+        assertSoftly(softly -> {
+            softly.assertThat(existsDailyResult(PARTICIPANT_ID, TODAY)).isTrue();
+            softly.assertThat(countDailyTodos(PARTICIPANT_ID, TODAY, "REVIEW")).isEqualTo(1);
+            softly.assertThat(findCompletedDays(PARTICIPANT_ID)).isEqualTo(1);
+            softly.assertThat(findStreak(PARTICIPANT_ID)).isEqualTo(1);
+            softly.assertThat(findLastParticipatedDate(PARTICIPANT_ID)).isEqualTo(TODAY);
+            softly.assertThat(findTeamProgress(1)).isEqualTo(100);
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void createReview_종료일_다음날_작성하면_리뷰만_저장되고_출석은_인정되지_않는다() {
+        LocalDate dayAfterEnd = TODAY.plusDays(1);
+        clock.setInstant(dayAfterEnd.atStartOfDay(SEOUL_ZONE).plusSeconds(30).toInstant(), SEOUL_ZONE);
+
+        createReview(CHALLENGE_ID, MEMBER_ID, "종료 후 리뷰", true)
+                .then()
+                .statusCode(201);
+
+        assertSoftly(softly -> {
+            softly.assertThat(countReviews()).isEqualTo(1);
+            softly.assertThat(findReviewComment(CHALLENGE_ID, MEMBER_ID)).isEqualTo("종료 후 리뷰");
+            softly.assertThat(countDailyResults()).isZero();
+            softly.assertThat(countDailyTodos()).isZero();
+            softly.assertThat(findCompletedDays(PARTICIPANT_ID)).isZero();
+            softly.assertThat(findStreak(PARTICIPANT_ID)).isZero();
+            softly.assertThat(findLastParticipatedDate(PARTICIPANT_ID)).isNull();
+            softly.assertThat(findTeamProgress(1)).isZero();
         });
     }
 
@@ -548,6 +595,32 @@ class ChallengeReviewControllerTest {
                 participantId
         );
         return count == null ? 0 : count;
+    }
+
+    private int findStreak(long participantId) {
+        Integer streak = jdbcTemplate.queryForObject(
+                "select streak from challenge_participant where id = ?",
+                Integer.class,
+                participantId
+        );
+        return streak == null ? 0 : streak;
+    }
+
+    private LocalDate findLastParticipatedDate(long participantId) {
+        return jdbcTemplate.queryForObject(
+                "select last_participated_date from challenge_participant where id = ?",
+                LocalDate.class,
+                participantId
+        );
+    }
+
+    private int findTeamProgress(long teamId) {
+        Integer progress = jdbcTemplate.queryForObject(
+                "select progress from challenge_team where id = ?",
+                Integer.class,
+                teamId
+        );
+        return progress == null ? 0 : progress;
     }
 
     private void updateCompletedDays(long participantId, int completedDays) {

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentReplyRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyResultRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyTodoRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
@@ -29,6 +30,7 @@ public class ChallengeWithdrawService {
     private final ChallengeCommentLikeRepository challengeCommentLikeRepository;
     private final ChallengeDailyResultRepository challengeDailyResultRepository;
     private final ChallengeDailyTodoRepository challengeDailyTodoRepository;
+    private final ChallengeDailyGuideCommentRepository challengeDailyGuideCommentRepository;
     private final ChallengeStartNotificationRepository challengeStartNotificationRepository;
     private final ChallengeTodoReminderNotificationRepository challengeTodoReminderNotificationRepository;
 
@@ -53,6 +55,7 @@ public class ChallengeWithdrawService {
             challengeCommentRepository.bulkDeleteAllByParticipantIdIn(participantIds);
             challengeDailyResultRepository.bulkDeleteAllByParticipantIdIn(participantIds);
             challengeDailyTodoRepository.bulkDeleteAllByParticipantIdIn(participantIds);
+            challengeDailyGuideCommentRepository.bulkDeleteAllByParticipantIdIn(participantIds);
         }
 
         challengeReviewRepository.bulkDeleteAllByMemberId(memberId);

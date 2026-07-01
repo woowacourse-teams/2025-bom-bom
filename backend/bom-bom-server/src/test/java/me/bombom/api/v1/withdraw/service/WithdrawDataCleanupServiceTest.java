@@ -15,11 +15,13 @@ import me.bombom.api.v1.badge.domain.StreakBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentLike;
+import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
 import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeReviewRepository;
 import me.bombom.api.v1.challenge.service.ChallengeCommentReplyService;
@@ -30,6 +32,8 @@ import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.domain.MemberFcmToken;
 import me.bombom.api.v1.member.repository.MemberFcmTokenRepository;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
+import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import me.bombom.api.v1.reading.domain.MemberReadTokenBucket;
 import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import me.bombom.support.integration.IntegrationTest;
@@ -83,6 +87,12 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private ArticleArrivalNotificationFailedRepository articleArrivalNotificationFailedRepository;
+
+    @Autowired
+    private ChallengeDailyGuideCommentRepository challengeDailyGuideCommentRepository;
+
+    @Autowired
+    private MaeilMailSentContentRepository maeilMailSentContentRepository;
 
     @Test
     void 탈퇴_회원의_모든_도메인_데이터가_삭제된다() {
@@ -146,6 +156,16 @@ class WithdrawDataCleanupServiceTest {
                 .participantId(participant.getId())
                 .commentId(comment.getId())
                 .build());
+        challengeDailyGuideCommentRepository.save(ChallengeDailyGuideComment.builder()
+                .guideId(1L)
+                .participantId(participant.getId())
+                .content("데일리 가이드 댓글")
+                .build());
+        maeilMailSentContentRepository.save(MaeilMailSentContent.builder()
+                .memberId(memberId)
+                .topicId(1L)
+                .contentId(1L)
+                .build());
 
         // when
         withdrawDataCleanupService.cleanupByMemberId(memberId);
@@ -166,6 +186,8 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(memberFcmTokenRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationFailedRepository.count()).isZero();
+            softly.assertThat(challengeDailyGuideCommentRepository.count()).isZero();
+            softly.assertThat(maeilMailSentContentRepository.count()).isZero();
         });
     }
 

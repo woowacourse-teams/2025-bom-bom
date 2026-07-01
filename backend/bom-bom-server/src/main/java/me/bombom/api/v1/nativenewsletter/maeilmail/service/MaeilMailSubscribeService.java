@@ -13,6 +13,7 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionT
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
+import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
@@ -33,6 +34,7 @@ public class MaeilMailSubscribeService {
     private final NewsletterRepository newsletterRepository;
     private final MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
     private final MaeilMailUserAnswerRepository maeilMailUserAnswerRepository;
+    private final MaeilMailSentContentRepository maeilMailSentContentRepository;
 
     public MaeilMailSubscriptionResponse getSubscription(Long memberId) {
         List<MaeilMailSubscriptionTrack> tracks = maeilMailSubscriptionTrackRepository.findByMemberId(memberId);
@@ -66,6 +68,7 @@ public class MaeilMailSubscribeService {
     public void deleteAllByMemberId(Long memberId) {
         maeilMailSubscriptionTrackRepository.bulkDeleteByMemberId(memberId);
         maeilMailUserAnswerRepository.bulkDeleteAllByMemberId(memberId);
+        maeilMailSentContentRepository.bulkDeleteAllByMemberId(memberId);
     }
 
     private void replaceTracks(Subscribe subscribe, Long memberId, List<MaeilMailTrack> requestedTracks) {

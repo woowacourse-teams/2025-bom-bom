@@ -30,7 +30,9 @@ import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.domain.MemberFcmToken;
+import me.bombom.api.v1.member.domain.MemberNotificationSetting;
 import me.bombom.api.v1.member.repository.MemberFcmTokenRepository;
+import me.bombom.api.v1.member.repository.MemberNotificationSettingRepository;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
@@ -93,6 +95,9 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private MaeilMailSentContentRepository maeilMailSentContentRepository;
+
+    @Autowired
+    private MemberNotificationSettingRepository memberNotificationSettingRepository;
 
     @Test
     void 탈퇴_회원의_모든_도메인_데이터가_삭제된다() {
@@ -166,6 +171,11 @@ class WithdrawDataCleanupServiceTest {
                 .topicId(1L)
                 .contentId(1L)
                 .build());
+        memberNotificationSettingRepository.save(MemberNotificationSetting.builder()
+                .memberId(memberId)
+                .category("ARTICLE_ARRIVAL")
+                .isEnabled(true)
+                .build());
 
         // when
         withdrawDataCleanupService.cleanupByMemberId(memberId);
@@ -188,6 +198,7 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(articleArrivalNotificationFailedRepository.count()).isZero();
             softly.assertThat(challengeDailyGuideCommentRepository.count()).isZero();
             softly.assertThat(maeilMailSentContentRepository.count()).isZero();
+            softly.assertThat(memberNotificationSettingRepository.count()).isZero();
         });
     }
 

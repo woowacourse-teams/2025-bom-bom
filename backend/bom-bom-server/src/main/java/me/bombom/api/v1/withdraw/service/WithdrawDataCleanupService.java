@@ -10,6 +10,7 @@ import me.bombom.api.v1.challenge.service.ChallengeWithdrawService;
 import me.bombom.api.v1.coupon.service.CouponService;
 import me.bombom.api.v1.highlight.service.HighlightService;
 import me.bombom.api.v1.member.service.MemberFcmTokenService;
+import me.bombom.api.v1.member.service.MemberNotificationSettingService;
 import me.bombom.api.v1.member.service.WarningService;
 import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailSubscribeService;
 import me.bombom.api.v1.pet.service.PetService;
@@ -39,6 +40,7 @@ public class WithdrawDataCleanupService {
     private final ChallengeWithdrawService challengeWithdrawService;
     private final MaeilMailSubscribeService maeilMailSubscribeService;
     private final MemberFcmTokenService memberFcmTokenService;
+    private final MemberNotificationSettingService memberNotificationSettingService;
 
     public void cleanupByMemberId(Long memberId) {
         runSafely("아티클", memberId, articleService::deleteAllByMemberId);
@@ -53,6 +55,7 @@ public class WithdrawDataCleanupService {
         runSafely("챌린지", memberId, challengeWithdrawService::deleteAllByMemberId);
         runSafely("매일메일", memberId, maeilMailSubscribeService::deleteAllByMemberId);
         runSafely("FCM 토큰", memberId, memberFcmTokenService::deleteAllByMemberId);
+        runSafely("알림 설정", memberId, memberNotificationSettingService::deleteAllByMemberId);
     }
 
     private void runSafely(String domain, Long memberId, LongConsumer action) {

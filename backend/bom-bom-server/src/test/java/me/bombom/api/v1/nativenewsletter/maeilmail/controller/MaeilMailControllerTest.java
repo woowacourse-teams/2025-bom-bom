@@ -7,11 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import me.bombom.api.v1.common.exception.ErrorDetail;
-import me.bombom.api.v1.common.exception.ErrorResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailUserAnswer;
-import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailIdealAnswerResponse;
-import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailInformationResponse;
-import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubmittedAnswerResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
@@ -36,7 +32,7 @@ class MaeilMailControllerTest {
 
     @Test
     void 아티클_ID로_매일메일_콘텐츠_정보를_조회한다() {
-        MaeilMailInformationResponse response = authenticatedRequest()
+        Map<String, Object> response = authenticatedRequest()
                 .queryParam("articleId", ARTICLE_ID)
                 .when()
                 .get("/api/v1/maeil-mail/content")
@@ -44,25 +40,27 @@ class MaeilMailControllerTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .extract()
-                .as(MaeilMailInformationResponse.class);
+                .jsonPath()
+                .getMap("$");
 
-        assertThat(response.contentId()).isEqualTo(CONTENT_ID);
+        assertThat(longValue(response, "contentId")).isEqualTo(CONTENT_ID);
     }
 
     @Test
     void 매일메일_콘텐츠의_모범_답변을_조회한다() {
-        MaeilMailIdealAnswerResponse response = authenticatedRequest()
+        Map<String, Object> response = authenticatedRequest()
                 .when()
                 .get("/api/v1/maeil-mail/{contentId}/answer", CONTENT_ID)
                 .then()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .extract()
-                .as(MaeilMailIdealAnswerResponse.class);
+                .jsonPath()
+                .getMap("$");
 
         assertSoftly(softly -> {
-            softly.assertThat(response.title()).isEqualTo("Java의 GC 동작 방식은?");
-            softly.assertThat(response.answer()).isEqualTo("<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>");
+            softly.assertThat(response.get("title")).isEqualTo("Java의 GC 동작 방식은?");
+            softly.assertThat(response.get("answer")).isEqualTo("<p>GC는 더 이상 참조되지 않는 객체를 정리합니다.</p>");
         });
     }
 
@@ -91,10 +89,9 @@ class MaeilMailControllerTest {
             softly.assertThat(savedAnswer.getAnswer()).isEqualTo(answer);
         });
 
-        MaeilMailSubmittedAnswerResponse response = getSubmittedAnswer(ARTICLE_ID, 200)
-                .as(MaeilMailSubmittedAnswerResponse.class);
+        Map<String, Object> response = getSubmittedAnswer(ARTICLE_ID, 200);
 
-        assertThat(response.answer()).isEqualTo(answer);
+        assertThat(response.get("answer")).isEqualTo(answer);
     }
 
     @Test
@@ -110,10 +107,8 @@ class MaeilMailControllerTest {
                 .then()
                 .statusCode(201);
 
-        MaeilMailSubmittedAnswerResponse firstResponse = getSubmittedAnswer(ARTICLE_ID, 200)
-                .as(MaeilMailSubmittedAnswerResponse.class);
-        MaeilMailSubmittedAnswerResponse secondResponse = getSubmittedAnswer(SECOND_ARTICLE_ID, 200)
-                .as(MaeilMailSubmittedAnswerResponse.class);
+        Map<String, Object> firstResponse = getSubmittedAnswer(ARTICLE_ID, 200);
+        Map<String, Object> secondResponse = getSubmittedAnswer(SECOND_ARTICLE_ID, 200);
         MaeilMailUserAnswer savedFirstAnswer = userAnswerRepository
                 .findByMemberIdAndIssueHistoryId(MEMBER_ID, ISSUE_HISTORY_ID)
                 .orElseThrow();
@@ -122,8 +117,8 @@ class MaeilMailControllerTest {
                 .orElseThrow();
 
         assertSoftly(softly -> {
-            softly.assertThat(firstResponse.answer()).isEqualTo(firstAnswer);
-            softly.assertThat(secondResponse.answer()).isEqualTo(secondAnswer);
+            softly.assertThat(firstResponse.get("answer")).isEqualTo(firstAnswer);
+            softly.assertThat(secondResponse.get("answer")).isEqualTo(secondAnswer);
             softly.assertThat(savedFirstAnswer.getAnswer()).isEqualTo(firstAnswer);
             softly.assertThat(savedSecondAnswer.getAnswer()).isEqualTo(secondAnswer);
             softly.assertThat(userAnswerRepository.findAll()).hasSize(2);
@@ -148,14 +143,15 @@ class MaeilMailControllerTest {
 
     @Test
     void 존재하지_않는_아티클에_답변을_제출하면_404를_반환한다() {
-        ErrorResponse response = submitAnswer(UNKNOWN_ARTICLE_ID, "존재하지 않는 아티클에는 저장되지 않는다.")
+        Map<String, Object> response = submitAnswer(UNKNOWN_ARTICLE_ID, "존재하지 않는 아티클에는 저장되지 않는다.")
                 .then()
                 .statusCode(404)
                 .contentType(ContentType.JSON)
                 .extract()
-                .as(ErrorResponse.class);
+                .jsonPath()
+                .getMap("$");
 
-        assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
+        assertThat(response.get("code")).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
@@ -174,44 +170,44 @@ class MaeilMailControllerTest {
 
     @Test
     void 답변이_공백이면_제출할_수_없다() {
-        ErrorResponse response = submitAnswer(ARTICLE_ID, " ")
+        Map<String, Object> response = submitAnswer(ARTICLE_ID, " ")
                 .then()
                 .statusCode(400)
                 .contentType(ContentType.JSON)
                 .extract()
-                .as(ErrorResponse.class);
+                .jsonPath()
+                .getMap("$");
 
-        assertThat(response.code()).isEqualTo(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getCode());
+        assertThat(response.get("code")).isEqualTo(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getCode());
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
     @Test
     void 답변이_1500자를_초과하면_제출할_수_없다() {
-        ErrorResponse response = submitAnswer(ARTICLE_ID, "가".repeat(1_501))
+        Map<String, Object> response = submitAnswer(ARTICLE_ID, "가".repeat(1_501))
                 .then()
                 .statusCode(400)
                 .contentType(ContentType.JSON)
                 .extract()
-                .as(ErrorResponse.class);
+                .jsonPath()
+                .getMap("$");
 
-        assertThat(response.code()).isEqualTo(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getCode());
+        assertThat(response.get("code")).isEqualTo(ErrorDetail.INVALID_REQUEST_BODY_VALIDATION.getCode());
         assertThat(userAnswerRepository.findAll()).isEmpty();
     }
 
     @Test
     void 아직_제출하지_않은_답변을_조회하면_404를_반환한다() {
-        ErrorResponse response = getSubmittedAnswer(ARTICLE_ID, 404)
-                .as(ErrorResponse.class);
+        Map<String, Object> response = getSubmittedAnswer(ARTICLE_ID, 404);
 
-        assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
+        assertThat(response.get("code")).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
     }
 
     @Test
     void 존재하지_않는_아티클의_제출_답변을_조회하면_404를_반환한다() {
-        ErrorResponse response = getSubmittedAnswer(UNKNOWN_ARTICLE_ID, 404)
-                .as(ErrorResponse.class);
+        Map<String, Object> response = getSubmittedAnswer(UNKNOWN_ARTICLE_ID, 404);
 
-        assertThat(response.code()).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
+        assertThat(response.get("code")).isEqualTo(ErrorDetail.ENTITY_NOT_FOUND.getCode());
     }
 
     private io.restassured.response.Response submitAnswer(Long articleId, String answer) {
@@ -222,7 +218,7 @@ class MaeilMailControllerTest {
                 .post("/api/v1/maeil-mail/articles/{articleId}/answers/me", articleId);
     }
 
-    private io.restassured.response.ExtractableResponse<io.restassured.response.Response> getSubmittedAnswer(
+    private Map<String, Object> getSubmittedAnswer(
             Long articleId,
             int statusCode
     ) {
@@ -232,12 +228,18 @@ class MaeilMailControllerTest {
                 .then()
                 .statusCode(statusCode)
                 .contentType(ContentType.JSON)
-                .extract();
+                .extract()
+                .jsonPath()
+                .getMap("$");
     }
 
     private io.restassured.specification.RequestSpecification authenticatedRequest() {
         return RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, MEMBER_ID);
+    }
+
+    private static long longValue(Map<String, Object> response, String key) {
+        return ((Number) response.get(key)).longValue();
     }
 }

@@ -1,6 +1,7 @@
 package me.bombom.api.v1.challenge.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import org.springframework.data.domain.Page;
@@ -87,4 +88,18 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
                  WHERE c.id = :commentId
             """)
     void bulkUpdateReplyCount(Long commentId);
+
+    @Query("""
+            SELECT cc.id
+            FROM ChallengeComment cc
+            WHERE cc.participantId IN :participantIds
+            """)
+    List<Long> findIdsByParticipantIdIn(@Param("participantIds") List<Long> participantIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeComment cc
+            WHERE cc.participantId IN :participantIds
+            """)
+    void bulkDeleteAllByParticipantIdIn(@Param("participantIds") List<Long> participantIds);
 }

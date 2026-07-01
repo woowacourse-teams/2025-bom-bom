@@ -20,6 +20,13 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
     int countByMemberId(Long memberId);
 
     @Query("""
+            SELECT MAX(h.readAt)
+            FROM ArticleReadHistory h
+            WHERE h.memberId = :memberId
+            """)
+    Optional<LocalDateTime> findLastReadAtByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
             SELECT new me.bombom.api.v1.member.dto.CategoryReadCount(
                 c.id,
                 c.name,
@@ -123,4 +130,11 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
             @Param("categoryId") Long categoryId,
             @Param("readAt") LocalDateTime readAt
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ArticleReadHistory h
+            WHERE h.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

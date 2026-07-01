@@ -18,6 +18,7 @@ import me.bombom.api.v1.reading.dto.RankerInfo;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -71,6 +72,11 @@ public class BadgeService {
                     badgeRepository.save(badge);
                     log.info("스트릭 뱃지 발급 완료 - memberId: {}, streakDayCount: {}", memberId, tier.getDayCount());
                 });
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        badgeRepository.bulkDeleteAllByMemberId(memberId);
     }
 
     private void issueRankingBadge(Long memberId, BadgeGrade grade, LocalDate period) {

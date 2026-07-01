@@ -1,9 +1,11 @@
 package me.bombom.api.v1.challenge.repository;
 
+import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ChallengeCommentLikeRepository extends JpaRepository<ChallengeCommentLike, Long> {
 
@@ -17,4 +19,18 @@ public interface ChallengeCommentLikeRepository extends JpaRepository<ChallengeC
     boolean existsByParticipantIdAndCommentId(Long participantId, Long commentId);
 
     int deleteByParticipantIdAndCommentId(Long participantId, Long commentId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeCommentLike cl
+            WHERE cl.participantId IN :participantIds
+            """)
+    void bulkDeleteAllByParticipantIdIn(@Param("participantIds") List<Long> participantIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeCommentLike cl
+            WHERE cl.commentId IN :commentIds
+            """)
+    void bulkDeleteAllByCommentIdIn(@Param("commentIds") List<Long> commentIds);
 }

@@ -45,6 +45,7 @@ import me.bombom.api.v1.reading.event.ContinueReadingIncreasedEvent;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
+import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRankHistoryRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingSnapshotRepository;
@@ -77,6 +78,7 @@ public class ReadingService {
     private final MonthlyReadingRealtimeRepository monthlyReadingRealtimeRepository;
     private final MonthlyReadingRankHistoryRepository monthlyReadingRankHistoryRepository;
     private final YearlyReadingRepository yearlyReadingRepository;
+    private final MemberReadTokenBucketRepository memberReadTokenBucketRepository;
     private final HolidayRepository holidayRepository;
 
     private final MonthlyRankingScheduleProperties scheduleProps;
@@ -376,6 +378,9 @@ public class ReadingService {
             monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
             monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
             yearlyReadingRepository.bulkDeleteByMemberId(memberId);
+            continueReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
+            monthlyReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
+            memberReadTokenBucketRepository.bulkDeleteAllByMemberId(memberId);
             continueReadingShieldService.deleteByMemberId(memberId);
         } catch (Exception e) {
             log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());

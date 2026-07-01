@@ -6,6 +6,7 @@ import me.bombom.api.v1.challenge.dto.response.ChallengeReviewListItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,4 +33,11 @@ public interface ChallengeReviewRepository extends JpaRepository<ChallengeReview
             @Param("viewerMemberId") Long viewerMemberId,
             Pageable pageable
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeReview cr
+            WHERE cr.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

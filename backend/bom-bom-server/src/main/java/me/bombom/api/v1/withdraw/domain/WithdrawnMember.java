@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.bombom.api.v1.common.BaseEntity;
 import me.bombom.api.v1.member.enums.Gender;
+import me.bombom.api.v1.subscribe.domain.AgeGroup;
 
 @Entity
 @Getter
@@ -29,14 +30,15 @@ public class WithdrawnMember extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Column(nullable = false, length = 50)
-    private String email;
-
-    private LocalDate birthDate;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    @Enumerated(EnumType.STRING)
+    private AgeGroup ageGroup;
+
+    @Column(length = 20)
+    private String provider;
 
     @Column(nullable = false)
     private LocalDate joinedDate;
@@ -47,36 +49,56 @@ public class WithdrawnMember extends BaseEntity {
     @Column(nullable = false)
     private LocalDate expireDate;
 
+    private LocalDate lastReadDate;
+
     private int continueReading;
 
     private int bookmarkedCount;
 
     private int highlightCount;
 
+    private int totalReadCount;
+
+    private int subscribeCount;
+
+    private int challengeCount;
+
+    private int badgeCount;
+
     @Builder
     public WithdrawnMember(
             Long id,
             @NonNull Long memberId,
-            @NonNull String email,
-            LocalDate birthDate,
             Gender gender,
+            AgeGroup ageGroup,
+            String provider,
             @NonNull LocalDate joinedDate,
             @NonNull LocalDate deletedDate,
             @NotNull LocalDate expireDate,
+            LocalDate lastReadDate,
             int continueReading,
             int bookmarkedCount,
-            int highlightCount
+            int highlightCount,
+            int totalReadCount,
+            int subscribeCount,
+            int challengeCount,
+            int badgeCount
     ) {
         this.id = id;
         this.memberId = memberId;
-        this.email = email;
-        this.birthDate = birthDate;
         this.gender = gender;
+        this.ageGroup = ageGroup;
+        this.provider = provider;
         this.joinedDate = joinedDate;
         this.deletedDate = deletedDate;
         this.expireDate = expireDate;
+        this.lastReadDate = lastReadDate;
         this.continueReading = continueReading;
         this.bookmarkedCount = bookmarkedCount;
         this.highlightCount = highlightCount;
+        this.totalReadCount = totalReadCount;
+        this.subscribeCount = subscribeCount;
+        this.challengeCount = challengeCount;
+        this.badgeCount = badgeCount;
     }
 }

@@ -17,10 +17,13 @@ import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentLike;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
+import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeReviewRepository;
+import me.bombom.api.v1.challenge.service.ChallengeCommentReplyService;
+import me.bombom.api.v1.challenge.service.ChallengeCommentService;
 import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import me.bombom.api.v1.member.domain.Member;
@@ -59,6 +62,12 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private ChallengeReviewRepository challengeReviewRepository;
+
+    @Autowired
+    private ChallengeCommentService challengeCommentService;
+
+    @Autowired
+    private ChallengeCommentReplyService challengeCommentReplyService;
 
     @Autowired
     private MemberReadTokenBucketRepository memberReadTokenBucketRepository;
@@ -157,6 +166,45 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(memberFcmTokenRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationFailedRepository.count()).isZero();
+        });
+    }
+
+    @Test
+    void 탈퇴_회원이_타인_댓글에_남긴_좋아요와_답글은_대상_댓글의_카운터를_보정하고_삭제된다() {
+        // given
+        Member withdrawer = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Member other = memberRepository.save(TestFixture.uniqueMemberFixture());
+
+        ChallengeParticipant otherParticipant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(1L)
+                .memberId(other.getId())
+                .build());
+        ChallengeComment othersComment = challengeCommentRepository.save(ChallengeComment.builder()
+                .newsletterId(1L)
+                .participantId(otherParticipant.getId())
+                .articleTitle("제목")
+                .comment("타인의 댓글")
+                .build());
+
+        ChallengeParticipant withdrawerParticipant = challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(1L)
+                .memberId(withdrawer.getId())
+                .build());
+        // 실제 좋아요/답글 생성 플로우로 대상 댓글의 카운터를 1씩 증가시킨다.
+        challengeCommentService.addChallengeCommentLike(withdrawer.getId(), 1L, othersComment.getId());
+        challengeCommentReplyService.createCommentReply(
+                1L, othersComment.getId(), withdrawer.getId(), new CreateCommentReplyRequest("답글", false));
+
+        // when
+        withdrawDataCleanupService.cleanupByMemberId(withdrawer.getId());
+
+        // then
+        ChallengeComment updated = challengeCommentRepository.findById(othersComment.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(updated.getLikeCount()).isZero();
+            softly.assertThat(updated.getReplyCount()).isZero();
+            softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(
+                    withdrawerParticipant.getId(), othersComment.getId())).isFalse();
         });
     }
 }

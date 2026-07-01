@@ -44,6 +44,9 @@ public class ChallengeWithdrawService {
                 challengeCommentReplyRepository.bulkDeleteAllByCommentIdIn(commentIds);
             }
 
+            // 탈퇴 회원이 타인 댓글에 남긴 좋아요/답글을 지우기 전에 해당 댓글의 카운터를 보정한다.
+            decreaseCountersForMemberReactions(participantIds);
+
             // 탈퇴 회원 본인이 남긴 좋아요/답글/댓글/일일기록을 정리한다.
             challengeCommentLikeRepository.bulkDeleteAllByParticipantIdIn(participantIds);
             challengeCommentReplyRepository.bulkDeleteAllByParticipantIdIn(participantIds);
@@ -56,5 +59,11 @@ public class ChallengeWithdrawService {
         challengeStartNotificationRepository.bulkDeleteAllByMemberId(memberId);
         challengeTodoReminderNotificationRepository.bulkDeleteAllByMemberId(memberId);
         challengeParticipantRepository.bulkDeleteAllByMemberId(memberId);
+    }
+
+    private void decreaseCountersForMemberReactions(List<Long> participantIds) {
+        // 댓글별로 GROUP BY 하여 좋아요/답글 카운터를 한 번의 벌크 UPDATE로 감소시킨다.
+        challengeCommentRepository.bulkDecreaseLikeCountByParticipantIds(participantIds);
+        challengeCommentRepository.bulkDecreaseReplyCountByParticipantIds(participantIds);
     }
 }

@@ -16,30 +16,31 @@ public class WithdrawScheduler {
 
     private static final String TIME_ZONE = "Asia/Seoul";
     private static final String DAILY_CRON = "0 0 0 * * *";
-    private static final String DAILY_RECONCILE_CRON = "0 30 3 * * *";
 
     private final WithdrawService withdrawService;
     private final WithdrawDataCleanupService withdrawDataCleanupService;
 
+    /**
+     * 탈퇴 회원 데이터 유지보수를 하루 한 번 실행한다.
+     * 1) 비동기 삭제 실패로 남은 고아 데이터를 재정리(멱등)한 뒤,
+     * 2) 만료된 탈퇴 회원 추적 정보를 삭제한다.
+     * 만료 삭제보다 재정리를 먼저 수행해, cleanup이 계속 실패한 회원이라도
+     * 추적 정보가 사라지기 전에 반드시 한 번 더 정리되도록 보장한다.
+     */
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "daily_migrate_deleted_member", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
-    public void dailyMigrateDeletedMember(){
+    @SchedulerLock(name = "daily_withdrawn_member_maintenance", lockAtLeastFor = "PT10S", lockAtMostFor = "PT30M")
+    public void dailyWithdrawnMemberMaintenance() {
+        reconcileWithdrawnMemberData();
         log.info("만료된 탈퇴 회원 정보 삭제 실행");
         withdrawService.deleteExpiredWithdrawnMembers();
     }
 
-    /**
-     * 비동기 삭제 실패 등으로 남은 고아 데이터를 정리한다.
-     * 모든 삭제는 멱등하므로 이미 정리된 회원에 대해 재실행해도 안전하다.
-     */
-    @Scheduled(cron = DAILY_RECONCILE_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "daily_reconcile_withdrawn_member_data", lockAtLeastFor = "PT10S", lockAtMostFor = "PT30M")
-    public void reconcileWithdrawnMemberData() {
+    private void reconcileWithdrawnMemberData() {
         List<Long> memberIds = withdrawService.findActiveWithdrawnMemberIds();
-        log.info("탈퇴 회원 데이터 재조정 시작 - 대상 {}건", memberIds.size());
+        log.info("탈퇴 회원 데이터 재정리 시작 - 대상 {}건", memberIds.size());
         for (Long memberId : memberIds) {
             withdrawDataCleanupService.cleanupByMemberId(memberId);
         }
-        log.info("탈퇴 회원 데이터 재조정 완료");
+        log.info("탈퇴 회원 데이터 재정리 완료");
     }
 }

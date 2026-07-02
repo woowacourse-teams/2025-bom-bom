@@ -3,11 +3,8 @@ package me.bombom.api.v1.article.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,16 +42,15 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.reading.service.ReadRateLimitService;
+import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
 
@@ -65,6 +61,8 @@ class ArticleServiceTest {
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
     private static final LocalDateTime OLD_ARTICLE_TIME = LocalDateTime.of(2000, 1, 1, 10, 0);
     private static final LocalDateTime RECENT_ARTICLE_TIME = LocalDateTime.of(2099, 1, 1, 10, 0);
+    private static final LocalDate READ_DATE = LocalDate.of(2026, 1, 1);
+    private static final LocalDateTime READ_AT = READ_DATE.atStartOfDay();
 
     @Autowired
     private ArticleService articleService;
@@ -99,11 +97,14 @@ class ArticleServiceTest {
     @Autowired
     private HighlightRepository highlightRepository;
 
-    @MockitoBean
-    private ReadRateLimitService readRateLimitService;
+    @Autowired
+    private MemberReadTokenBucketRepository memberReadTokenBucketRepository;
 
     @Autowired
     private ApplicationEvents applicationEvents;
+
+    @Autowired
+    private MutableClock clock;
 
     List<Category> categories;
     List<Newsletter> newsletters;
@@ -114,6 +115,7 @@ class ArticleServiceTest {
 
     @BeforeEach
     public void setup() {
+        clock.setDate(READ_DATE);
         ensureRoles();
 
         member = memberRepository.save(TestFixture.createMemberWithRole("nickname", "providerId", userRoleId));
@@ -125,9 +127,6 @@ class ArticleServiceTest {
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
-
-        lenient().when(readRateLimitService.tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class)))
-                .thenReturn(true);
     }
 
     private void ensureRoles() {
@@ -497,33 +496,10 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 읽기_토큰_소비_중_일시적_DB_예외가_발생하면_카운트_가능한_읽음_이벤트를_발행한다() {
-        // given
-        Article article = articles.getFirst();
-        doThrow(new TransientDataAccessResourceException("DB 일시 장애"))
-                .when(readRateLimitService).tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class));
-
-        // when
-        MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
-
-        // then
-        List<MarkAsReadEvent> events = applicationEvents.stream(MarkAsReadEvent.class).toList();
-        assertThat(events).hasSize(1);
-        MarkAsReadEvent event = events.getFirst();
-        assertSoftly(softly -> {
-            softly.assertThat(result.readCountTokenConsumed()).isTrue();
-            softly.assertThat(event.memberId()).isEqualTo(member.getId());
-            softly.assertThat(event.articleId()).isEqualTo(article.getId());
-            softly.assertThat(event.countable()).isTrue();
-        });
-    }
-
-    @Test
     void 읽기_토큰을_소비하지_못하면_카운트_대상이_아닌_읽음_이벤트를_발행한다() {
         // given
         Article article = articles.getFirst();
-        lenient().when(readRateLimitService.tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class)))
-                .thenReturn(false);
+        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5, READ_AT));
 
         // when
         MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);

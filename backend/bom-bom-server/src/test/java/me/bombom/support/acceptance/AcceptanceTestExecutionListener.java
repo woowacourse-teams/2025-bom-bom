@@ -26,10 +26,7 @@ public class AcceptanceTestExecutionListener extends AbstractTestExecutionListen
 
     @Override
     public void beforeTestMethod(TestContext testContext) {
-        testContext.getApplicationContext()
-                .getBeansOfType(ResettableTestDouble.class)
-                .values()
-                .forEach(ResettableTestDouble::reset);
+        resetTestDoubles(testContext);
 
         RestAssured.reset();
         RestAssured.port = port(testContext);
@@ -59,6 +56,8 @@ public class AcceptanceTestExecutionListener extends AbstractTestExecutionListen
     }
 
     private void loadDataSet(TestContext testContext) {
+        resetTestDoubles(testContext);
+
         AcceptanceTest acceptanceTest = AnnotatedElementUtils.findMergedAnnotation(
                 testContext.getTestClass(),
                 AcceptanceTest.class
@@ -68,6 +67,13 @@ public class AcceptanceTestExecutionListener extends AbstractTestExecutionListen
         }
 
         dataSetLoader(testContext).load(acceptanceTest.value());
+    }
+
+    private void resetTestDoubles(TestContext testContext) {
+        testContext.getApplicationContext()
+                .getBeansOfType(ResettableTestDouble.class)
+                .values()
+                .forEach(ResettableTestDouble::reset);
     }
 
     private AdditionalAcceptanceDataSet additionalDataSet(TestContext testContext) {

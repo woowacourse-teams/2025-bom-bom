@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @IntegrationTest
 class ChallengeTodoServiceTest {
 
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 5);
+
     @Autowired
     private ChallengeTodoService challengeTodoService;
 
@@ -59,7 +61,7 @@ class ChallengeTodoServiceTest {
         ChallengeParticipant participant = saveParticipant();
 
         // when
-        challengeTodoService.completeDailyTodo(participant.getId(), LocalDate.now());
+        challengeTodoService.completeDailyTodo(participant.getId(), TODAY);
 
         // then
         ChallengeParticipant updated = challengeParticipantRepository.findById(participant.getId()).orElseThrow();
@@ -68,7 +70,7 @@ class ChallengeTodoServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(updated.getCompletedDays()).isEqualTo(3);
             softly.assertThat(updated.getStreak()).isEqualTo(3);
-            softly.assertThat(updated.getLastParticipatedDate()).isEqualTo(LocalDate.now());
+            softly.assertThat(updated.getLastParticipatedDate()).isEqualTo(TODAY);
             softly.assertThat(results).hasSize(1);
             softly.assertThat(results.getFirst().getStatus()).isEqualTo(ChallengeDailyStatus.COMPLETE);
         });
@@ -77,7 +79,7 @@ class ChallengeTodoServiceTest {
     @Test
     void 댓글_투두_완료는_중복이_없을_때만_일일_투두를_저장한다() {
         // given
-        LocalDate today = LocalDate.of(2026, 1, 5);
+        LocalDate today = TODAY;
         ChallengeParticipant participant = saveParticipant();
         ChallengeTodo todo = saveTodo(participant.getChallengeId(), ChallengeTodoType.COMMENT);
 
@@ -98,7 +100,7 @@ class ChallengeTodoServiceTest {
     @Test
     void 다짐과_회고_투두_완료를_각각_저장한다() {
         // given
-        LocalDate today = LocalDate.of(2026, 1, 5);
+        LocalDate today = TODAY;
         ChallengeParticipant participant = saveParticipant();
         ChallengeTodo mindsetTodo = saveTodo(participant.getChallengeId(), ChallengeTodoType.MINDSET);
         ChallengeTodo reviewTodo = saveTodo(participant.getChallengeId(), ChallengeTodoType.REVIEW);
@@ -129,14 +131,14 @@ class ChallengeTodoServiceTest {
         ChallengeParticipant participant = saveParticipant();
 
         // when & then
-        assertThatThrownBy(() -> challengeTodoService.insertCommentDone(participant, LocalDate.of(2026, 1, 5)))
+        assertThatThrownBy(() -> challengeTodoService.insertCommentDone(participant, TODAY))
                 .isInstanceOf(CServerErrorException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
 
     @Test
     void 존재하지_않는_참가자는_일일_투두를_완료할_수_없다() {
-        assertThatThrownBy(() -> challengeTodoService.completeDailyTodo(-1L, LocalDate.of(2026, 1, 5)))
+        assertThatThrownBy(() -> challengeTodoService.completeDailyTodo(-1L, TODAY))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
     }
@@ -145,7 +147,7 @@ class ChallengeTodoServiceTest {
         var member = memberRepository.save(TestFixture.createUniqueMember("tester", "id"));
         var group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("그룹"));
         var challenge = challengeRepository.save(TestFixture.createChallenge(
-                "Challenge", LocalDate.now().minusDays(3), LocalDate.now().plusDays(7), 10, group.getId()));
+                "Challenge", TODAY.minusDays(3), TODAY.plusDays(7), 10, group.getId()));
 
         return challengeParticipantRepository.save(ChallengeParticipant.builder()
                 .challengeId(challenge.getId())

@@ -19,11 +19,15 @@ import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.withdraw.domain.WithdrawnMember;
 import me.bombom.api.v1.withdraw.repository.WithdrawnMemberRepository;
 import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @IntegrationTest
 class WithdrawServiceTest {
+
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 1);
 
     @Autowired
     private WithdrawService withdrawService;
@@ -42,6 +46,14 @@ class WithdrawServiceTest {
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
+
+    @Autowired
+    private MutableClock clock;
+
+    @BeforeEach
+    void setUp() {
+        clock.setDate(TODAY);
+    }
 
     @Test
     void 회원_탈퇴_시_탈퇴_회원_정보로_이전된다() {
@@ -97,9 +109,9 @@ class WithdrawServiceTest {
                 .memberId(1L)
                 .email("expired@test.com")
                 .gender(Gender.MALE)
-                .joinedDate(LocalDate.now().minusDays(200))
-                .deletedDate(LocalDate.now().minusDays(90))
-                .expireDate(LocalDate.now()) // 오늘 만료
+                .joinedDate(TODAY.minusDays(200))
+                .deletedDate(TODAY.minusDays(90))
+                .expireDate(TODAY) // 오늘 만료
                 .build();
         withdrawnMemberRepository.save(expired);
 
@@ -107,9 +119,9 @@ class WithdrawServiceTest {
                 .memberId(2L)
                 .email("valid@test.com")
                 .gender(Gender.FEMALE)
-                .joinedDate(LocalDate.now().minusDays(200))
-                .deletedDate(LocalDate.now().minusDays(79))
-                .expireDate(LocalDate.now().plusDays(1)) // 아직 유효
+                .joinedDate(TODAY.minusDays(200))
+                .deletedDate(TODAY.minusDays(79))
+                .expireDate(TODAY.plusDays(1)) // 아직 유효
                 .build();
         withdrawnMemberRepository.save(notExpired);
 

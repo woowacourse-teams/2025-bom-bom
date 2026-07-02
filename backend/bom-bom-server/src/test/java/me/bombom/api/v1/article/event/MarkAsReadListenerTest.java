@@ -29,6 +29,8 @@ import org.springframework.test.context.ActiveProfiles;
 @ExtendWith(MockitoExtension.class)
 class MarkAsReadListenerTest {
 
+    private static final LocalDateTime READ_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
+
     @Mock
     private ArticleService articleService;
 
@@ -59,7 +61,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
 
         // when
@@ -75,7 +77,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(false);
 
         // when
@@ -91,7 +93,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, true);
         given(markAsReadEventLogRepository.markIfAbsent(anyLong(), anyLong()))
                 .willReturn(false);
 
@@ -108,7 +110,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, true);
         given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
 
         // when
@@ -124,7 +126,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), false);
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, false);
 
         // when
         markAsReadListener.on(event);
@@ -140,7 +142,7 @@ class MarkAsReadListenerTest {
         // given
         Long memberId = 1L;
         Long articleId = 1L;
-        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, LocalDateTime.now(), true);
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, true);
         TransientDataAccessResourceException exception = new TransientDataAccessResourceException("DB 일시 장애");
 
         // when

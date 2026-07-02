@@ -39,6 +39,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 @IntegrationTest
 class MarkAsReadListenerIntegrationTest {
 
+    private static final LocalDateTime READ_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
+    private static final LocalDateTime YESTERDAY_ARTICLE_ARRIVED_AT = READ_AT.minusDays(1);
+
     @Autowired
     private MarkAsReadListener markAsReadListener;
 
@@ -99,14 +102,14 @@ class MarkAsReadListenerIntegrationTest {
         );
 
         articleId = articleRepository.save(
-                TestFixture.createArticle("테스트 아티클", member.getId(), newsletter.getId(), LocalDateTime.now().minusDays(1))
+                TestFixture.createArticle("테스트 아티클", member.getId(), newsletter.getId(), YESTERDAY_ARTICLE_ARRIVED_AT)
         ).getId();
     }
 
     @Test
     void 이벤트_정상_처리_시_읽기_카운트_증가() {
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, READ_AT, true));
 
         // then
         verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
@@ -123,7 +126,7 @@ class MarkAsReadListenerIntegrationTest {
                 .when(readingService).updateReadingCount(anyLong(), any(Boolean.class));
 
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, READ_AT, true));
 
         // then
         verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
@@ -145,7 +148,7 @@ class MarkAsReadListenerIntegrationTest {
                 .when(petService).rewardArticleRead(anyLong());
 
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, READ_AT, true));
 
         // then
         verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), true);
@@ -159,7 +162,7 @@ class MarkAsReadListenerIntegrationTest {
     @Test
     void 카운트_대상이_아닌_이벤트는_읽기_카운트_증가_안함() {
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), false));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, READ_AT, false));
 
         // then
         verify(readingService, after(300).never()).updateReadingCount(anyLong(), any(Boolean.class));

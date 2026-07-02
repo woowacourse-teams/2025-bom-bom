@@ -63,6 +63,8 @@ import org.springframework.test.context.event.RecordApplicationEvents;
 class ArticleServiceTest {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
+    private static final LocalDateTime OLD_ARTICLE_TIME = LocalDateTime.of(2000, 1, 1, 10, 0);
+    private static final LocalDateTime RECENT_ARTICLE_TIME = LocalDateTime.of(2099, 1, 1, 10, 0);
 
     @Autowired
     private ArticleService articleService;
@@ -597,7 +599,7 @@ class ArticleServiceTest {
     @Test
     void 키워드_앞뒤_공백이_제거되어_검색된다() {
         // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
-        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), sixDaysAgo);
         articleRepository.save(article);
 
@@ -655,7 +657,7 @@ class ArticleServiceTest {
     @Test
     void 부분_문자열로_키워드_검색이_된다() {
         // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
-        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), sixDaysAgo),
                 TestFixture.createArticle("그래픽 디자인", member.getId(), newsletters.get(1).getId(), sixDaysAgo)
@@ -823,7 +825,7 @@ class ArticleServiceTest {
     void 키워드가_있을_때_countWithKeyword가_호출된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("검색 테스트 아티클", member.getId(), targetNewsletter.getId(), sixDaysAgo);
         articleRepository.save(article);
 
@@ -842,9 +844,8 @@ class ArticleServiceTest {
     void 키워드_검색시_5일_이내_article_테이블_데이터만_검색된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fourDaysAgo = now.minusDays(4); // 5일 이내
-        LocalDateTime sixDaysAgo = now.minusDays(6); // 5일 이전
+        LocalDateTime fourDaysAgo = RECENT_ARTICLE_TIME; // 5일 이내
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME; // 5일 이전
 
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), fourDaysAgo),
@@ -873,9 +874,8 @@ class ArticleServiceTest {
     void 키워드_검색시_5일_이전_article_테이블_데이터는_검색되지_않는다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime sixDaysAgo = now.minusDays(6); // 5일 이전
-        LocalDateTime tenDaysAgo = now.minusDays(10); // 5일 이전
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME; // 5일 이전
+        LocalDateTime tenDaysAgo = OLD_ARTICLE_TIME.minusDays(4); // 5일 이전
 
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), sixDaysAgo),
@@ -902,14 +902,14 @@ class ArticleServiceTest {
     void 키워드_검색시_recent_article_테이블에서_최근_5일_이내_데이터가_검색된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        Article article = TestFixture.createArticle("최근 아티클 검색 테스트", member.getId(), targetNewsletter.getId(), now);
+        LocalDateTime recentArticleTime = RECENT_ARTICLE_TIME;
+        Article article = TestFixture.createArticle("최근 아티클 검색 테스트", member.getId(), targetNewsletter.getId(), recentArticleTime);
         articleRepository.save(article);
         RecentArticle recentArticle = TestFixture.createRecentArticle(
                 "최근 아티클 검색 테스트",
                 member.getId(),
                 targetNewsletter.getId(),
-                now,
+                recentArticleTime,
                 article.getId()
         );
         recentArticleRepository.save(recentArticle);
@@ -932,21 +932,24 @@ class ArticleServiceTest {
     void 키워드_검색시_recent_article과_article_테이블_모두에서_검색된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-
         // article 테이블에 5일 이전 데이터 저장
-        LocalDateTime sixDaysAgo = now.minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), sixDaysAgo);
         articleRepository.save(article);
 
         // recent_article 테이블에 최근 데이터 저장
-        Article recentArticleSource = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), now);
+        Article recentArticleSource = TestFixture.createArticle(
+                "통합 검색 테스트",
+                member.getId(),
+                targetNewsletter.getId(),
+                RECENT_ARTICLE_TIME
+        );
         articleRepository.save(recentArticleSource);
         RecentArticle recentArticle = TestFixture.createRecentArticle(
                 "통합 검색 테스트",
                 member.getId(),
                 targetNewsletter.getId(),
-                now,
+                RECENT_ARTICLE_TIME,
                 recentArticleSource.getId()
         );
         recentArticleRepository.save(recentArticle);

@@ -55,6 +55,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @IntegrationTest
 class ReadingServiceTest {
 
+    private static final LocalDateTime SNAPSHOT_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
+
     @Autowired
     private ReadingService readingService;
 
@@ -111,7 +113,7 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착한_아티클을_읽으면_오늘_및_주간_읽기_횟수가_증가한다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         int initialTodayCount = todayReading.getCurrentCount();
         int initialReadCount = todayReading.getReadCount();
@@ -131,7 +133,7 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착한_아티클을_최초로_읽을_때_연속_읽기_횟수가_증가한다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         int initialContinueCount = continueReading.getDayCount();
         int initialMaxContinueCount = continueReading.getMaxDayCount();
@@ -148,7 +150,7 @@ class ReadingServiceTest {
 
     @Test
     void 이미_연속_읽기_횟수가_증가하면_그날은_더이상_증가하지_않는다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         int initialContinueCount = continueReading.getDayCount();
         int initialMaxContinueCount = continueReading.getMaxDayCount();
@@ -166,7 +168,7 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착하지_않은_아티클을_읽으면_읽은_횟수와_연속_읽기만_증가한다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         int initialTodayCount = todayReading.getCurrentCount();
         int initialReadCount = todayReading.getReadCount();
@@ -191,7 +193,7 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_도착하지_않은_아티클을_여러_개_읽어도_연속_읽기는_하루_한_번만_증가한다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         int initialContinueCount = continueReading.getDayCount();
         int initialMaxContinueCount = continueReading.getMaxDayCount();
@@ -212,7 +214,7 @@ class ReadingServiceTest {
 
     @Test
     void 오늘_읽기_횟수를_초기화하면_오늘_도착_읽기와_전체_읽기_횟수가_초기화된다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         readingService.updateReadingCount(member.getId(), true);
 
@@ -228,7 +230,7 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_초기화_대상은_오늘_읽은_횟수로_판단한다() {
-        읽기_횟수_갱신에_필요한_데이터를_저장한다();
+        saveReadingCountData();
 
         Member readMember = memberRepository.save(TestFixture.createUniqueMember("nickname_read", "pid_read"));
         todayReadingRepository.save(TodayReading.builder()
@@ -251,7 +253,7 @@ class ReadingServiceTest {
 
     @Test
     void 저장된_rank를_사용해_상위_N명의_랭킹을_조회할_수_있다() {
-        월간_랭킹_기본_데이터를_저장한다();
+        saveMonthlyRankingBaseData();
 
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_r2", "pid_r2"));
@@ -276,7 +278,7 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_일수_기준으로_상위_N명의_랭킹을_조회할_수_있다() {
-        연속_읽기_랭킹_기본_데이터를_저장한다();
+        saveContinueReadingRankingBaseData();
 
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st2", "pid_st2"));
         continueReadingRepository.save(
@@ -310,7 +312,7 @@ class ReadingServiceTest {
 
     @Test
     void 가입_시_추가된_연속_읽기_스냅샷으로_신규_회원이_랭킹_최하위_공동_순위에_포함된다() {
-        연속_읽기_랭킹_기본_데이터를_저장한다();
+        saveContinueReadingRankingBaseData();
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
 
         // given: 기존 회원 스냅샷이 있는 상태
@@ -348,7 +350,7 @@ class ReadingServiceTest {
 
     @Test
     void 나의_연속_읽기_순위를_조회할_수_있다() {
-        연속_읽기_랭킹_기본_데이터를_저장한다();
+        saveContinueReadingRankingBaseData();
 
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_st_me2", "pid_st_me2"));
         continueReadingRepository.save(
@@ -382,7 +384,7 @@ class ReadingServiceTest {
 
     @Test
     void 보상_보호막만_남아도_나의_연속_읽기_보호막은_사용_가능으로_조회된다() {
-        연속_읽기_랭킹_기본_데이터를_저장한다();
+        saveContinueReadingRankingBaseData();
         Long shieldId = continueReadingShieldRepository.findByMemberId(member.getId()).orElseThrow().getId();
         continueReadingShieldRepository.deleteById(shieldId);
         continueReadingShieldRepository.save(ContinueReadingShield.builder()
@@ -402,7 +404,7 @@ class ReadingServiceTest {
 
     @Test
     void 연속_읽기_일수가_0이어도_나의_순위는_최하위_공동_순위로_조회된다() {
-        연속_읽기_랭킹_기본_데이터를_저장한다();
+        saveContinueReadingRankingBaseData();
 
         ContinueReadingRealtime cr = continueReadingRepository.findByMemberId(member.getId()).get();
         cr.resetDayCount();
@@ -431,7 +433,7 @@ class ReadingServiceTest {
     @Test
     void 랭킹_업데이트된_시간을_조회할_수_있다() {
         // given
-        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);;
+        LocalDateTime dateTime = SNAPSHOT_AT.truncatedTo(ChronoUnit.MICROS);
         int limit = 2;
 
         // when
@@ -448,7 +450,7 @@ class ReadingServiceTest {
     @Test
     @Disabled
     void 나의_월간_순위와_전체_참여자_수를_조회할_수_있다() {
-        월간_랭킹_기본_데이터를_저장한다();
+        saveMonthlyRankingBaseData();
 
         // given: 기본 멤버는 currentCount 10
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
@@ -509,7 +511,7 @@ class ReadingServiceTest {
 
     @Test
     void 매월_읽기_수를_연간_읽기_수에_반영하고_월간은_초기화한다() {
-        월간_초기화_기본_데이터를_저장한다();
+        saveMonthlyResetBaseData();
 
         // given
         int monthlyCountBefore = monthlyReadingSnapshotRepository.findByMemberId(member.getId()).get().getCurrentCount();
@@ -563,7 +565,7 @@ class ReadingServiceTest {
 
     @Test
     void 매월_초기화_전에_다독왕과_연속왕_확정_랭킹_이력을_저장한다() {
-        member = 회원을_저장한다();
+        member = saveMember();
 
         Member member2 = memberRepository.save(TestFixture.createUniqueMember("hist_member2", "hist_provider2"));
         Member member3 = memberRepository.save(TestFixture.createUniqueMember("hist_member3", "hist_provider3"));
@@ -615,7 +617,7 @@ class ReadingServiceTest {
 
     @Test
     void 같은_월_확정_랭킹_이력은_월간_초기화가_재실행되어도_덮어쓰지_않는다() {
-        member = 회원을_저장한다();
+        member = saveMember();
 
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 12));
         continueReadingRepository.save(ContinueReadingRealtime.builder()
@@ -931,16 +933,16 @@ class ReadingServiceTest {
         });
     }
 
-    private void 읽기_횟수_갱신에_필요한_데이터를_저장한다() {
-        member = 회원을_저장한다();
+    private void saveReadingCountData() {
+        member = saveMember();
         todayReading = todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         weeklyReading = weeklyReadingRepository.save(TestFixture.weeklyReadingFixture(member));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
     }
 
-    private void 연속_읽기_랭킹_기본_데이터를_저장한다() {
-        member = 회원을_저장한다();
+    private void saveContinueReadingRankingBaseData() {
+        member = saveMember();
         continueReading = continueReadingRepository.save(TestFixture.continueReadingFixture(member));
         continueReadingShieldRepository.save(ContinueReadingShield.create(member.getId()));
         continueReadingRankingSnapshotRepository.save(
@@ -948,19 +950,19 @@ class ReadingServiceTest {
         );
     }
 
-    private void 월간_랭킹_기본_데이터를_저장한다() {
-        member = 회원을_저장한다();
+    private void saveMonthlyRankingBaseData() {
+        member = saveMember();
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
     }
 
-    private void 월간_초기화_기본_데이터를_저장한다() {
-        member = 회원을_저장한다();
+    private void saveMonthlyResetBaseData() {
+        member = saveMember();
         monthlyReadingSnapshot = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(member));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
         continueReadingRepository.save(TestFixture.continueReadingFixture(member));
     }
 
-    private Member 회원을_저장한다() {
+    private Member saveMember() {
         return memberRepository.save(TestFixture.createUniqueMember("읽기테스트회원", "reading-service-test"));
     }
 

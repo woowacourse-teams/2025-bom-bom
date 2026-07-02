@@ -32,6 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @IntegrationTest
 class BadgeServiceTest {
 
+    private static final LocalDate CHALLENGE_START_DATE = LocalDate.of(2024, 1, 1);
+    private static final LocalDate CHALLENGE_END_DATE = LocalDate.of(2024, 1, 10);
+
     @Autowired
     private BadgeService badgeService;
 
@@ -209,8 +212,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(group);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             group.getId()
         ));
@@ -229,8 +232,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(goldGroup);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             goldGroup.getId()
         ));
@@ -267,8 +270,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(silverGroup);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             silverGroup.getId()
         ));
@@ -302,8 +305,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(bronzeGroup);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             bronzeGroup.getId()
         ));
@@ -337,8 +340,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(noBadgeGroup);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             noBadgeGroup.getId()
         ));
@@ -364,8 +367,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(failedGroup);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             failedGroup.getId()
         ));
@@ -391,8 +394,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(multiGroup);
         Challenge challenge = challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             multiGroup.getId()
         ));
@@ -481,8 +484,8 @@ class BadgeServiceTest {
         newsletterGroupRepository.save(boundaryGroup);
         return challengeRepository.save(TestFixture.createChallenge(
             "Test Challenge",
-            LocalDate.now().minusDays(10),
-            LocalDate.now().minusDays(1),
+            CHALLENGE_START_DATE,
+            CHALLENGE_END_DATE,
             10,
             boundaryGroup.getId()
         ));

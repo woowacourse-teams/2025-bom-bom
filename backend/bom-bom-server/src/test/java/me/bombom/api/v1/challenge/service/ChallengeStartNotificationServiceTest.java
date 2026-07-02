@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @IntegrationTest
 class ChallengeStartNotificationServiceTest {
 
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 5);
+
     @Autowired
     private ChallengeStartNotificationService challengeStartNotificationService;
 
@@ -44,7 +46,7 @@ class ChallengeStartNotificationServiceTest {
     @Test
     void 시작일_챌린지_참여자에게_PENDING_알림을_생성한다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
 
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge todayChallenge = challengeRepository.save(
@@ -101,7 +103,7 @@ class ChallengeStartNotificationServiceTest {
     @Test
     void 이미_저장된_알림은_중복_생성하지_않는다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
 
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge challenge = challengeRepository.save(

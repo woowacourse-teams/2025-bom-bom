@@ -282,8 +282,6 @@ class ArticleServiceTest {
                 pageable
         );
 
-        System.out.println(result);
-
         // then
         assertSoftly(softly -> {
             softly.assertThat(result.getTotalElements()).isEqualTo(11);

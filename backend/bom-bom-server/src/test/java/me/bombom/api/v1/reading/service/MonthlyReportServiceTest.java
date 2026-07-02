@@ -2,10 +2,12 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
+import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
@@ -23,9 +25,12 @@ import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @IntegrationTest
 class MonthlyReportServiceTest {
+
+    private static final YearMonth TARGET_MONTH = YearMonth.of(2026, 1);
 
     @Autowired
     private MonthlyReportService monthlyReportService;
@@ -66,7 +71,7 @@ class MonthlyReportServiceTest {
 
     @Test
     void 월간_읽기_캘린더를_읽기_히스토리_기준으로_조회한다() {
-        YearMonth targetMonth = YearMonth.now();
+        YearMonth targetMonth = TARGET_MONTH;
 
         articleReadHistoryRepository.saveAll(List.of(
                 TestFixture.createArticleReadHistory(member, 1L, newsletters.get(0), targetMonth.atDay(1).atTime(10, 0)),
@@ -92,7 +97,7 @@ class MonthlyReportServiceTest {
 
     @Test
     void 월간_읽기_대시보드를_읽기_히스토리와_월간_북마크_기준으로_조회한다() {
-        YearMonth targetMonth = YearMonth.now();
+        YearMonth targetMonth = TARGET_MONTH;
 
         articleReadHistoryRepository.saveAll(List.of(
                 TestFixture.createArticleReadHistory(member, 1L, newsletters.get(2), targetMonth.atDay(1).atTime(10, 0)),
@@ -103,9 +108,9 @@ class MonthlyReportServiceTest {
                 TestFixture.createArticleReadHistory(otherMember, 6L, newsletters.get(2), targetMonth.atDay(1).atTime(10, 0))
         ));
 
-        bookmarkRepository.save(TestFixture.createBookmark(member, 1L));
-        bookmarkRepository.save(TestFixture.createBookmark(member, 2L));
-        bookmarkRepository.save(TestFixture.createBookmark(otherMember, 4L));
+        saveBookmarkAt(TestFixture.createBookmark(member, 1L), targetMonth.atDay(1).atTime(12, 0));
+        saveBookmarkAt(TestFixture.createBookmark(member, 2L), targetMonth.atDay(2).atTime(12, 0));
+        saveBookmarkAt(TestFixture.createBookmark(otherMember, 4L), targetMonth.atDay(1).atTime(12, 0));
 
         ReadingDashboardResponse result = monthlyReportService.getReadingDashboard(
                 member,
@@ -119,5 +124,11 @@ class MonthlyReportServiceTest {
             softly.assertThat(result.frequentReadNewsletters()).hasSize(1);
             softly.assertThat(result.frequentReadNewsletters().getFirst().newsletterId()).isEqualTo(newsletters.get(2).getId());
         });
+    }
+
+    private void saveBookmarkAt(Bookmark bookmark, LocalDateTime createdAt) {
+        Bookmark saved = bookmarkRepository.saveAndFlush(bookmark);
+        ReflectionTestUtils.setField(saved, "createdAt", createdAt);
+        bookmarkRepository.saveAndFlush(saved);
     }
 }

@@ -115,7 +115,6 @@ class ReadRateLimitServiceTest {
         double carryOver = memberReadTokenBucketRepository.findById(member.getId())
                 .map(MemberReadTokenBucket::getTokens)
                 .orElseThrow();
-        System.out.println("1차 소비 후 이월 토큰: " + carryOver);
 
         assertSoftly(softly -> {
             softly.assertThat(firstResult).isTrue();

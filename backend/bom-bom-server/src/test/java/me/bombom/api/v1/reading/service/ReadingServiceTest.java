@@ -48,7 +48,6 @@ import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
 import me.bombom.api.v1.reading.repository.YearlyReadingRepository;
 import me.bombom.support.integration.IntegrationTest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -445,33 +444,6 @@ class ReadingServiceTest {
 
         // then
         assertThat(monthlyReadingRank.rankingUpdatedAt()).isEqualTo(dateTime);
-    }
-
-    @Test
-    @Disabled
-    void 나의_월간_순위와_전체_참여자_수를_조회할_수_있다() {
-        saveMonthlyRankingBaseData();
-
-        // given: 기본 멤버는 currentCount 10
-        Member member2 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr2", "pid_mr2"));
-        Member member3 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr3", "pid_mr3"));
-        Member member4 = memberRepository.save(TestFixture.createUniqueMember("nickname_mr4", "pid_mr4"));
-
-        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member2, 30));
-        MonthlyReadingSnapshot member3Reading = monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member3, 20));
-        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshot(member4, 20));
-
-        // when: 순위 반영 후 내 순위를 조회
-        readingService.updateMonthlyRanking();
-        MemberMonthlyReadingRankResponse memberRank = readingService.getMemberMonthlyReadingRank(member);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(memberRank.rank()).isGreaterThan(0L);
-            softly.assertThat(memberRank.monthlyReadCount()).isEqualTo(monthlyReadingSnapshot.getCurrentCount());
-            softly.assertThat(memberRank.nextRankDifference())
-                    .isEqualTo(member3Reading.getCurrentCount() - monthlyReadingSnapshot.getCurrentCount());
-        });
     }
 
     @Test

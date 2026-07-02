@@ -111,6 +111,23 @@ class UnsubscribeUrlExtractorTest {
     }
 
     @Test
+    void beehiiv_HTML에서_unsubscribe와_앵커_사이에_줄바꿈과_들여쓰기가_있어도_추출한다() {
+        String html = """
+                <tbody><tr><td align="center" valign="top">
+                <p style="font-family:'Arial',Helvetica,sans-serif;color:#222222!important;">
+                 Update your email preferences
+                or unsubscribe
+                        <a class="link" href="https://link.mail.beehiiv.com/v1/c/fake-token"
+                        style="text-decoration:underline;text-decoration-color:#222222!important;color:#222222!important;">
+                        here</a>
+                </p></td></tr></tbody>
+                """;
+
+        assertThat(extractor.extract(html))
+                .isEqualTo("https://link.mail.beehiiv.com/v1/c/fake-token");
+    }
+
+    @Test
     void 앵커_직전_텍스트에_수신거부_키워드가_있으면_추출한다() {
         String html = "<p>수신거부 <a href=\"https://example.com/u/abc\">여기</a></p>";
         assertThat(extractor.extract(html))

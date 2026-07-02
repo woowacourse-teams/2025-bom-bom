@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.dto.request.ArticleSearchOptionsRequest;
 import me.bombom.api.v1.article.dto.request.ArticlesOptionsRequest;
@@ -33,9 +32,7 @@ import me.bombom.api.v1.newsletter.domain.Category;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.reading.service.ReadRateLimitService;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.TransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,7 +40,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,7 +53,7 @@ public class ArticleService {
     private final HighlightRepository highlightRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BookmarkRepository bookmarkRepository;
-    private final ReadRateLimitService readRateLimitService;
+    private final ReadCountTokenConsumeHandler readCountTokenConsumeHandler;
     private final Clock clock;
 
     public Page<ArticleResponse> getArticles(
@@ -115,7 +111,7 @@ public class ArticleService {
             return MarkAsReadResponse.notCounted();
         }
 
-        boolean isReadCountTokenConsumed = tryConsumeReadCountToken(member.getId(), articleId, readAt);
+        boolean isReadCountTokenConsumed = readCountTokenConsumeHandler.consume(member.getId(), articleId, readAt);
         article.markAsRead();
 
         applicationEventPublisher.publishEvent(
@@ -123,16 +119,6 @@ public class ArticleService {
         );
 
         return MarkAsReadResponse.from(isReadCountTokenConsumed);
-    }
-
-    private boolean tryConsumeReadCountToken(Long memberId, Long articleId, LocalDateTime readAt) {
-        try {
-            return readRateLimitService.tryConsumeReadCountToken(memberId, readAt);
-        } catch (TransientDataAccessException e) {
-            log.error("읽기 토큰 소비 실패 - countable=true로 처리합니다. memberId={}, articleId={}, readAt={}",
-                    memberId, articleId, readAt, e);
-            return true;
-        }
     }
 
     public ArticleNewsletterStatisticsResponse getArticleNewsletterStatistics(Member member, String keyword) {

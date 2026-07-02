@@ -1,9 +1,11 @@
 package me.bombom.api.v1.article.event;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -119,6 +121,23 @@ class MarkAsReadListenerTest {
         // then
         verify(readingService, times(1)).updateReadingCount(memberId, true);
         verify(petService, times(1)).rewardArticleRead(memberId);
+    }
+
+    @Test
+    void 읽기_카운트_갱신에_실패하면_펫_경험치를_갱신하지_않는다() {
+        // given
+        Long memberId = 1L;
+        Long articleId = 1L;
+        MarkAsReadEvent event = MarkAsReadEvent.of(memberId, articleId, READ_AT, true);
+        given(articleService.isArrivedToday(eq(articleId), eq(memberId), any(LocalDate.class))).willReturn(true);
+        doThrow(new RuntimeException("읽기 카운트 갱신 실패"))
+                .when(readingService).updateReadingCount(memberId, true);
+
+        // when & then
+        assertThatThrownBy(() -> markAsReadListener.on(event))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("읽기 카운트 갱신 실패");
+        verify(petService, never()).rewardArticleRead(anyLong());
     }
 
     @Test

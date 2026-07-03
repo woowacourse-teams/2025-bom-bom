@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import me.bombom.api.v1.challenge.domain.ChallengeGrade;
 import me.bombom.api.v1.challenge.domain.CompletedChallengeSummary;
 
-@Schema(description = "완료한(종료된) 챌린지 1건")
 public record CompletedChallengeResponse(
 
         @Schema(description = "챌린지 식별자", example = "201")

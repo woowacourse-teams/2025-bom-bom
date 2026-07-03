@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import me.bombom.api.v1.challenge.domain.OngoingChallengeSummary;
 
-@Schema(description = "참여 중 챌린지 1건 요약")
-public record OngoingChallengeResponse(
+public record MyOngoingChallengeResponse(
 
         @Schema(description = "챌린지 식별자", example = "101")
         Long challengeId,
@@ -43,8 +42,8 @@ public record OngoingChallengeResponse(
         TeamAttendanceComparison teamAttendanceComparison
 ) {
 
-    public static OngoingChallengeResponse from(OngoingChallengeSummary summary) {
-        return new OngoingChallengeResponse(
+    public static MyOngoingChallengeResponse from(OngoingChallengeSummary summary) {
+        return new MyOngoingChallengeResponse(
                 summary.challengeId(),
                 summary.title(),
                 summary.startDate(),

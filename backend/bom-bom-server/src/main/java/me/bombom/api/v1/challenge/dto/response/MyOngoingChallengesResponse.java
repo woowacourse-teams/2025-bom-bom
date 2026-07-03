@@ -5,18 +5,17 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import me.bombom.api.v1.challenge.domain.OngoingChallengeSummary;
 
-@Schema(description = "마이페이지 참여 중 챌린지 목록")
-public record OngoingChallengesResponse(
+public record MyOngoingChallengesResponse(
 
         @NotNull
         @Schema(description = "참여 중 챌린지 목록 (없으면 빈 배열)")
-        List<OngoingChallengeResponse> challenges
+        List<MyOngoingChallengeResponse> challenges
 ) {
 
-    public static OngoingChallengesResponse from(List<OngoingChallengeSummary> summaries) {
-        return new OngoingChallengesResponse(
+    public static MyOngoingChallengesResponse from(List<OngoingChallengeSummary> summaries) {
+        return new MyOngoingChallengesResponse(
                 summaries.stream()
-                        .map(OngoingChallengeResponse::from)
+                        .map(MyOngoingChallengeResponse::from)
                         .toList()
         );
     }

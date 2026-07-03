@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import me.bombom.api.v1.challenge.domain.MyChallengeSummary;
 
-@Schema(description = "마이페이지 나의 챌린지 요약 정보")
 public record MyChallengeSummaryResponse(
 
         @Schema(description = "완료한 챌린지 수", example = "5")

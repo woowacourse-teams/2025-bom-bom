@@ -3,7 +3,7 @@ package me.bombom.api.v1.member.controller;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.dto.response.CompletedChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeSummaryResponse;
-import me.bombom.api.v1.challenge.dto.response.OngoingChallengesResponse;
+import me.bombom.api.v1.challenge.dto.response.MyOngoingChallengesResponse;
 import me.bombom.api.v1.challenge.service.ChallengeSummaryService;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
@@ -29,7 +29,7 @@ public class MyPageChallengeController implements MyPageChallengeControllerApi {
 
     @Override
     @GetMapping("/ongoing")
-    public OngoingChallengesResponse getOngoingChallenges(@LoginMember Member member) {
+    public MyOngoingChallengesResponse getOngoingChallenges(@LoginMember Member member) {
         return challengeSummaryService.getOngoingChallenges(member.getId());
     }
 

@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.challenge.dto.response.CompletedChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeSummaryResponse;
-import me.bombom.api.v1.challenge.dto.response.OngoingChallengesResponse;
+import me.bombom.api.v1.challenge.dto.response.MyOngoingChallengesResponse;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
@@ -38,7 +38,7 @@ public interface MyPageChallengeControllerApi {
             @ApiResponse(responseCode = "200", description = "참여 중 챌린지 목록 조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패 (로그인 필요)", content = @Content)
     })
-    OngoingChallengesResponse getOngoingChallenges(@Parameter(hidden = true) @LoginMember Member member);
+    MyOngoingChallengesResponse getOngoingChallenges(@Parameter(hidden = true) @LoginMember Member member);
 
     @Operation(
             summary = "완료한(종료된) 챌린지 목록 조회",

@@ -15,7 +15,7 @@ import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
 import me.bombom.api.v1.challenge.dto.OngoingChallengeParticipantFlat;
 import me.bombom.api.v1.challenge.dto.response.CompletedChallengeResponse;
 import me.bombom.api.v1.challenge.dto.response.MyChallengeSummaryResponse;
-import me.bombom.api.v1.challenge.dto.response.OngoingChallengesResponse;
+import me.bombom.api.v1.challenge.dto.response.MyOngoingChallengesResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +41,7 @@ public class ChallengeSummaryService {
         return MyChallengeSummaryResponse.from(summary);
     }
 
-    public OngoingChallengesResponse getOngoingChallenges(Long memberId) {
+    public MyOngoingChallengesResponse getOngoingChallenges(Long memberId) {
         LocalDate today = LocalDate.now(clock);
         List<OngoingChallengeParticipantFlat> participants =
                 challengeParticipantRepository.findParticipantsOfMemberOngoingChallenges(memberId, today);
@@ -56,7 +56,7 @@ public class ChallengeSummaryService {
                         .thenComparing(OngoingChallengeSummary::challengeId))
                 .toList();
 
-        return OngoingChallengesResponse.from(summaries);
+        return MyOngoingChallengesResponse.from(summaries);
     }
 
     public Page<CompletedChallengeResponse> getCompletedChallenges(Long memberId, Pageable pageable) {

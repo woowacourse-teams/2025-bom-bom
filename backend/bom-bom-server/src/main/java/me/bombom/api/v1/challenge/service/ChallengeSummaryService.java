@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.challenge.domain.CompletedChallengeSummary;
@@ -45,9 +46,11 @@ public class ChallengeSummaryService {
         List<OngoingChallengeParticipantFlat> participants =
                 challengeParticipantRepository.findParticipantsOfMemberOngoingChallenges(memberId, today);
 
-        List<OngoingChallengeSummary> summaries = participants.stream()
-                .collect(Collectors.groupingBy(OngoingChallengeParticipantFlat::challengeId))
-                .values().stream()
+        Map<Long, List<OngoingChallengeParticipantFlat>> participantsByChallenge = participants.stream()
+                .collect(Collectors.groupingBy(OngoingChallengeParticipantFlat::challengeId));
+
+        List<OngoingChallengeSummary> summaries = participantsByChallenge.values()
+                .stream()
                 .map(challengeParticipants -> OngoingChallengeSummary.of(challengeParticipants, memberId, today))
                 .sorted(Comparator.comparing(OngoingChallengeSummary::endDate)
                         .thenComparing(OngoingChallengeSummary::challengeId))

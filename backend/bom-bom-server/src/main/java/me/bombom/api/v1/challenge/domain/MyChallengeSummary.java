@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 import me.bombom.api.v1.challenge.dto.MemberChallengeRankingStatsFlat;
+import me.bombom.api.v1.challenge.dto.MemberMedalParticipationFlat;
 
 public record MyChallengeSummary(
         int completedChallengeCount,
@@ -16,8 +16,7 @@ public record MyChallengeSummary(
         MedalRatio medalRatio
 ) {
 
-    public static final MyChallengeSummary EMPTY =
-            new MyChallengeSummary(0, 0.0, 0, 0.0, 0, MedalRatio.ZERO);
+    public static final MyChallengeSummary EMPTY = new MyChallengeSummary(0, 0.0, 0, 0.0, 0, MedalRatio.ZERO);
 
     public static MyChallengeSummary of(
             List<MemberChallengeRankingStatsFlat> aggregates,

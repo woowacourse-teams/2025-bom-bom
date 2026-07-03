@@ -61,7 +61,7 @@ public class ChallengeSummaryService {
         Pageable enforcedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
         return challengeParticipantRepository.findCompletedChallenges(memberId, today, enforcedPageable)
-                .map(CompletedChallengeSummary::of)
+                .map(CompletedChallengeSummary::from)
                 .map(CompletedChallengeResponse::from);
     }
 }

@@ -15,7 +15,7 @@ class CompletedChallengeSummaryTest {
 
     @Test
     void 챌린지_정보와_출석률_등급을_계산한다() {
-        CompletedChallengeSummary summary = CompletedChallengeSummary.of(challenge(10, 10, true));
+        CompletedChallengeSummary summary = CompletedChallengeSummary.from(challenge(10, 10, true));
 
         assertSoftly(softly -> {
             softly.assertThat(summary.challengeId()).isEqualTo(CHALLENGE_ID);
@@ -30,20 +30,20 @@ class CompletedChallengeSummaryTest {
     @Test
     void 진행률에_따라_등급이_매핑된다() {
         assertSoftly(softly -> {
-            softly.assertThat(CompletedChallengeSummary.of(challenge(10, 10, true)).grade())
+            softly.assertThat(CompletedChallengeSummary.from(challenge(10, 10, true)).grade())
                     .isEqualTo(ChallengeGrade.GOLD);
-            softly.assertThat(CompletedChallengeSummary.of(challenge(9, 10, true)).grade())
+            softly.assertThat(CompletedChallengeSummary.from(challenge(9, 10, true)).grade())
                     .isEqualTo(ChallengeGrade.SILVER);
-            softly.assertThat(CompletedChallengeSummary.of(challenge(8, 10, true)).grade())
+            softly.assertThat(CompletedChallengeSummary.from(challenge(8, 10, true)).grade())
                     .isEqualTo(ChallengeGrade.BRONZE);
-            softly.assertThat(CompletedChallengeSummary.of(challenge(7, 10, true)).grade())
+            softly.assertThat(CompletedChallengeSummary.from(challenge(7, 10, true)).grade())
                     .isEqualTo(ChallengeGrade.FAIL);
         });
     }
 
     @Test
     void 생존하지_못하면_진행률이_높아도_FAIL이고_출석률은_그대로다() {
-        CompletedChallengeSummary summary = CompletedChallengeSummary.of(challenge(10, 10, false));
+        CompletedChallengeSummary summary = CompletedChallengeSummary.from(challenge(10, 10, false));
 
         assertSoftly(softly -> {
             softly.assertThat(summary.grade()).isEqualTo(ChallengeGrade.FAIL);
@@ -53,7 +53,7 @@ class CompletedChallengeSummaryTest {
 
     @Test
     void totalDays가_0이면_출석률은_0이고_FAIL이다() {
-        CompletedChallengeSummary summary = CompletedChallengeSummary.of(challenge(0, 0, true));
+        CompletedChallengeSummary summary = CompletedChallengeSummary.from(challenge(0, 0, true));
 
         assertSoftly(softly -> {
             softly.assertThat(summary.attendanceRate()).isZero();

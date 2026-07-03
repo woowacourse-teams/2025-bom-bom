@@ -26,7 +26,7 @@ public record CompletedChallengeSummary(
         );
     }
 
-    public static CompletedChallengeSummary of(CompletedChallengeFlat challenge) {
+    public static CompletedChallengeSummary from(CompletedChallengeFlat challenge) {
         int attendanceRate = calculateProgress(challenge.completedDays(), challenge.totalDays());
         ChallengeGrade grade = ChallengeGrade.calculate(attendanceRate, challenge.isSurvived());
         return new CompletedChallengeSummary(challenge, attendanceRate, grade);

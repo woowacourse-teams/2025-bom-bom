@@ -113,7 +113,8 @@ public record OngoingChallengeSummary(
     }
 
     private static double overallTeamAverage(Map<Long, Double> teamAverageById) {
-        return teamAverageById.values().stream()
+        return teamAverageById.values()
+                .stream()
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0);

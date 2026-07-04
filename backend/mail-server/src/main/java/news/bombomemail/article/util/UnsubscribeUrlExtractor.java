@@ -27,7 +27,7 @@ public class UnsubscribeUrlExtractor {
         textPattern.set(Pattern.compile("^[\\[(\\s]*(" + textKeywordGroup + ")", Pattern.CASE_INSENSITIVE));
         adjacentTextPattern.set(
                 Pattern.compile(
-                        "(?:" + textKeywordGroup + ")\\s{0,3}<a\\s[^>]*href=\"([^\"]+)\"",
+                        "(?:" + textKeywordGroup + ")\\s*<a\\s[^>]*href=\"([^\"]+)\"",
                         Pattern.CASE_INSENSITIVE
                 )
         );

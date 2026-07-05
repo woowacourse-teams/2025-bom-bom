@@ -23,30 +23,6 @@ jobs:
         with:
           configuration-path: ".github/auto_assign_backend.yml"
 
-      # 2) BE 라벨 자동 추가
-      - name: Add BE label
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const prNumber = context.payload.pull_request.number;
-
-            const labels = (context.payload.pull_request.labels || []).map(l => l.name);
-            if (labels.includes("BE")) {
-              console.log("BE label already exists. Skip.");
-              return;
-            }
-
-            await github.rest.issues.addLabels({
-              owner,
-              repo,
-              issue_number: prNumber,
-              labels: ["BE"],
-            });
-
-            console.log("Added BE label.");
-
       # 3) D-n 라벨이 없으면 D-2 자동 추가
       - name: Add default D-2 label
         uses: actions/github-script@v8

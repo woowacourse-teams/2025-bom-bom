@@ -1,0 +1,143 @@
+{
+  "member": [
+    {
+      "id": 1,
+      "provider": "apple",
+      "provider_id": "summaryMe",
+      "email": "summary-me@bombom.news",
+      "nickname": "나밍곰",
+      "gender": "FEMALE",
+      "role_id": 1
+    },
+    {
+      "id": 2,
+      "provider": "apple",
+      "provider_id": "summaryA",
+      "email": "summary-a@bombom.news",
+      "nickname": "제나",
+      "gender": "FEMALE",
+      "role_id": 1
+    },
+    {
+      "id": 3,
+      "provider": "apple",
+      "provider_id": "summaryB",
+      "email": "summary-b@bombom.news",
+      "nickname": "익명",
+      "gender": "FEMALE",
+      "role_id": 1
+    },
+    {
+      "id": 4,
+      "provider": "apple",
+      "provider_id": "summaryOngoingOnly",
+      "email": "summary-ongoing@bombom.news",
+      "nickname": "진행중만",
+      "gender": "FEMALE",
+      "role_id": 1
+    }
+  ],
+  "newsletter_group": [
+    {
+      "id": 1,
+      "name": "그룹A"
+    }
+  ],
+  "challenge": [
+    {
+      "id": 1,
+      "name": "종료챌린지1",
+      "generation": 1,
+      "start_date": "2026-01-05",
+      "end_date": "2026-01-15",
+      "total_days": 10,
+      "is_badge_issued": false,
+      "newsletter_group_id": 1
+    },
+    {
+      "id": 2,
+      "name": "종료챌린지2",
+      "generation": 1,
+      "start_date": "2026-01-08",
+      "end_date": "2026-01-18",
+      "total_days": 10,
+      "is_badge_issued": false,
+      "newsletter_group_id": 1
+    },
+    {
+      "id": 3,
+      "name": "진행중챌린지",
+      "generation": 2,
+      "start_date": "2026-01-25",
+      "end_date": "2026-02-10",
+      "total_days": 10,
+      "is_badge_issued": false,
+      "newsletter_group_id": 1
+    }
+  ],
+  "challenge_participant": [
+    {
+      "id": 1,
+      "challenge_id": 1,
+      "member_id": 1,
+      "completed_days": 10,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 2,
+      "challenge_id": 2,
+      "member_id": 1,
+      "completed_days": 8,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 3,
+      "challenge_id": 1,
+      "member_id": 2,
+      "completed_days": 9,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 4,
+      "challenge_id": 2,
+      "member_id": 2,
+      "completed_days": 7,
+      "is_survived": false,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 5,
+      "challenge_id": 1,
+      "member_id": 3,
+      "completed_days": 10,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 6,
+      "challenge_id": 2,
+      "member_id": 3,
+      "completed_days": 9,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    },
+    {
+      "id": 7,
+      "challenge_id": 3,
+      "member_id": 4,
+      "completed_days": 5,
+      "is_survived": true,
+      "shield": 0,
+      "streak": 0
+    }
+  ]
+}

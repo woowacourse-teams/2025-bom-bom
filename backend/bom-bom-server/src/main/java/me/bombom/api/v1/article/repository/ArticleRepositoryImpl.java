@@ -181,7 +181,8 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
     }
 
 
-    private long getRecentTotalCountNative(Long memberId, ArticleSearchOptionsRequest options, LocalDate fiveDaysAgoDate) {
+    private long getRecentTotalCountNative(Long memberId, ArticleSearchOptionsRequest options,
+                                           LocalDate fiveDaysAgoDate) {
         StringBuilder sql = new StringBuilder();
         List<Object> params = new ArrayList<>();
 
@@ -502,6 +503,16 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
     }
 
     private JPAQuery<Long> getTotalQuery(Long memberId, ArticlesOptionsRequest options) {
+        if (options.unreadOnly()) {
+            return jpaQueryFactory.select(article.count())
+                    .from(article)
+                    .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                    .join(category).on(newsletter.categoryId.eq(category.id))
+                    .where(createMemberWhereClause(memberId))
+                    .where(createDateWhereClause(options.date()))
+                    .where(createNewsletterIdWhereClause(options.newsletterId()))
+                    .where(article.isRead.isFalse());
+        }
         return jpaQueryFactory.select(article.count())
                 .from(article)
                 .join(newsletter).on(article.newsletterId.eq(newsletter.id))
@@ -512,6 +523,31 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
     }
 
     private List<ArticleResponse> getContent(Long memberId, ArticlesOptionsRequest options, Pageable pageable) {
+        if (options.unreadOnly()) {
+            return jpaQueryFactory.select(new QArticleResponse(
+                            article.id,
+                            article.title,
+                            article.contentsSummary,
+                            article.arrivedDateTime,
+                            article.thumbnailUrl,
+                            article.expectedReadTime,
+                            article.isRead,
+                            getIsBookmarked(memberId),
+                            new QNewsletterSummaryResponse(newsletter.name, newsletter.imageUrl, category.name)
+                    ))
+                    .from(article)
+                    .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                    .join(category).on(newsletter.categoryId.eq(category.id))
+                    .where(createMemberWhereClause(memberId))
+                    .where(createDateWhereClause(options.date()))
+                    .where(createNewsletterIdWhereClause(options.newsletterId()))
+                    .where(article.isRead.isFalse())
+                    .orderBy(getOrderSpecifiers(pageable).toArray(OrderSpecifier[]::new))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+        }
+
         return jpaQueryFactory.select(new QArticleResponse(
                         article.id,
                         article.title,

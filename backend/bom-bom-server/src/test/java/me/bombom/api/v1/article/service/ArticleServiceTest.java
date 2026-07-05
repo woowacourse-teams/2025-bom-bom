@@ -188,6 +188,32 @@ class ArticleServiceTest {
         });
     }
 
+    @Test
+    void 아티클_목록_조회_읽지_않은_아티클만_조회한다() {
+        // given
+        Article readArticle = articles.getFirst();
+        readArticle.markAsRead();
+        articleRepository.saveAndFlush(readArticle);
+
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member,
+                ArticlesOptionsRequest.of(null, null, true),
+                pageable
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(10);
+            softly.assertThat(result.getContent()).hasSize(10);
+            softly.assertThat(result.getContent())
+                    .extracting(ArticleResponse::isRead)
+                    .containsOnly(false);
+        });
+    }
+
 //
 //    @Test
 //    void 아티클_목록_조회_제목_검색_테스트() {

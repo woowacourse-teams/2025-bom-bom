@@ -13,10 +13,10 @@ public record MyChallengeSummary(
         int completionRate,
         double attendanceTopPercent,
         int averageAttendanceRate,
-        MedalRatio medalRatio
+        MedalCounts medalCounts
 ) {
 
-    public static final MyChallengeSummary EMPTY = new MyChallengeSummary(0, 0.0, 0, 0.0, 0, MedalRatio.ZERO);
+    public static final MyChallengeSummary EMPTY = new MyChallengeSummary(0, 0.0, 0, 0.0, 0, MedalCounts.ZERO);
 
     public static MyChallengeSummary of(
             List<MemberChallengeRankingStatsFlat> aggregates,
@@ -32,13 +32,13 @@ public record MyChallengeSummary(
             return EMPTY;
         }
 
-        return from(statsByMember.get(memberId), statsByMember.values(), MedalRatio.from(myParticipations));
+        return from(statsByMember.get(memberId), statsByMember.values(), MedalCounts.from(myParticipations));
     }
 
     private static MyChallengeSummary from(
             MemberChallengeStats myStats,
             Collection<MemberChallengeStats> population,
-            MedalRatio medalRatio
+            MedalCounts medalCounts
     ) {
         double completionTopPercent = topPercent(
                 myStats.getCompletionRate(),
@@ -55,7 +55,7 @@ public record MyChallengeSummary(
                 myStats.getCompletionRate(),
                 attendanceTopPercent,
                 myStats.getAverageAttendanceRate(),
-                medalRatio
+                medalCounts
         );
     }
 

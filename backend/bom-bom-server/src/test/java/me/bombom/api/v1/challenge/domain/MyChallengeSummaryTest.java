@@ -37,8 +37,9 @@ class MyChallengeSummaryTest {
             softly.assertThat(summary.completedChallengeCount()).isEqualTo(2);
             softly.assertThat(summary.completionRate()).isEqualTo(100);
             softly.assertThat(summary.averageAttendanceRate()).isEqualTo(90);
-            softly.assertThat(summary.medalRatio().getGold()).isEqualTo(50);
-            softly.assertThat(summary.medalRatio().getBronze()).isEqualTo(50);
+            // 메달은 "개수"로 보유(GOLD 1, BRONZE 1). 비율(%) 변환은 응답 DTO 책임
+            softly.assertThat(summary.medalCounts().getGold()).isEqualTo(1);
+            softly.assertThat(summary.medalCounts().getBronze()).isEqualTo(1);
         });
     }
 

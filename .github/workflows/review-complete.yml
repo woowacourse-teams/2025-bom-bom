@@ -1,0 +1,33 @@
+name: Review Complete
+
+# 배정된 리뷰어가 리뷰를 제출하거나 PR이 닫히면 배정 이력을 완료 처리합니다.
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [closed]
+    branches: [server-dev, email-server-dev]
+
+permissions:
+  contents: read
+
+env:
+  TARGET_BASE_BRANCHES: server-dev,email-server-dev
+
+jobs:
+  complete:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Close review assignment
+        uses: actions/github-script@v7
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TARGET_BASE_BRANCHES: ${{ env.TARGET_BASE_BRANCHES }}
+        with:
+          script: |
+            const { run } = require('./.github/scripts/complete-review.js');
+            await run({ context, core });

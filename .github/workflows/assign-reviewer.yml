@@ -1,0 +1,48 @@
+name: Assign Reviewer
+
+# 백엔드 PR이 열리면 Supabase 로테이션 정보를 읽어 리뷰어 1명을 자동 배정합니다.
+# 배정 현황·휴가·기한 설정은 admin 대시보드(Bombom-Team/client의 admin 워크스페이스)에서 관리합니다.
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+    branches: [server-dev, email-server-dev]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  assign:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assign reviewer via rotation
+        id: assign
+        uses: actions/github-script@v7
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        with:
+          script: |
+            const { run } = require('./.github/scripts/assign-reviewer.js');
+            await run({ github, context, core });
+
+      - name: Send Discord notification
+        if: steps.assign.outputs.assigned == 'true'
+        uses: ./.github/actions/discord-notify
+        with:
+          webhook: ${{ secrets.DISCORD_REVIEW_WEBHOOK_URL }}
+          content: '👀 *리뷰어가 배정되었습니다!*'
+          mentions: ${{ steps.assign.outputs.reviewer_mention }}
+          title: ${{ github.event.pull_request.title }}
+          url: ${{ github.event.pull_request.html_url }}
+          color: 3447003
+          fields: |
+            [
+              { "name": "작성자", "value": "${{ github.event.pull_request.user.login }}" },
+              { "name": "리뷰어", "value": "${{ steps.assign.outputs.reviewer_name }}" },
+              { "name": "기한", "value": "${{ steps.assign.outputs.deadline_label }}" }
+            ]

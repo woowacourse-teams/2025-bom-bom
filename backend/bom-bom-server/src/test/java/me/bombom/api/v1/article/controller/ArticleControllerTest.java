@@ -63,6 +63,22 @@ class ArticleControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
+    void 읽지_않은_아티클만_조회한다() {
+        markAsRead(1);
+
+        Map<String, Object> response = getArticles(Map.of("unreadOnly", true));
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.get("totalElements")).isEqualTo(10);
+            softly.assertThat(content(response)).hasSize(10);
+            softly.assertThat(content(response))
+                    .extracting(article -> article.get("isRead"))
+                    .containsOnly(false);
+        });
+    }
+
+    @Test
     void 뉴스_키워드_검색() {
         Map<String, Object> response = searchArticles(Map.of("keyword", "뉴스"));
 

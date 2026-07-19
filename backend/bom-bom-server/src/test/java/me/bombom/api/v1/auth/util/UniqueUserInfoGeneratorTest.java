@@ -31,7 +31,6 @@ class UniqueUserInfoGeneratorTest {
         String result = uniqueUserInfoGenerator.getUniqueNickname(nickname);
 
         // then
-        System.out.println(result);
         assertThat(result).isEqualTo(nickname);
     }
 
@@ -135,7 +134,6 @@ class UniqueUserInfoGeneratorTest {
         String result = uniqueUserInfoGenerator.getUniqueEmailLocalPart(email);
 
         // then
-        System.out.println(result);
         assertThat(result).isEqualTo(email);
     }
 
@@ -149,7 +147,6 @@ class UniqueUserInfoGeneratorTest {
         String result = uniqueUserInfoGenerator.getUniqueEmailLocalPart(email);
 
         // then
-        System.out.println(result);
         assertThat(result).startsWith(email + UniqueUserInfoGenerator.EMAIL_RANDOM_DELIMITER);
     }
 

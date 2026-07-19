@@ -57,12 +57,6 @@ class PetServiceTest {
 
     @BeforeEach
     void setUp() {
-        petRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        continueReadingRealtimeRepository.deleteAllInBatch();
-        stageRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = TestFixture.createUniqueMember(getUniqueValue(), getUniqueValue());
         memberRepository.save(member);
         firstStage = TestFixture.createStage(1, 0);

@@ -1,5 +1,6 @@
 package me.bombom.api.v1.withdraw.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class WithdrawService {
     private final HighlightRepository highlightRepository;
     private final ContinueReadingRealtimeRepository continueReadingRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final Clock clock;
 
     @Transactional
     public void migrateDeletedMember(Member member) {
@@ -37,7 +39,7 @@ public class WithdrawService {
 
     @Transactional
     public void deleteExpiredWithdrawnMembers() {
-        withdrawnMemberRepository.bulkDeleteAllByExpireDate(LocalDate.now());
+        withdrawnMemberRepository.bulkDeleteAllByExpireDate(LocalDate.now(clock));
         log.info("만료된 회원 정보 삭제 성공");
     }
 
@@ -48,8 +50,8 @@ public class WithdrawService {
                 .birthDate(member.getBirthDate())
                 .gender(member.getGender())
                 .joinedDate(member.getCreatedAt().toLocalDate())
-                .deletedDate(LocalDate.now())
-                .expireDate(LocalDate.now().plusDays(EXPIRATION_DAYS))
+                .deletedDate(LocalDate.now(clock))
+                .expireDate(LocalDate.now(clock).plusDays(EXPIRATION_DAYS))
                 .continueReading(getContinueReadingRealtime(member.getId()))
                 .bookmarkedCount(getBookmarkedCount(member.getId()))
                 .highlightCount(getHighlightCount(member.getId()))

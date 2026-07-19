@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class ArticleTest {
 
+    private static final LocalDate BASE_DATE = LocalDate.of(2025, 7, 15);
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
 
     @Test
@@ -37,11 +38,11 @@ class ArticleTest {
                 "제목",
                 1L,
                 1L,
-                LocalDateTime.now()
+                BASE_TIME
         );
 
         // when
-        boolean result = article.isArrivedToday(LocalDate.now());
+        boolean result = article.isArrivedToday(BASE_DATE);
 
         // then
         assertThat(result).isTrue();
@@ -58,7 +59,7 @@ class ArticleTest {
         );
 
         // when
-        boolean result = article.isArrivedToday(LocalDate.now());
+        boolean result = article.isArrivedToday(BASE_DATE.plusDays(1));
 
         // then
         assertThat(result).isFalse();

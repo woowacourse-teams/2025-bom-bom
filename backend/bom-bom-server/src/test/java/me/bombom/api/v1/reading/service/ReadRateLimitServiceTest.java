@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @IntegrationTest
 class ReadRateLimitServiceTest {
 
+    private static final LocalDateTime REQUESTED_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
+
     @Autowired
     private ReadRateLimitService readRateLimitService;
 
@@ -34,10 +36,6 @@ class ReadRateLimitServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberReadTokenBucketRepository.deleteAllInBatch();
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createMemberFixture("test@test.com", "testUser"));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
     }
@@ -48,7 +46,7 @@ class ReadRateLimitServiceTest {
         assertThat(memberReadTokenBucketRepository.findById(member.getId())).isEmpty();
 
         // when
-        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), LocalDateTime.now());
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), REQUESTED_AT);
 
         // then
         assertSoftly(softly -> {
@@ -62,10 +60,10 @@ class ReadRateLimitServiceTest {
     @Test
     void 토큰이_남아있으면_차감_후_허용() {
         // given
-        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 3.0));
+        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 3.0, REQUESTED_AT));
 
         // when
-        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), LocalDateTime.now());
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), REQUESTED_AT);
 
         // then
         assertSoftly(softly -> {
@@ -78,10 +76,10 @@ class ReadRateLimitServiceTest {
     @Test
     void 토큰_소진_시_차단() {
         // given
-        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5));
+        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5, REQUESTED_AT));
 
         // when
-        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), LocalDateTime.now());
+        boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), REQUESTED_AT);
 
         // then
         assertSoftly(softly -> {
@@ -94,8 +92,8 @@ class ReadRateLimitServiceTest {
     @Test
     void refillSeconds_경과_후_토큰_충전되어_재허용() {
         // given
-        LocalDateTime savedAt = LocalDateTime.now();
-        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5));
+        LocalDateTime savedAt = REQUESTED_AT;
+        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5, savedAt));
 
         // when - 55초 뒤
         boolean result = readRateLimitService.tryConsumeReadCountToken(member.getId(), savedAt.plusSeconds(55));
@@ -107,7 +105,7 @@ class ReadRateLimitServiceTest {
     @Test
     void 소수점_토큰_이월되어_짧은_대기_후_재허용() {
         // given
-        LocalDateTime savedAt = LocalDateTime.now().withNano(0);
+        LocalDateTime savedAt = REQUESTED_AT;
         memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.0, savedAt));
 
         // when - 80초 뒤 소비 (80/50 = 1.6 충전 → 1.6 - 1 = 0.6 이월)
@@ -117,7 +115,6 @@ class ReadRateLimitServiceTest {
         double carryOver = memberReadTokenBucketRepository.findById(member.getId())
                 .map(MemberReadTokenBucket::getTokens)
                 .orElseThrow();
-        System.out.println("1차 소비 후 이월 토큰: " + carryOver);
 
         assertSoftly(softly -> {
             softly.assertThat(firstResult).isTrue();

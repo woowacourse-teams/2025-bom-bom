@@ -1,6 +1,7 @@
 package me.bombom.support.acceptance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -19,9 +20,10 @@ public class AcceptanceTestConfiguration {
     AcceptanceDataSetLoader acceptanceDataSetLoader(
             JdbcTemplate jdbcTemplate,
             ObjectMapper objectMapper,
-            ResourceLoader resourceLoader
+            ResourceLoader resourceLoader,
+            Clock clock
     ) {
-        return new AcceptanceDataSetLoader(jdbcTemplate, objectMapper, resourceLoader);
+        return new AcceptanceDataSetLoader(jdbcTemplate, objectMapper, resourceLoader, clock);
     }
 
     @Bean

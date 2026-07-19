@@ -22,9 +22,8 @@ public class CleanUp {
             """;
 
     /**
-     * 읽기 전용 seed 테이블. 무조건적인 Flyway seed가 존재하고 활성(@Disabled가 아닌) 테스트가
-     * INSERT/DELETE로 변경하지 않는 테이블만 제외한다.
-     * - unsubscribe_pattern: 유일한 writer인 UnsubscribeAgentTest가 @Disabled이므로 정적 참조 seed로 취급한다.
+     * 읽기 전용 seed 테이블. 무조건적인 Flyway seed가 존재하고 테스트가 INSERT/DELETE로 변경하지 않는 테이블만 제외한다.
+     * - unsubscribe_pattern: 구독 취소 패턴 조회 테스트에서 참조만 하므로 정적 참조 seed로 취급한다.
      */
     private static final Set<String> EXCLUDED_TABLES = Set.of(
             "unsubscribe_pattern"

@@ -51,7 +51,6 @@ class InitializeReadingListenerTest {
     @Test
     void 회원가입_이벤트_발행_시_읽기정보가_초기화된다() {
         // given
-        memberRepository.deleteAllInBatch();
         Member baselineMember = memberRepository.save(TestFixture.createUniqueMember("baseline", "baseline-provider"));
         baselineMemberId = baselineMember.getId();
         monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingFixture(baselineMember));

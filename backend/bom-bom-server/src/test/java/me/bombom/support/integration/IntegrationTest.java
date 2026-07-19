@@ -7,16 +7,14 @@ import java.lang.annotation.Target;
 import me.bombom.support.acceptance.AcceptanceTestConfiguration;
 import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
- * Spring Boot, MockMvc, Testcontainers 설정을 함께 올리는 통합 테스트용 메타 애노테이션이다.
+ * Spring Boot, Testcontainers 설정을 함께 올리는 통합 테스트용 메타 애노테이션이다.
  */
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Tag("integration")
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})

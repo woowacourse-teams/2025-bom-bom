@@ -1,5 +1,6 @@
 package me.bombom.api.v1.guidemail.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.member.domain.Member;
@@ -16,6 +17,7 @@ public class GuideMailService {
 
     private final PetService petService;
     private final ReadingService readingService;
+    private final Clock clock;
 
     @Transactional
     public void updateReadScore(Member member) {
@@ -29,6 +31,6 @@ public class GuideMailService {
     }
 
     private boolean isRegisterDay(LocalDate registerDate) {
-        return registerDate.isEqual(LocalDate.now());
+        return registerDate.isEqual(LocalDate.now(clock));
     }
 }

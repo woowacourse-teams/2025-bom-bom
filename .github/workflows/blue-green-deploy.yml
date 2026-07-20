@@ -314,59 +314,17 @@ jobs:
 
           echo "✅ prod7 CodeDeploy rollback 완료: ${ROLLBACK_DEPLOYMENT_ID}"
 
-  # X-3) rollback된 prod7 로컬 health check
-  rollback-prod7-health:
+  # X-3) rollback 완료 시 prod7 트래픽 복구
+  restore-prod7-after-rollback:
     if: ${{ always() && needs.rollback-prod7-wait.result == 'success' }}
     needs: rollback-prod7-wait
-    runs-on: [self-hosted, prod7]
-    steps:
-      - name: prod7 rollback health check
-        run: |
-          set -euo pipefail
-
-          HEALTH_CHECK_URL="${HEALTH_CHECK_URL:-http://localhost:8081/actuator/health}"
-          INITIAL_DELAY_SECONDS=90
-          MAX_RETRIES=10
-          REQUIRED_SUCCESS=2
-          RETRY_INTERVAL_SECONDS=10
-
-          echo "prod7 rollback health check 시작: ${HEALTH_CHECK_URL}"
-          sleep "${INITIAL_DELAY_SECONDS}"
-
-          SUCCESS_COUNT=0
-          for ((i=1; i<=MAX_RETRIES; i++)); do
-            STATUS="$(curl -s -o /dev/null -w "%{http_code}" "${HEALTH_CHECK_URL}" || echo "000")"
-
-            if [ "${STATUS}" = "200" ]; then
-              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-              echo "✅ prod7 rollback health success (${SUCCESS_COUNT}/${REQUIRED_SUCCESS}) attempt=${i}/${MAX_RETRIES}"
-
-              if [ "${SUCCESS_COUNT}" -ge "${REQUIRED_SUCCESS}" ]; then
-                echo "✅ prod7 rollback health check 통과"
-                exit 0
-              fi
-            else
-              echo "⏳ prod7 health status=${STATUS} attempt=${i}/${MAX_RETRIES}"
-            fi
-
-            sleep "${RETRY_INTERVAL_SECONDS}"
-          done
-
-          echo "❌ prod7 rollback health check 실패. prod7은 disabled 상태로 유지합니다."
-          sudo docker logs prod --tail 80 || true
-          exit 1
-
-  # X-4) rollback health check 성공 시 prod7 트래픽 복구
-  restore-prod7-after-rollback:
-    if: ${{ always() && needs.rollback-prod7-health.result == 'success' }}
-    needs: rollback-prod7-health
     runs-on: [self-hosted, lb]
     steps:
       - name: prod7 rollback 후 트래픽 복구
         run: |
           echo "enable server app_servers/prod6" | sudo socat stdio /var/run/haproxy.sock
           echo "enable server app_servers/prod7" | sudo socat stdio /var/run/haproxy.sock
-          echo "✅ prod7 rollback health check 성공으로 prod7 트래픽을 복구했습니다."
+          echo "✅ prod7 CodeDeploy rollback 완료로 prod7 트래픽을 복구했습니다."
 
   # ---------------------------------------------------
   # 4️⃣ 트래픽 전환: prod6 → prod7

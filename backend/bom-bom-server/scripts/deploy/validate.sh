@@ -12,7 +12,7 @@ RETRY_INTERVAL_SECONDS="${RETRY_INTERVAL_SECONDS:-10}"
 sleep "$INITIAL_DELAY_SECONDS"
 
 for i in $(seq 1 "$MAX_RETRIES"); do
-  STATUS="$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL" || echo "000")"
+  STATUS="$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$HEALTH_CHECK_URL" || echo "000")"
 
   if [ "$STATUS" = "200" ]; then
     SUCCESS_COUNT=$((SUCCESS_COUNT + 1))

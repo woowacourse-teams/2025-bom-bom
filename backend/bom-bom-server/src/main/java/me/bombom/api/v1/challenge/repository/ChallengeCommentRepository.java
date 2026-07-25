@@ -89,32 +89,6 @@ public interface ChallengeCommentRepository extends JpaRepository<ChallengeComme
             """)
     void bulkUpdateReplyCount(Long commentId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = """
-                UPDATE challenge_comment cc
-                JOIN (
-                    SELECT comment_id, COUNT(*) AS cnt
-                    FROM challenge_comment_like
-                    WHERE participant_id IN (:participantIds)
-                    GROUP BY comment_id
-                ) l ON l.comment_id = cc.id
-                SET cc.like_count = GREATEST(cc.like_count - l.cnt, 0)
-            """, nativeQuery = true)
-    void bulkDecreaseLikeCountByParticipantIds(@Param("participantIds") List<Long> participantIds);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = """
-                UPDATE challenge_comment cc
-                JOIN (
-                    SELECT comment_id, COUNT(*) AS cnt
-                    FROM challenge_comment_reply
-                    WHERE participant_id IN (:participantIds)
-                    GROUP BY comment_id
-                ) r ON r.comment_id = cc.id
-                SET cc.reply_count = GREATEST(cc.reply_count - r.cnt, 0)
-            """, nativeQuery = true)
-    void bulkDecreaseReplyCountByParticipantIds(@Param("participantIds") List<Long> participantIds);
-
     @Query("""
             SELECT cc.id
             FROM ChallengeComment cc

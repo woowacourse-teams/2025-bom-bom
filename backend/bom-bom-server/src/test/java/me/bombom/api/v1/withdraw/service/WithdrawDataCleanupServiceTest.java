@@ -20,6 +20,7 @@ import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
 import me.bombom.api.v1.challenge.dto.request.CreateCommentReplyRequest;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeCommentReplyRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeDailyGuideCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
@@ -65,6 +66,9 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private ChallengeCommentLikeRepository challengeCommentLikeRepository;
+
+    @Autowired
+    private ChallengeCommentReplyRepository challengeCommentReplyRepository;
 
     @Autowired
     private ChallengeReviewRepository challengeReviewRepository;
@@ -204,7 +208,7 @@ class WithdrawDataCleanupServiceTest {
     }
 
     @Test
-    void 탈퇴_회원이_타인_댓글에_남긴_좋아요와_답글은_대상_댓글의_카운터를_보정하고_삭제된다() {
+    void 탈퇴_회원이_타인_댓글에_남긴_좋아요와_답글은_카운터_보정_없이_삭제된다() {
         // given
         Member withdrawer = memberRepository.save(TestFixture.uniqueMemberFixture());
         Member other = memberRepository.save(TestFixture.uniqueMemberFixture());
@@ -236,10 +240,11 @@ class WithdrawDataCleanupServiceTest {
         ChallengeComment updated = challengeCommentRepository.findById(othersComment.getId()).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(isSucceeded).isTrue();
-            softly.assertThat(updated.getLikeCount()).isZero();
-            softly.assertThat(updated.getReplyCount()).isZero();
+            softly.assertThat(updated.getLikeCount()).isEqualTo(1);
+            softly.assertThat(updated.getReplyCount()).isEqualTo(1);
             softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(
                     withdrawerParticipant.getId(), othersComment.getId())).isFalse();
+            softly.assertThat(challengeCommentReplyRepository.count()).isZero();
         });
     }
 }

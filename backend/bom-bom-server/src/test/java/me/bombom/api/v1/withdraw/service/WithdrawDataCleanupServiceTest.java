@@ -178,12 +178,13 @@ class WithdrawDataCleanupServiceTest {
                 .build());
 
         // when
-        withdrawDataCleanupService.cleanupByMemberId(memberId);
+        boolean isSucceeded = withdrawDataCleanupService.cleanupByMemberId(memberId);
 
         // then
         Long participantId = participant.getId();
         Long commentId = comment.getId();
         assertSoftly(softly -> {
+            softly.assertThat(isSucceeded).isTrue();
             softly.assertThat(badgeRepository.countByMemberId(memberId)).isZero();
             softly.assertThat(couponIssueRepository.findByMemberId(memberId)).isEmpty();
             softly.assertThat(challengeParticipantRepository.countByMemberId(memberId)).isZero();
@@ -229,11 +230,12 @@ class WithdrawDataCleanupServiceTest {
                 1L, othersComment.getId(), withdrawer.getId(), new CreateCommentReplyRequest("답글", false));
 
         // when
-        withdrawDataCleanupService.cleanupByMemberId(withdrawer.getId());
+        boolean isSucceeded = withdrawDataCleanupService.cleanupByMemberId(withdrawer.getId());
 
         // then
         ChallengeComment updated = challengeCommentRepository.findById(othersComment.getId()).orElseThrow();
         assertSoftly(softly -> {
+            softly.assertThat(isSucceeded).isTrue();
             softly.assertThat(updated.getLikeCount()).isZero();
             softly.assertThat(updated.getReplyCount()).isZero();
             softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(

@@ -11,6 +11,8 @@ import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.highlight.repository.HighlightRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
@@ -48,12 +50,19 @@ public class WithdrawService {
 
     @Transactional
     public void deleteExpiredWithdrawnMembers() {
-        withdrawnMemberRepository.bulkDeleteAllExpired(LocalDate.now(clock));
+        withdrawnMemberRepository.bulkDeleteAllExpiredAndCleanupCompleted(LocalDate.now(clock));
         log.info("만료된 회원 정보 삭제 성공");
     }
 
-    public List<Long> findActiveWithdrawnMemberIds() {
-        return withdrawnMemberRepository.findAllMemberIds();
+    public List<Long> findCleanupNotCompletedMemberIds() {
+        return withdrawnMemberRepository.findAllMemberIdsByCleanupNotCompleted();
+    }
+
+    @Transactional
+    public void completeCleanup(Long memberId) {
+        WithdrawnMember withdrawnMember = withdrawnMemberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND));
+        withdrawnMember.completeCleanup();
     }
 
     private WithdrawnMember createWithdrawnMember(Member member) {

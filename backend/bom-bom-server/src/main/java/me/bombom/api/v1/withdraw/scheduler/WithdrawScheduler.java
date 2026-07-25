@@ -22,10 +22,8 @@ public class WithdrawScheduler {
 
     /**
      * 탈퇴 회원 데이터 유지보수를 하루 한 번 실행한다.
-     * 1) 비동기 삭제 실패로 남은 고아 데이터를 재정리(멱등)한 뒤,
-     * 2) 만료된 탈퇴 회원 추적 정보를 삭제한다.
-     * 만료 삭제보다 재정리를 먼저 수행해, cleanup이 계속 실패한 회원이라도
-     * 추적 정보가 사라지기 전에 반드시 한 번 더 정리되도록 보장한다.
+     * 1) 비동기 삭제 실패로 완료 표시되지 않은 고아 데이터를 재정리(멱등)한 뒤,
+     * 2) 정리 완료 후 만료된 탈퇴 회원 추적 정보를 삭제한다.
      */
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "daily_withdrawn_member_maintenance", lockAtLeastFor = "PT10S", lockAtMostFor = "PT30M")
@@ -36,10 +34,12 @@ public class WithdrawScheduler {
     }
 
     private void reconcileWithdrawnMemberData() {
-        List<Long> memberIds = withdrawService.findActiveWithdrawnMemberIds();
+        List<Long> memberIds = withdrawService.findCleanupNotCompletedMemberIds();
         log.info("탈퇴 회원 데이터 재정리 시작 - 대상 {}건", memberIds.size());
         for (Long memberId : memberIds) {
-            withdrawDataCleanupService.cleanupByMemberId(memberId);
+            if (withdrawDataCleanupService.cleanupByMemberId(memberId)) {
+                withdrawService.completeCleanup(memberId);
+            }
         }
         log.info("탈퇴 회원 데이터 재정리 완료");
     }

@@ -65,6 +65,9 @@ public class WithdrawnMember extends BaseEntity {
 
     private int badgeCount;
 
+    @Column(nullable = false)
+    private boolean cleanupCompleted;
+
     @Builder
     public WithdrawnMember(
             Long id,
@@ -82,7 +85,8 @@ public class WithdrawnMember extends BaseEntity {
             int totalReadCount,
             int subscribeCount,
             int challengeCount,
-            int badgeCount
+            int badgeCount,
+            boolean cleanupCompleted
     ) {
         this.id = id;
         this.memberId = memberId;
@@ -100,5 +104,10 @@ public class WithdrawnMember extends BaseEntity {
         this.subscribeCount = subscribeCount;
         this.challengeCount = challengeCount;
         this.badgeCount = badgeCount;
+        this.cleanupCompleted = cleanupCompleted;
+    }
+
+    public void completeCleanup() {
+        cleanupCompleted = true;
     }
 }

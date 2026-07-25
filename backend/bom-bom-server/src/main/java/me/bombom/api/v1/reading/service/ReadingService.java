@@ -370,21 +370,17 @@ public class ReadingService {
     // TODO: 실패한 작업부터 재실행 로직 필요
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllByMemberId(Long memberId) {
-        try {
-            continueReadingRepository.deleteByMemberId(memberId);
-            continueReadingRankingSnapshotRepository.deleteByMemberId(memberId);
-            todayReadingRepository.deleteByMemberId(memberId);
-            weeklyReadingRepository.deleteByMemberId(memberId);
-            monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
-            monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
-            yearlyReadingRepository.bulkDeleteByMemberId(memberId);
-            continueReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
-            monthlyReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
-            memberReadTokenBucketRepository.bulkDeleteAllByMemberId(memberId);
-            continueReadingShieldService.deleteByMemberId(memberId);
-        } catch (Exception e) {
-            log.error("회원 읽기 정보 삭제 실패. memberId = {}", memberId, e.getStackTrace());
-        }
+        continueReadingRepository.deleteByMemberId(memberId);
+        continueReadingRankingSnapshotRepository.deleteByMemberId(memberId);
+        todayReadingRepository.deleteByMemberId(memberId);
+        weeklyReadingRepository.deleteByMemberId(memberId);
+        monthlyReadingSnapshotRepository.deleteByMemberId(memberId);
+        monthlyReadingRealtimeRepository.deleteByMemberId(memberId);
+        yearlyReadingRepository.bulkDeleteByMemberId(memberId);
+        continueReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
+        monthlyReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
+        memberReadTokenBucketRepository.bulkDeleteAllByMemberId(memberId);
+        continueReadingShieldService.deleteByMemberId(memberId);
     }
 
     private LocalDate getLastMonth() {

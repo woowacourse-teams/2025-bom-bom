@@ -42,27 +42,31 @@ public class WithdrawDataCleanupService {
     private final MemberFcmTokenService memberFcmTokenService;
     private final MemberNotificationSettingService memberNotificationSettingService;
 
-    public void cleanupByMemberId(Long memberId) {
-        runSafely("아티클", memberId, articleService::deleteAllByMemberId);
-        runSafely("북마크", memberId, bookmarkService::deleteAllByMemberId);
-        runSafely("하이라이트", memberId, highlightService::deleteAllByMemberId);
-        runSafely("키우기", memberId, petService::deleteByMemberId);
-        runSafely("읽기", memberId, readingService::deleteAllByMemberId);
-        runSafely("구독", memberId, subscribeService::deleteAllByMemberId);
-        runSafely("경고 설정", memberId, warningService::deleteByMemberId);
-        runSafely("뱃지", memberId, badgeService::deleteAllByMemberId);
-        runSafely("쿠폰", memberId, couponService::deleteAllByMemberId);
-        runSafely("챌린지", memberId, challengeWithdrawService::deleteAllByMemberId);
-        runSafely("매일메일", memberId, maeilMailSubscribeService::deleteAllByMemberId);
-        runSafely("FCM 토큰", memberId, memberFcmTokenService::deleteAllByMemberId);
-        runSafely("알림 설정", memberId, memberNotificationSettingService::deleteAllByMemberId);
+    public boolean cleanupByMemberId(Long memberId) {
+        boolean isSucceeded = true;
+        isSucceeded &= runSafely("아티클", memberId, articleService::deleteAllByMemberId);
+        isSucceeded &= runSafely("북마크", memberId, bookmarkService::deleteAllByMemberId);
+        isSucceeded &= runSafely("하이라이트", memberId, highlightService::deleteAllByMemberId);
+        isSucceeded &= runSafely("키우기", memberId, petService::deleteByMemberId);
+        isSucceeded &= runSafely("읽기", memberId, readingService::deleteAllByMemberId);
+        isSucceeded &= runSafely("구독", memberId, subscribeService::deleteAllByMemberId);
+        isSucceeded &= runSafely("경고 설정", memberId, warningService::deleteByMemberId);
+        isSucceeded &= runSafely("뱃지", memberId, badgeService::deleteAllByMemberId);
+        isSucceeded &= runSafely("쿠폰", memberId, couponService::deleteAllByMemberId);
+        isSucceeded &= runSafely("챌린지", memberId, challengeWithdrawService::deleteAllByMemberId);
+        isSucceeded &= runSafely("매일메일", memberId, maeilMailSubscribeService::deleteAllByMemberId);
+        isSucceeded &= runSafely("FCM 토큰", memberId, memberFcmTokenService::deleteAllByMemberId);
+        isSucceeded &= runSafely("알림 설정", memberId, memberNotificationSettingService::deleteAllByMemberId);
+        return isSucceeded;
     }
 
-    private void runSafely(String domain, Long memberId, LongConsumer action) {
+    private boolean runSafely(String domain, Long memberId, LongConsumer action) {
         try {
             action.accept(memberId);
+            return true;
         } catch (Exception e) {
             log.error("회원 탈퇴 데이터 삭제 실패 - domain={}, memberId={}", domain, memberId, e);
+            return false;
         }
     }
 }

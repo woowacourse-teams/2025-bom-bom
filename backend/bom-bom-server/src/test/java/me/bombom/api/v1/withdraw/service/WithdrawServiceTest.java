@@ -4,6 +4,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.domain.ArticleReadHistory;
@@ -96,6 +97,7 @@ class WithdrawServiceTest {
             softly.assertThat(withdrawn.getFirst().getContinueReading()).isEqualTo(10);
             softly.assertThat(withdrawn.getFirst().getBookmarkedCount()).isEqualTo(1);
             softly.assertThat(withdrawn.getFirst().getHighlightCount()).isEqualTo(6);
+            softly.assertThat(withdrawn.getFirst().isCleanupCompleted()).isFalse();
         });
     }
 
@@ -122,7 +124,7 @@ class WithdrawServiceTest {
                 .articleId(2L)
                 .newsletterId(1L)
                 .categoryId(1L)
-                .readAt(LocalDateTime.of(TODAY, java.time.LocalTime.NOON))
+                .readAt(LocalDateTime.of(TODAY, LocalTime.NOON))
                 .build());
 
         // when
@@ -179,14 +181,24 @@ class WithdrawServiceTest {
                 .build();
         withdrawnMemberRepository.save(notExpired);
 
+        WithdrawnMember cleanupNotCompleted = WithdrawnMember.builder()
+                .memberId(3L)
+                .gender(Gender.NONE)
+                .joinedDate(TODAY.minusDays(200))
+                .deletedDate(TODAY.minusDays(90))
+                .expireDate(TODAY) // 오늘 만료됐지만 정리 미완료
+                .build();
+        withdrawnMemberRepository.save(cleanupNotCompleted);
+
         // when
+        withdrawService.completeCleanup(1L);
         withdrawService.deleteExpiredWithdrawnMembers();
 
         // then
         List<WithdrawnMember> remaining = withdrawnMemberRepository.findAll();
         assertSoftly(softly -> {
-            softly.assertThat(remaining).hasSize(1);
-            softly.assertThat(remaining.get(0).getMemberId()).isEqualTo(2L);
+            softly.assertThat(remaining).extracting(WithdrawnMember::getMemberId)
+                    .containsExactlyInAnyOrder(2L, 3L);
         });
     }
 

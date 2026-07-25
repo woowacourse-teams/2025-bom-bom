@@ -12,4 +12,4 @@ ALTER TABLE withdrawn_member
     ADD COLUMN subscribe_count INT NOT NULL DEFAULT 0,
     ADD COLUMN challenge_count INT NOT NULL DEFAULT 0,
     ADD COLUMN badge_count INT NOT NULL DEFAULT 0,
-    ADD COLUMN cleanup_completed BOOLEAN NOT NULL DEFAULT FALSE;
+    ADD COLUMN cleanup_completed BOOLEAN NOT NULL DEFAULT TRUE;

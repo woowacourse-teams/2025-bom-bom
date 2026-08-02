@@ -26,4 +26,10 @@ public record CommentReplyResponse(
         @Schema(requiredMode = RequiredMode.REQUIRED)
         boolean isPrivate
 ) {
+
+    private static final String WITHDRAWN_MEMBER_NICKNAME = "탈퇴한 사용자";
+
+    public CommentReplyResponse {
+        nickname = nickname != null ? nickname : WITHDRAWN_MEMBER_NICKNAME;
+    }
 }

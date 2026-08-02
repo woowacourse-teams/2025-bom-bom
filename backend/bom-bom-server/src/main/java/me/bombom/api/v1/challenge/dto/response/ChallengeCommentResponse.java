@@ -43,4 +43,10 @@ public record ChallengeCommentResponse(
         @Schema(requiredMode = RequiredMode.REQUIRED)
         long replyCount
 ) {
+
+    private static final String WITHDRAWN_MEMBER_NICKNAME = "탈퇴한 사용자";
+
+    public ChallengeCommentResponse {
+        nickname = nickname != null ? nickname : WITHDRAWN_MEMBER_NICKNAME;
+    }
 }

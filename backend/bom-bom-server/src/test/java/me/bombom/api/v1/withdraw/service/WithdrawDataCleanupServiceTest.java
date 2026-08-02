@@ -14,6 +14,7 @@ import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.badge.domain.StreakBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
+import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentLike;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
@@ -165,6 +166,11 @@ class WithdrawDataCleanupServiceTest {
                 .participantId(participant.getId())
                 .commentId(comment.getId())
                 .build());
+        ChallengeCommentReply reply = challengeCommentReplyRepository.save(ChallengeCommentReply.builder()
+                .commentId(comment.getId())
+                .participantId(participant.getId())
+                .reply("답글")
+                .build());
         challengeDailyGuideCommentRepository.save(ChallengeDailyGuideComment.builder()
                 .guideId(1L)
                 .participantId(participant.getId())
@@ -191,9 +197,11 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(isSucceeded).isTrue();
             softly.assertThat(badgeRepository.countByMemberId(memberId)).isZero();
             softly.assertThat(couponIssueRepository.findByMemberId(memberId)).isEmpty();
-            softly.assertThat(challengeParticipantRepository.countByMemberId(memberId)).isZero();
+            softly.assertThat(challengeParticipantRepository.countByMemberId(memberId)).isEqualTo(1);
             softly.assertThat(challengeReviewRepository.findByChallengeIdAndMemberId(1L, memberId)).isEmpty();
-            softly.assertThat(challengeCommentRepository.findIdsByParticipantIdIn(List.of(participantId))).isEmpty();
+            softly.assertThat(challengeCommentRepository.findIdsByParticipantIdIn(List.of(participantId)))
+                    .containsExactly(commentId);
+            softly.assertThat(challengeCommentReplyRepository.findById(reply.getId())).isPresent();
             softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(participantId, commentId))
                     .isFalse();
             softly.assertThat(memberReadTokenBucketRepository.findById(memberId)).isEmpty();
@@ -208,7 +216,7 @@ class WithdrawDataCleanupServiceTest {
     }
 
     @Test
-    void 탈퇴_회원이_타인_댓글에_남긴_좋아요와_답글은_카운터_보정_없이_삭제된다() {
+    void 탈퇴_회원이_타인_댓글에_남긴_좋아요는_삭제하고_답글은_보존한다() {
         // given
         Member withdrawer = memberRepository.save(TestFixture.uniqueMemberFixture());
         Member other = memberRepository.save(TestFixture.uniqueMemberFixture());
@@ -244,7 +252,7 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(updated.getReplyCount()).isEqualTo(1);
             softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(
                     withdrawerParticipant.getId(), othersComment.getId())).isFalse();
-            softly.assertThat(challengeCommentReplyRepository.count()).isZero();
+            softly.assertThat(challengeCommentReplyRepository.count()).isEqualTo(1);
         });
     }
 }

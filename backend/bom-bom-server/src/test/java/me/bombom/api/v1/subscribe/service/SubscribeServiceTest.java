@@ -35,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @IntegrationTest
 class SubscribeServiceTest {
 
+    private static final LocalDateTime RETRY_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
+
     @Autowired
     private SubscribeService subscribeService;
 
@@ -422,7 +424,7 @@ class SubscribeServiceTest {
         // given
         UnsubscribeRetry retry = unsubscribeRetryRepository.save(UnsubscribeRetry.builder()
                 .subscribeId(-1L)
-                .nextRetryAt(LocalDateTime.now())
+                .nextRetryAt(RETRY_AT)
                 .lastError("not found")
                 .build());
 
@@ -441,7 +443,7 @@ class SubscribeServiceTest {
         Subscribe subscribe = saveSubscribe(member);
         UnsubscribeRetry retry = unsubscribeRetryRepository.save(UnsubscribeRetry.builder()
                 .subscribeId(subscribe.getId())
-                .nextRetryAt(LocalDateTime.now())
+                .nextRetryAt(RETRY_AT)
                 .lastError("retry")
                 .build());
 
@@ -527,12 +529,12 @@ class SubscribeServiceTest {
         String unsubscribeUrl = subscribe.getUnsubscribeUrl();
         UnsubscribeRetry retry = UnsubscribeRetry.builder()
                 .subscribeId(subscribeId)
-                .nextRetryAt(LocalDateTime.now())
+                .nextRetryAt(RETRY_AT)
                 .lastError("previous")
                 .build();
-        retry.increaseRetryCount(LocalDateTime.now(), "first");
-        retry.increaseRetryCount(LocalDateTime.now(), "second");
-        retry.increaseRetryCount(LocalDateTime.now(), "third");
+        retry.increaseRetryCount(RETRY_AT.plusMinutes(1), "first");
+        retry.increaseRetryCount(RETRY_AT.plusMinutes(2), "second");
+        retry.increaseRetryCount(RETRY_AT.plusMinutes(3), "third");
         unsubscribeRetryRepository.save(retry);
         unsubscribeAgent.failWith(new RetryableException("Server Error"));
 

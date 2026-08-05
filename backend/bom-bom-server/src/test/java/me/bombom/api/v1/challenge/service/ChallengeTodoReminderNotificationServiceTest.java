@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.challenge.domain.Challenge;
@@ -27,9 +28,13 @@ import me.bombom.api.v1.newsletter.repository.NewsletterGroupRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @IntegrationTest
 class ChallengeTodoReminderNotificationServiceTest {
+
+    private static final LocalDate TODAY = LocalDate.of(2026, 1, 5);
+    private static final LocalDateTime REMINDER_CREATED_AT = TODAY.atTime(12, 0);
 
     @Autowired
     private ChallengeTodoReminderNotificationService challengeTodoReminderNotificationService;
@@ -61,7 +66,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     @Test
     void 오늘_COMPLETE_DailyResult가_없는_참여자에게만_PENDING_알림을_생성한다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge challenge = challengeRepository.save(
                 TestFixture.createChallenge("진행 중 챌린지", today.minusDays(1), today.plusDays(3), 5, group.getId()));
@@ -125,7 +130,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     @Test
     void 같은_날짜에_이미_적재된_알림은_중복_생성하지_않는다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge challenge = challengeRepository.save(
                 TestFixture.createChallenge("진행 중 챌린지", today.minusDays(1), today.plusDays(3), 5, group.getId()));
@@ -137,7 +142,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         challengeParticipantRepository.save(TestFixture.createChallengeParticipant(challenge.getId(), member2.getId(), 0));
         challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
 
-        challengeTodoReminderNotificationRepository.save(
+        saveReminderNotificationCreatedAt(
                 ChallengeTodoReminderNotification.createPending(
                         member1.getId(),
                         challenge.getId(),
@@ -163,7 +168,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     @Test
     void 같은_날짜라도_phase가_다르면_알림을_생성한다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge challenge = challengeRepository.save(
                 TestFixture.createChallenge("진행 중 챌린지", today.minusDays(1), today.plusDays(3), 5, group.getId()));
@@ -172,7 +177,7 @@ class ChallengeTodoReminderNotificationServiceTest {
         challengeParticipantRepository.save(TestFixture.createChallengeParticipant(challenge.getId(), member.getId(), 0));
         challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.READ));
 
-        challengeTodoReminderNotificationRepository.save(
+        saveReminderNotificationCreatedAt(
                 ChallengeTodoReminderNotification.createPending(
                         member.getId(),
                         challenge.getId(),
@@ -225,7 +230,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     @Test
     void 스트릭이_있는_참여자에게는_스트릭_값이_저장된_알림을_생성한다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge challenge = challengeRepository.save(
                 TestFixture.createChallenge("봄봄 챌린지", today.minusDays(7), today.plusDays(10), 20, group.getId()));
@@ -256,7 +261,7 @@ class ChallengeTodoReminderNotificationServiceTest {
     @Test
     void 챌린지_마지막_날에는_isLastDay가_true인_알림을_생성한다() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = TODAY;
         NewsletterGroup group = newsletterGroupRepository.save(TestFixture.createNewsletterGroup("group"));
         Challenge challenge = challengeRepository.save(
                 TestFixture.createChallenge("봄봄 챌린지", today.minusDays(14), today, 15, group.getId()));
@@ -364,5 +369,11 @@ class ChallengeTodoReminderNotificationServiceTest {
         // then
         ChallengeTodoReminderNotification notification = challengeTodoReminderNotificationRepository.findAll().get(0);
         assertThat(notification.getRemainingAbsences()).isEqualTo(3); // 2 - 1 + shield(2)
+    }
+
+    private void saveReminderNotificationCreatedAt(ChallengeTodoReminderNotification notification) {
+        ChallengeTodoReminderNotification saved = challengeTodoReminderNotificationRepository.saveAndFlush(notification);
+        ReflectionTestUtils.setField(saved, "createdAt", REMINDER_CREATED_AT);
+        challengeTodoReminderNotificationRepository.saveAndFlush(saved);
     }
 }

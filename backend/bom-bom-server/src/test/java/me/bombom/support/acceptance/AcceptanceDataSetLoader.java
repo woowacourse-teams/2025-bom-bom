@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,15 +31,18 @@ public class AcceptanceDataSetLoader {
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
     private final ResourceLoader resourceLoader;
+    private final Clock clock;
 
     public AcceptanceDataSetLoader(
             JdbcTemplate jdbcTemplate,
             ObjectMapper objectMapper,
-            ResourceLoader resourceLoader
+            ResourceLoader resourceLoader,
+            Clock clock
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.resourceLoader = resourceLoader;
+        this.clock = clock;
     }
 
     @Transactional
@@ -166,7 +170,7 @@ public class AcceptanceDataSetLoader {
             if (value.isNull()) {
                 preparedStatement.setObject(parameterIndex, null);
             } else if (value.isTextual() && CURRENT_DATE_TIME.equals(value.textValue())) {
-                preparedStatement.setTimestamp(parameterIndex, Timestamp.valueOf(LocalDateTime.now()));
+                preparedStatement.setTimestamp(parameterIndex, Timestamp.valueOf(LocalDateTime.now(clock)));
             } else if (value.isBoolean()) {
                 preparedStatement.setBoolean(parameterIndex, value.booleanValue());
             } else if (value.isIntegralNumber()) {

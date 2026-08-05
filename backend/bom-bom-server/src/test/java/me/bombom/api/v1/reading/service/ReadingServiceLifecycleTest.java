@@ -3,7 +3,6 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -314,8 +313,9 @@ class ReadingServiceLifecycleTest {
         MonthlyReadingSnapshot monthlySnapshot =
                 monthlyReadingSnapshotRepository.findByMemberId(newMember.getId()).orElseThrow();
         ContinueReadingSnapshot continueSnapshot = findContinueSnapshot(newMember.getId());
-        YearlyReading yearlyReading = yearlyReadingRepository
-                .findByMemberIdAndReadingYear(newMember.getId(), LocalDate.now().getYear())
+        YearlyReading yearlyReading = yearlyReadingRepository.findAll().stream()
+                .filter(reading -> reading.getMemberId().equals(newMember.getId()))
+                .findFirst()
                 .orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(monthlySnapshot.getRankOrder()).isEqualTo(4L);

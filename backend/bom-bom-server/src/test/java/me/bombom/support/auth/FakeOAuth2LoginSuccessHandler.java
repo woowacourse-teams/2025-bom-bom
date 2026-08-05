@@ -20,6 +20,6 @@ public final class FakeOAuth2LoginSuccessHandler extends OAuth2LoginSuccessHandl
             HttpServletResponse response,
             Authentication authentication
     ) {
-        // HTTP API 통합 테스트에서는 SecurityMockMvcRequestPostProcessors로 인증을 주입한다.
+        // 테스트에서는 OAuth2 로그인 성공 이후의 실제 리다이렉트와 토큰 발급 흐름을 수행하지 않는다.
     }
 }

@@ -1,0 +1,20 @@
+{
+  "coupon_issue": [
+    {
+      "id": 1,
+      "member_id": 1,
+      "coupon_name": "쿠폰A",
+      "image_url": "https://cdn.bombom.me/coupon-a.png",
+      "created_at": "2026-01-01 00:00:00.000000",
+      "updated_at": "2026-01-01 00:00:00.000000"
+    },
+    {
+      "id": 2,
+      "member_id": 1,
+      "coupon_name": "쿠폰B",
+      "image_url": "https://cdn.bombom.me/coupon-b.png",
+      "created_at": "2026-01-01 00:00:00.000000",
+      "updated_at": "2026-01-01 00:00:00.000000"
+    }
+  ]
+}

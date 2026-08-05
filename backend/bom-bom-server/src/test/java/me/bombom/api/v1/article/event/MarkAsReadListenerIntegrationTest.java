@@ -1,20 +1,12 @@
 package me.bombom.api.v1.article.event;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.concurrent.Executor;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
-import me.bombom.api.v1.article.service.ArticleService;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -23,21 +15,28 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.pet.service.PetService;
+import me.bombom.api.v1.pet.ScorePolicyConstants;
+import me.bombom.api.v1.pet.domain.Pet;
+import me.bombom.api.v1.pet.repository.PetRepository;
+import me.bombom.api.v1.pet.repository.StageRepository;
 import me.bombom.api.v1.reading.domain.MonthlyReadingRealtime;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.MonthlyReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import me.bombom.api.v1.reading.repository.WeeklyReadingRepository;
-import me.bombom.api.v1.reading.service.ReadingService;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @IntegrationTest
 class MarkAsReadListenerIntegrationTest {
+
+    private static final LocalDateTime READ_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
+    private static final LocalDateTime YESTERDAY_ARTICLE_ARRIVED_AT = READ_AT.minusDays(1);
+    private static final LocalDateTime TODAY_ARTICLE_ARRIVED_AT = READ_AT;
 
     @Autowired
     private MarkAsReadListener markAsReadListener;
@@ -72,31 +71,22 @@ class MarkAsReadListenerIntegrationTest {
     @Autowired
     private WeeklyReadingRepository weeklyReadingRepository;
 
-    @MockitoSpyBean
-    private ReadingService readingService;
+    @Autowired
+    private PetRepository petRepository;
 
-    @MockitoSpyBean
-    private ArticleService articleService;
+    @Autowired
+    private StageRepository stageRepository;
 
-    @MockitoSpyBean
-    private PetService petService;
+    @Autowired
+    @Qualifier("markAsReadExecutor")
+    private Executor markAsReadExecutor;
 
     private Member member;
     private Long articleId;
+    private Newsletter newsletter;
 
     @BeforeEach
     void setUp() {
-        markAsReadEventLogRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        newsletterDetailRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        monthlyReadingRealtimeRepository.deleteAllInBatch();
-        todayReadingRepository.deleteAllInBatch();
-        continueReadingRealtimeRepository.deleteAllInBatch();
-        weeklyReadingRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-
         member = memberRepository.save(TestFixture.createMemberFixture("test@test.com", "testUser"));
         monthlyReadingRealtimeRepository.save(TestFixture.monthlyReadingRealtimeFixture(member, 0));
         todayReadingRepository.save(TestFixture.todayReadingFixtureZeroCurrentCount(member));
@@ -105,83 +95,116 @@ class MarkAsReadListenerIntegrationTest {
 
         NewsletterDetail detail = newsletterDetailRepository.saveAll(TestFixture.createNewsletterDetails()).getFirst();
         Category category = categoryRepository.saveAll(TestFixture.createCategories()).getFirst();
-        Newsletter newsletter = newsletterRepository.save(
+        newsletter = newsletterRepository.save(
                 TestFixture.createNewsletter("테스트레터", "test@letter.com", category.getId(), detail.getId())
         );
 
-        articleId = articleRepository.save(
-                TestFixture.createArticle("테스트 아티클", member.getId(), newsletter.getId(), LocalDateTime.now().minusDays(1))
-        ).getId();
+        articleId = saveArticleArrivedAt(member, YESTERDAY_ARTICLE_ARRIVED_AT);
     }
 
     @Test
     void 이벤트_정상_처리_시_읽기_카운트_증가() {
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, READ_AT, true));
 
         // then
-        verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
-        awaitUntilAsserted(() -> {
-            MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
-            assertSoftly(softly -> softly.assertThat(realtime.getCurrentCount()).isEqualTo(1));
-        });
-    }
-
-    @Test
-    void 읽기_카운트_갱신_실패_시_펫_경험치도_갱신_안됨() {
-        // given
-        doThrow(new RuntimeException("읽기 카운트 갱신 실패"))
-                .when(readingService).updateReadingCount(anyLong(), any(Boolean.class));
-
-        // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
-
-        // then
-        verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), false);
-        verify(petService, after(300).never()).rewardArticleRead(anyLong());
         awaitUntilAsserted(() -> {
             MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
             assertSoftly(softly -> {
-                softly.assertThat(realtime.getCurrentCount()).isEqualTo(0);
-                softly.assertThat(markAsReadEventLogRepository.count()).isZero();
+                softly.assertThat(realtime.getCurrentCount()).isEqualTo(1);
+                softly.assertThat(markAsReadEventLogRepository.count()).isEqualTo(1);
             });
         });
     }
 
     @Test
-    void 펫_경험치_갱신_실패해도_읽기_카운트는_유지된다() {
+    void 펫_정보가_없어_경험치_갱신에_실패해도_읽기_카운트는_유지된다() {
         // given
-        doReturn(true).when(articleService).isArrivedToday(anyLong(), anyLong(), any(LocalDate.class));
-        doThrow(new RuntimeException("펫 경험치 갱신 실패"))
-                .when(petService).rewardArticleRead(anyLong());
+        Long todayArticleId = saveArticleArrivedAt(member, TODAY_ARTICLE_ARRIVED_AT);
 
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), true));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), todayArticleId, READ_AT, true));
 
         // then
-        verify(readingService, timeout(1_000)).updateReadingCount(member.getId(), true);
-        verify(petService, timeout(1_000)).rewardArticleRead(member.getId());
         awaitUntilAsserted(() -> {
             MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
-            assertSoftly(softly -> softly.assertThat(realtime.getCurrentCount()).isEqualTo(1));
+            assertSoftly(softly -> {
+                softly.assertThat(realtime.getCurrentCount()).isEqualTo(1);
+                softly.assertThat(markAsReadEventLogRepository.count()).isEqualTo(1);
+                softly.assertThat(petRepository.findByMemberId(member.getId())).isEmpty();
+            });
+        });
+    }
+
+    @Test
+    void 읽기_카운트_갱신에_실패하면_이벤트_로그도_롤백된다() {
+        // given
+        Member memberWithoutReading = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Long articleWithoutReadingId = saveArticleArrivedAt(memberWithoutReading, YESTERDAY_ARTICLE_ARRIVED_AT);
+
+        // when
+        markAsReadListener.on(MarkAsReadEvent.of(memberWithoutReading.getId(), articleWithoutReadingId, READ_AT, true));
+
+        // then
+        waitForMarkAsReadExecutorIdle();
+        assertSoftly(softly -> {
+            softly.assertThat(markAsReadEventLogRepository.count()).isZero();
+            softly.assertThat(monthlyReadingRealtimeRepository.findByMemberId(memberWithoutReading.getId())).isEmpty();
+        });
+    }
+
+    @Test
+    void 오늘_도착한_아티클은_오늘과_주간_읽기_카운트도_증가한다() {
+        // given
+        Long todayArticleId = saveArticleArrivedAt(member, TODAY_ARTICLE_ARRIVED_AT);
+        savePet(member);
+        int weeklyReadingCountBefore = weeklyReadingRepository.findByMemberId(member.getId())
+                .orElseThrow()
+                .getCurrentCount();
+
+        // when
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), todayArticleId, READ_AT, true));
+
+        // then
+        awaitUntilAsserted(() -> {
+            MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
+            assertSoftly(softly -> {
+                softly.assertThat(realtime.getCurrentCount()).isEqualTo(1);
+                softly.assertThat(todayReadingRepository.findByMemberId(member.getId()).orElseThrow().getCurrentCount())
+                        .isEqualTo(1);
+                softly.assertThat(weeklyReadingRepository.findByMemberId(member.getId()).orElseThrow().getCurrentCount())
+                        .isEqualTo(weeklyReadingCountBefore + 1);
+                softly.assertThat(petRepository.findByMemberId(member.getId()).orElseThrow().getCurrentScore())
+                        .isEqualTo(ScorePolicyConstants.ARTICLE_READING_SCORE
+                                + ScorePolicyConstants.CONTINUE_READING_BONUS_SCORE);
+            });
         });
     }
 
     @Test
     void 카운트_대상이_아닌_이벤트는_읽기_카운트_증가_안함() {
         // when
-        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, LocalDateTime.now(), false));
+        markAsReadListener.on(MarkAsReadEvent.of(member.getId(), articleId, READ_AT, false));
 
         // then
-        verify(readingService, after(300).never()).updateReadingCount(anyLong(), any(Boolean.class));
-        verify(petService, after(300).never()).rewardArticleRead(anyLong());
-        awaitUntilAsserted(() -> {
-            MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
-            assertSoftly(softly -> {
-                softly.assertThat(realtime.getCurrentCount()).isEqualTo(0);
-                softly.assertThat(markAsReadEventLogRepository.count()).isZero();
-            });
+        waitForMarkAsReadExecutorIdle();
+        MonthlyReadingRealtime realtime = monthlyReadingRealtimeRepository.findByMemberId(member.getId()).orElseThrow();
+        assertSoftly(softly -> {
+            softly.assertThat(realtime.getCurrentCount()).isEqualTo(0);
+            softly.assertThat(markAsReadEventLogRepository.count()).isZero();
         });
+    }
+
+    private Long saveArticleArrivedAt(Member targetMember, LocalDateTime arrivedAt) {
+        return articleRepository.save(
+                TestFixture.createArticle("테스트 아티클", targetMember.getId(), newsletter.getId(), arrivedAt)
+        ).getId();
+    }
+
+    private Pet savePet(Member targetMember) {
+        Long firstStageId = stageRepository.save(TestFixture.createStage(1, 0)).getId();
+        stageRepository.save(TestFixture.createStage(2, 50));
+        return petRepository.save(TestFixture.createPet(targetMember, firstStageId));
     }
 
     private void awaitUntilAsserted(CheckedAssertion assertion) {
@@ -208,6 +231,17 @@ class MarkAsReadListenerIntegrationTest {
             Thread.currentThread().interrupt();
             throw new AssertionError("비동기 테스트 대기 중 인터럽트 발생", e);
         }
+    }
+
+    private void waitForMarkAsReadExecutorIdle() {
+        ThreadPoolTaskExecutor executor = (ThreadPoolTaskExecutor) markAsReadExecutor;
+        for (int i = 0; i < 20; i++) {
+            if (executor.getActiveCount() == 0 && executor.getThreadPoolExecutor().getQueue().isEmpty()) {
+                return;
+            }
+            sleepBriefly();
+        }
+        throw new AssertionError("MarkAsRead 비동기 작업이 제한 시간 안에 완료되지 않음");
     }
 
     @FunctionalInterface

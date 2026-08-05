@@ -13,7 +13,6 @@ import me.bombom.api.v1.subscribe.dto.UnsubscribePatterns;
 import me.bombom.api.v1.subscribe.dto.response.PlaywrightResponse;
 import me.bombom.api.v1.subscribe.exception.AutoUnsubscribeFailedException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -76,15 +75,5 @@ class UnsubscribeAgentTest {
         // when & then
         assertThatThrownBy(() -> agent.unsubscribe(MOCK_URL, MOCK_NEWSLETTER_ID))
                 .isInstanceOf(AutoUnsubscribeFailedException.class);
-    }
-
-    @Test
-    @Disabled("실제 Lambda를 호출하여 구독 취소를 수행한다 (실제 AWS 환경 변수 필요)")
-    void 실제_람다_연동_테스트() {
-        // given
-        String realUnsubscribeUrl = "...";
-
-        // when
-        agent.unsubscribe(realUnsubscribeUrl, MOCK_NEWSLETTER_ID);
     }
 }

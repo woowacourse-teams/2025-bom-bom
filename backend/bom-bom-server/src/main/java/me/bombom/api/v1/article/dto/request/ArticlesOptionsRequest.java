@@ -11,10 +11,20 @@ public record ArticlesOptionsRequest(
         LocalDate date,
 
         @Positive(message = "id는 1 이상의 값이어야 합니다.")
-        Long newsletterId
+        Long newsletterId,
+
+        Boolean unreadOnly
 ) {
 
+    public ArticlesOptionsRequest {
+        unreadOnly = Boolean.TRUE.equals(unreadOnly);
+    }
+
     public static ArticlesOptionsRequest of(LocalDate date, Long newsletterId) {
-        return new ArticlesOptionsRequest(date, newsletterId);
+        return new ArticlesOptionsRequest(date, newsletterId, false);
+    }
+
+    public static ArticlesOptionsRequest of(LocalDate date, Long newsletterId, boolean unreadOnly) {
+        return new ArticlesOptionsRequest(date, newsletterId, unreadOnly);
     }
 }

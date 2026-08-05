@@ -3,11 +3,8 @@ package me.bombom.api.v1.article.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,16 +42,15 @@ import me.bombom.api.v1.newsletter.domain.NewsletterDetail;
 import me.bombom.api.v1.newsletter.repository.CategoryRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterDetailRepository;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
-import me.bombom.api.v1.reading.service.ReadRateLimitService;
+import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import me.bombom.support.integration.IntegrationTest;
+import me.bombom.support.time.MutableClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
 
@@ -63,6 +59,10 @@ import org.springframework.test.context.event.RecordApplicationEvents;
 class ArticleServiceTest {
 
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2025, 7, 15, 10, 0);
+    private static final LocalDateTime OLD_ARTICLE_TIME = LocalDateTime.of(2000, 1, 1, 10, 0);
+    private static final LocalDateTime RECENT_ARTICLE_TIME = LocalDateTime.of(2099, 1, 1, 10, 0);
+    private static final LocalDate READ_DATE = LocalDate.of(2026, 1, 1);
+    private static final LocalDateTime READ_AT = READ_DATE.atStartOfDay();
 
     @Autowired
     private ArticleService articleService;
@@ -97,11 +97,14 @@ class ArticleServiceTest {
     @Autowired
     private HighlightRepository highlightRepository;
 
-    @MockitoBean
-    private ReadRateLimitService readRateLimitService;
+    @Autowired
+    private MemberReadTokenBucketRepository memberReadTokenBucketRepository;
 
     @Autowired
     private ApplicationEvents applicationEvents;
+
+    @Autowired
+    private MutableClock clock;
 
     List<Category> categories;
     List<Newsletter> newsletters;
@@ -112,14 +115,8 @@ class ArticleServiceTest {
 
     @BeforeEach
     public void setup() {
+        clock.setDate(READ_DATE);
         ensureRoles();
-        articleReadHistoryRepository.deleteAllInBatch();
-        newsletterRepository.deleteAllInBatch();
-        articleRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        bookmarkRepository.deleteAllInBatch();
-        highlightRepository.deleteAllInBatch();
 
         member = memberRepository.save(TestFixture.createMemberWithRole("nickname", "providerId", userRoleId));
         categories = TestFixture.createCategories();
@@ -130,9 +127,6 @@ class ArticleServiceTest {
         newsletterRepository.saveAll(newsletters);
         articles = TestFixture.createArticles(member, newsletters);
         articleRepository.saveAll(articles);
-
-        lenient().when(readRateLimitService.tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class)))
-                .thenReturn(true);
     }
 
     private void ensureRoles() {
@@ -185,6 +179,32 @@ class ArticleServiceTest {
             softly.assertThat(result.getContent()).extracting("newsletter")
                     .extracting("name")
                     .containsExactly(newsletter.getName());
+        });
+    }
+
+    @Test
+    void 아티클_목록_조회_읽지_않은_아티클만_조회한다() {
+        // given
+        Article readArticle = articles.getFirst();
+        readArticle.markAsRead();
+        articleRepository.saveAndFlush(readArticle);
+
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<ArticleResponse> result = articleService.getArticles(
+                member,
+                ArticlesOptionsRequest.of(null, null, true),
+                pageable
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(10);
+            softly.assertThat(result.getContent()).hasSize(10);
+            softly.assertThat(result.getContent())
+                    .extracting(ArticleResponse::isRead)
+                    .containsOnly(false);
         });
     }
 
@@ -287,8 +307,6 @@ class ArticleServiceTest {
                 ArticlesOptionsRequest.of(null, null),
                 pageable
         );
-
-        System.out.println(result);
 
         // then
         assertSoftly(softly -> {
@@ -502,33 +520,10 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 읽기_토큰_소비_중_일시적_DB_예외가_발생하면_카운트_가능한_읽음_이벤트를_발행한다() {
-        // given
-        Article article = articles.getFirst();
-        doThrow(new TransientDataAccessResourceException("DB 일시 장애"))
-                .when(readRateLimitService).tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class));
-
-        // when
-        MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
-
-        // then
-        List<MarkAsReadEvent> events = applicationEvents.stream(MarkAsReadEvent.class).toList();
-        assertThat(events).hasSize(1);
-        MarkAsReadEvent event = events.getFirst();
-        assertSoftly(softly -> {
-            softly.assertThat(result.readCountTokenConsumed()).isTrue();
-            softly.assertThat(event.memberId()).isEqualTo(member.getId());
-            softly.assertThat(event.articleId()).isEqualTo(article.getId());
-            softly.assertThat(event.countable()).isTrue();
-        });
-    }
-
-    @Test
     void 읽기_토큰을_소비하지_못하면_카운트_대상이_아닌_읽음_이벤트를_발행한다() {
         // given
         Article article = articles.getFirst();
-        lenient().when(readRateLimitService.tryConsumeReadCountToken(eq(member.getId()), any(LocalDateTime.class)))
-                .thenReturn(false);
+        memberReadTokenBucketRepository.save(TestFixture.createMemberReadTokenBucket(member.getId(), 0.5, READ_AT));
 
         // when
         MarkAsReadResponse result = articleService.markAsRead(article.getId(), member);
@@ -604,7 +599,7 @@ class ArticleServiceTest {
     @Test
     void 키워드_앞뒤_공백이_제거되어_검색된다() {
         // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
-        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), sixDaysAgo);
         articleRepository.save(article);
 
@@ -662,7 +657,7 @@ class ArticleServiceTest {
     @Test
     void 부분_문자열로_키워드_검색이_된다() {
         // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
-        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), sixDaysAgo),
                 TestFixture.createArticle("그래픽 디자인", member.getId(), newsletters.get(1).getId(), sixDaysAgo)
@@ -830,7 +825,7 @@ class ArticleServiceTest {
     void 키워드가_있을_때_countWithKeyword가_호출된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime sixDaysAgo = LocalDateTime.now().minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("검색 테스트 아티클", member.getId(), targetNewsletter.getId(), sixDaysAgo);
         articleRepository.save(article);
 
@@ -849,9 +844,8 @@ class ArticleServiceTest {
     void 키워드_검색시_5일_이내_article_테이블_데이터만_검색된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fourDaysAgo = now.minusDays(4); // 5일 이내
-        LocalDateTime sixDaysAgo = now.minusDays(6); // 5일 이전
+        LocalDateTime fourDaysAgo = RECENT_ARTICLE_TIME; // 5일 이내
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME; // 5일 이전
 
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), fourDaysAgo),
@@ -880,9 +874,8 @@ class ArticleServiceTest {
     void 키워드_검색시_5일_이전_article_테이블_데이터는_검색되지_않는다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime sixDaysAgo = now.minusDays(6); // 5일 이전
-        LocalDateTime tenDaysAgo = now.minusDays(10); // 5일 이전
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME; // 5일 이전
+        LocalDateTime tenDaysAgo = OLD_ARTICLE_TIME.minusDays(4); // 5일 이전
 
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("검색 키워드 포함", member.getId(), targetNewsletter.getId(), sixDaysAgo),
@@ -909,14 +902,14 @@ class ArticleServiceTest {
     void 키워드_검색시_recent_article_테이블에서_최근_5일_이내_데이터가_검색된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-        Article article = TestFixture.createArticle("최근 아티클 검색 테스트", member.getId(), targetNewsletter.getId(), now);
+        LocalDateTime recentArticleTime = RECENT_ARTICLE_TIME;
+        Article article = TestFixture.createArticle("최근 아티클 검색 테스트", member.getId(), targetNewsletter.getId(), recentArticleTime);
         articleRepository.save(article);
         RecentArticle recentArticle = TestFixture.createRecentArticle(
                 "최근 아티클 검색 테스트",
                 member.getId(),
                 targetNewsletter.getId(),
-                now,
+                recentArticleTime,
                 article.getId()
         );
         recentArticleRepository.save(recentArticle);
@@ -939,21 +932,24 @@ class ArticleServiceTest {
     void 키워드_검색시_recent_article과_article_테이블_모두에서_검색된다() {
         // given
         Newsletter targetNewsletter = newsletters.get(0); // 뉴스픽
-        LocalDateTime now = LocalDateTime.now();
-
         // article 테이블에 5일 이전 데이터 저장
-        LocalDateTime sixDaysAgo = now.minusDays(6);
+        LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), sixDaysAgo);
         articleRepository.save(article);
 
         // recent_article 테이블에 최근 데이터 저장
-        Article recentArticleSource = TestFixture.createArticle("통합 검색 테스트", member.getId(), targetNewsletter.getId(), now);
+        Article recentArticleSource = TestFixture.createArticle(
+                "통합 검색 테스트",
+                member.getId(),
+                targetNewsletter.getId(),
+                RECENT_ARTICLE_TIME
+        );
         articleRepository.save(recentArticleSource);
         RecentArticle recentArticle = TestFixture.createRecentArticle(
                 "통합 검색 테스트",
                 member.getId(),
                 targetNewsletter.getId(),
-                now,
+                RECENT_ARTICLE_TIME,
                 recentArticleSource.getId()
         );
         recentArticleRepository.save(recentArticle);

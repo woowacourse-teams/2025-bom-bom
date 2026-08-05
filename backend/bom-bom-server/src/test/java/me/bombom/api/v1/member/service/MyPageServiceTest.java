@@ -67,13 +67,6 @@ class MyPageServiceTest {
 
     @BeforeEach
     void setUp() {
-        articleReadHistoryRepository.deleteAllInBatch();
-        monthlyReadingRankHistoryRepository.deleteAllInBatch();
-        continueReadingRankHistoryRepository.deleteAllInBatch();
-        continueReadingRealtimeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-
         clock.setInstant(Instant.parse("2026-06-17T00:00:00Z"), SEOUL_ZONE);
 
         member = memberRepository.save(TestFixture.createUniqueMember("member", "memberProvider"));

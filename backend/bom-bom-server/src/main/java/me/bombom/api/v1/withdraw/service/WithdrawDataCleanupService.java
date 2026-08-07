@@ -1,5 +1,6 @@
 package me.bombom.api.v1.withdraw.service;
 
+import java.time.LocalDate;
 import java.util.function.LongConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +44,17 @@ public class WithdrawDataCleanupService {
     private final MemberNotificationSettingService memberNotificationSettingService;
 
     public boolean cleanupByMemberId(Long memberId) {
+        return cleanupByMemberId(memberId, null);
+    }
+
+    public boolean cleanupByMemberId(Long memberId, LocalDate birthDate) {
         boolean isSucceeded = true;
         isSucceeded &= runSafely("아티클", memberId, articleService::deleteAllByMemberId);
         isSucceeded &= runSafely("북마크", memberId, bookmarkService::deleteAllByMemberId);
         isSucceeded &= runSafely("하이라이트", memberId, highlightService::deleteAllByMemberId);
         isSucceeded &= runSafely("키우기", memberId, petService::deleteByMemberId);
         isSucceeded &= runSafely("읽기", memberId, readingService::deleteAllByMemberId);
-        isSucceeded &= runSafely("구독", memberId, subscribeService::deleteAllByMemberId);
+        isSucceeded &= runSafely("구독", memberId, id -> deleteSubscriptions(id, birthDate));
         isSucceeded &= runSafely("경고 설정", memberId, warningService::deleteByMemberId);
         isSucceeded &= runSafely("뱃지", memberId, badgeService::deleteAllByMemberId);
         isSucceeded &= runSafely("쿠폰", memberId, couponService::deleteAllByMemberId);
@@ -58,6 +63,15 @@ public class WithdrawDataCleanupService {
         isSucceeded &= runSafely("FCM 토큰", memberId, memberFcmTokenService::deleteAllByMemberId);
         isSucceeded &= runSafely("알림 설정", memberId, memberNotificationSettingService::deleteAllByMemberId);
         return isSucceeded;
+    }
+
+    private void deleteSubscriptions(Long memberId, LocalDate birthDate) {
+        if (birthDate == null) {
+            subscribeService.deleteAllByMemberId(memberId);
+            return;
+        }
+
+        subscribeService.deleteAllByMemberId(memberId, birthDate);
     }
 
     private boolean runSafely(String domain, Long memberId, LongConsumer action) {

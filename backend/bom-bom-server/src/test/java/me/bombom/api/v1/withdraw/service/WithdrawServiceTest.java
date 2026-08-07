@@ -94,6 +94,7 @@ class WithdrawServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(withdrawn).hasSize(1);
             softly.assertThat(withdrawn.getFirst().getMemberId()).isEqualTo(member.getId());
+            softly.assertThat(withdrawn.getFirst().getEmail()).isEqualTo(member.getEmail());
             softly.assertThat(withdrawn.getFirst().getContinueReading()).isEqualTo(10);
             softly.assertThat(withdrawn.getFirst().getBookmarkedCount()).isEqualTo(1);
             softly.assertThat(withdrawn.getFirst().getHighlightCount()).isEqualTo(6);

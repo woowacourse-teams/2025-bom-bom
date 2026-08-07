@@ -30,6 +30,9 @@ public class WithdrawnMember extends BaseEntity {
     @Column(nullable = false)
     private Long memberId;
 
+    @Column(nullable = false, length = 50)
+    private String email;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -72,6 +75,7 @@ public class WithdrawnMember extends BaseEntity {
     public WithdrawnMember(
             Long id,
             @NonNull Long memberId,
+            @NonNull String email,
             Gender gender,
             AgeGroup ageGroup,
             String provider,
@@ -90,6 +94,7 @@ public class WithdrawnMember extends BaseEntity {
     ) {
         this.id = id;
         this.memberId = memberId;
+        this.email = email;
         this.gender = gender;
         this.ageGroup = ageGroup;
         this.provider = provider;

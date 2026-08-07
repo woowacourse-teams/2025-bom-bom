@@ -70,6 +70,7 @@ public class WithdrawService {
         LocalDate today = LocalDate.now(clock);
         return WithdrawnMember.builder()
                 .memberId(memberId)
+                .email(member.getEmail())
                 .gender(member.getGender())
                 .ageGroup(getAgeGroup(member.getBirthDate()))
                 .provider(member.getProvider())

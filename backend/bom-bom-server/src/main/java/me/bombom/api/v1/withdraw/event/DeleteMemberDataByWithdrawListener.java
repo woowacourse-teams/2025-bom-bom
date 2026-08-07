@@ -20,7 +20,7 @@ public class DeleteMemberDataByWithdrawListener {
     @TransactionalEventListener
     public void on(WithdrawEvent event) {
         log.info("회원 탈퇴에 따른 관련 데이터 삭제 시작 - memberId={}", event.memberId());
-        if (withdrawDataCleanupService.cleanupByMemberId(event.memberId())) {
+        if (withdrawDataCleanupService.cleanupByMemberId(event.memberId(), event.birthDate())) {
             withdrawService.completeCleanup(event.memberId());
         }
     }

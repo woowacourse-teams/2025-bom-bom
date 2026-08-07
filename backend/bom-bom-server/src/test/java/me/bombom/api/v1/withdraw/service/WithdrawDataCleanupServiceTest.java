@@ -40,6 +40,10 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSentContent;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import me.bombom.api.v1.reading.domain.MemberReadTokenBucket;
 import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
+import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
+import me.bombom.api.v1.subscribe.domain.Subscribe;
+import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
+import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +107,12 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private MemberNotificationSettingRepository memberNotificationSettingRepository;
+
+    @Autowired
+    private SubscribeRepository subscribeRepository;
+
+    @Autowired
+    private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
 
     @Test
     void 탈퇴_회원의_모든_도메인_데이터가_삭제된다() {
@@ -253,6 +263,46 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(
                     withdrawerParticipant.getId(), othersComment.getId())).isFalse();
             softly.assertThat(challengeCommentReplyRepository.count()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 회원_삭제_이후_탈퇴_정리가_실행되어도_구독자_수는_전달받은_생년월일로_감소한다() {
+        // given
+        LocalDateTime birthDateTime = LocalDateTime.of(2001, 1, 1, 0, 0);
+        Member member = memberRepository.save(Member.builder()
+                .provider("apple")
+                .providerId("withdraw-subscription")
+                .email("withdraw-subscription@bombom.news")
+                .nickname("withdraw-subscription")
+                .gender(me.bombom.api.v1.member.enums.Gender.FEMALE)
+                .birthDate(birthDateTime.toLocalDate())
+                .roleId(1L)
+                .build());
+        Long memberId = member.getId();
+
+        subscribeRepository.save(Subscribe.builder()
+                .memberId(memberId)
+                .newsletterId(1L)
+                .build());
+        newsletterSubscriptionCountRepository.save(NewsletterSubscriptionCount.builder()
+                .newsletterId(1L)
+                .total(1)
+                .age20s(1)
+                .build());
+
+        memberRepository.delete(member);
+
+        // when
+        boolean isSucceeded = withdrawDataCleanupService.cleanupByMemberId(memberId, birthDateTime.toLocalDate());
+
+        // then
+        NewsletterSubscriptionCount count = newsletterSubscriptionCountRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(isSucceeded).isTrue();
+            softly.assertThat(subscribeRepository.countByMemberId(memberId)).isZero();
+            softly.assertThat(count.getTotal()).isZero();
+            softly.assertThat(count.getAge20s()).isZero();
         });
     }
 }

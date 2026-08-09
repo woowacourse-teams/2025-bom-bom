@@ -19,6 +19,7 @@ import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.request.UpdateChallengeCommentRequest;
 import me.bombom.api.v1.challenge.dto.response.ChallengeCommentLikeResponse;
+import me.bombom.api.v1.challenge.dto.response.ChallengeCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.CreateCommentResponse;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
@@ -151,6 +152,35 @@ class ChallengeCommentServiceTest {
         ))
                 .isInstanceOf(CIllegalArgumentException.class)
                 .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
+    }
+
+    @Test
+    void 탈퇴한_회원의_챌린지_댓글은_탈퇴한_사용자로_조회된다() {
+        // given
+        clock.setDate(WEEKDAY);
+        CommentFixture fixture = saveCommentFixture();
+        Member viewer = saveMember("vw");
+        saveParticipant(fixture.challenge(), fixture.team(), viewer);
+        ChallengeComment comment = saveComment(fixture.newsletter(), fixture.participant());
+        LocalDate commentDate = comment.getCreatedAt().toLocalDate();
+
+        memberRepository.delete(fixture.member());
+
+        // when
+        List<ChallengeCommentResponse> result = challengeCommentService.getChallengeComments(
+                fixture.challenge().getId(),
+                viewer.getId(),
+                new ChallengeCommentOptionsRequest(commentDate, commentDate),
+                PageRequest.of(0, 10)
+        ).getContent();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(result.getFirst().commentId()).isEqualTo(comment.getId());
+            softly.assertThat(result.getFirst().nickname()).isEqualTo("탈퇴한 사용자");
+            softly.assertThat(result.getFirst().comment()).isEqualTo(VALID_COMMENT);
+        });
     }
 
     @Test

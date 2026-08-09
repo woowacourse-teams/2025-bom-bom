@@ -114,7 +114,7 @@ public class MemberService {
         이벤트에서 회원 관련된 모든 정보 제거: articles, pet, highlight, bookmark, reading, subscribe
          */
         withdrawService.migrateDeletedMember(member);
-        applicationEventPublisher.publishEvent(new WithdrawEvent(memberId));
+        applicationEventPublisher.publishEvent(new WithdrawEvent(memberId, member.getBirthDate()));
 
         memberRepository.delete(member);
         log.info("회원 탈퇴 처리 완료. MemberId: {}", memberId);

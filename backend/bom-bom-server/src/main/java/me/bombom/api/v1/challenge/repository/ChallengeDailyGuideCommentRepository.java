@@ -1,17 +1,26 @@
 package me.bombom.api.v1.challenge.repository;
 
+import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse;
 import me.bombom.api.v1.challenge.dto.response.MemberDailyCommentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ChallengeDailyGuideCommentRepository extends JpaRepository<ChallengeDailyGuideComment, Long> {
 
     boolean existsByGuideIdAndParticipantId(Long guideId, Long participantId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeDailyGuideComment c
+            WHERE c.participantId IN :participantIds
+            """)
+    void bulkDeleteAllByParticipantIdIn(@Param("participantIds") List<Long> participantIds);
 
     @Query("""
             SELECT new me.bombom.api.v1.challenge.dto.response.DailyGuideCommentResponse(

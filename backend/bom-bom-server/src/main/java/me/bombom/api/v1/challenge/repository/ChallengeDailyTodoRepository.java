@@ -1,6 +1,7 @@
 package me.bombom.api.v1.challenge.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyTodo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -43,4 +44,11 @@ public interface ChallengeDailyTodoRepository extends JpaRepository<ChallengeDai
 
     boolean existsByParticipantIdAndTodoDateAndChallengeTodoId(Long participantId, LocalDate todoDate,
                                                                Long challengeTodoId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeDailyTodo cdt
+            WHERE cdt.participantId IN :participantIds
+            """)
+    void bulkDeleteAllByParticipantIdIn(@Param("participantIds") List<Long> participantIds);
 }

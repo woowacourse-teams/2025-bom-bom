@@ -1,5 +1,6 @@
 package me.bombom.api.v1.subscribe.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,16 @@ public class SubscribeService {
                 .forEach(subscribe -> newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCountByMemberId(
                         subscribe.getNewsletterId(),
                         memberId
+                ));
+        subscribeRepository.bulkDeleteAllByMemberId(memberId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId, LocalDate birthDate) {
+        subscribeRepository.findAllByMemberId(memberId)
+                .forEach(subscribe -> newsletterSubscriptionCountService.decreaseNewsletterSubscriptionCount(
+                        subscribe.getNewsletterId(),
+                        birthDate
                 ));
         subscribeRepository.bulkDeleteAllByMemberId(memberId);
     }

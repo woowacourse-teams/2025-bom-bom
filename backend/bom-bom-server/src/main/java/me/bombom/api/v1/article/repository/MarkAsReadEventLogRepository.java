@@ -27,4 +27,11 @@ public interface MarkAsReadEventLogRepository extends JpaRepository<MarkAsReadEv
     @Modifying
     @Query("DELETE FROM MarkAsReadEventLog e WHERE e.createdAt < :threshold")
     int deleteOlderThan(@Param("threshold") LocalDateTime threshold);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM MarkAsReadEventLog e
+            WHERE e.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

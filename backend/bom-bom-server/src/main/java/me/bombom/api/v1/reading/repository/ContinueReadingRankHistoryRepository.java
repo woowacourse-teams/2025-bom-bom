@@ -52,4 +52,11 @@ public interface ContinueReadingRankHistoryRepository extends JpaRepository<Cont
     void saveCurrentContinueReadingRanking(
             @Param("period") LocalDate period
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ContinueReadingRankHistory h
+            WHERE h.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

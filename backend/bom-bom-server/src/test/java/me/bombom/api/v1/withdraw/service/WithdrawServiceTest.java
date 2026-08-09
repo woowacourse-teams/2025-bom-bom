@@ -3,10 +3,18 @@ package me.bombom.api.v1.withdraw.service;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.article.domain.ArticleReadHistory;
+import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
+import me.bombom.api.v1.badge.domain.StreakBadge;
+import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.bookmark.domain.Bookmark;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
+import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
+import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
 import me.bombom.api.v1.highlight.domain.Color;
 import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
@@ -48,6 +56,15 @@ class WithdrawServiceTest {
     private BookmarkRepository bookmarkRepository;
 
     @Autowired
+    private BadgeRepository badgeRepository;
+
+    @Autowired
+    private ChallengeParticipantRepository challengeParticipantRepository;
+
+    @Autowired
+    private ArticleReadHistoryRepository articleReadHistoryRepository;
+
+    @Autowired
     private MutableClock clock;
 
     @BeforeEach
@@ -76,10 +93,52 @@ class WithdrawServiceTest {
         List<WithdrawnMember> withdrawn = withdrawnMemberRepository.findAll();
         assertSoftly(softly -> {
             softly.assertThat(withdrawn).hasSize(1);
-            softly.assertThat(withdrawn.getFirst().getEmail()).isEqualTo("email@bombom.news");
+            softly.assertThat(withdrawn.getFirst().getMemberId()).isEqualTo(member.getId());
+            softly.assertThat(withdrawn.getFirst().getEmail()).isEqualTo(member.getEmail());
             softly.assertThat(withdrawn.getFirst().getContinueReading()).isEqualTo(10);
             softly.assertThat(withdrawn.getFirst().getBookmarkedCount()).isEqualTo(1);
             softly.assertThat(withdrawn.getFirst().getHighlightCount()).isEqualTo(6);
+            softly.assertThat(withdrawn.getFirst().isCleanupCompleted()).isFalse();
+        });
+    }
+
+    @Test
+    void 마이그레이션_시_가입경로와_활동량_지표가_수집된다() {
+        // given
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Long memberId = member.getId();
+
+        badgeRepository.save(StreakBadge.builder().memberId(memberId).streakDayCount(3).build());
+        challengeParticipantRepository.save(ChallengeParticipant.builder()
+                .challengeId(1L)
+                .memberId(memberId)
+                .build());
+        articleReadHistoryRepository.save(ArticleReadHistory.builder()
+                .memberId(memberId)
+                .articleId(1L)
+                .newsletterId(1L)
+                .categoryId(1L)
+                .readAt(TODAY.atStartOfDay())
+                .build());
+        articleReadHistoryRepository.save(ArticleReadHistory.builder()
+                .memberId(memberId)
+                .articleId(2L)
+                .newsletterId(1L)
+                .categoryId(1L)
+                .readAt(LocalDateTime.of(TODAY, LocalTime.NOON))
+                .build());
+
+        // when
+        withdrawService.migrateDeletedMember(member);
+
+        // then
+        WithdrawnMember withdrawn = withdrawnMemberRepository.findAll().getFirst();
+        assertSoftly(softly -> {
+            softly.assertThat(withdrawn.getProvider()).isEqualTo("apple");
+            softly.assertThat(withdrawn.getBadgeCount()).isEqualTo(1);
+            softly.assertThat(withdrawn.getChallengeCount()).isEqualTo(1);
+            softly.assertThat(withdrawn.getTotalReadCount()).isEqualTo(2);
+            softly.assertThat(withdrawn.getLastReadDate()).isEqualTo(TODAY);
         });
     }
 
@@ -107,7 +166,7 @@ class WithdrawServiceTest {
         // given
         WithdrawnMember expired = WithdrawnMember.builder()
                 .memberId(1L)
-                .email("expired@test.com")
+                .email("expired@bombom.news")
                 .gender(Gender.MALE)
                 .joinedDate(TODAY.minusDays(200))
                 .deletedDate(TODAY.minusDays(90))
@@ -117,7 +176,7 @@ class WithdrawServiceTest {
 
         WithdrawnMember notExpired = WithdrawnMember.builder()
                 .memberId(2L)
-                .email("valid@test.com")
+                .email("not-expired@bombom.news")
                 .gender(Gender.FEMALE)
                 .joinedDate(TODAY.minusDays(200))
                 .deletedDate(TODAY.minusDays(79))
@@ -125,14 +184,25 @@ class WithdrawServiceTest {
                 .build();
         withdrawnMemberRepository.save(notExpired);
 
+        WithdrawnMember cleanupNotCompleted = WithdrawnMember.builder()
+                .memberId(3L)
+                .email("cleanup-not-completed@bombom.news")
+                .gender(Gender.NONE)
+                .joinedDate(TODAY.minusDays(200))
+                .deletedDate(TODAY.minusDays(90))
+                .expireDate(TODAY) // 오늘 만료됐지만 정리 미완료
+                .build();
+        withdrawnMemberRepository.save(cleanupNotCompleted);
+
         // when
+        withdrawService.completeCleanup(1L);
         withdrawService.deleteExpiredWithdrawnMembers();
 
         // then
         List<WithdrawnMember> remaining = withdrawnMemberRepository.findAll();
         assertSoftly(softly -> {
-            softly.assertThat(remaining).hasSize(1);
-            softly.assertThat(remaining.get(0).getEmail()).isEqualTo("valid@test.com");
+            softly.assertThat(remaining).extracting(WithdrawnMember::getMemberId)
+                    .containsExactlyInAnyOrder(2L, 3L);
         });
     }
 

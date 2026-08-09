@@ -166,6 +166,7 @@ class WithdrawServiceTest {
         // given
         WithdrawnMember expired = WithdrawnMember.builder()
                 .memberId(1L)
+                .email("expired@bombom.news")
                 .gender(Gender.MALE)
                 .joinedDate(TODAY.minusDays(200))
                 .deletedDate(TODAY.minusDays(90))
@@ -175,6 +176,7 @@ class WithdrawServiceTest {
 
         WithdrawnMember notExpired = WithdrawnMember.builder()
                 .memberId(2L)
+                .email("not-expired@bombom.news")
                 .gender(Gender.FEMALE)
                 .joinedDate(TODAY.minusDays(200))
                 .deletedDate(TODAY.minusDays(79))
@@ -184,6 +186,7 @@ class WithdrawServiceTest {
 
         WithdrawnMember cleanupNotCompleted = WithdrawnMember.builder()
                 .memberId(3L)
+                .email("cleanup-not-completed@bombom.news")
                 .gender(Gender.NONE)
                 .joinedDate(TODAY.minusDays(200))
                 .deletedDate(TODAY.minusDays(90))

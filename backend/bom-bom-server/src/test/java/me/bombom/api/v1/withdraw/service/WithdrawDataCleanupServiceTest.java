@@ -14,8 +14,8 @@ import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.badge.domain.StreakBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
-import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeCommentLike;
+import me.bombom.api.v1.challenge.domain.ChallengeCommentReply;
 import me.bombom.api.v1.challenge.domain.ChallengeDailyGuideComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.domain.ChallengeReview;
@@ -274,7 +274,7 @@ class WithdrawDataCleanupServiceTest {
                 .provider("apple")
                 .providerId("withdraw-subscription")
                 .email("withdraw-subscription@bombom.news")
-                .nickname("withdraw-subscription")
+                .nickname("withdraw-sub")
                 .gender(me.bombom.api.v1.member.enums.Gender.FEMALE)
                 .birthDate(birthDateTime.toLocalDate())
                 .roleId(1L)

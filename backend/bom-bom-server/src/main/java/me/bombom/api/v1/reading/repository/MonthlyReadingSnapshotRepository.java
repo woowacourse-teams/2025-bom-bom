@@ -16,10 +16,10 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 
 	@Query(value = """
 		SELECT
-			m.nickname AS nickname,
-			mr.rank_order AS `rank`,
-			mr.current_count AS monthlyReadCount,
-			mr.next_rank_difference AS nextRankDifference,
+			ranked.nickname AS nickname,
+			ranked.rank_order AS `rank`,
+			ranked.current_count AS monthlyReadCount,
+			ranked.next_rank_difference AS nextRankDifference,
 			rb.badge_grade AS rankingBadgeGrade,
 			rb.period_year AS rankingBadgeYear,
 			rb.period_month AS rankingBadgeMonth,
@@ -27,32 +27,44 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			cb_latest.challenge_name AS challengeBadgeName,
 			cb_latest.challenge_generation AS challengeBadgeGeneration,
 			sb_latest.streak_day_count AS streakDayCount
-		FROM monthly_reading_snapshot mr
-		JOIN member m ON mr.member_id = m.id
-		LEFT JOIN badge rb ON rb.member_id = mr.member_id
+		FROM (
+			SELECT
+				mr.member_id,
+				m.nickname,
+				mr.rank_order,
+				mr.current_count,
+				mr.next_rank_difference
+			FROM monthly_reading_snapshot mr
+			JOIN member m ON mr.member_id = m.id
+			WHERE mr.rank_order IS NOT NULL
+			ORDER BY mr.rank_order, m.nickname
+			LIMIT :limit
+		) ranked
+		LEFT JOIN badge rb ON rb.member_id = ranked.member_id
 			AND rb.badge_category = 'RANKING'
 			AND rb.period_year = :lastMonthYear
 			AND rb.period_month = :lastMonthValue
 		LEFT JOIN LATERAL (
-			SELECT cb.*
+			SELECT
+				cb.badge_grade,
+				cb.challenge_name,
+				cb.challenge_generation
 			FROM badge cb
-			WHERE cb.member_id = mr.member_id
+			WHERE cb.member_id = ranked.member_id
 				AND cb.badge_category = 'CHALLENGE'
 			ORDER BY cb.created_at DESC
 			LIMIT 1
 		) cb_latest ON true
 		LEFT JOIN LATERAL (
-			SELECT sb.*
+			SELECT sb.streak_day_count
 			FROM badge sb
-			WHERE sb.member_id = mr.member_id
+			WHERE sb.member_id = ranked.member_id
 				AND sb.badge_category = 'STREAK'
 			ORDER BY sb.streak_day_count DESC,
 			sb.created_at DESC
 			LIMIT 1
 		) sb_latest ON true
-		WHERE mr.rank_order IS NOT NULL
-		ORDER BY mr.rank_order, m.nickname
-		LIMIT :limit
+		ORDER BY ranked.rank_order, ranked.nickname
 	""", nativeQuery = true)
 	List<MonthlyReadingRankFlat> findMonthlyRanking(
 			@Param("limit") int limit,
@@ -113,7 +125,10 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			AND rb.period_year = :lastMonthYear
 			AND rb.period_month = :lastMonthValue
 		LEFT JOIN LATERAL (
-			SELECT cb.*
+			SELECT
+				cb.badge_grade,
+				cb.challenge_name,
+				cb.challenge_generation
 			FROM badge cb
 			WHERE cb.member_id = mr.member_id
 				AND cb.badge_category = 'CHALLENGE'
@@ -121,7 +136,7 @@ public interface MonthlyReadingSnapshotRepository extends JpaRepository<MonthlyR
 			LIMIT 1
 		) cb_latest ON true
 		LEFT JOIN LATERAL (
-			SELECT sb.*
+			SELECT sb.streak_day_count
 			FROM badge sb
 			WHERE sb.member_id = mr.member_id
 				AND sb.badge_category = 'STREAK'

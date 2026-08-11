@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.Clock;
@@ -34,6 +35,7 @@ import me.bombom.api.v1.reading.domain.YearlyReading;
 import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
+import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRankHistoryRepository;
@@ -780,6 +782,32 @@ class ReadingServiceTest {
             softly.assertThat(result.data()).hasSize(1);
             softly.assertThat(result.data().get(0).badges()).isNull();
         });
+    }
+
+    @Test
+    void 월간_랭킹_조회_시_limit_수만큼_순위와_닉네임_순으로_조회한다() {
+        Member secondNickname = memberRepository.save(TestFixture.createUniqueMember("나", "provider1"));
+        Member firstNickname = memberRepository.save(TestFixture.createUniqueMember("가", "provider2"));
+        Member nextRank = memberRepository.save(TestFixture.createUniqueMember("다", "provider3"));
+
+        monthlyReadingSnapshotRepository.save(
+                TestFixture.monthlyReadingSnapshotWithRank(secondNickname, 30, 1, 0)
+        );
+        monthlyReadingSnapshotRepository.save(
+                TestFixture.monthlyReadingSnapshotWithRank(firstNickname, 30, 1, 0)
+        );
+        monthlyReadingSnapshotRepository.save(TestFixture.monthlyReadingSnapshotWithRank(nextRank, 20, 2, 10));
+
+        // when
+        MonthlyReadingRankingResponse result = readingService.getMonthlyReadingRank(2);
+
+        // then
+        assertThat(result.data())
+                .extracting(MonthlyReadingRankResponse::nickname, MonthlyReadingRankResponse::rank)
+                .containsExactly(
+                        tuple("가", 1L),
+                        tuple("나", 1L)
+                );
     }
 
     @Test

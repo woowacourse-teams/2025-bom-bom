@@ -12,4 +12,11 @@ public interface RecentArticleRepository extends JpaRepository<RecentArticle, Lo
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM RecentArticle ra WHERE ra.arrivedDateTime < :cutoffDateTime")
     int bulkDeleteAllByArrivedDateTimeBefore(@Param("cutoffDateTime") LocalDateTime cutoffDateTime);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM RecentArticle ra
+            WHERE ra.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

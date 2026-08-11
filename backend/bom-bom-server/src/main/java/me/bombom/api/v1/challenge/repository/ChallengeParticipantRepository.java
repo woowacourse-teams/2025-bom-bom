@@ -16,6 +16,7 @@ import me.bombom.api.v1.challenge.dto.TeamTodayProgressCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -233,4 +234,20 @@ public interface ChallengeParticipantRepository extends JpaRepository<ChallengeP
             @Param("challengeId") Long challengeId,
             @Param("date") LocalDate date
     );
+
+    @Query("""
+            SELECT cp.id
+            FROM ChallengeParticipant cp
+            WHERE cp.memberId = :memberId
+            """)
+    List<Long> findIdsByMemberId(@Param("memberId") Long memberId);
+
+    int countByMemberId(Long memberId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM ChallengeParticipant cp
+            WHERE cp.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

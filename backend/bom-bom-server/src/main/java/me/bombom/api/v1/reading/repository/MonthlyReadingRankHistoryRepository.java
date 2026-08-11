@@ -52,4 +52,11 @@ public interface MonthlyReadingRankHistoryRepository extends JpaRepository<Month
     void saveCurrentMonthlyRanking(
             @Param("period") LocalDate period
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM MonthlyReadingRankHistory h
+            WHERE h.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

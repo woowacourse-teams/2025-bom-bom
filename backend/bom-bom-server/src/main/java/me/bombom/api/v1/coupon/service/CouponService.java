@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.coupon.dto.CouponIssueSummaryResponse;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -16,5 +17,10 @@ public class CouponService {
 
     public List<CouponIssueSummaryResponse> getIssuedCoupons(Long memberId) {
         return CouponIssueSummaryResponse.of(couponIssueRepository.findByMemberId(memberId));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        couponIssueRepository.bulkDeleteAllByMemberId(memberId);
     }
 }

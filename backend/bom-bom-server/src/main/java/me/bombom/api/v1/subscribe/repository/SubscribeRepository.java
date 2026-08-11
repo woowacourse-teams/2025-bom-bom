@@ -36,6 +36,8 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
     List<Subscribe> findAllByMemberId(Long memberId);
 
+    int countByMemberId(Long memberId);
+
     @Modifying(clearAutomatically = true)
     @Query("""
             DELETE FROM Subscribe sb

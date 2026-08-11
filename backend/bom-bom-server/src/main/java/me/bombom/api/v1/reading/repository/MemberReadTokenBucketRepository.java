@@ -35,4 +35,11 @@ public interface MemberReadTokenBucketRepository extends JpaRepository<MemberRea
             @Param("refillSeconds") int refillSeconds,
             @Param("now") LocalDateTime now
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            DELETE FROM MemberReadTokenBucket b
+            WHERE b.memberId = :memberId
+            """)
+    void bulkDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

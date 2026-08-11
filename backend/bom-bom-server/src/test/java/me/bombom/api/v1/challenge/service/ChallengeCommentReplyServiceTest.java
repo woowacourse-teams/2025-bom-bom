@@ -181,6 +181,36 @@ class ChallengeCommentReplyServiceTest {
         });
     }
 
+    @Test
+    void 탈퇴한_회원의_챌린지_답글은_탈퇴한_사용자로_조회된다() {
+        // given
+        ReplyFixture fixture = saveReplyFixture();
+        ChallengeCommentReply reply = challengeCommentReplyRepository.save(TestFixture.createChallengeCommentReply(
+                fixture.comment().getId(),
+                fixture.replyParticipant().getId(),
+                "탈퇴 후에도 보이는 대댓글",
+                false
+        ));
+
+        memberRepository.delete(fixture.replyMember());
+
+        // when
+        List<CommentReplyResponse> result = challengeCommentReplyService.getCommentReplies(
+                fixture.commentMember().getId(),
+                fixture.challenge().getId(),
+                fixture.comment().getId(),
+                PageRequest.of(0, 10)
+        ).getContent();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(1);
+            softly.assertThat(result.getFirst().replyId()).isEqualTo(reply.getId());
+            softly.assertThat(result.getFirst().nickname()).isEqualTo("탈퇴한 사용자");
+            softly.assertThat(result.getFirst().reply()).isEqualTo("탈퇴 후에도 보이는 대댓글");
+        });
+    }
+
     private ReplyFixture saveReplyFixture() {
         Member commentMember = saveMember("cm");
         Member replyMember = saveMember("rp");
@@ -198,6 +228,7 @@ class ChallengeCommentReplyServiceTest {
         ));
 
         return new ReplyFixture(
+                commentMember,
                 replyMember,
                 challenge,
                 team,
@@ -245,6 +276,7 @@ class ChallengeCommentReplyServiceTest {
     }
 
     private record ReplyFixture(
+            Member commentMember,
             Member replyMember,
             Challenge challenge,
             ChallengeTeam team,

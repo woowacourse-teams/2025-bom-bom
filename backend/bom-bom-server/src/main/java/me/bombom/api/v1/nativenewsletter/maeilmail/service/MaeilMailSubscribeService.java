@@ -13,13 +13,16 @@ import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailSubscriptionT
 import me.bombom.api.v1.nativenewsletter.maeilmail.domain.MaeilMailTrack;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailSubscriptionResponse;
 import me.bombom.api.v1.nativenewsletter.maeilmail.dto.MaeilMailUpdateSubscriptionRequest;
+import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSentContentRepository;
 import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailSubscriptionTrackRepository;
+import me.bombom.api.v1.nativenewsletter.maeilmail.repository.MaeilMailUserAnswerRepository;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.newsletter.repository.NewsletterRepository;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -30,6 +33,8 @@ public class MaeilMailSubscribeService {
     private final SubscribeService subscribeService;
     private final NewsletterRepository newsletterRepository;
     private final MaeilMailSubscriptionTrackRepository maeilMailSubscriptionTrackRepository;
+    private final MaeilMailUserAnswerRepository maeilMailUserAnswerRepository;
+    private final MaeilMailSentContentRepository maeilMailSentContentRepository;
 
     public MaeilMailSubscriptionResponse getSubscription(Long memberId) {
         List<MaeilMailSubscriptionTrack> tracks = maeilMailSubscriptionTrackRepository.findByMemberId(memberId);
@@ -53,6 +58,17 @@ public class MaeilMailSubscribeService {
         Newsletter newsletter = getMaeilMailNewsletter();
         maeilMailSubscriptionTrackRepository.bulkDeleteByMemberId(memberId);
         subscribeService.deleteByMemberIdAndNewsletterId(memberId, newsletter.getId());
+    }
+
+    /**
+     * 회원 탈퇴 시 매일메일 관련 개인 데이터(구독 트랙, 사용자 답변)를 정리한다.
+     * 매일메일 구독(Subscribe) 자체는 {@code SubscribeService}에서 일괄 삭제되므로 여기서는 다루지 않는다.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteAllByMemberId(Long memberId) {
+        maeilMailSubscriptionTrackRepository.bulkDeleteByMemberId(memberId);
+        maeilMailUserAnswerRepository.bulkDeleteAllByMemberId(memberId);
+        maeilMailSentContentRepository.bulkDeleteAllByMemberId(memberId);
     }
 
     private void replaceTracks(Subscribe subscribe, Long memberId, List<MaeilMailTrack> requestedTracks) {

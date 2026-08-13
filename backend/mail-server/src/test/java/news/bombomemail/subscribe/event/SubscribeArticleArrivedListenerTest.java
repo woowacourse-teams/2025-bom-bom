@@ -33,11 +33,10 @@ class SubscribeArticleArrivedListenerTest {
         String articleTitle = "테스트 아티클";
         Long memberId = 2L;
         String unsubscribeUrl = "unsubscribeUrl";
-        String contents = "테스트 본문";
-        
+
         // when
         eventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl, contents,
+                newsletterId, newsletterName, articleId, articleTitle, memberId, unsubscribeUrl,
                 ArticleSource.EMAIL_RECEIVED));
 
         TestTransaction.flagForCommit();
@@ -56,11 +55,10 @@ class SubscribeArticleArrivedListenerTest {
         Long articleId = 1L;
         String articleTitle = "매일메일 아티클";
         Long memberId = 2L;
-        String contents = "매일메일 본문";
 
         // when
         eventPublisher.publishEvent(ArticleArrivedEvent.of(
-                newsletterId, newsletterName, articleId, articleTitle, memberId, null, contents,
+                newsletterId, newsletterName, articleId, articleTitle, memberId, null,
                 ArticleSource.MAEIL_MAIL_ISSUED));
 
         TestTransaction.flagForCommit();

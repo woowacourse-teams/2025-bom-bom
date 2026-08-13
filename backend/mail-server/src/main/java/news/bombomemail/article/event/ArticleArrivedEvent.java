@@ -7,7 +7,6 @@ public record ArticleArrivedEvent(
         String articleTitle,
         Long memberId,
         String unsubscribeUrl,
-        String contents,
         ArticleSource source
 ) {
     public static ArticleArrivedEvent of(
@@ -17,7 +16,6 @@ public record ArticleArrivedEvent(
             String articleTitle,
             Long memberId,
             String unsubscribeUrl,
-            String contents,
             ArticleSource source
     ) {
         return new ArticleArrivedEvent(
@@ -27,7 +25,6 @@ public record ArticleArrivedEvent(
                 articleTitle,
                 memberId,
                 unsubscribeUrl,
-                contents,
                 source
         );
     }

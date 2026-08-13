@@ -68,7 +68,6 @@ public class MaeilMailIssuePublisher {
                 article.getTitle(),
                 article.getMemberId(),
                 null,
-                article.getContents(),
                 ArticleSource.MAEIL_MAIL_ISSUED
         )));
     }

@@ -7,9 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.faq.dto.FaqResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
 
 @Tag(name = "Faq", description = "FAQ 관련 API")
 public interface FaqControllerApi {
@@ -21,11 +18,5 @@ public interface FaqControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "FAQ 목록 조회 성공")
     })
-    Page<FaqResponse> getFaqs(
-            @PageableDefault(size = 20)
-            @SortDefault.SortDefaults({
-                    @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC),
-                    @SortDefault(sort = "id", direction = Sort.Direction.ASC)
-            }) Pageable pageable
-    );
+    Page<FaqResponse> getFaqs(Pageable pageable);
 }

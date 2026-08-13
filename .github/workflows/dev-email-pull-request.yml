@@ -14,10 +14,10 @@ jobs:
         working-directory: ./backend/mail-server
     steps:
       - name: Github Repository 파일 불러오기
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: JDK v21 설치
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21

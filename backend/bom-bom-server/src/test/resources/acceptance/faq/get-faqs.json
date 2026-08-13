@@ -1,0 +1,28 @@
+{
+  "faq": [
+    {
+      "id": 1,
+      "question": "질문1",
+      "answer": "answer",
+      "faq_category": "MEMBER",
+      "created_at": "2026-01-01 10:00:00.000000",
+      "updated_at": "2026-01-01 10:00:00.000000"
+    },
+    {
+      "id": 2,
+      "question": "질문2",
+      "answer": "answer",
+      "faq_category": "NEWSLETTER",
+      "created_at": "2026-01-01 11:00:00.000000",
+      "updated_at": "2026-01-01 11:00:00.000000"
+    },
+    {
+      "id": 3,
+      "question": "질문3",
+      "answer": "answer",
+      "faq_category": "CHALLENGE",
+      "created_at": "2026-01-01 12:00:00.000000",
+      "updated_at": "2026-01-01 12:00:00.000000"
+    }
+  ]
+}

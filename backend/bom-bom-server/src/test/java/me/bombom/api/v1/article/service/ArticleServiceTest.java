@@ -697,7 +697,7 @@ class ArticleServiceTest {
 
     @Test
     void 키워드_앞뒤_공백이_제거되어_검색된다() {
-        // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
+        // given
         LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         Article article = TestFixture.createArticle("AI 기술", member.getId(), newsletters.get(0).getId(), sixDaysAgo);
         articleRepository.save(article);
@@ -755,7 +755,7 @@ class ArticleServiceTest {
 
     @Test
     void 부분_문자열로_키워드_검색이_된다() {
-        // given - 5일 이전 데이터로 생성하여 article 테이블에서 검색되도록 함
+        // given
         LocalDateTime sixDaysAgo = OLD_ARTICLE_TIME;
         List<Article> testArticles = List.of(
                 TestFixture.createArticle("프로그래밍 언어", member.getId(), newsletters.get(0).getId(), sixDaysAgo),

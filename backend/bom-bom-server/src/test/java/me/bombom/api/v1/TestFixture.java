@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.ArticleReadHistory;
-import me.bombom.api.v1.article.domain.RecentArticle;
 import me.bombom.api.v1.blog.domain.BlogCategory;
 import me.bombom.api.v1.blog.domain.BlogHashtag;
 import me.bombom.api.v1.blog.domain.BlogImageAsset;
@@ -353,31 +352,6 @@ public final class TestFixture {
                 .newsletterId(newsletter.getId())
                 .categoryId(newsletter.getCategoryId())
                 .readAt(readAt)
-                .build();
-    }
-
-    /**
-     * RecentArticle
-     */
-    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
-                                                    LocalDateTime arrivedTime) {
-        return createRecentArticle(title, memberId, newsletterId, arrivedTime, memberId);
-    }
-
-    public static RecentArticle createRecentArticle(String title, Long memberId, Long newsletterId,
-                                                    LocalDateTime arrivedTime, Long articleId) {
-        return RecentArticle.builder()
-                .articleId(articleId)
-                .title(title)
-                .contents("<h1>" + title + "</h1>")
-                .contentsText(title)
-                .thumbnailUrl("https://example.com/images/thumb.png")
-                .expectedReadTime(5)
-                .contentsSummary("요약")
-                .isRead(false)
-                .memberId(memberId)
-                .newsletterId(newsletterId)
-                .arrivedDateTime(arrivedTime)
                 .build();
     }
 

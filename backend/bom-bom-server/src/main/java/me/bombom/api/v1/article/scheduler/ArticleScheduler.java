@@ -20,7 +20,6 @@ public class ArticleScheduler {
     private static final String TIME_ZONE = "Asia/Seoul";
     private static final String DAILY_2AM_CRON = "0 0 2 * * *";
     private static final String DAILY_2_10_AM_CRON = "0 10 2 * * *";
-    private static final String DAILY_2_20_AM_CRON = "0 20 2 * * *";
     private static final String DAILY_3AM_CRON = "0 0 3 * * *";
     private static final int MINIMUM_ARTICLE_LIMIT = 500;
 
@@ -38,14 +37,6 @@ public class ArticleScheduler {
     public void cleanupOldPreviousArticles() {
         log.info("이전 아티클 정리 시작");
         int deletedCount = previousArticleService.cleanupOldPreviousArticles();
-        log.info("{}개 정리 완료", deletedCount);
-    }
-
-    @Scheduled(cron = DAILY_2_20_AM_CRON, zone = TIME_ZONE)
-    @SchedulerLock(name = "cleanup_old_recent_articles", lockAtLeastFor = "PT4S", lockAtMostFor = "PT9S")
-    public void cleanupOldRecentArticles() {
-        log.info("최신 아티클 정리 시작 (5일 이상 지난 데이터)");
-        int deletedCount = articleService.cleanupOldRecentArticles();
         log.info("{}개 정리 완료", deletedCount);
     }
 

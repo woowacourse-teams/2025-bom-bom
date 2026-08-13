@@ -5,12 +5,14 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.domain.ArticleArrivalNotification;
 import me.bombom.api.v1.article.domain.ArticleArrivalNotificationFailed;
 import me.bombom.api.v1.article.domain.ArticleReadHistory;
 import me.bombom.api.v1.article.repository.ArticleArrivalNotificationFailedRepository;
 import me.bombom.api.v1.article.repository.ArticleArrivalNotificationRepository;
 import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
+import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.badge.domain.StreakBadge;
 import me.bombom.api.v1.badge.repository.BadgeRepository;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
@@ -91,6 +93,9 @@ class WithdrawDataCleanupServiceTest {
     private ArticleReadHistoryRepository articleReadHistoryRepository;
 
     @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
     private MemberFcmTokenRepository memberFcmTokenRepository;
 
     @Autowired
@@ -119,6 +124,19 @@ class WithdrawDataCleanupServiceTest {
         // given
         Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
         Long memberId = member.getId();
+        Member otherMember = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Article withdrawerArticle = articleRepository.save(TestFixture.createArticle(
+                "탈퇴 회원 아티클",
+                memberId,
+                1L,
+                LocalDateTime.now()
+        ));
+        Article othersArticle = articleRepository.save(TestFixture.createArticle(
+                "다른 회원 아티클",
+                otherMember.getId(),
+                1L,
+                LocalDateTime.now()
+        ));
 
         badgeRepository.save(StreakBadge.builder().memberId(memberId).streakDayCount(3).build());
         couponIssueRepository.save(CouponIssue.of(memberId, "쿠폰", "https://image"));
@@ -219,6 +237,8 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(memberFcmTokenRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationFailedRepository.count()).isZero();
+            softly.assertThat(articleRepository.findById(withdrawerArticle.getId())).isEmpty();
+            softly.assertThat(articleRepository.findById(othersArticle.getId())).isPresent();
             softly.assertThat(challengeDailyGuideCommentRepository.count()).isZero();
             softly.assertThat(maeilMailSentContentRepository.count()).isZero();
             softly.assertThat(memberNotificationSettingRepository.count()).isZero();

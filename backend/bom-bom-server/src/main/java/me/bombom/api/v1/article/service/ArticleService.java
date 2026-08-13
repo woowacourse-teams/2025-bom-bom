@@ -21,7 +21,6 @@ import me.bombom.api.v1.article.repository.ArticleArrivalNotificationRepository;
 import me.bombom.api.v1.article.repository.ArticleReadHistoryRepository;
 import me.bombom.api.v1.article.repository.ArticleRepository;
 import me.bombom.api.v1.article.repository.MarkAsReadEventLogRepository;
-import me.bombom.api.v1.article.repository.RecentArticleRepository;
 import me.bombom.api.v1.bookmark.repository.BookmarkRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -50,7 +49,6 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final ArticleReadHistoryRepository articleReadHistoryRepository;
-    private final RecentArticleRepository recentArticleRepository;
     private final MarkAsReadEventLogRepository markAsReadEventLogRepository;
     private final ArticleArrivalNotificationRepository articleArrivalNotificationRepository;
     private final ArticleArrivalNotificationFailedRepository articleArrivalNotificationFailedRepository;
@@ -156,16 +154,9 @@ public class ArticleService {
     public void deleteAllByMemberId(Long memberId) {
         articleRepository.bulkDeleteAllByMemberId(memberId);
         articleReadHistoryRepository.bulkDeleteAllByMemberId(memberId);
-        recentArticleRepository.bulkDeleteAllByMemberId(memberId);
         markAsReadEventLogRepository.bulkDeleteAllByMemberId(memberId);
         articleArrivalNotificationRepository.bulkDeleteAllByMemberId(memberId);
         articleArrivalNotificationFailedRepository.bulkDeleteAllByMemberId(memberId);
-    }
-
-    @Transactional
-    public int cleanupOldRecentArticles() {
-        LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(5);
-        return recentArticleRepository.bulkDeleteAllByArrivedDateTimeBefore(fiveDaysAgo);
     }
 
     @Transactional

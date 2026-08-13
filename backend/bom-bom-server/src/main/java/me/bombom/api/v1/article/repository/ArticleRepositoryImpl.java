@@ -15,7 +15,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class ArticleRepositoryImpl implements CustomArticleRepository {
 
-    private static final int RECENT_DAYS = 5;
+    private static final char LIKE_ESCAPE_CHARACTER = '!';
 
     private static final Map<String, Path<?>> SORT_FIELD_WHITELIST_MAP = Map.of(
             "title", article.title,
@@ -52,7 +51,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
-
 
     @Override
     public Page<ArticleResponse> findArticles(
@@ -71,33 +69,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
             ArticleSearchOptionsRequest options,
             Pageable pageable
     ) {
-        LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(RECENT_DAYS);
-        LocalDate fiveDaysAgoDate = fiveDaysAgo.toLocalDate();
-
-        // 전체 개수 조회
-        long recentCount = getRecentTotalCountNative(memberId, options, fiveDaysAgoDate);
-        Long oldCountResult = getOldTotalQueryForSearch(memberId, options, fiveDaysAgoDate).fetchOne();
-        long oldCount = oldCountResult != null ? oldCountResult : 0L;
-        long total = recentCount + oldCount;
-
-        List<ArticleResponse> content;
-        if (recentCount > 0) {
-            // recent_article 테이블에 데이터가 있을 때만 UNION 쿼리 사용
-            try {
-                content = findArticlesWithUnion(memberId, options, pageable, fiveDaysAgoDate);
-            } catch (CIllegalArgumentException e) {
-                // 정렬 필드 검증 실패 등은 그대로 전파
-                throw e;
-            } catch (Exception e) {
-                log.error("UNION 쿼리 실패, article 테이블만 사용: {}", e.getMessage(), e);
-                content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
-            }
-        } else {
-            // recent_article 테이블에 데이터가 없으면 article 테이블만 사용
-            content = findArticlesFromArticleOnly(memberId, options, pageable, fiveDaysAgoDate);
-        }
-
-        return PageableExecutionUtils.getPage(content, pageable, () -> total);
+        JPAQuery<Long> totalQuery = getTotalQueryForSearch(memberId, options);
+        List<ArticleResponse> content = findArticlesFromArticleOnly(memberId, options, pageable);
+        return PageableExecutionUtils.getPage(content, pageable, totalQuery::fetchOne);
     }
 
     @Override
@@ -125,99 +99,20 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
     }
 
     private List<ArticleCountPerNewsletterResponse> countWithKeyword(Long memberId, String keyword) {
-        String sql = """
-                    SELECT 
-                        merged.newsletterId,
-                        merged.name,
-                        merged.imageUrl,
-                        SUM(merged.articleCount) AS articleCount
-                    FROM (
-                        SELECT 
-                            n.id AS newsletterId,
-                            n.name AS name,
-                            COALESCE(n.image_url, '') AS imageUrl,
-                            COUNT(a.id) AS articleCount
-                        FROM article a
-                        JOIN newsletter n ON n.id = a.newsletter_id
-                        WHERE a.member_id = :memberId
-                          AND a.arrived_date_time < DATE_SUB(NOW(), INTERVAL :recentDays DAY)
-                          AND (
-                                LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                             OR LOWER(a.contents_text) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                          )
-                        GROUP BY n.id
-                
-                        UNION ALL
-                
-                        -- 최근 아티클 검색 (recent_article)
-                        SELECT
-                            n.id AS newsletterId,
-                            n.name AS name,
-                            COALESCE(n.image_url, '') AS imageUrl,
-                            COUNT(ra.id) AS articleCount
-                        FROM recent_article ra
-                        JOIN newsletter n ON n.id = ra.newsletter_id
-                        WHERE ra.member_id = :memberId
-                          AND MATCH(ra.title, ra.contents_text) AGAINST(:keyword)
-                        GROUP BY n.id
-                    ) AS merged
-                    GROUP BY merged.newsletterId, merged.name, merged.imageUrl
-                """;
-
-        List<Object[]> rows = entityManager.createNativeQuery(sql)
-                .setParameter("memberId", memberId)
-                .setParameter("keyword", keyword)
-                .setParameter("recentDays", RECENT_DAYS)
-                .getResultList();
-
-        return rows.stream()
-                .map(r -> new ArticleCountPerNewsletterResponse(
-                        ((Number) r[0]).longValue(),
-                        (String) r[1],
-                        (String) r[2],
-                        ((Number) r[3]).intValue()
+        return jpaQueryFactory
+                .select(new QArticleCountPerNewsletterResponse(
+                        newsletter.id,
+                        newsletter.name,
+                        newsletter.imageUrl.coalesce(""),
+                        article.id.count().intValue()
                 ))
-                .toList();
-    }
-
-
-    private long getRecentTotalCountNative(Long memberId, ArticleSearchOptionsRequest options,
-                                           LocalDate fiveDaysAgoDate) {
-        StringBuilder sql = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-
-        sql.append("SELECT COUNT(*) ")
-                .append("FROM recent_article ra ")
-                .append("INNER JOIN newsletter n ON n.id = ra.newsletter_id ")
-                .append("INNER JOIN category c ON c.id = n.category_id ")
-                .append("WHERE ra.member_id = ? ")
-                .append("AND ra.arrived_date_time >= ? ");
-        params.add(memberId);
-        params.add(fiveDaysAgoDate.atStartOfDay());
-
-        if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip();
-            sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?) ");
-            params.add(keyword);
-        }
-
-        if (options.newsletterId() != null) {
-            sql.append("AND ra.newsletter_id = ? ");
-            params.add(options.newsletterId());
-        }
-
-        try {
-            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
-            for (int i = 0; i < params.size(); i++) {
-                nativeQuery.setParameter(i + 1, params.get(i));
-            }
-
-            Object result = nativeQuery.getSingleResult();
-            return result instanceof Number ? ((Number) result).longValue() : 0L;
-        } catch (Exception e) {
-            log.warn("recent_article 테이블 개수 조회 실패, 0으로 처리: {}", e.getMessage());
-            return 0L;
-        }
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createKeywordWhereClause(keyword))
+                .groupBy(newsletter.id)
+                .orderBy(article.id.count().desc())
+                .fetch();
     }
 
     /**
@@ -226,8 +121,7 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
     private List<ArticleResponse> findArticlesFromArticleOnly(
             Long memberId,
             ArticleSearchOptionsRequest options,
-            Pageable pageable,
-            LocalDate fiveDaysAgoDate
+            Pageable pageable
     ) {
         StringBuilder sql = new StringBuilder();
         List<Object> params = new ArrayList<>();
@@ -259,10 +153,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
         params.add(memberId); // member_id
 
         if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip().toLowerCase();
-            sql.append("AND (LOWER(a.title) LIKE ? OR LOWER(a.contents_text) LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
+            String keywordPattern = createKeywordPattern(options.keyword());
+            sql.append("AND (LOWER(a.title) LIKE ? ESCAPE '!' OR LOWER(a.contents_text) LIKE ? ESCAPE '!') ");
+            params.add(keywordPattern);
+            params.add(keywordPattern);
         }
 
         if (options.newsletterId() != null) {
@@ -291,123 +185,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
                     .toList();
         } catch (Exception e) {
             log.error("SQL 쿼리 실행 실패 (article 테이블만) - SQL: {}, Params: {}", sql.toString(), params, e);
-            throw e;
-        }
-    }
-
-    /**
-     * UNION 쿼리를 사용하여 두 테이블을 합쳐서 DB에서 정렬/페이징 처리 성능 최적화: DB 레벨에서 정렬/페이징 처리하여 메모리 사용 최소화
-     */
-    private List<ArticleResponse> findArticlesWithUnion(
-            Long memberId,
-            ArticleSearchOptionsRequest options,
-            Pageable pageable,
-            LocalDate fiveDaysAgoDate
-    ) {
-        StringBuilder sql = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-
-        // 정렬 조건
-        String orderBy = buildOrderByClause(pageable);
-
-        // 페이징
-        int pageSize = pageable.getPageSize();
-        int offset = (int) pageable.getOffset();
-
-        // UNION 쿼리를 서브쿼리로 감싸서 ORDER BY 적용
-        sql.append("SELECT * FROM (");
-
-        // UNION 쿼리 구성 - RecentArticle (최근 5일)
-        sql.append("SELECT ")
-                .append("ra.article_id as article_id, ")
-                .append("ra.title, ")
-                .append("ra.contents_summary, ")
-                .append("ra.arrived_date_time, ")
-                .append("ra.thumbnail_url, ")
-                .append("ra.expected_read_time, ")
-                .append("ra.is_read, ")
-                .append("CASE WHEN EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = ra.article_id AND b.member_id = ?) THEN 1 ELSE 0 END as is_bookmarked, ")
-                .append("n.name as newsletter_name, ")
-                .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
-                .append("c.name as category_name ")
-                .append("FROM recent_article ra ")
-                .append("INNER JOIN newsletter n ON n.id = ra.newsletter_id ")
-                .append("INNER JOIN category c ON c.id = n.category_id ")
-                .append("WHERE ra.member_id = ? ")
-                .append("AND ra.arrived_date_time >= ? ");
-        params.add(memberId); // bookmark 서브쿼리용
-        params.add(memberId); // member_id
-        params.add(fiveDaysAgoDate.atStartOfDay());
-
-        if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip();
-            sql.append("AND MATCH(ra.title, ra.contents_text) AGAINST(?) ");
-            params.add(keyword);
-        }
-
-        if (options.newsletterId() != null) {
-            sql.append("AND ra.newsletter_id = ? ");
-            params.add(options.newsletterId());
-        }
-
-        // UNION ALL - Article (5일 이전)
-        sql.append("UNION ALL ")
-                .append("SELECT ")
-                .append("a.id as article_id, ")
-                .append("a.title, ")
-                .append("a.contents_summary, ")
-                .append("a.arrived_date_time, ")
-                .append("a.thumbnail_url, ")
-                .append("a.expected_read_time, ")
-                .append("a.is_read, ")
-                .append("CASE WHEN EXISTS(SELECT 1 FROM bookmark b WHERE b.article_id = a.id AND b.member_id = ?) THEN 1 ELSE 0 END as is_bookmarked, ")
-                .append("n.name as newsletter_name, ")
-                .append("COALESCE(n.image_url, '') as newsletter_image_url, ")
-                .append("c.name as category_name ")
-                .append("FROM article a ")
-                .append("INNER JOIN newsletter n ON n.id = a.newsletter_id ")
-                .append("INNER JOIN category c ON c.id = n.category_id ")
-                .append("WHERE a.member_id = ? ")
-                .append("AND a.arrived_date_time < ? ");
-        params.add(memberId); // bookmark 서브쿼리용
-        params.add(memberId); // member_id
-        params.add(fiveDaysAgoDate.atStartOfDay());
-
-        if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip().toLowerCase();
-            sql.append("AND (LOWER(a.title) LIKE ? OR LOWER(a.contents_text) LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
-        }
-
-        if (options.newsletterId() != null) {
-            sql.append("AND a.newsletter_id = ? ");
-            params.add(options.newsletterId());
-        }
-
-        // 서브쿼리 닫고 ORDER BY 적용
-        sql.append(") AS combined ")
-                .append("ORDER BY ").append(orderBy).append(" ")
-                .append("LIMIT ? OFFSET ?");
-        params.add(pageSize);
-        params.add(offset);
-
-        // Native Query 실행
-        try {
-            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
-            for (int i = 0; i < params.size(); i++) {
-                nativeQuery.setParameter(i + 1, params.get(i));
-            }
-
-            @SuppressWarnings("unchecked")
-            List<Object[]> results = nativeQuery.getResultList();
-
-            // 결과를 ArticleResponse로 매핑
-            return results.stream()
-                    .map(this::mapToArticleResponse)
-                    .toList();
-        } catch (Exception e) {
-            log.error("SQL 쿼리 실행 실패 (UNION) - SQL: {}, Params: {}", sql.toString(), params, e);
             throw e;
         }
     }
@@ -607,10 +384,9 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
                 .exists();
     }
 
-    private JPAQuery<Long> getOldTotalQueryForSearch(
+    private JPAQuery<Long> getTotalQueryForSearch(
             Long memberId,
-            ArticleSearchOptionsRequest options,
-            LocalDate fiveDaysAgoDate
+            ArticleSearchOptionsRequest options
     ) {
         return jpaQueryFactory.select(article.count())
                 .from(article)
@@ -618,7 +394,6 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
                 .join(category).on(newsletter.categoryId.eq(category.id))
                 .where(createMemberWhereClause(memberId))
                 .where(createKeywordWhereClause(options.keyword()))
-                .where(article.arrivedDateTime.lt(fiveDaysAgoDate.atStartOfDay()))
                 .where(createNewsletterIdWhereClause(options.newsletterId()));
     }
 
@@ -630,9 +405,18 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
         if (!StringUtils.hasText(keyword)) {
             return null;
         }
-        String trimmed = "%" + keyword.strip().toLowerCase() + "%";
-        return article.title.lower().like(trimmed)
-                .or(article.contentsText.lower().like(trimmed));
+        String keywordPattern = createKeywordPattern(keyword);
+        return article.title.lower().like(keywordPattern, LIKE_ESCAPE_CHARACTER)
+                .or(article.contentsText.lower().like(keywordPattern, LIKE_ESCAPE_CHARACTER));
+    }
+
+    private String createKeywordPattern(String keyword) {
+        String escapedKeyword = keyword.strip()
+                .toLowerCase()
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
+        return "%" + escapedKeyword + "%";
     }
 
     private BooleanExpression createDateWhereClause(LocalDate date) {

@@ -40,6 +40,8 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class ArticleRepositoryImpl implements CustomArticleRepository {
 
+    private static final char LIKE_ESCAPE_CHARACTER = '!';
+
     private static final Map<String, Path<?>> SORT_FIELD_WHITELIST_MAP = Map.of(
             "title", article.title,
             "createdAt", article.createdAt,
@@ -97,35 +99,20 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
     }
 
     private List<ArticleCountPerNewsletterResponse> countWithKeyword(Long memberId, String keyword) {
-        String sql = """
-                    SELECT
-                        n.id AS newsletterId,
-                        n.name AS name,
-                        COALESCE(n.image_url, '') AS imageUrl,
-                        COUNT(a.id) AS articleCount
-                    FROM article a
-                    JOIN newsletter n ON n.id = a.newsletter_id
-                    WHERE a.member_id = :memberId
-                      AND (
-                            LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                         OR LOWER(a.contents_text) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                      )
-                    GROUP BY n.id, n.name, n.image_url
-                """;
-
-        List<Object[]> rows = entityManager.createNativeQuery(sql)
-                .setParameter("memberId", memberId)
-                .setParameter("keyword", keyword)
-                .getResultList();
-
-        return rows.stream()
-                .map(r -> new ArticleCountPerNewsletterResponse(
-                        ((Number) r[0]).longValue(),
-                        (String) r[1],
-                        (String) r[2],
-                        ((Number) r[3]).intValue()
+        return jpaQueryFactory
+                .select(new QArticleCountPerNewsletterResponse(
+                        newsletter.id,
+                        newsletter.name,
+                        newsletter.imageUrl.coalesce(""),
+                        article.id.count().intValue()
                 ))
-                .toList();
+                .from(article)
+                .join(newsletter).on(article.newsletterId.eq(newsletter.id))
+                .where(createMemberWhereClause(memberId))
+                .where(createKeywordWhereClause(keyword))
+                .groupBy(newsletter.id)
+                .orderBy(article.id.count().desc())
+                .fetch();
     }
 
     /**
@@ -166,10 +153,10 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
         params.add(memberId); // member_id
 
         if (StringUtils.hasText(options.keyword())) {
-            String keyword = options.keyword().strip().toLowerCase();
-            sql.append("AND (LOWER(a.title) LIKE ? OR LOWER(a.contents_text) LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
+            String keywordPattern = createKeywordPattern(options.keyword());
+            sql.append("AND (LOWER(a.title) LIKE ? ESCAPE '!' OR LOWER(a.contents_text) LIKE ? ESCAPE '!') ");
+            params.add(keywordPattern);
+            params.add(keywordPattern);
         }
 
         if (options.newsletterId() != null) {
@@ -418,9 +405,18 @@ public class ArticleRepositoryImpl implements CustomArticleRepository {
         if (!StringUtils.hasText(keyword)) {
             return null;
         }
-        String trimmed = "%" + keyword.strip().toLowerCase() + "%";
-        return article.title.lower().like(trimmed)
-                .or(article.contentsText.lower().like(trimmed));
+        String keywordPattern = createKeywordPattern(keyword);
+        return article.title.lower().like(keywordPattern, LIKE_ESCAPE_CHARACTER)
+                .or(article.contentsText.lower().like(keywordPattern, LIKE_ESCAPE_CHARACTER));
+    }
+
+    private String createKeywordPattern(String keyword) {
+        String escapedKeyword = keyword.strip()
+                .toLowerCase()
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
+        return "%" + escapedKeyword + "%";
     }
 
     private BooleanExpression createDateWhereClause(LocalDate date) {

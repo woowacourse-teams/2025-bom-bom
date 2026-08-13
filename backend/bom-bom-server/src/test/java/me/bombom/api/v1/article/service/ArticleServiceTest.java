@@ -203,6 +203,40 @@ class ArticleServiceTest {
     }
 
     @Test
+    void 검색어의_LIKE_특수문자는_리터럴로_조회한다() {
+        // given
+        Newsletter literalNewsletter = newsletters.get(0);
+        Newsletter wildcardNewsletter = newsletters.get(1);
+        Article literalArticle = articleRepository.save(TestFixture.createArticle(
+                "성장률 100%_완료\\보고",
+                member.getId(),
+                literalNewsletter.getId(),
+                RECENT_TIME
+        ));
+        articleRepository.save(TestFixture.createArticle(
+                "성장률 1000X완료보고",
+                member.getId(),
+                wildcardNewsletter.getId(),
+                RECENT_TIME
+        ));
+
+        // when
+        Page<ArticleResponse> result = articleService.getArticlesBySearch(
+                member,
+                ArticleSearchOptionsRequest.of(null, "100%_완료\\보고"),
+                PageRequest.of(0, 10)
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.getTotalElements()).isEqualTo(1);
+            softly.assertThat(result.getContent())
+                    .extracting(ArticleResponse::articleId)
+                    .containsExactly(literalArticle.getId());
+        });
+    }
+
+    @Test
     void 키워드_통계는_도착_시각과_관계없이_article_테이블만_집계한다() {
         // given
         Newsletter targetNewsletter = newsletters.getFirst();
@@ -234,6 +268,84 @@ class ArticleServiceTest {
                     .filteredOn(statistic -> statistic.id().equals(targetNewsletter.getId()))
                     .extracting(ArticleCountPerNewsletterResponse::articleCount)
                     .containsExactly(2);
+        });
+    }
+
+    @Test
+    void 키워드_통계는_아티클_개수_내림차순으로_정렬한다() {
+        // given
+        Newsletter firstNewsletter = newsletters.get(1);
+        Newsletter secondNewsletter = newsletters.get(0);
+        articleRepository.saveAll(List.of(
+                TestFixture.createArticle(
+                        "통계정렬 세 번째",
+                        member.getId(),
+                        secondNewsletter.getId(),
+                        BASE_TIME
+                ),
+                TestFixture.createArticle(
+                        "통계정렬 첫 번째",
+                        member.getId(),
+                        firstNewsletter.getId(),
+                        BASE_TIME
+                ),
+                TestFixture.createArticle(
+                        "통계정렬 두 번째",
+                        member.getId(),
+                        firstNewsletter.getId(),
+                        BASE_TIME
+                )
+        ));
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "통계정렬"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.newsletters())
+                    .extracting(ArticleCountPerNewsletterResponse::name)
+                    .containsExactly(firstNewsletter.getName(), secondNewsletter.getName());
+            softly.assertThat(result.newsletters())
+                    .extracting(ArticleCountPerNewsletterResponse::articleCount)
+                    .containsExactly(2, 1);
+        });
+    }
+
+    @Test
+    void 키워드_통계의_LIKE_특수문자는_리터럴로_집계한다() {
+        // given
+        Newsletter literalNewsletter = newsletters.get(0);
+        Newsletter wildcardNewsletter = newsletters.get(1);
+        articleRepository.saveAll(List.of(
+                TestFixture.createArticle(
+                        "성장률 100%_완료\\보고",
+                        member.getId(),
+                        literalNewsletter.getId(),
+                        BASE_TIME
+                ),
+                TestFixture.createArticle(
+                        "성장률 1000X완료보고",
+                        member.getId(),
+                        wildcardNewsletter.getId(),
+                        BASE_TIME
+                )
+        ));
+
+        // when
+        ArticleNewsletterStatisticsResponse result = articleService.getArticleNewsletterStatistics(
+                member,
+                "100%_완료\\보고"
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result.totalCount()).isEqualTo(1);
+            softly.assertThat(result.newsletters())
+                    .extracting(ArticleCountPerNewsletterResponse::id)
+                    .containsExactly(literalNewsletter.getId());
         });
     }
 

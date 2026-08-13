@@ -66,7 +66,6 @@ public class ArticleService {
                         article.getTitle(),
                         member.getId(),
                         unsubscribeUrl,
-                        contents,
                         ArticleSource.EMAIL_RECEIVED
                 )
         );

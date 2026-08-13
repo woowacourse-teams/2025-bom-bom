@@ -152,7 +152,6 @@ class ArticleServiceTest {
             softly.assertThat(event.articleTitle()).isEqualTo("테스트 이메일 제목");
             softly.assertThat(event.memberId()).isEqualTo(member.getId());
             softly.assertThat(event.unsubscribeUrl()).isEqualTo("https://example.com/unsubscribe?id=123");
-            softly.assertThat(event.contents()).isEqualTo(content);
             softly.assertThat(event.source()).isEqualTo(ArticleSource.EMAIL_RECEIVED);
         });
     }

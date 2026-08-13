@@ -105,7 +105,6 @@ class MaeilMailIssuePublisherTest {
             softly.assertThat(event.articleTitle()).isEqualTo("매일메일 제목");
             softly.assertThat(event.memberId()).isEqualTo(1L);
             softly.assertThat(event.unsubscribeUrl()).isNull();
-            softly.assertThat(event.contents()).isEqualTo("<p>본문</p>");
             softly.assertThat(event.source()).isEqualTo(ArticleSource.MAEIL_MAIL_ISSUED);
             softly.assertThat(histories).hasSize(1);
             softly.assertThat(histories.getFirst().getArticleId()).isEqualTo(100L);

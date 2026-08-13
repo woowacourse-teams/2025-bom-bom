@@ -9,9 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import news.bombomemail.article.domain.Article;
-import news.bombomemail.article.domain.RecentArticle;
 import news.bombomemail.article.repository.ArticleRepository;
-import news.bombomemail.article.repository.RecentArticleRepository;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailContent;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueHistory;
 import news.bombomemail.nativenewsletter.maeilmail.domain.MaeilMailIssueJob;
@@ -85,9 +83,6 @@ class MaeilMailIssueIntegrationTest {
     private ArticleRepository articleRepository;
 
     @Autowired
-    private RecentArticleRepository recentArticleRepository;
-
-    @Autowired
     private ArticleArrivalNotificationRepository notificationRepository;
 
     @Autowired
@@ -106,7 +101,6 @@ class MaeilMailIssueIntegrationTest {
         topicRepository.deleteAll();
         todayReadingRepository.deleteAll();
         notificationRepository.deleteAll();
-        recentArticleRepository.deleteAll();
         articleRepository.deleteAll();
         subscribeRepository.deleteAll();
         newsletterRepository.deleteAll();
@@ -156,7 +150,6 @@ class MaeilMailIssueIntegrationTest {
 
         // then
         List<Article> articles = articleRepository.findAll();
-        List<RecentArticle> recentArticles = recentArticleRepository.findAll();
         List<ArticleArrivalNotification> notifications = notificationRepository.findAll();
         List<MaeilMailSentContent> sentContents = sentContentRepository.findAll();
         List<MaeilMailIssueHistory> issueHistories = issueHistoryRepository.findAll();
@@ -171,10 +164,6 @@ class MaeilMailIssueIntegrationTest {
             softly.assertThat(article.getContents()).isEqualTo("<p>매일메일 본문</p>");
             softly.assertThat(article.getMemberId()).isEqualTo(memberId);
             softly.assertThat(article.getNewsletterId()).isEqualTo(newsletter.getId());
-
-            softly.assertThat(recentArticles).hasSize(1);
-            softly.assertThat(recentArticles.getFirst().getArticleId()).isEqualTo(article.getId());
-            softly.assertThat(recentArticles.getFirst().getTitle()).isEqualTo("매일메일 제목");
 
             softly.assertThat(notifications).hasSize(1);
             softly.assertThat(notifications.getFirst().getArticleId()).isEqualTo(article.getId());
@@ -255,7 +244,6 @@ class MaeilMailIssueIntegrationTest {
         TodayReading todayReading = todayReadingRepository.findByMemberId(memberId).orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(articleRepository.findAll()).hasSize(1);
-            softly.assertThat(recentArticleRepository.findAll()).hasSize(1);
             softly.assertThat(notificationRepository.findAll()).hasSize(1);
             softly.assertThat(sentContentRepository.findAll()).hasSize(1);
             softly.assertThat(issueHistoryRepository.findAll()).hasSize(1);

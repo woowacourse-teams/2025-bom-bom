@@ -1,5 +1,6 @@
 package me.bombom.api.v1.member.repository;
 
+import java.util.List;
 import java.util.Optional;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         WHERE m.provider = :provider AND m.providerId = :providerId
     """)
     Optional<Member> findByProviderAndProviderId(@Param("provider") String provider, @Param("providerId") String providerId);
+
+    long countByProviderAndAppleTransferSubIsNull(String provider);
+
+    List<Member> findFirst100ByProviderAndAppleTransferSubIsNullAndIdGreaterThanOrderByIdAsc(String provider, Long id);
 
     boolean existsByEmail(String email);
 

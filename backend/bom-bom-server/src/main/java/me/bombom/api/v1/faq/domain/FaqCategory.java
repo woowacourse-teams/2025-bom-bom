@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum FaqCategory {
 
-    MEMBER("회원"),
+    INTRODUCTION("서비스"),
+    FEATURE("기능"),
+    ACCOUNT("계정"),
     NEWSLETTER("뉴스레터"),
-    CHALLENGE("챌린지"),
     ETC("기타"),
     ;
 

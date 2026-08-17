@@ -40,6 +40,9 @@ public class Member extends BaseEntity implements Serializable {
     @Column(nullable = false)
     private String providerId;
 
+    @Column(unique = true, length = 255)
+    private String appleTransferSub;
+
     @Column(nullable = false, length = 50)
     private String email;
 
@@ -103,5 +106,9 @@ public class Member extends BaseEntity implements Serializable {
 
     public boolean isSameNickname(String nickname) {
         return this.nickname.equals(nickname);
+    }
+
+    public void updateAppleTransferSub(String transferSub) {
+        this.appleTransferSub = transferSub;
     }
 }

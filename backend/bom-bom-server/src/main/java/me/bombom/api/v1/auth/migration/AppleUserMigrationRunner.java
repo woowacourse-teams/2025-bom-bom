@@ -18,6 +18,9 @@ public class AppleUserMigrationRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        log.info("Apple 사용자 이전 설정 - clientId: {}, targetTeamId: {}, execute: {}",
+                properties.clientId(), properties.targetTeamId(), properties.execute());
+
         if (!properties.execute()) {
             log.info("Apple 사용자 이전 dry-run - 대상 수: {}", service.preview());
             return;
@@ -25,6 +28,7 @@ public class AppleUserMigrationRunner implements ApplicationRunner {
 
         properties.validateForExecution();
         AppleUserMigrationResult result = service.migrateAll();
-        log.info("Apple 사용자 이전 완료 - 대상 수: {}, 저장 수: {}", result.targetCount(), result.migratedCount());
+        log.info("Apple 사용자 이전 완료 - 대상 수: {}, 저장 수: {}, 실패 수: {}",
+                result.targetCount(), result.migratedCount(), result.failedCount());
     }
 }

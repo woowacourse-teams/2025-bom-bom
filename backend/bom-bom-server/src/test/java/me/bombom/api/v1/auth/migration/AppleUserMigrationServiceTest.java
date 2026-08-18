@@ -1,7 +1,5 @@
 package me.bombom.api.v1.auth.migration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -45,22 +43,34 @@ class AppleUserMigrationServiceTest {
             softly.assertThat(member.getAppleTransferSub()).isEqualTo("transfer-sub");
             softly.assertThat(result.targetCount()).isEqualTo(1L);
             softly.assertThat(result.migratedCount()).isEqualTo(1L);
+            softly.assertThat(result.failedCount()).isEqualTo(0L);
         });
         verify(memberRepository).save(member);
     }
 
     @Test
-    void Apple_호출에_실패하면_해당_회원값을_저장하지_않는다() {
-        Member member = appleMember(1L, "old-sub");
-        given(memberRepository.countByProviderAndAppleTransferSubIsNull("apple")).willReturn(1L);
+    void Apple_호출에_실패한_회원은_건너뛰고_다음_회원을_계속_처리한다() {
+        Member failedMember = appleMember(1L, "old-sub-1");
+        Member succeededMember = appleMember(2L, "old-sub-2");
+        given(memberRepository.countByProviderAndAppleTransferSubIsNull("apple")).willReturn(2L);
         given(memberRepository.findFirst100ByProviderAndAppleTransferSubIsNullAndIdGreaterThanOrderByIdAsc("apple", 0L))
-                .willReturn(List.of(member));
-        given(appleUserMigrationClient.createTransferSub("old-sub")).willThrow(new IllegalStateException("Apple error"));
+                .willReturn(List.of(failedMember, succeededMember));
+        given(memberRepository.findFirst100ByProviderAndAppleTransferSubIsNullAndIdGreaterThanOrderByIdAsc("apple", 2L))
+                .willReturn(List.of());
+        given(appleUserMigrationClient.createTransferSub("old-sub-1")).willThrow(new IllegalStateException("Apple error"));
+        given(appleUserMigrationClient.createTransferSub("old-sub-2")).willReturn("transfer-sub-2");
 
-        assertThatThrownBy(service::migrateAll).isInstanceOf(IllegalStateException.class);
+        AppleUserMigrationResult result = service.migrateAll();
 
-        assertThat(member.getAppleTransferSub()).isNull();
-        verify(memberRepository, never()).save(member);
+        assertSoftly(softly -> {
+            softly.assertThat(failedMember.getAppleTransferSub()).isNull();
+            softly.assertThat(succeededMember.getAppleTransferSub()).isEqualTo("transfer-sub-2");
+            softly.assertThat(result.targetCount()).isEqualTo(2L);
+            softly.assertThat(result.migratedCount()).isEqualTo(1L);
+            softly.assertThat(result.failedCount()).isEqualTo(1L);
+        });
+        verify(memberRepository, never()).save(failedMember);
+        verify(memberRepository).save(succeededMember);
     }
 
     private Member appleMember(Long id, String providerId) {

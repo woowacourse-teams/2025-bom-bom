@@ -2,6 +2,7 @@ package me.bombom.api.v1.auth.migration;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AppleUserMigrationRestClient implements AppleUserMigrationClient {
@@ -32,6 +35,14 @@ public class AppleUserMigrationRestClient implements AppleUserMigrationClient {
                 .header("Authorization", "Bearer " + accessToken)
                 .body(userMigrationRequestBody(existingSub, clientSecret))
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        (request, res) -> {
+                            String body = new String(res.getBody().readAllBytes());
+                            log.error("Apple usermigrationinfo 호출 실패 - sub: {}, status: {}, body: {}",
+                                    existingSub, res.getStatusCode(), body);
+                            throw HttpClientErrorException.create(
+                                    res.getStatusCode(), res.getStatusText(), res.getHeaders(), body.getBytes(), null);
+                        })
                 .body(new ParameterizedTypeReference<>() {});
         return requiredString(response, "transfer_sub");
     }

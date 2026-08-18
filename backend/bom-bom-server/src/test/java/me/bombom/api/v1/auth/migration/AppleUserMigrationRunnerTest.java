@@ -26,7 +26,7 @@ class AppleUserMigrationRunnerTest {
     @Test
     void execute가_true이면_검증후_배치를_수행한다() throws Exception {
         AppleUserMigrationProperties properties = new AppleUserMigrationProperties("A1B2C3D4E5", "com.example.app", true);
-        given(service.migrateAll()).willReturn(new AppleUserMigrationResult(12L, 12L));
+        given(service.migrateAll()).willReturn(new AppleUserMigrationResult(12L, 12L, 0L));
 
         new AppleUserMigrationRunner(properties, service).run(mock(ApplicationArguments.class));
 

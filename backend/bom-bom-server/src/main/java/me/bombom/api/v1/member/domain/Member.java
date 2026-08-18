@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,6 +43,8 @@ public class Member extends BaseEntity implements Serializable {
 
     @Column(unique = true, length = 255)
     private String appleTransferSub;
+
+    private LocalDateTime appleSubMigratedAt;
 
     @Column(nullable = false, length = 50)
     private String email;
@@ -110,5 +113,10 @@ public class Member extends BaseEntity implements Serializable {
 
     public void updateAppleTransferSub(String transferSub) {
         this.appleTransferSub = transferSub;
+    }
+
+    public void updateAppleSubMigration(String newProviderId, LocalDateTime migratedAt) {
+        this.providerId = newProviderId;
+        this.appleSubMigratedAt = migratedAt;
     }
 }

@@ -20,6 +20,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     List<Member> findFirst100ByProviderAndAppleTransferSubIsNullAndIdGreaterThanOrderByIdAsc(String provider, Long id);
 
+    long countByProviderAndAppleTransferSubIsNotNullAndAppleSubMigratedAtIsNull(String provider);
+
+    List<Member> findFirst100ByProviderAndAppleTransferSubIsNotNullAndAppleSubMigratedAtIsNullAndIdGreaterThanOrderByIdAsc(
+            String provider, Long id);
+
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);

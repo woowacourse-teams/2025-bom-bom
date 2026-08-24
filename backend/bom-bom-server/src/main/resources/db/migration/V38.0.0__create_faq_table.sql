@@ -1,6 +1,6 @@
 CREATE TABLE faq (
     id bigint NOT NULL AUTO_INCREMENT,
-    question varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    question varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     answer mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     faq_category ENUM('INTRODUCTION', 'FEATURE', 'ACCOUNT', 'NEWSLETTER', 'ETC') NOT NULL,
     created_at datetime(6) DEFAULT NULL,

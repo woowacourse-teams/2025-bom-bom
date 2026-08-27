@@ -128,16 +128,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private String buildRedirectUrl(HttpServletRequest request, Member member, OAuth2LoginInfo oauth2Info) {
-        String baseUrl = getBaseUrl(request);
-        baseUrl = StringUtils.trimTrailingCharacter(baseUrl, '/');
         if (member != null) {
+            String baseUrl = StringUtils.trimTrailingCharacter(getBaseUrl(request), '/');
             return baseUrl + HOME_PATH;
         }
+
+        String signupUrl = StringUtils.trimTrailingCharacter(frontendBaseUrl, '/') + SIGNUP_PATH;
         if (oauth2Info.getEmail() != null || oauth2Info.getName() != null) {
             String queryParams = buildQueryParams(oauth2Info);
-            return baseUrl + SIGNUP_PATH + queryParams;
+            return signupUrl + queryParams;
         }
-        return baseUrl + SIGNUP_PATH;
+        return signupUrl;
     }
 
     private String buildQueryParams(OAuth2LoginInfo oauth2Info) {

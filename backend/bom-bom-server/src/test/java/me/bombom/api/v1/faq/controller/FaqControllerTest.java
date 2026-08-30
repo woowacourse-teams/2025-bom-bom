@@ -35,6 +35,27 @@ class FaqControllerTest {
         });
     }
 
+    @Test
+    void FAQ_목록을_카테고리로_필터링하여_조회한다() {
+        Map<String, Object> result = RestAssured.given()
+                .accept(ContentType.JSON)
+                .queryParam("faqCategory", "NEWSLETTER")
+                .when()
+                .get("/api/v1/faqs")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(content(result)).hasSize(1);
+            softly.assertThat(content(result).get(0).get("question")).isEqualTo("질문2");
+            softly.assertThat(result.get("totalElements")).isEqualTo(1);
+        });
+    }
+
     @SuppressWarnings("unchecked")
     private static List<Map<String, Object>> content(Map<String, Object> page) {
         return (List<Map<String, Object>>) page.get("content");

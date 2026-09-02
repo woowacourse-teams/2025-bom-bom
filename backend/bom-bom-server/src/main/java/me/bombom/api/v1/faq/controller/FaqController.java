@@ -2,7 +2,7 @@ package me.bombom.api.v1.faq.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.faq.dto.FaqResponse;
-import me.bombom.api.v1.faq.dto.GetFaqsRequest;
+import me.bombom.api.v1.faq.dto.GetFaqsOptionsRequest;
 import me.bombom.api.v1.faq.service.FaqService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +22,7 @@ public class FaqController implements FaqControllerApi {
     @Override
     @GetMapping
     public Page<FaqResponse> getFaqs(
-            @ModelAttribute GetFaqsRequest request,
+            @ModelAttribute GetFaqsOptionsRequest request,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         return faqService.getFaqs(request, pageable);

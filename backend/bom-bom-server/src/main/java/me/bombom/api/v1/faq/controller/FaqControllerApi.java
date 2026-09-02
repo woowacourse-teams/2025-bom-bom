@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.faq.dto.FaqResponse;
-import me.bombom.api.v1.faq.dto.GetFaqsRequest;
+import me.bombom.api.v1.faq.dto.GetFaqsOptionsRequest;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,5 +20,5 @@ public interface FaqControllerApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "FAQ 목록 조회 성공")
     })
-    Page<FaqResponse> getFaqs(@ParameterObject GetFaqsRequest request, @ParameterObject Pageable pageable);
+    Page<FaqResponse> getFaqs(@ParameterObject GetFaqsOptionsRequest request, @ParameterObject Pageable pageable);
 }

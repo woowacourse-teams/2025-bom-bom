@@ -9,7 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.faq.domain.Faq;
 import me.bombom.api.v1.faq.domain.FaqCategory;
-import me.bombom.api.v1.faq.dto.GetFaqsRequest;
+import me.bombom.api.v1.faq.dto.GetFaqsOptionsRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -20,7 +20,7 @@ public class FaqRepositoryImpl implements CustomFaqRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Faq> findFaqs(GetFaqsRequest request, Pageable pageable) {
+    public Page<Faq> findFaqs(GetFaqsOptionsRequest request, Pageable pageable) {
         List<Faq> content = jpaQueryFactory
                 .selectFrom(faq)
                 .where(categoryEq(request.faqCategory()))

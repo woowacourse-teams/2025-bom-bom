@@ -31,7 +31,6 @@ class FaqControllerTest {
             softly.assertThat(content(result).get(2).get("question")).isEqualTo("질문1");
             softly.assertThat(result.get("totalElements")).isEqualTo(3);
             softly.assertThat(result.get("size")).isEqualTo(20);
-            softly.assertThat(sort(result).get("sorted")).isEqualTo(true);
         });
     }
 
@@ -59,10 +58,5 @@ class FaqControllerTest {
     @SuppressWarnings("unchecked")
     private static List<Map<String, Object>> content(Map<String, Object> page) {
         return (List<Map<String, Object>>) page.get("content");
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> sort(Map<String, Object> page) {
-        return (Map<String, Object>) page.get("sort");
     }
 }

@@ -49,10 +49,10 @@ public class SessionCleanupService {
     @Transactional
     public int cleanupExpiredSessionsCompletely() {
         long currentTimeMillis = System.currentTimeMillis();
-        // 추가로 30일 이상 된 세션도 정리
-        long thirtyDaysAgoMillis = currentTimeMillis - Duration.ofDays(30).toMillis();
-        
-        int deletedCount = sessionManagerRepository.deleteExpiredAndOldSessions(currentTimeMillis, thirtyDaysAgoMillis);
+        // 추가로 120일 이상 된 세션도 정리
+        long oldSessionThresholdMillis = currentTimeMillis - Duration.ofDays(120).toMillis();
+
+        int deletedCount = sessionManagerRepository.deleteExpiredAndOldSessions(currentTimeMillis, oldSessionThresholdMillis);
         
         if (deletedCount > 0) {
             log.info("철저한 세션 정리 완료 - 삭제된 세션 수: {}", deletedCount);

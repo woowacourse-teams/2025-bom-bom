@@ -2,6 +2,7 @@ package me.bombom.api.v1.faq.service;
 
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.faq.dto.FaqResponse;
+import me.bombom.api.v1.faq.dto.GetFaqsOptionsRequest;
 import me.bombom.api.v1.faq.repository.FaqRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +16,8 @@ public class FaqService {
 
     private final FaqRepository faqRepository;
 
-    public Page<FaqResponse> getFaqs(Pageable pageable) {
-        return faqRepository.findAll(pageable)
+    public Page<FaqResponse> getFaqs(GetFaqsOptionsRequest request, Pageable pageable) {
+        return faqRepository.findFaqs(request, pageable)
                 .map(FaqResponse::from);
     }
 }

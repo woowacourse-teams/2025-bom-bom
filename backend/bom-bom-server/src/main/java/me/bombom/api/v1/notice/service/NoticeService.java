@@ -1,6 +1,7 @@
 package me.bombom.api.v1.notice.service;
 
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.notice.domain.NoticeVisibility;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
 import me.bombom.api.v1.notice.repository.NoticeRepository;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
 
     public Page<NoticeResponse> getNotices(Pageable pageable) {
-        return noticeRepository.findAll(pageable)
+        return noticeRepository.findAllByVisibility(NoticeVisibility.PUBLIC, pageable)
                 .map(NoticeResponse::from);
     }
 }

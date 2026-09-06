@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,16 +33,27 @@ public class Notice extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private NoticeCategory noticeCategory;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private NoticeVisibility visibility;
+
+    @Column(nullable = false)
+    private boolean isRepresentative;
+
     @Builder
     public Notice(
             Long id,
             @NonNull String title,
             @NonNull String content,
-            @NonNull NoticeCategory noticeCategory
+            @NonNull NoticeCategory noticeCategory,
+            @NonNull NoticeVisibility visibility,
+            Boolean isRepresentative
     ) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.noticeCategory = noticeCategory;
+        this.visibility = visibility;
+        this.isRepresentative = isRepresentative != null && isRepresentative;
     }
 }

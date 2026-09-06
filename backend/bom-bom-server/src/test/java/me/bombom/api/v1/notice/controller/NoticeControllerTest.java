@@ -12,18 +12,11 @@ import org.junit.jupiter.api.Test;
 @AcceptanceTest("acceptance/notice/get-notices.json")
 class NoticeControllerTest {
 
+    private static final int PRIVATE_NOTICE_ID = 4;
+
     @Test
     void 공지_목록을_생성일_내림차순과_ID_오름차순으로_페이지네이션하여_조회한다() {
-        Map<String, Object> result = RestAssured.given()
-                .accept(ContentType.JSON)
-                .when()
-                .get("/api/v1/notices")
-                .then()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .extract()
-                .jsonPath()
-                .getMap("$");
+        Map<String, Object> result = getNotices();
 
         assertSoftly(softly -> {
             softly.assertThat(content(result).get(0).get("title")).isEqualTo("공지3");
@@ -33,6 +26,35 @@ class NoticeControllerTest {
             softly.assertThat(result.get("size")).isEqualTo(20);
             softly.assertThat(sort(result).get("sorted")).isEqualTo(true);
         });
+    }
+
+    @Test
+    void 비공개_공지는_목록에서_제외된다() {
+        Map<String, Object> result = getNotices();
+
+        assertSoftly(softly -> {
+            softly.assertThat(noticeIds(result)).doesNotContain(PRIVATE_NOTICE_ID);
+            softly.assertThat(result.get("totalElements")).isEqualTo(3);
+        });
+    }
+
+    private static Map<String, Object> getNotices() {
+        return RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/notices")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+    }
+
+    private static List<Object> noticeIds(Map<String, Object> page) {
+        return content(page).stream()
+                .map(notice -> notice.get("noticeId"))
+                .toList();
     }
 
     @SuppressWarnings("unchecked")

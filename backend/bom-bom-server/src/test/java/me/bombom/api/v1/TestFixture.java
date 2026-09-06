@@ -46,6 +46,7 @@ import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
 import me.bombom.api.v1.newsletter.domain.NewsletterSource;
 import me.bombom.api.v1.notice.domain.Notice;
 import me.bombom.api.v1.notice.domain.NoticeCategory;
+import me.bombom.api.v1.notice.domain.NoticeVisibility;
 import me.bombom.api.v1.pet.domain.Pet;
 import me.bombom.api.v1.pet.domain.Stage;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
@@ -613,6 +614,7 @@ public final class TestFixture {
                 .title(title)
                 .content("content")
                 .noticeCategory(noticeCategory)
+                .visibility(NoticeVisibility.PUBLIC)
                 .build();
     }
 

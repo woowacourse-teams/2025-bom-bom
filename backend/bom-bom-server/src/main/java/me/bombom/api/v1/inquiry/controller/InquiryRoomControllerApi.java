@@ -8,6 +8,9 @@ import jakarta.validation.Valid;
 import me.bombom.api.v1.inquiry.dto.CreateInquiryRoomRequest;
 import me.bombom.api.v1.inquiry.dto.InquiryRoomResponse;
 import me.bombom.api.v1.member.domain.Member;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Tag(name = "Inquiry", description = "1:1 문의 관련 API")
 public interface InquiryRoomControllerApi {
@@ -21,4 +24,14 @@ public interface InquiryRoomControllerApi {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 (회원/비회원 식별 불가 등)")
     })
     InquiryRoomResponse createRoom(Member member, String guestId, @Valid CreateInquiryRoomRequest request);
+
+    @Operation(
+            summary = "문의 채팅방 목록 조회",
+            description = "생성일 최신순으로 문의 채팅방 목록을 조회합니다. 종료된 채팅방도 포함됩니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "채팅방 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 (회원/비회원 식별 불가 등)")
+    })
+    Page<InquiryRoomResponse> getRooms(Member member, String guestId, @ParameterObject Pageable pageable);
 }

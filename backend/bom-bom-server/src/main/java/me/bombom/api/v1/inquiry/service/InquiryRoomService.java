@@ -7,6 +7,8 @@ import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,13 @@ public class InquiryRoomService {
 
         InquiryRoom saved = inquiryRoomRepository.save(room);
         return InquiryRoomResponse.from(saved);
+    }
+
+    public Page<InquiryRoomResponse> getRooms(InquiryRequester requester, Pageable pageable) {
+        validateRequester(requester);
+
+        return inquiryRoomRepository.findRoomsByRequester(requester.memberId(), requester.guestId(), pageable)
+                .map(InquiryRoomResponse::from);
     }
 
     private void validateRequester(InquiryRequester requester) {

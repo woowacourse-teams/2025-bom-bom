@@ -9,6 +9,10 @@ import me.bombom.api.v1.inquiry.dto.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.resolver.GuestId;
 import me.bombom.api.v1.inquiry.service.InquiryRoomService;
 import me.bombom.api.v1.member.domain.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +34,17 @@ public class InquiryRoomController implements InquiryRoomControllerApi {
     ) {
         InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
         return inquiryRoomService.createRoom(requester, request.categoryId());
+    }
+
+    @Override
+    @GetMapping
+    public Page<InquiryRoomResponse> getRooms(
+            @LoginMember(anonymous = true) Member member,
+            @GuestId String guestId,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        return inquiryRoomService.getRooms(requester, pageable);
     }
 
     private Long memberId(Member member) {

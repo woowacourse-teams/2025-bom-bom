@@ -1,0 +1,38 @@
+package me.bombom.api.v1.inquiry.service;
+
+import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.inquiry.domain.InquiryRoom;
+import me.bombom.api.v1.inquiry.dto.InquiryRequester;
+import me.bombom.api.v1.inquiry.dto.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class InquiryRoomService {
+
+    private final InquiryRoomRepository inquiryRoomRepository;
+
+    @Transactional
+    public InquiryRoomResponse createRoom(InquiryRequester requester, Long categoryId) {
+        validateRequester(requester);
+
+        InquiryRoom room = requester.isMember()
+                ? InquiryRoom.createMemberInquiryRoom(requester.memberId(), categoryId)
+                : InquiryRoom.createGuestInquiryRoom(requester.guestId(), categoryId);
+
+        InquiryRoom saved = inquiryRoomRepository.save(room);
+        return InquiryRoomResponse.from(saved);
+    }
+
+    private void validateRequester(InquiryRequester requester) {
+        if (requester.memberId() == null && requester.guestId() == null) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext("reason", "member_id_or_guest_id_required");
+        }
+    }
+}

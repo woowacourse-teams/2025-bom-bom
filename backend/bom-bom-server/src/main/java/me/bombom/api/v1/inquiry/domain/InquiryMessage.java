@@ -44,4 +44,12 @@ public class InquiryMessage extends BaseEntity {
     public static InquiryMessage createUserMessage(Long roomId, String content) {
         return new InquiryMessage(roomId, InquirySenderType.USER, null, content);
     }
+
+    public boolean isWrittenByUser() {
+        return this.senderType == InquirySenderType.USER;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

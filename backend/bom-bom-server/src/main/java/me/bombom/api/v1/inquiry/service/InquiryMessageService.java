@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryMessage;
 import me.bombom.api.v1.inquiry.domain.InquiryMessageImage;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
@@ -12,6 +14,7 @@ import me.bombom.api.v1.inquiry.dto.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.SendInquiryMessageRequest;
+import me.bombom.api.v1.inquiry.dto.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageImageRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,49 @@ public class InquiryMessageService {
                 .collect(Collectors.groupingBy(InquiryMessageImage::getMessageId));
 
         return InquiryMessagePageResponse.of(pageMessages, imagesByMessageId, hasNext);
+    }
+
+    @Transactional
+    public InquiryMessageResponse updateMessage(
+            InquiryRequester requester, Long roomId, Long messageId, UpdateInquiryMessageRequest request
+    ) {
+        inquiryRoomService.getOwnedRoom(roomId, requester);
+        InquiryMessage message = getMessageInRoom(roomId, messageId);
+        validateWrittenByUser(message);
+
+        message.updateContent(request.content());
+        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(List.of(messageId));
+        return InquiryMessageResponse.of(message, images);
+    }
+
+    @Transactional
+    public void deleteMessage(InquiryRequester requester, Long roomId, Long messageId) {
+        inquiryRoomService.getOwnedRoom(roomId, requester);
+        InquiryMessage message = getMessageInRoom(roomId, messageId);
+        validateWrittenByUser(message);
+
+        inquiryMessageImageRepository.deleteByMessageId(messageId);
+        inquiryMessageRepository.delete(message);
+    }
+
+    private InquiryMessage getMessageInRoom(Long roomId, Long messageId) {
+        InquiryMessage message = inquiryMessageRepository.findById(messageId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext("messageId", messageId));
+
+        if (!message.getRoomId().equals(roomId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("messageId", messageId)
+                    .addContext("roomId", roomId);
+        }
+        return message;
+    }
+
+    private void validateWrittenByUser(InquiryMessage message) {
+        if (!message.isWrittenByUser()) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext("messageId", message.getId());
+        }
     }
 
     private List<InquiryMessageImage> saveImages(Long messageId, List<String> imageUrls) {

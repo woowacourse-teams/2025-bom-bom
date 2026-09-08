@@ -38,6 +38,21 @@ public class InquiryRoomService {
                 .map(InquiryRoomResponse::from);
     }
 
+    public InquiryRoom getOwnedRoom(Long roomId, InquiryRequester requester) {
+        validateRequester(requester);
+
+        InquiryRoom room = inquiryRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext("roomId", roomId));
+
+        if (!room.isOwnedBy(requester.memberId(), requester.guestId())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext("roomId", roomId);
+        }
+
+        return room;
+    }
+
     private void validateRequester(InquiryRequester requester) {
         if (requester.memberId() == null && requester.guestId() == null) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)

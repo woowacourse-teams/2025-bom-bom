@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -60,5 +61,12 @@ public class InquiryRoom extends BaseEntity {
 
     public static InquiryRoom createGuestInquiryRoom(String guestId, Long categoryId) {
         return new InquiryRoom(null, guestId, categoryId);
+    }
+
+    public boolean isOwnedBy(Long memberId, String guestId) {
+        if (this.memberId != null) {
+            return Objects.equals(this.memberId, memberId);
+        }
+        return Objects.equals(this.guestId, guestId);
     }
 }

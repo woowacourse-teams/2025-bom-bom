@@ -2,10 +2,13 @@ package me.bombom.api.v1.inquiry.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.inquiry.domain.InquiryMessage;
 import me.bombom.api.v1.inquiry.domain.InquiryMessageImage;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
+import me.bombom.api.v1.inquiry.dto.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.SendInquiryMessageRequest;
@@ -32,6 +35,21 @@ public class InquiryMessageService {
         List<InquiryMessageImage> images = saveImages(message.getId(), request.imageUrls());
 
         return InquiryMessageResponse.of(message, images);
+    }
+
+    public InquiryMessagePageResponse getMessages(InquiryRequester requester, Long roomId, Long cursor, int size) {
+        inquiryRoomService.getOwnedRoom(roomId, requester);
+
+        List<InquiryMessage> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor, size + 1);
+        boolean hasNext = messages.size() > size;
+        List<InquiryMessage> pageMessages = hasNext ? messages.subList(0, size) : messages;
+
+        List<Long> messageIds = pageMessages.stream().map(InquiryMessage::getId).toList();
+        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(messageIds);
+        Map<Long, List<InquiryMessageImage>> imagesByMessageId = images.stream()
+                .collect(Collectors.groupingBy(InquiryMessageImage::getMessageId));
+
+        return InquiryMessagePageResponse.of(pageMessages, imagesByMessageId, hasNext);
     }
 
     private List<InquiryMessageImage> saveImages(Long messageId, List<String> imageUrls) {

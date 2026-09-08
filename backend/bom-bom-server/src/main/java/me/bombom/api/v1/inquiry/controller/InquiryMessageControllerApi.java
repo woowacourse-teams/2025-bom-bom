@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import me.bombom.api.v1.inquiry.dto.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.dto.SendInquiryMessageRequest;
 import me.bombom.api.v1.member.domain.Member;
@@ -27,5 +28,22 @@ public interface InquiryMessageControllerApi {
             String guestId,
             @Parameter(description = "채팅방 ID") Long roomId,
             @Valid SendInquiryMessageRequest request
+    );
+
+    @Operation(
+            summary = "문의 메시지 조회",
+            description = "채팅방의 메시지를 커서 기반으로 조회합니다. cursor가 없으면 최신 메시지부터 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "메시지 조회 성공"),
+            @ApiResponse(responseCode = "403", description = "본인 소유 채팅방이 아님"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 채팅방")
+    })
+    InquiryMessagePageResponse getMessages(
+            Member member,
+            String guestId,
+            @Parameter(description = "채팅방 ID") Long roomId,
+            @Parameter(description = "커서 (마지막으로 받은 메시지 ID)") Long cursor,
+            @Parameter(description = "조회 개수") int size
     );
 }

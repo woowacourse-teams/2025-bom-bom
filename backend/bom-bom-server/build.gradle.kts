@@ -96,6 +96,7 @@ dependencies {
     // AWS SDK
     implementation(platform("software.amazon.awssdk:bom:2.41.21"))
     implementation("software.amazon.awssdk:lambda")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.2")
 
     // Annotations
     implementation("jakarta.annotation:jakarta.annotation-api")

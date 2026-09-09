@@ -7,6 +7,7 @@ import io.restassured.http.ContentType;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import org.junit.jupiter.api.Test;
 
 @AcceptanceTest("acceptance/inquiry/upload-images.json")
@@ -16,6 +17,7 @@ class InquiryImageControllerTest {
     void 이미지_한_장을_업로드한다() {
         Map<String, Object> result = RestAssured.given()
                 .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
                 .multiPart("images", "photo.png", "content".getBytes(), "image/png")
                 .when()
                 .post("/api/v1/inquiries/images")
@@ -34,6 +36,7 @@ class InquiryImageControllerTest {
     void 이미지_여러_장을_한번에_업로드한다() {
         Map<String, Object> result = RestAssured.given()
                 .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
                 .multiPart("images", "photo1.png", "content1".getBytes(), "image/png")
                 .multiPart("images", "photo2.png", "content2".getBytes(), "image/png")
                 .when()
@@ -51,6 +54,7 @@ class InquiryImageControllerTest {
     void 이미지가_4장을_초과하면_거부한다() {
         RestAssured.given()
                 .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
                 .multiPart("images", "1.png", "1".getBytes(), "image/png")
                 .multiPart("images", "2.png", "2".getBytes(), "image/png")
                 .multiPart("images", "3.png", "3".getBytes(), "image/png")

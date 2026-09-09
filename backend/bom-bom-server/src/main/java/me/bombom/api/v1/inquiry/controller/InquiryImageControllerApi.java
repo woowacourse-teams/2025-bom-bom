@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import me.bombom.api.v1.inquiry.dto.InquiryImageUploadResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryImageUploadResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.multipart.MultipartFile;
 

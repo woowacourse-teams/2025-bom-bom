@@ -6,10 +6,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import me.bombom.api.v1.inquiry.dto.InquiryMessagePageResponse;
-import me.bombom.api.v1.inquiry.dto.InquiryMessageResponse;
-import me.bombom.api.v1.inquiry.dto.SendInquiryMessageRequest;
-import me.bombom.api.v1.inquiry.dto.UpdateInquiryMessageRequest;
+import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
+import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
+import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
 import me.bombom.api.v1.member.domain.Member;
 
 @Tag(name = "Inquiry", description = "1:1 문의 관련 API")

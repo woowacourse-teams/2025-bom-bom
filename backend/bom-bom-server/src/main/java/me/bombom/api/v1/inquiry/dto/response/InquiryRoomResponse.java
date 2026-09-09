@@ -1,4 +1,4 @@
-package me.bombom.api.v1.inquiry.dto;
+package me.bombom.api.v1.inquiry.dto.response;
 
 import java.time.LocalDateTime;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;

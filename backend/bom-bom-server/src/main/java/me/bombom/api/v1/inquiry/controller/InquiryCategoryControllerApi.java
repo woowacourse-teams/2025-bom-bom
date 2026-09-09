@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import me.bombom.api.v1.inquiry.dto.InquiryCategoryResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryCategoryResponse;
 
 @Tag(name = "Inquiry", description = "1:1 문의 관련 API")
 public interface InquiryCategoryControllerApi {

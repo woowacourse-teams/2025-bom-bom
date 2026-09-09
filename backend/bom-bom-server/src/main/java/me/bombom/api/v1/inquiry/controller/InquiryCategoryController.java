@@ -2,7 +2,7 @@ package me.bombom.api.v1.inquiry.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.inquiry.dto.InquiryCategoryResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryCategoryResponse;
 import me.bombom.api.v1.inquiry.service.InquiryCategoryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

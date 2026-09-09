@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import me.bombom.api.v1.inquiry.dto.InquiryImageUploadResponse;
+import me.bombom.api.v1.member.domain.Member;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Inquiry", description = "1:1 문의 관련 API")
@@ -17,7 +18,7 @@ public interface InquiryImageControllerApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이미지 업로드 성공"),
-            @ApiResponse(responseCode = "400", description = "이미지 개수가 4장을 초과함")
+            @ApiResponse(responseCode = "400", description = "이미지 개수가 4장을 초과하거나, 이미지 형식이 아니거나, 요청자를 식별할 수 없음")
     })
-    InquiryImageUploadResponse uploadImages(List<MultipartFile> images);
+    InquiryImageUploadResponse uploadImages(Member member, String guestId, List<MultipartFile> images);
 }

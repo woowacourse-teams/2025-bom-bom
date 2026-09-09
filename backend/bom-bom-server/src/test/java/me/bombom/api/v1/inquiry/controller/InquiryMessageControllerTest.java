@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -61,6 +62,25 @@ class InquiryMessageControllerTest {
     @Test
     void 내용이_비어있으면_거부한다() {
         sendMessage(1, "", List.of())
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 이미지_URL_중_빈_문자열이_있으면_거부한다() {
+        List<String> imageUrls = new ArrayList<>(List.of("https://s3/img1.png"));
+        imageUrls.add("");
+
+        sendMessage(1, "빈 URL 포함", imageUrls)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 이미지_URL이_512자를_초과하면_거부한다() {
+        String longUrl = "https://s3/" + "a".repeat(510);
+
+        sendMessage(1, "긴 URL", List.of(longUrl))
                 .then()
                 .statusCode(400);
     }

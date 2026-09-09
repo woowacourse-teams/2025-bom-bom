@@ -38,7 +38,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             @PathVariable Long roomId,
             @Valid @RequestBody SendInquiryMessageRequest request
     ) {
-        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryMessageService.sendMessage(requester, roomId, request);
     }
 
@@ -51,7 +51,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "20") int size
     ) {
-        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryMessageService.getMessages(requester, roomId, cursor, size);
     }
 
@@ -64,7 +64,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             @PathVariable Long messageId,
             @Valid @RequestBody UpdateInquiryMessageRequest request
     ) {
-        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryMessageService.updateMessage(requester, roomId, messageId, request);
     }
 
@@ -77,11 +77,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             @PathVariable Long roomId,
             @PathVariable Long messageId
     ) {
-        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
         inquiryMessageService.deleteMessage(requester, roomId, messageId);
-    }
-
-    private Long memberId(Member member) {
-        return member == null ? null : member.getId();
     }
 }

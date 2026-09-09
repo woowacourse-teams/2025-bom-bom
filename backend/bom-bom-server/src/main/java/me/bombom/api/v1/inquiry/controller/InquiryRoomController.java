@@ -32,7 +32,7 @@ public class InquiryRoomController implements InquiryRoomControllerApi {
             @GuestId String guestId,
             @Valid @RequestBody CreateInquiryRoomRequest request
     ) {
-        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryRoomService.createRoom(requester, request.categoryId());
     }
 
@@ -43,11 +43,7 @@ public class InquiryRoomController implements InquiryRoomControllerApi {
             @GuestId String guestId,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        InquiryRequester requester = new InquiryRequester(memberId(member), guestId);
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryRoomService.getRooms(requester, pageable);
-    }
-
-    private Long memberId(Member member) {
-        return member == null ? null : member.getId();
     }
 }

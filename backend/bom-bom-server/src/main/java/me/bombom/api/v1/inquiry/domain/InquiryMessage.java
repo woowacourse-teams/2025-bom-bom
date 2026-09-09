@@ -31,7 +31,7 @@ public class InquiryMessage extends BaseEntity {
     @Column
     private Long adminId;
 
-    @Column(nullable = false, length = 500)
+    @Column(length = 500)
     private String content;
 
     private InquiryMessage(Long roomId, InquirySenderType senderType, Long adminId, String content) {
@@ -42,7 +42,7 @@ public class InquiryMessage extends BaseEntity {
     }
 
     public static InquiryMessage createUserMessage(Long roomId, String content) {
-        return new InquiryMessage(roomId, InquirySenderType.USER, null, content);
+        return new InquiryMessage(roomId, InquirySenderType.USER, null, content == null ? "" : content);
     }
 
     public boolean isWrittenByUser() {

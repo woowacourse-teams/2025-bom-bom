@@ -32,6 +32,7 @@ public class InquiryMessageService {
 
     @Transactional
     public InquiryMessageResponse sendMessage(InquiryRequester requester, Long roomId, SendInquiryMessageRequest request) {
+        validateContentOrImages(request);
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
         InquiryMessage message = inquiryMessageRepository.save(InquiryMessage.createUserMessage(room.getId(), request.content()));
@@ -76,6 +77,15 @@ public class InquiryMessageService {
 
         inquiryMessageImageRepository.deleteByMessageId(messageId);
         inquiryMessageRepository.delete(message);
+    }
+
+    private void validateContentOrImages(SendInquiryMessageRequest request) {
+        boolean hasContent = request.content() != null && !request.content().isEmpty();
+        boolean hasImages = !CollectionUtils.isEmpty(request.imageUrls());
+        if (!hasContent && !hasImages) {
+            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
+                    .addContext("reason", "content_or_images_required");
+        }
     }
 
     private InquiryMessage getMessageInRoom(Long roomId, Long messageId) {

@@ -8,6 +8,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
@@ -60,10 +61,28 @@ class InquiryMessageControllerTest {
     }
 
     @Test
-    void 내용이_비어있으면_거부한다() {
+    void 내용과_이미지가_모두_없으면_거부한다() {
         sendMessage(1, "", List.of())
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 내용_없이_이미지만_보낼_수_있다() {
+        List<String> imageUrls = List.of("https://s3/img1.png");
+
+        Map<String, Object> result = sendMessage(1, null, imageUrls)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("content")).isEqualTo("");
+            softly.assertThat((List<String>) result.get("imageUrls")).isEqualTo(imageUrls);
+        });
     }
 
     @Test
@@ -273,11 +292,14 @@ class InquiryMessageControllerTest {
     }
 
     private static Response sendMessage(long roomId, String content, List<String> imageUrls) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("content", content);
+        body.put("imageUrls", imageUrls);
         return RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, 1)
-                .body(Map.of("content", content, "imageUrls", imageUrls))
+                .body(body)
                 .when()
                 .post("/api/v1/inquiries/rooms/{roomId}/messages", roomId);
     }

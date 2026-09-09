@@ -32,7 +32,7 @@ CREATE TABLE inquiry_message (
     room_id BIGINT NOT NULL,
     sender_type VARCHAR(10) NOT NULL,
     admin_id BIGINT NULL,
-    content VARCHAR(500) NOT NULL,
+    content VARCHAR(500) NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.bombom.api.v1.auth.diagnostic.DiagnosticOAuth2UserService;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import me.bombom.api.v1.auth.dto.PendingOAuth2Member;
 import me.bombom.api.v1.auth.dto.request.NativeLoginRequest;
@@ -15,7 +16,6 @@ import me.bombom.api.v1.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -34,7 +34,7 @@ import org.springframework.web.client.RestClient;
 @Transactional(readOnly = true)
 public class GoogleOAuth2LoginService implements OAuth2LoginService {
 
-    private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
+    private final DiagnosticOAuth2UserService defaultOAuth2UserService;
     private final MemberRepository memberRepository;
     private final HttpSession session;
     private final RestClient.Builder restClientBuilder;

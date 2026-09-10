@@ -2,6 +2,8 @@ package me.bombom.api.v1.inquiry.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class InquiryImageService {
 
     private static final String IMAGE_PREFIX = "inquiry";
+    private static final DateTimeFormatter DATE_PATH_FORMATTER = DateTimeFormatter.ofPattern("yyyyMM");
     private static final int MAX_IMAGE_COUNT = 4;
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/png", "image/jpeg", "image/gif", "image/webp");
 
@@ -76,6 +79,7 @@ public class InquiryImageService {
     private String createObjectKey(MultipartFile image) {
         String ext = StringUtils.getFilenameExtension(image.getOriginalFilename());
         String fileName = StringUtils.hasText(ext) ? UUID.randomUUID() + "." + ext : UUID.randomUUID().toString();
-        return IMAGE_PREFIX + "/" + fileName;
+        String datePath = LocalDate.now().format(DATE_PATH_FORMATTER);
+        return IMAGE_PREFIX + "/" + datePath + "/" + fileName;
     }
 }

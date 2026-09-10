@@ -7,6 +7,10 @@ import java.util.function.Supplier;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.AppleOAuth2AccessTokenResponseClient;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
+import me.bombom.api.v1.auth.diagnostic.DiagnosticAuthorizationRequestRepository;
+import me.bombom.api.v1.auth.diagnostic.DiagnosticOAuth2TokenResponseClient;
+import me.bombom.api.v1.auth.diagnostic.OAuth2Diagnostics;
+import me.bombom.api.v1.auth.diagnostic.OAuth2DiagnosticsFilter;
 import me.bombom.api.v1.auth.handler.OAuth2LoginFailureHandler;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
 import me.bombom.api.v1.auth.resolver.AppleAuthorizationRequestResolver;
@@ -28,9 +32,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
-import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -76,9 +80,11 @@ public class SecurityConfig {
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
             OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
             OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient,
-            ClientRegistrationRepository clientRegistrationRepository
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2Diagnostics diagnostics
     ) throws Exception {
         http
+                .addFilterBefore(new OAuth2DiagnosticsFilter(diagnostics), OAuth2AuthorizationRequestRedirectFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
@@ -88,12 +94,16 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization ->
                                 authorization.authorizationRequestResolver(new AppleAuthorizationRequestResolver(clientRegistrationRepository))
+                                        .authorizationRequestRepository(new DiagnosticAuthorizationRequestRepository(diagnostics))
                         )
                         .tokenEndpoint(token -> token.accessTokenResponseClient(delegatingAccessTokenClient))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                                 .oidcUserService(appleOAuth2Service))
-                        .successHandler(oAuth2LoginSuccessHandler)
+                        .successHandler((request, response, authentication) -> {
+                            oAuth2LoginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+                            diagnostics.emit("oauth_login_succeeded", false);
+                        })
                         .failureHandler(oAuth2LoginFailureHandler));
 
         return http.build();
@@ -155,15 +165,15 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
-            AppleOAuth2AccessTokenResponseClient appleClient
+            AppleOAuth2AccessTokenResponseClient appleClient,
+            DiagnosticOAuth2TokenResponseClient diagnosticGoogleTokenClient
     ) {
-        var defaultClient = new RestClientAuthorizationCodeTokenResponseClient();
         return request -> {
             String registrationId = request.getClientRegistration().getRegistrationId();
             if ("apple".equals(registrationId)) {
                 return appleClient.getTokenResponse(request);
             }
-            return defaultClient.getTokenResponse(request);
+            return diagnosticGoogleTokenClient.getTokenResponse(request);
         };
     }
 

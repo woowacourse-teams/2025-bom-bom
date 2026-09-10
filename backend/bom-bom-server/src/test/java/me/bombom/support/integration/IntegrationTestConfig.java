@@ -5,6 +5,7 @@ import me.bombom.support.auth.FakeAppleOAuth2Service;
 import me.bombom.support.auth.FakeOAuth2LoginSuccessHandler;
 import me.bombom.support.notification.FakeDiscordWebhookNotifier;
 import me.bombom.support.persistence.CleanUp;
+import me.bombom.support.s3.FakeS3ImageUploader;
 import me.bombom.support.subscribe.FakeUnsubscribeAgent;
 import me.bombom.support.time.MutableClock;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -46,6 +47,12 @@ public class IntegrationTestConfig {
     @Primary
     FakeAppleOAuth2Service fakeAppleOAuth2Service() {
         return new FakeAppleOAuth2Service();
+    }
+
+    @Bean
+    @Primary
+    FakeS3ImageUploader fakeS3ImageUploader() {
+        return new FakeS3ImageUploader();
     }
 
     @Bean

@@ -1,0 +1,21 @@
+{
+  "role": [
+    {
+      "id": 1,
+      "authority": "USER"
+    }
+  ],
+  "member": [
+    {
+      "id": 1,
+      "provider": "provider",
+      "provider_id": "inquiry-image-user",
+      "email": "inquiry-image-user@bombom.news",
+      "nickname": "문의이미지회원",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ]
+}

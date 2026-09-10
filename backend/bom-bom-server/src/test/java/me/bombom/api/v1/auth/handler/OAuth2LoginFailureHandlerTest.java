@@ -18,7 +18,7 @@ class OAuth2LoginFailureHandlerTest {
     @Test
     void 실패_로그는_민감정보_없이_구조화하고_기존_리다이렉트를_유지한다() throws Exception {
         OAuth2LoginFailureHandler handler = new OAuth2LoginFailureHandler(new me.bombom.api.v1.auth.diagnostic.OAuth2Diagnostics(
-                java.time.Clock.systemUTC(), "test-diagnostics-key", "JSESSIONID_PROD", "instance-1", "release-1"));
+                java.time.Clock.systemUTC(), "JSESSIONID_PROD", "instance-1"));
         ReflectionTestUtils.setField(handler, "frontendBaseUrl", "https://www.bombom.news");
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/login/oauth2/code/google");
         request.setParameter("state", "secret-state");

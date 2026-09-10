@@ -25,11 +25,6 @@ DATABASE="$(get_parameter DATABASE)"
 MYSQL_USER="$(get_parameter MYSQL_USER)"
 MYSQL_PASSWORD="$(get_parameter MYSQL_PASSWORD)"
 PROD_OTEL_ENDPOINT="$(get_parameter PROD_OTEL_ENDPOINT)"
-# Optional diagnostic key: missing configuration must not block authentication deployment.
-OAUTH_DIAGNOSTICS_HMAC_KEY="$(get_parameter OAUTH_DIAGNOSTICS_HMAC_KEY 2>/dev/null || true)"
-if [ -z "$OAUTH_DIAGNOSTICS_HMAC_KEY" ]; then
-  echo "OAuth diagnostic key unavailable; fingerprints will be process-scoped." >&2
-fi
 export OAUTH2_APPLE_PRIVATE_KEY
 OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$(get_parameter OAUTH2_APPLE_PRIVATE_KEY)")"
 
@@ -58,7 +53,6 @@ install -m 600 /dev/null "$ENV_FILE"
   printf 'MYSQL_PASSWORD=%s\n' "$MYSQL_PASSWORD"
   printf 'SPRING_PROFILES_ACTIVE=prod\n'
   printf 'PROD_OTEL_ENDPOINT=%s\n' "$PROD_OTEL_ENDPOINT"
-  printf 'OAUTH_DIAGNOSTICS_HMAC_KEY=%s\n' "$OAUTH_DIAGNOSTICS_HMAC_KEY"
 } > "$ENV_FILE"
 
 cd "$APP_DIR"

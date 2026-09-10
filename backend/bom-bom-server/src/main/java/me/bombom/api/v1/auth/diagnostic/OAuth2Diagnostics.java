@@ -6,33 +6,27 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 
-/** Request-thread scoped, allowlisted diagnostics. Never retain raw tokens in diagnostic context. */
+/** Callback-scoped diagnostics. Only allowlisted fields are logged; context is cleared by the filter. */
 @Slf4j
 @Component
 public class OAuth2Diagnostics {
@@ -45,33 +39,22 @@ public class OAuth2Diagnostics {
             "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile");
     private final ThreadLocal<Context> current = new ThreadLocal<>();
     private final Clock clock;
-    private final byte[] key;
-    private final String keyScope;
     private final String cookieName;
     private final String instance;
-    private final String release;
 
     public OAuth2Diagnostics(Clock clock,
-            @Value("${oauth.diagnostics.hmac-key:}") String hmacKey,
             @Value("${server.servlet.session.cookie.name:JSESSIONID}") String cookieName,
-            @Value("${APP_INSTANCE_ID:${HOSTNAME:unknown}}") String instance,
-            @Value("${APP_RELEASE:unknown}") String release) {
+            @Value("${HOSTNAME:unknown}") String instance) {
         this.clock = clock;
         this.cookieName = cookieName;
         this.instance = instance;
-        this.release = release;
-        this.keyScope = hmacKey.isBlank() ? "process" : "shared";
-        this.key = hmacKey.isBlank() ? new SecureRandom().generateSeed(32) : hmacKey.getBytes(StandardCharsets.UTF_8);
     }
 
     public void open(HttpServletRequest request) {
         current.set(new Context());
         update(context -> {
             Map<String, Object> fields = context.fields;
-            fields.put("fingerprint_scope", keyScope);
-            fields.put("fingerprint_key_id", fingerprint("key", "v1"));
             fields.put("instance_id", bounded(instance, 128));
-            fields.put("release", bounded(release, 256));
             fields.put("stage", "callback");
             fields.put("provider", provider(request.getRequestURI()));
             fields.put("session_present", request.getSession(false) != null);
@@ -90,8 +73,6 @@ public class OAuth2Diagnostics {
             fields.put("app_version", version(agent, "bombom/([0-9]+(?:\\.[0-9]+){0,3})"));
             fields.put("os_version", version(agent, "ios".equals(platform)
                     ? "(?:CPU (?:iPhone )?OS) ([0-9_]+)" : "Android ([0-9.]+)"));
-            String state = request.getParameter("state");
-            if (state != null && state.length() <= 4096) fields.put("attempt_id", fingerprint("state", state));
         });
     }
 
@@ -99,21 +80,7 @@ public class OAuth2Diagnostics {
         current.remove();
     }
 
-    public void attempt(String state) {
-        update(context -> {
-            if (state != null && state.length() <= 4096) context.fields.put("attempt_id", fingerprint("state", state));
-        });
-    }
-
-    String stateFingerprint(String state) {
-        try {
-            return state == null || state.length() > 4096 ? null : fingerprint("state", state);
-        } catch (RuntimeException e) {
-            return null;
-        }
-    }
-
-    public Map<String, Object> snapshot() {
+    Map<String, Object> snapshot() {
         Context context = current.get();
         return context == null ? Map.of() : Map.copyOf(context.fields);
     }
@@ -125,79 +92,56 @@ public class OAuth2Diagnostics {
         });
     }
 
-    public void tokenReceived(OAuth2AccessTokenResponse response) {
+    void userInfoToken(OAuth2AccessToken token) {
         update(context -> {
-            var token = response.getAccessToken();
-            context.receivedAt = clock.instant();
-            context.fields.put("issued_token_fingerprint", fingerprint("token", token.getTokenValue()));
-            context.fields.put("token_received_at", context.receivedAt.toString());
-            if (token.getIssuedAt() != null && token.getExpiresAt() != null) {
-                long lifetime = Duration.between(token.getIssuedAt(), token.getExpiresAt()).getSeconds();
-                context.expiresAt = context.receivedAt.plusSeconds(lifetime);
-                context.fields.put("token_lifetime_seconds", lifetime);
-            }
+            context.token = token;
+            context.fields.put("stage", "userinfo");
             context.fields.put("scopes", token.getScopes().stream().filter(SCOPES::contains).sorted().toList());
-            context.fields.put("token_exchange_success", true);
         });
-        emit("oauth_token_received", false);
     }
 
     public void outgoing(HttpRequest request) {
         update(context -> {
             Map<String, Object> fields = context.fields;
-            fields.remove("sent_token_fingerprint");
             fields.remove("token_matches_issued");
             List<String> values = request.getHeaders().getOrEmpty(HttpHeaders.AUTHORIZATION);
             fields.put("authorization_present", !values.isEmpty());
             var matcher = BEARER.matcher(values.size() == 1 ? values.getFirst() : "");
             boolean valid = matcher.matches();
             fields.put("authorization_scheme_valid", valid);
-            if (valid) {
-                String sent = fingerprint("token", matcher.group(1));
-                fields.put("sent_token_fingerprint", sent);
-                if (fields.containsKey("issued_token_fingerprint")) {
-                    fields.put("token_matches_issued", sent.equals(fields.get("issued_token_fingerprint")));
-                }
+            if (valid && context.token != null) {
+                fields.put("token_matches_issued", context.token.getTokenValue().equals(matcher.group(1)));
             }
+            if (context.token == null) return;
             Instant now = clock.instant();
-            if (context.receivedAt != null) fields.put("token_age_ms", Duration.between(context.receivedAt, now).toMillis());
-            if (context.expiresAt != null) {
-                fields.put("token_remaining_seconds", Duration.between(now, context.expiresAt).getSeconds());
-                fields.put("token_expired", !now.isBefore(context.expiresAt));
+            if (context.token.getIssuedAt() != null) {
+                fields.put("token_age_ms", Duration.between(context.token.getIssuedAt(), now).toMillis());
+            }
+            if (context.token.getExpiresAt() != null) {
+                fields.put("token_remaining_seconds", Duration.between(now, context.token.getExpiresAt()).getSeconds());
+                fields.put("token_expired", !now.isBefore(context.token.getExpiresAt()));
             }
         });
     }
 
-    public ClientHttpRequestInterceptor interceptor(String stage) {
+    public ClientHttpRequestInterceptor interceptor() {
         return (request, body, execution) -> {
-            record("stage", stage);
-            record(stage + "_host", request.getURI().getHost());
-            record(stage + "_path", request.getURI().getPath());
-            if ("userinfo".equals(stage)) outgoing(request);
+            update(context -> {
+                context.fields.put("userinfo_host", request.getURI().getHost());
+                context.fields.put("userinfo_path", request.getURI().getPath());
+            });
+            outgoing(request);
             long started = System.nanoTime();
             try {
                 var response = execution.execute(request, body);
-                // A diagnostics read must not close, consume, or replace the actual response.
                 try {
-                    record(stage + "_status", response.getStatusCode().value());
-                    for (String header : List.of("x-request-id", "x-goog-request-id")) {
-                        String requestId = response.getHeaders().getFirst(header);
-                        if (requestId != null && requestId.matches("[A-Za-z0-9_-]{8,128}")) {
-                            record(stage + "_request_id", requestId);
-                            break;
-                        }
-                    }
-                    String challenge = response.getHeaders().getFirst(HttpHeaders.WWW_AUTHENTICATE);
-                    if (challenge != null && challenge.length() <= 1024) {
-                        var matcher = Pattern.compile("error=\"([a-z_]+)\"").matcher(challenge);
-                        if (matcher.find()) record(stage + "_auth_error", knownError(matcher.group(1)));
-                    }
+                    record("userinfo_status", response.getStatusCode().value());
                 } catch (Exception ignored) {
                     record("diagnostic_error", true);
                 }
                 return response;
             } finally {
-                record(stage + "_duration_ms", (System.nanoTime() - started) / 1_000_000);
+                record("userinfo_duration_ms", (System.nanoTime() - started) / 1_000_000);
             }
         };
     }
@@ -236,26 +180,22 @@ public class OAuth2Diagnostics {
         boolean standalone = current.get() == null;
         try {
             if (standalone) open(request);
-            failed(failure);
+            failureDetails(failure);
+            update(context -> {
+                Span.current().setAttribute("auth.outcome", "failure");
+                Span.current().setStatus(StatusCode.ERROR);
+            });
+            emitFailure();
         } finally {
             if (standalone) close();
         }
     }
 
-    public void failed(Throwable failure) {
-        failureDetails(failure);
+    private void emitFailure() {
         update(context -> {
-            Span.current().setAttribute("auth.outcome", "failure");
-            Span.current().setStatus(StatusCode.ERROR);
-        });
-        emit("oauth_login_failed", true);
-    }
-
-    public void emit(String event, boolean warning) {
-        update(context -> {
-            Map<String, Object> fields = new LinkedHashMap<>(context.fields);
-            fields.put("event", event);
-            if ("oauth_login_failed".equals(event)) fields.put("message", "OAuth2 로그인 실패");
+            Map<String, Object> fields = new LinkedHashMap<>(snapshot());
+            fields.put("event", "oauth_login_failed");
+            fields.put("message", "OAuth2 로그인 실패");
             var span = Span.current().getSpanContext();
             fields.put("trace_id", span.getTraceId());
             fields.put("span_id", span.getSpanId());
@@ -266,8 +206,7 @@ public class OAuth2Diagnostics {
             } catch (Exception ignored) {
                 message = "{\"event\":\"oauth_diagnostic_error\"}";
             }
-            if (warning) log.warn("{}", message);
-            else log.info("{}", message);
+            log.warn("{}", message);
         });
     }
 
@@ -278,17 +217,6 @@ public class OAuth2Diagnostics {
             action.accept(context);
         } catch (RuntimeException ignored) {
             context.fields.put("diagnostic_error", true);
-        }
-    }
-
-    private String fingerprint(String purpose, String value) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(key, "HmacSHA256"));
-            mac.update((purpose + "\0").getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)), 0, 16);
-        } catch (GeneralSecurityException e) {
-            throw new IllegalStateException("OAuth diagnostic fingerprint unavailable", e);
         }
     }
 
@@ -312,7 +240,6 @@ public class OAuth2Diagnostics {
 
     private static final class Context {
         private final Map<String, Object> fields = new LinkedHashMap<>();
-        private Instant receivedAt;
-        private Instant expiresAt;
+        private OAuth2AccessToken token;
     }
 }

@@ -15,7 +15,7 @@ public class OAuth2DiagnosticsFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return !path.startsWith("/oauth2/authorization/") && !path.startsWith("/login/oauth2/code/");
+        return !path.startsWith("/login/oauth2/code/");
     }
 
     @Override

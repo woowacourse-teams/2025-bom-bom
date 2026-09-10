@@ -14,22 +14,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationExchange;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 class DiagnosticOAuth2HttpTest {
-    private final OAuth2Diagnostics diagnostics = new OAuth2Diagnostics(Clock.systemUTC(),
-            "http-test-diagnostic-secret", "SESSION", "test", "test-release");
+    private final OAuth2Diagnostics diagnostics = new OAuth2Diagnostics(Clock.systemUTC(), "SESSION", "test");
 
     @AfterEach
     void tearDown() {
@@ -37,12 +30,7 @@ class DiagnosticOAuth2HttpTest {
     }
 
     @Test
-    void 실제_토큰_교환_후_UserInfo_401의_전송_토큰과_원인을_안전하게_기록한다() {
-        RestClient.Builder builder = RestClient.builder();
-        MockRestServiceServer tokenServer = MockRestServiceServer.bindTo(builder).build();
-        DiagnosticOAuth2TokenResponseClient tokenClient = new DiagnosticOAuth2TokenResponseClient(builder, diagnostics);
-        tokenServer.expect(requestTo("https://oauth2.googleapis.com/token"))
-                .andRespond(withSuccess("{\"access_token\":\"secret-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}", MediaType.APPLICATION_JSON));
+    void UserInfo_401의_전송_토큰과_응답을_안전하게_기록한다() {
         RestTemplate template = new RestTemplate();
         MockRestServiceServer userServer = MockRestServiceServer.bindTo(template).build();
         DiagnosticOAuth2UserService userService = new DiagnosticOAuth2UserService(template, diagnostics);
@@ -54,36 +42,19 @@ class DiagnosticOAuth2HttpTest {
         request.setParameter("state", "secret-state");
         diagnostics.open(request);
 
-        var token = tokenClient.getTokenResponse(grant());
-        assertThatThrownBy(() -> userService.loadUser(new OAuth2UserRequest(registration(), token.getAccessToken())))
-                .isInstanceOf(OAuth2AuthenticationException.class);
+        var now = java.time.Instant.now();
+        var token = new org.springframework.security.oauth2.core.OAuth2AccessToken(
+                org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER,
+                "secret-token", now, now.plusSeconds(3600));
+        assertThatThrownBy(() -> userService.loadUser(new OAuth2UserRequest(registration(), token)))
+                .isInstanceOf(OAuth2AuthenticationException.class)
+                .satisfies(diagnostics::failureDetails);
 
-        assertThat(diagnostics.snapshot()).containsEntry("token_exchange_status", 200)
-                .containsEntry("userinfo_status", 401).containsEntry("token_matches_issued", true)
+        assertThat(diagnostics.snapshot()).containsEntry("userinfo_status", 401).containsEntry("token_matches_issued", true)
                 .containsEntry("provider_error", "invalid_request").containsEntry("provider_description", "Invalid Credentials")
                 .containsEntry("authorization_scheme_valid", true).containsEntry("token_expired", false);
         assertThat(diagnostics.snapshot().toString()).doesNotContain("secret-token", "secret-state", "secret-client");
-        tokenServer.verify();
         userServer.verify();
-    }
-
-    @Test
-    void 토큰_발급_실패를_UserInfo_실패와_구분하고_예외_응답의_비밀값은_버린다() {
-        RestClient.Builder builder = RestClient.builder();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        DiagnosticOAuth2TokenResponseClient client = new DiagnosticOAuth2TokenResponseClient(builder, diagnostics);
-        server.expect(requestTo("https://oauth2.googleapis.com/token"))
-                .andRespond(withStatus(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
-                        .body("{\"error\":\"invalid_grant\",\"error_description\":\"secret-code user@example.com\"}"));
-        diagnostics.open(new MockHttpServletRequest("GET", "/login/oauth2/code/google"));
-
-        assertThatThrownBy(() -> client.getTokenResponse(grant())).isInstanceOf(OAuth2AuthorizationException.class);
-
-        assertThat(diagnostics.snapshot()).containsEntry("token_exchange_status", 400)
-                .containsEntry("token_exchange_success", false).containsEntry("error_code", "invalid_grant")
-                .doesNotContainKey("userinfo_status");
-        assertThat(diagnostics.snapshot().toString()).doesNotContain("secret-code", "user@example.com");
-        server.verify();
     }
 
     @Test
@@ -129,12 +100,50 @@ class DiagnosticOAuth2HttpTest {
         server.verify();
     }
 
-    private OAuth2AuthorizationCodeGrantRequest grant() {
-        var authorization = OAuth2AuthorizationRequest.authorizationCode().authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
-                .clientId("test-client").redirectUri("https://api.bombom.news/login/oauth2/code/google").state("secret-state").build();
-        var callback = OAuth2AuthorizationResponse.success("secret-code")
-                .redirectUri("https://api.bombom.news/login/oauth2/code/google").state("secret-state").build();
-        return new OAuth2AuthorizationCodeGrantRequest(registration(), new OAuth2AuthorizationExchange(authorization, callback));
+    @Test
+    void 기본_토큰_교환을_계측하지_않아도_UserInfo_전송_토큰을_비교한다() {
+        RestTemplate template = new RestTemplate();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(template).build();
+        DiagnosticOAuth2UserService service = new DiagnosticOAuth2UserService(template, diagnostics);
+        server.expect(requestTo("https://www.googleapis.com/oauth2/v3/userinfo"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer secret-token"))
+                .andRespond(withSuccess("{\"sub\":\"user-123\"}", MediaType.APPLICATION_JSON));
+        diagnostics.open(new MockHttpServletRequest("GET", "/login/oauth2/code/google"));
+        var now = java.time.Instant.now();
+        var token = new org.springframework.security.oauth2.core.OAuth2AccessToken(
+                org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER,
+                "secret-token", now, now.plusSeconds(60));
+
+        assertThat(service.loadUser(new OAuth2UserRequest(registration(), token)).getName()).isEqualTo("user-123");
+        assertThat(diagnostics.snapshot()).containsEntry("token_matches_issued", true)
+                .containsEntry("token_expired", false);
+        server.verify();
+    }
+
+    @Test
+    void 진단_시계가_실패해도_UserInfo_요청과_응답을_유지한다() {
+        Clock brokenClock = new Clock() {
+            public java.time.ZoneId getZone() { return java.time.ZoneOffset.UTC; }
+            public Clock withZone(java.time.ZoneId zone) { return this; }
+            public java.time.Instant instant() { throw new IllegalStateException("clock failed"); }
+        };
+        OAuth2Diagnostics broken = new OAuth2Diagnostics(brokenClock, "SESSION", "test");
+        RestTemplate template = new RestTemplate();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(template).build();
+        DiagnosticOAuth2UserService service = new DiagnosticOAuth2UserService(template, broken);
+        server.expect(requestTo("https://www.googleapis.com/oauth2/v3/userinfo"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer secret-token"))
+                .andRespond(withSuccess("{\"sub\":\"user-123\"}", MediaType.APPLICATION_JSON));
+        broken.open(new MockHttpServletRequest("GET", "/login/oauth2/code/google"));
+        try {
+            var token = new org.springframework.security.oauth2.core.OAuth2AccessToken(
+                    org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER, "secret-token", null, null);
+            assertThat(service.loadUser(new OAuth2UserRequest(registration(), token)).getName()).isEqualTo("user-123");
+            assertThat(broken.snapshot()).containsEntry("diagnostic_error", true);
+            server.verify();
+        } finally {
+            broken.close();
+        }
     }
 
     private ClientRegistration registration() {

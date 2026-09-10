@@ -10,7 +10,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 class OAuth2DiagnosticsFilterTest {
-    private final OAuth2Diagnostics diagnostics = new OAuth2Diagnostics(Clock.systemUTC(), "filter-test-key", "SESSION", "test", "test");
+    private final OAuth2Diagnostics diagnostics = new OAuth2Diagnostics(Clock.systemUTC(), "SESSION", "test");
     private final OAuth2DiagnosticsFilter filter = new OAuth2DiagnosticsFilter(diagnostics);
 
     @Test
@@ -19,7 +19,7 @@ class OAuth2DiagnosticsFilterTest {
         request.setServletPath("/login/oauth2/code/apple");
         request.setParameter("state", "secret-state");
         assertThatThrownBy(() -> filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {
-            assertThat(diagnostics.snapshot()).containsEntry("provider", "apple").containsKey("attempt_id");
+            assertThat(diagnostics.snapshot()).containsEntry("provider", "apple");
             throw new ServletException("downstream failure");
         })).isInstanceOf(ServletException.class).hasMessage("downstream failure");
         assertThat(diagnostics.snapshot()).isEmpty();
@@ -50,4 +50,16 @@ class OAuth2DiagnosticsFilterTest {
         assertThat(response.getStatus()).isEqualTo(302);
         assertThat(diagnostics.snapshot()).isEmpty();
     }
+    @Test
+    void 진단은_기존_세션_속성을_추가하거나_변경하지_않는다() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/login/oauth2/code/google");
+        request.setServletPath("/login/oauth2/code/google");
+        var session = request.getSession();
+        Object authorization = new Object();
+        session.setAttribute("authorization", authorization);
+        filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {});
+        assertThat(java.util.Collections.list(session.getAttributeNames())).containsExactly("authorization");
+        assertThat(session.getAttribute("authorization")).isSameAs(authorization);
+    }
+
 }

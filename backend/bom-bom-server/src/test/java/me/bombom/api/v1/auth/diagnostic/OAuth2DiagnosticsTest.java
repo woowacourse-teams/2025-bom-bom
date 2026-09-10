@@ -13,12 +13,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 
 class OAuth2DiagnosticsTest {
     private final MutableClock clock = new MutableClock();
-    private final OAuth2Diagnostics diagnostics = new OAuth2Diagnostics(clock,
-            "test-key-for-oauth-diagnostics-only", "JSESSIONID_PROD", "instance-1", "release-1");
+    private final OAuth2Diagnostics diagnostics = new OAuth2Diagnostics(clock, "JSESSIONID_PROD", "instance-1");
     private final Instant receivedAt = Instant.parse("2026-09-10T01:00:00Z");
 
     @BeforeEach
@@ -27,9 +25,9 @@ class OAuth2DiagnosticsTest {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/login/oauth2/code/google");
         request.addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) bombom/1.1.9 Apple ios");
         diagnostics.open(request);
-        diagnostics.tokenReceived(OAuth2AccessTokenResponse.withToken("issued-secret-token")
-                .tokenType(org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER)
-                .expiresIn(60).scopes(Set.of("email", "profile")).build());
+        diagnostics.userInfoToken(new org.springframework.security.oauth2.core.OAuth2AccessToken(
+                org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER,
+                "issued-secret-token", receivedAt, receivedAt.plusSeconds(60), Set.of("email", "profile")));
     }
 
     @AfterEach

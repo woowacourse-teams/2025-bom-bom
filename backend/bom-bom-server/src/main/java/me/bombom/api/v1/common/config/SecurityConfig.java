@@ -7,8 +7,6 @@ import java.util.function.Supplier;
 import me.bombom.api.v1.auth.AppleClientSecretSupplier;
 import me.bombom.api.v1.auth.AppleOAuth2AccessTokenResponseClient;
 import me.bombom.api.v1.auth.ApplePrivateKeyLoader;
-import me.bombom.api.v1.auth.diagnostic.DiagnosticAuthorizationRequestRepository;
-import me.bombom.api.v1.auth.diagnostic.DiagnosticOAuth2TokenResponseClient;
 import me.bombom.api.v1.auth.diagnostic.OAuth2Diagnostics;
 import me.bombom.api.v1.auth.diagnostic.OAuth2DiagnosticsFilter;
 import me.bombom.api.v1.auth.handler.OAuth2LoginFailureHandler;
@@ -32,6 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
@@ -94,16 +93,12 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization ->
                                 authorization.authorizationRequestResolver(new AppleAuthorizationRequestResolver(clientRegistrationRepository))
-                                        .authorizationRequestRepository(new DiagnosticAuthorizationRequestRepository(diagnostics))
                         )
                         .tokenEndpoint(token -> token.accessTokenResponseClient(delegatingAccessTokenClient))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                                 .oidcUserService(appleOAuth2Service))
-                        .successHandler((request, response, authentication) -> {
-                            oAuth2LoginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
-                            diagnostics.emit("oauth_login_succeeded", false);
-                        })
+                        .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler));
 
         return http.build();
@@ -165,15 +160,15 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient(
-            AppleOAuth2AccessTokenResponseClient appleClient,
-            DiagnosticOAuth2TokenResponseClient diagnosticGoogleTokenClient
+            AppleOAuth2AccessTokenResponseClient appleClient
     ) {
+        var defaultClient = new RestClientAuthorizationCodeTokenResponseClient();
         return request -> {
             String registrationId = request.getClientRegistration().getRegistrationId();
             if ("apple".equals(registrationId)) {
                 return appleClient.getTokenResponse(request);
             }
-            return diagnosticGoogleTokenClient.getTokenResponse(request);
+            return defaultClient.getTokenResponse(request);
         };
     }
 

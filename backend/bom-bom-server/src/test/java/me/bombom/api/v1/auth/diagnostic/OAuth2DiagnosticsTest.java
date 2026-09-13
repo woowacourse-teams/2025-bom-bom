@@ -3,6 +3,7 @@ package me.bombom.api.v1.auth.diagnostic;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Set;
 import me.bombom.support.time.MutableClock;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.client.RestClientResponseException;
 
 class OAuth2DiagnosticsTest {
     private final MutableClock clock = new MutableClock();
@@ -71,6 +73,38 @@ class OAuth2DiagnosticsTest {
         outgoing("Bearer issued-secret-token");
         assertThat(diagnostics.snapshot()).doesNotContainKey("issued_token_fingerprint")
                 .doesNotContainKey("token_matches_issued");
+    }
+
+    @Test
+    void 공급자_응답이_4096자를_넘으면_원문_없이_크기_초과를_기록한다() {
+        String body = "{\"error\":\"invalid_token\",\"access_token\":\"provider-secret-token\"}";
+        body += " ".repeat(4097 - body.length());
+        RestClientResponseException failure = new RestClientResponseException(
+                "Unauthorized", 401, "Unauthorized", HttpHeaders.EMPTY,
+                body.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+
+        diagnostics.failureDetails(failure);
+
+        assertThat(diagnostics.snapshot()).containsEntry("provider_status", 401)
+                .containsEntry("provider_body_format", "too_large")
+                .doesNotContainKeys("provider_error", "provider_description");
+        assertThat(diagnostics.snapshot().toString()).doesNotContain("provider-secret-token");
+    }
+
+    @Test
+    void 공급자_응답이_4096자이면_기존대로_오류를_파싱한다() {
+        String body = "{\"error\":\"invalid_token\",\"error_description\":\"Invalid Credentials\"}";
+        body += " ".repeat(4096 - body.length());
+        RestClientResponseException failure = new RestClientResponseException(
+                "Unauthorized", 401, "Unauthorized", HttpHeaders.EMPTY,
+                body.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+
+        diagnostics.failureDetails(failure);
+
+        assertThat(diagnostics.snapshot()).containsEntry("provider_status", 401)
+                .containsEntry("provider_error", "invalid_token")
+                .containsEntry("provider_description", "Invalid Credentials")
+                .doesNotContainKey("provider_body_format");
     }
 
     private void outgoing(String authorization) {

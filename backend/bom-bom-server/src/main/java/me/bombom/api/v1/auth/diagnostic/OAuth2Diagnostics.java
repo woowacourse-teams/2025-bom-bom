@@ -169,6 +169,8 @@ public class OAuth2Diagnostics {
                         } catch (Exception ignored) {
                             context.fields.put("provider_body_format", "unparsed");
                         }
+                    } else {
+                        context.fields.put("provider_body_format", "too_large");
                     }
                     break;
                 }

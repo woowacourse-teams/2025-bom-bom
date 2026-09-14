@@ -90,6 +90,7 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.2")
 
     //otel
+    implementation("io.opentelemetry:opentelemetry-api")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
     implementation("io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0")
 

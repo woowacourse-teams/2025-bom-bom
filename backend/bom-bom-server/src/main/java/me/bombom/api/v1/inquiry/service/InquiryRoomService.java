@@ -6,6 +6,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.repository.InquiryCategoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,10 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class InquiryRoomService {
 
     private final InquiryRoomRepository inquiryRoomRepository;
+    private final InquiryCategoryRepository inquiryCategoryRepository;
 
     @Transactional
     public InquiryRoomResponse createRoom(InquiryRequester requester, Long categoryId) {
         validateRequester(requester);
+        validateCategoryExists(categoryId);
 
         InquiryRoom room = requester.isMember()
                 ? InquiryRoom.createMemberInquiryRoom(requester.memberId(), categoryId)
@@ -57,6 +60,13 @@ public class InquiryRoomService {
         if (requester.memberId() == null && requester.guestId() == null) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext("reason", "member_id_or_guest_id_required");
+        }
+    }
+
+    private void validateCategoryExists(Long categoryId) {
+        if (!inquiryCategoryRepository.existsById(categoryId)) {
+            throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                    .addContext("categoryId", categoryId);
         }
     }
 }

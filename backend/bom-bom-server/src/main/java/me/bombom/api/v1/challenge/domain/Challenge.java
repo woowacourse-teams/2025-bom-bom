@@ -103,6 +103,10 @@ public class Challenge extends BaseEntity {
         return totalDays - (int) Math.ceil(totalDays * SUCCESS_REQUIRED_RATIO);
     }
 
+    public boolean hasReachedCompletionRate(int progress) {
+        return progress >= SUCCESS_REQUIRED_RATIO * 100;
+    }
+
     public boolean hasStarted(LocalDate now) {
         return this.startDate != null && !now.isBefore(this.startDate);
     }

@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
@@ -37,6 +39,7 @@ public interface InquiryMessageControllerApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "메시지 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 값 (size는 1 이상 50 이하의 값이어야 함)"),
             @ApiResponse(responseCode = "403", description = "본인 소유 채팅방이 아님"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 채팅방")
     })
@@ -45,7 +48,10 @@ public interface InquiryMessageControllerApi {
             String guestId,
             @Parameter(description = "채팅방 ID") Long roomId,
             @Parameter(description = "커서 (마지막으로 받은 메시지 ID)") Long cursor,
-            @Parameter(description = "조회 개수") int size
+            @Parameter(description = "조회 개수")
+            @Positive(message = "size는 1 이상의 값이어야 합니다.")
+            @Max(value = 50, message = "size는 50 이하의 값이어야 합니다.")
+            int size
     );
 
     @Operation(

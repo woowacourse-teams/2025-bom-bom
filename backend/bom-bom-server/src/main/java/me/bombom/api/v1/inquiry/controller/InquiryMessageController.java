@@ -1,6 +1,8 @@
 package me.bombom.api.v1.inquiry.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
@@ -12,6 +14,7 @@ import me.bombom.api.v1.inquiry.resolver.GuestId;
 import me.bombom.api.v1.inquiry.service.InquiryMessageService;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/inquiries/rooms/{roomId}/messages")
@@ -49,7 +53,10 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             @GuestId String guestId,
             @PathVariable Long roomId,
             @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20")
+            @Positive(message = "size는 1 이상의 값이어야 합니다.")
+            @Max(value = 50, message = "size는 50 이하의 값이어야 합니다.")
+            int size
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryMessageService.getMessages(requester, roomId, cursor, size);

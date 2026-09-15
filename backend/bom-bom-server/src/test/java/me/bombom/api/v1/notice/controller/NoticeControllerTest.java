@@ -7,6 +7,7 @@ import io.restassured.http.ContentType;
 import java.util.List;
 import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
+import me.bombom.support.acceptance.AdditionalAcceptanceDataSet;
 import org.junit.jupiter.api.Test;
 
 @AcceptanceTest("acceptance/notice/get-notices.json")
@@ -55,6 +56,47 @@ class NoticeControllerTest {
         return content(page).stream()
                 .map(notice -> notice.get("noticeId"))
                 .toList();
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/notice/representative-public-notice.json")
+    void 대표로_지정된_공개_공지를_조회한다() {
+        Map<String, Object> result = RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/notices/representative")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("noticeId")).isEqualTo(3);
+            softly.assertThat(result.get("title")).isEqualTo("공지3");
+        });
+    }
+
+    @Test
+    void 대표_공지가_없으면_204를_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/notices/representative")
+                .then()
+                .statusCode(204);
+    }
+
+    @Test
+    @AdditionalAcceptanceDataSet("acceptance/notice/representative-private-notice.json")
+    void 비공개_공지가_대표로_지정돼_있으면_204를_반환한다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/api/v1/notices/representative")
+                .then()
+                .statusCode(204);
     }
 
     @SuppressWarnings("unchecked")

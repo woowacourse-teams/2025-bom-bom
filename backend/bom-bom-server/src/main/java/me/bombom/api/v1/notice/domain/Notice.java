@@ -37,23 +37,18 @@ public class Notice extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private NoticeVisibility visibility;
 
-    @Column(nullable = false)
-    private boolean isRepresentative;
-
     @Builder
     public Notice(
             Long id,
             @NonNull String title,
             @NonNull String content,
             @NonNull NoticeCategory noticeCategory,
-            @NonNull NoticeVisibility visibility,
-            Boolean isRepresentative
+            @NonNull NoticeVisibility visibility
     ) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.noticeCategory = noticeCategory;
         this.visibility = visibility;
-        this.isRepresentative = isRepresentative != null && isRepresentative;
     }
 }

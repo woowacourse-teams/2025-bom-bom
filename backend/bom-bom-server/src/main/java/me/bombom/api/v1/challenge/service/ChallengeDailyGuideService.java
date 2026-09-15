@@ -111,7 +111,8 @@ public class ChallengeDailyGuideService {
         DailyGuideCommentContext context = loadCommentCreationContext(challengeId, dayIndex, memberId);
         validateCommentCreation(context);
         saveDailyGuideComment(context.participant(), context.guide(), request);
-        return CreateCommentResponse.from(handleFirstDay(context.participant(), memberId, dayIndex, today));
+        // 1일차 출석만 처리하는 경로라 이 코멘트로 수료 기준 출석률에 도달할 수는 없다
+        return CreateCommentResponse.of(handleFirstDay(context.participant(), memberId, dayIndex, today), false);
     }
 
     public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {

@@ -73,10 +73,22 @@ public class ChallengeParticipant extends BaseEntity {
     }
 
     public int calculateProgress(int totalDays) {
+        return calculateProgress(this.completedDays, totalDays);
+    }
+
+    /**
+     * 출석 하루가 더 반영됐다고 가정한 진행률.
+     * 출석 처리가 커밋 이후 이벤트로 반영되므로, 반영 후 진행률을 미리 계산할 때 사용한다.
+     */
+    public int calculateProgressWithAdditionalDay(int totalDays) {
+        return calculateProgress(this.completedDays + 1, totalDays);
+    }
+
+    private static int calculateProgress(int completedDays, int totalDays) {
         if (totalDays <= 0) {
             return 0;
         }
-        int progress = (int) ((double) this.completedDays / totalDays * 100);
+        int progress = (int) ((double) completedDays / totalDays * 100);
         return Math.min(progress, 100);
     }
 

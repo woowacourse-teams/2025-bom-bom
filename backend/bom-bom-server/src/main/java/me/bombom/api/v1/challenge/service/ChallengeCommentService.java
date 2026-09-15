@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.article.domain.Article;
 import me.bombom.api.v1.article.repository.ArticleRepository;
+import me.bombom.api.v1.challenge.domain.Challenge;
 import me.bombom.api.v1.challenge.domain.ChallengeComment;
 import me.bombom.api.v1.challenge.domain.ChallengeParticipant;
 import me.bombom.api.v1.challenge.dto.request.ChallengeCommentOptionsRequest;
@@ -20,6 +21,7 @@ import me.bombom.api.v1.challenge.event.CreateChallengeCommentEvent;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentLikeRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeCommentRepository;
 import me.bombom.api.v1.challenge.repository.ChallengeParticipantRepository;
+import me.bombom.api.v1.challenge.repository.ChallengeRepository;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChallengeCommentService {
 
     private final ChallengeCommentRepository challengeCommentRepository;
+    private final ChallengeRepository challengeRepository;
     private final ChallengeParticipantRepository challengeParticipantRepository;
     private final ChallengeCommentLikeRepository challengeCommentLikeRepository;
     private final ChallengeTodoService challengeTodoService;
@@ -85,6 +88,7 @@ public class ChallengeCommentService {
 
         LocalDate today = LocalDate.now(clock);
         boolean isFirstCompletion = !challengeTodoService.isCompletedToday(participant.getId(), today);
+        boolean isChallengeCompleted = isChallengeCompletedByThisComment(challengeId, participant, isFirstCompletion);
 
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
@@ -102,7 +106,27 @@ public class ChallengeCommentService {
 
         challengeCommentRepository.save(comment);
         applicationEventPublisher.publishEvent(new CreateChallengeCommentEvent(participant.getId()));
-        return CreateCommentResponse.from(isFirstCompletion);
+        return CreateCommentResponse.of(isFirstCompletion, isChallengeCompleted);
+    }
+
+    /**
+     * 이 코멘트로 인한 출석 처리로 출석률이 수료 기준을 처음 넘어서는지 판단한다.
+     * 출석 처리는 커밋 이후 이벤트에서 반영되므로, 반영 후 출석률을 미리 계산해 직전 출석률과 비교한다.
+     */
+    private boolean isChallengeCompletedByThisComment(
+            Long challengeId,
+            ChallengeParticipant participant,
+            boolean isFirstCompletion
+    ) {
+        if (!isFirstCompletion) {
+            return false;
+        }
+
+        Challenge challenge = getChallenge(challengeId);
+        int totalDays = challenge.getTotalDays();
+
+        return !challenge.hasReachedCompletionRate(participant.calculateProgress(totalDays))
+                && challenge.hasReachedCompletionRate(participant.calculateProgressWithAdditionalDay(totalDays));
     }
 
     public Page<ChallengeCommentHighlightResponse> getChallengeArticleHighlights(
@@ -195,6 +219,14 @@ public class ChallengeCommentService {
                         .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "challengeParticipant")
                         .addContext(ErrorContextKeys.OPERATION, "findByChallengeIdAndMemberId"));
+    }
+
+    private Challenge getChallenge(Long challengeId) {
+        return challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext(ErrorContextKeys.CHALLENGE_ID, challengeId)
+                        .addContext(ErrorContextKeys.ENTITY_TYPE, "challenge")
+                        .addContext(ErrorContextKeys.OPERATION, "findById"));
     }
 
     private void validateCommentAvailableDay(Long memberId, Long challengeId) {

@@ -42,7 +42,7 @@ class InquiryRoomControllerTest {
         Map<String, Object> result = RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                .header("X-Guest-Id", "new-guest-uuid")
+                .header("X-Guest-Id", "2cf82d31-86ff-4c50-b4f8-e9ffa717d3d6")
                 .body(Map.of("categoryId", 1))
                 .when()
                 .post("/api/v1/inquiries/rooms")
@@ -68,6 +68,19 @@ class InquiryRoomControllerTest {
                 .post("/api/v1/inquiries/rooms")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void 존재하지_않는_카테고리로는_채팅방을_생성할_수_없다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .body(Map.of("categoryId", 999))
+                .when()
+                .post("/api/v1/inquiries/rooms")
+                .then()
+                .statusCode(404);
     }
 
     @Test
@@ -98,11 +111,11 @@ class InquiryRoomControllerTest {
     @Test
     @ResetsAcceptanceData
     void 비회원의_채팅방_목록을_guestId로_조회한다() {
-        createRoom("X-Guest-Id", "guest-uuid-1");
+        createRoom("X-Guest-Id", "e4560796-3db9-4f26-828a-c356c91d5076");
 
         Map<String, Object> result = RestAssured.given()
                 .accept(ContentType.JSON)
-                .header("X-Guest-Id", "guest-uuid-1")
+                .header("X-Guest-Id", "e4560796-3db9-4f26-828a-c356c91d5076")
                 .when()
                 .get("/api/v1/inquiries/rooms")
                 .then()

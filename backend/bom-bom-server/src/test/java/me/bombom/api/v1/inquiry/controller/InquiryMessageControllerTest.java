@@ -124,7 +124,7 @@ class InquiryMessageControllerTest {
         Map<String, Object> result = RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                .header("X-Guest-Id", "guest-uuid-1")
+                .header("X-Guest-Id", "e4560796-3db9-4f26-828a-c356c91d5076")
                 .body(Map.of("content", "비회원 문의", "imageUrls", List.of()))
                 .when()
                 .post("/api/v1/inquiries/rooms/{roomId}/messages", 2)
@@ -189,6 +189,27 @@ class InquiryMessageControllerTest {
     }
 
     @Test
+    void size가_0이면_거부한다() {
+        getMessagesResponse(1, null, 0)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void size가_음수이면_거부한다() {
+        getMessagesResponse(1, null, -1)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void size가_50을_초과하면_거부한다() {
+        getMessagesResponse(1, null, 51)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
     void 다른_사람의_채팅방_메시지는_조회할_수_없다() {
         getMessagesResponse(2, null, 20)
                 .then()
@@ -239,7 +260,7 @@ class InquiryMessageControllerTest {
         Map<String, Object> sent = RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                .header("X-Guest-Id", "guest-uuid-1")
+                .header("X-Guest-Id", "e4560796-3db9-4f26-828a-c356c91d5076")
                 .body(Map.of("content", "게스트 메시지", "imageUrls", List.of()))
                 .when()
                 .post("/api/v1/inquiries/rooms/{roomId}/messages", 2)

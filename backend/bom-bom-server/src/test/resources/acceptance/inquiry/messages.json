@@ -54,7 +54,7 @@
     {
       "id": 2,
       "member_id": null,
-      "guest_id": "guest-uuid-1",
+      "guest_id": "e4560796-3db9-4f26-828a-c356c91d5076",
       "category_id": 1,
       "status": "UNCONFIRMED",
       "assignee_id": null,

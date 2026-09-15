@@ -1,5 +1,6 @@
 package me.bombom.api.v1.notice.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.notice.domain.NoticeVisibility;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
@@ -18,6 +19,11 @@ public class NoticeService {
 
     public Page<NoticeResponse> getNotices(Pageable pageable) {
         return noticeRepository.findAllByVisibility(NoticeVisibility.PUBLIC, pageable)
+                .map(NoticeResponse::from);
+    }
+
+    public Optional<NoticeResponse> getRepresentativeNotice() {
+        return noticeRepository.findRepresentativeByVisibility(NoticeVisibility.PUBLIC)
                 .map(NoticeResponse::from);
     }
 }

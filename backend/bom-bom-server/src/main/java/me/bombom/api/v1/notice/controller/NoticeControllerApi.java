@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,4 +29,14 @@ public interface NoticeControllerApi {
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) Pageable pageable
     );
+
+    @Operation(
+            summary = "대표 공지 조회",
+            description = "대표로 지정된 공개 공지 1건을 조회합니다. 대표 공지가 없으면 204를 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "대표 공지 조회 성공"),
+            @ApiResponse(responseCode = "204", description = "대표로 지정된 공개 공지가 없음")
+    })
+    ResponseEntity<NoticeResponse> getRepresentativeNotice();
 }

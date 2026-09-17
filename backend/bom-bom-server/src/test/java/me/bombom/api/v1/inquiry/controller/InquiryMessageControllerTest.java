@@ -292,6 +292,50 @@ class InquiryMessageControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
+    void 이미_삭제된_메시지는_다시_삭제할_수_없다() {
+        Map<String, Object> sent = sendMessage(1, "삭제될 메시지", List.of())
+                .then().statusCode(200).extract().jsonPath().getMap("$");
+        long messageId = ((Number) sent.get("id")).longValue();
+
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .when()
+                .delete("/api/v1/inquiries/rooms/{roomId}/messages/{messageId}", 1, messageId)
+                .then()
+                .statusCode(204);
+
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .when()
+                .delete("/api/v1/inquiries/rooms/{roomId}/messages/{messageId}", 1, messageId)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 이미_삭제된_메시지는_수정할_수_없다() {
+        Map<String, Object> sent = sendMessage(1, "삭제될 메시지", List.of())
+                .then().statusCode(200).extract().jsonPath().getMap("$");
+        long messageId = ((Number) sent.get("id")).longValue();
+
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .when()
+                .delete("/api/v1/inquiries/rooms/{roomId}/messages/{messageId}", 1, messageId)
+                .then()
+                .statusCode(204);
+
+        updateMessage(1, messageId, "수정 시도")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
     void 존재하지_않는_메시지는_삭제할_수_없다() {
         RestAssured.given()
                 .accept(ContentType.JSON)

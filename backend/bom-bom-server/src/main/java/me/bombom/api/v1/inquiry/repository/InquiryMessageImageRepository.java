@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface InquiryMessageImageRepository extends JpaRepository<InquiryMessageImage, Long> {
 
     List<InquiryMessageImage> findByMessageIdInOrderBySortOrderAsc(List<Long> messageIds);
-
-    void deleteByMessageId(Long messageId);
 }

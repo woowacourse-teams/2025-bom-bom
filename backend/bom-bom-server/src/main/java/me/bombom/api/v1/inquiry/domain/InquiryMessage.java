@@ -7,13 +7,16 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.bombom.api.v1.common.BaseEntity;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
+@SQLRestriction("deleted_at IS NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InquiryMessage extends BaseEntity {
 
@@ -35,6 +38,9 @@ public class InquiryMessage extends BaseEntity {
     @Column(length = 500)
     private String content;
 
+    @Column
+    private LocalDateTime deletedAt;
+
     private InquiryMessage(Long roomId, InquirySenderType senderType, Long adminId, String content) {
         this.roomId = roomId;
         this.senderType = senderType;
@@ -52,5 +58,9 @@ public class InquiryMessage extends BaseEntity {
 
     public void updateContent(String content) {
         this.content = content;
+    }
+
+    public void delete(LocalDateTime now) {
+        this.deletedAt = now;
     }
 }

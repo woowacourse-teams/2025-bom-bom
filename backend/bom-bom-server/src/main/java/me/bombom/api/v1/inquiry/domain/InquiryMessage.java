@@ -28,6 +28,7 @@ public class InquiryMessage extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private InquirySenderType senderType;
 
+    // 메시지를 남긴 어드민의 member.id, 회원이 보낸 메시지인 경우 null
     @Column
     private Long adminId;
 

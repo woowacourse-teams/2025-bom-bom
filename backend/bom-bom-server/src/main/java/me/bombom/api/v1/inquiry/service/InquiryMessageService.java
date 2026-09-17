@@ -55,12 +55,17 @@ public class InquiryMessageService {
         return InquiryMessageResponse.of(message, images);
     }
 
+    @Transactional
     public InquiryMessagePageResponse getMessages(InquiryRequester requester, Long roomId, Long cursor, int size) {
-        inquiryRoomService.getOwnedRoom(roomId, requester);
+        InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
         List<InquiryMessage> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor, size + 1);
         boolean hasNext = messages.size() > size;
         List<InquiryMessage> pageMessages = hasNext ? messages.subList(0, size) : messages;
+
+        if (cursor == null && !pageMessages.isEmpty()) {
+            room.updateLastReadMessageIdByUser(pageMessages.get(0).getId());
+        }
 
         List<Long> messageIds = pageMessages.stream().map(InquiryMessage::getId).toList();
         List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(

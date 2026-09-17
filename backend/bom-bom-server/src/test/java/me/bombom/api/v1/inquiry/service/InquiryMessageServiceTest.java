@@ -11,13 +11,17 @@ import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
+import me.bombom.api.v1.inquiry.event.InquiryMessageSentEvent;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageEditHistoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
+@RecordApplicationEvents
 @IntegrationTest
 class InquiryMessageServiceTest {
 
@@ -32,6 +36,9 @@ class InquiryMessageServiceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ApplicationEvents applicationEvents;
 
     @Test
     void 메시지를_수정하면_수정_전_내용이_이력으로_남는다() {
@@ -68,6 +75,22 @@ class InquiryMessageServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(physicalCount).isEqualTo(1);
             softly.assertThat(deletedAt).isNotNull();
+        });
+    }
+
+    @Test
+    void 메시지를_전송하면_담당자_정보를_담은_이벤트가_발행된다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", 99L, room.getId());
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        inquiryMessageService.sendMessage(requester, room.getId(), new SendInquiryMessageRequest("문의합니다", List.of()));
+
+        List<InquiryMessageSentEvent> events = applicationEvents.stream(InquiryMessageSentEvent.class).toList();
+        assertSoftly(softly -> {
+            softly.assertThat(events).hasSize(1);
+            softly.assertThat(events.get(0).content()).isEqualTo("문의합니다");
+            softly.assertThat(events.get(0).assigneeId()).isEqualTo(99L);
         });
     }
 

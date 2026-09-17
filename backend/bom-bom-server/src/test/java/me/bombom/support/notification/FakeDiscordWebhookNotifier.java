@@ -3,6 +3,7 @@ package me.bombom.support.notification;
 import java.util.ArrayList;
 import java.util.List;
 import me.bombom.api.v1.common.DiscordWebhookNotifier;
+import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.support.testdouble.ResettableTestDouble;
 
@@ -13,6 +14,8 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
 
     private final List<String> newMemberNotifications = new ArrayList<>();
     private final List<UnsubscribeErrorNotification> unsubscribeErrorNotifications = new ArrayList<>();
+    private final List<UnresolvedInquiryRoomCounts> inquiryDailyStatusNotifications = new ArrayList<>();
+    private final List<InquiryNewMessageNotification> inquiryNewMessageNotifications = new ArrayList<>();
 
     public FakeDiscordWebhookNotifier() {
         super(null, null, null);
@@ -28,6 +31,16 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
         unsubscribeErrorNotifications.add(new UnsubscribeErrorNotification(message, subscribe.getId(), url));
     }
 
+    @Override
+    public void sendInquiryDailyStatusNotification(UnresolvedInquiryRoomCounts statusCounts) {
+        inquiryDailyStatusNotifications.add(statusCounts);
+    }
+
+    @Override
+    public void sendInquiryNewMessageNotification(String content, String assigneeText) {
+        inquiryNewMessageNotifications.add(new InquiryNewMessageNotification(content, assigneeText));
+    }
+
     public List<String> getNewMemberNotifications() {
         return List.copyOf(newMemberNotifications);
     }
@@ -36,12 +49,25 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
         return List.copyOf(unsubscribeErrorNotifications);
     }
 
+    public List<UnresolvedInquiryRoomCounts> getInquiryDailyStatusNotifications() {
+        return List.copyOf(inquiryDailyStatusNotifications);
+    }
+
+    public List<InquiryNewMessageNotification> getInquiryNewMessageNotifications() {
+        return List.copyOf(inquiryNewMessageNotifications);
+    }
+
     @Override
     public void reset() {
         newMemberNotifications.clear();
         unsubscribeErrorNotifications.clear();
+        inquiryDailyStatusNotifications.clear();
+        inquiryNewMessageNotifications.clear();
     }
 
     public record UnsubscribeErrorNotification(String message, Long subscribeId, String url) {
+    }
+
+    public record InquiryNewMessageNotification(String content, String assigneeText) {
     }
 }

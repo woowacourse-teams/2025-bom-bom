@@ -18,9 +18,11 @@ import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
+import me.bombom.api.v1.inquiry.event.InquiryMessageSentEvent;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageEditHistoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageImageRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -34,15 +36,21 @@ public class InquiryMessageService {
     private final InquiryMessageImageRepository inquiryMessageImageRepository;
     private final InquiryMessageEditHistoryRepository inquiryMessageEditHistoryRepository;
     private final InquiryRoomService inquiryRoomService;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
 
     @Transactional
-    public InquiryMessageResponse sendMessage(InquiryRequester requester, Long roomId, SendInquiryMessageRequest request) {
+    public InquiryMessageResponse sendMessage(InquiryRequester requester, Long roomId,
+                                              SendInquiryMessageRequest request) {
         validateContentOrImages(request);
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
-        InquiryMessage message = inquiryMessageRepository.save(InquiryMessage.createUserMessage(room.getId(), request.content()));
+        InquiryMessage message = inquiryMessageRepository.save(
+                InquiryMessage.createUserMessage(room.getId(), request.content()));
         List<InquiryMessageImage> images = saveImages(message.getId(), request.imageUrls());
+
+        applicationEventPublisher.publishEvent(
+                new InquiryMessageSentEvent(message.getContent(), room.getAssigneeId()));
 
         return InquiryMessageResponse.of(message, images);
     }
@@ -55,7 +63,8 @@ public class InquiryMessageService {
         List<InquiryMessage> pageMessages = hasNext ? messages.subList(0, size) : messages;
 
         List<Long> messageIds = pageMessages.stream().map(InquiryMessage::getId).toList();
-        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(messageIds);
+        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(
+                messageIds);
         Map<Long, List<InquiryMessageImage>> imagesByMessageId = images.stream()
                 .collect(Collectors.groupingBy(InquiryMessageImage::getMessageId));
 
@@ -72,7 +81,8 @@ public class InquiryMessageService {
 
         inquiryMessageEditHistoryRepository.save(new InquiryMessageEditHistory(message.getId(), message.getContent()));
         message.updateContent(request.content());
-        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(List.of(messageId));
+        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(
+                List.of(messageId));
         return InquiryMessageResponse.of(message, images);
     }
 

@@ -106,6 +106,22 @@ public class DiscordWebhookNotifier {
         webhookClient.post(inquiryWebhookUrl, body);
     }
 
+    public void sendInquiryNewMessageNotification(String content, String assigneeNickname) {
+        String assigneeText = assigneeNickname == null ? "담당자 미지정" : assigneeNickname;
+
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of(
+                        "title", withEnvironmentPrefix("💬 새로운 문의 메시지가 도착했어요"),
+                        "color", 0xF1C40F,
+                        "fields", List.of(
+                                Map.of("name", "🏷️ 담당자", "value", assigneeText, "inline", true),
+                                Map.of("name", "📝 내용", "value", content.isBlank() ? "(이미지)" : content)
+                        ),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(inquiryWebhookUrl, body);
+    }
+
     private String withEnvironmentPrefix(String title) {
         if ("prod".equals(activeProfile)) {
             return title;

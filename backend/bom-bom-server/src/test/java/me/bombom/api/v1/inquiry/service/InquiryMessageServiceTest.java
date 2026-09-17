@@ -103,8 +103,39 @@ class InquiryMessageServiceTest {
 
         inquiryMessageService.deleteMessage(requester, room.getId(), sent.id());
 
-        List<InquiryMessageResponse> messages = inquiryMessageService.getMessages(requester, room.getId(), null, 20)
+        List<InquiryMessageResponse> messages = inquiryMessageService
+                .getMessagesAndMarkAsRead(requester, room.getId(), null, 20)
                 .messages();
         assertThat(messages).isEmpty();
+    }
+
+    @Test
+    void cursor가_없으면_조회된_메시지_중_최신_id로_읽음_처리된다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        inquiryMessageService.sendMessage(requester, room.getId(), new SendInquiryMessageRequest("메시지1", List.of()));
+        InquiryMessageResponse last = inquiryMessageService.sendMessage(
+                requester, room.getId(), new SendInquiryMessageRequest("메시지2", List.of()));
+
+        inquiryMessageService.getMessagesAndMarkAsRead(requester, room.getId(), null, 20);
+
+        Long lastReadMessageIdByUser = jdbcTemplate.queryForObject(
+                "SELECT last_read_message_id_by_user FROM inquiry_room WHERE id = ?", Long.class, room.getId());
+        assertThat(lastReadMessageIdByUser).isEqualTo(last.id());
+    }
+
+    @Test
+    void cursor가_있으면_읽음_처리되지_않는다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        InquiryMessageResponse first = inquiryMessageService.sendMessage(
+                requester, room.getId(), new SendInquiryMessageRequest("메시지1", List.of()));
+        inquiryMessageService.sendMessage(requester, room.getId(), new SendInquiryMessageRequest("메시지2", List.of()));
+
+        inquiryMessageService.getMessagesAndMarkAsRead(requester, room.getId(), first.id(), 20);
+
+        Long lastReadMessageIdByUser = jdbcTemplate.queryForObject(
+                "SELECT last_read_message_id_by_user FROM inquiry_room WHERE id = ?", Long.class, room.getId());
+        assertThat(lastReadMessageIdByUser).isNull();
     }
 }

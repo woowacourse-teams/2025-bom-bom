@@ -56,7 +56,9 @@ public class InquiryMessageService {
     }
 
     @Transactional
-    public InquiryMessagePageResponse getMessages(InquiryRequester requester, Long roomId, Long cursor, int size) {
+    public InquiryMessagePageResponse getMessagesAndMarkAsRead(
+            InquiryRequester requester, Long roomId, Long cursor, int size
+    ) {
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
         List<InquiryMessage> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor, size + 1);

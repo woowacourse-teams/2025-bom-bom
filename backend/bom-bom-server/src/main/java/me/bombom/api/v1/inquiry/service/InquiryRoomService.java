@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
+import me.bombom.api.v1.inquiry.domain.InquiryStatus;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
+import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.repository.InquiryCategoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
@@ -39,6 +41,12 @@ public class InquiryRoomService {
 
         return inquiryRoomRepository.findRoomsByRequester(requester.memberId(), requester.guestId(), pageable)
                 .map(InquiryRoomResponse::from);
+    }
+
+    public UnresolvedInquiryRoomCounts countUnresolvedRooms() {
+        long unconfirmedCount = inquiryRoomRepository.countByStatus(InquiryStatus.UNCONFIRMED);
+        long inProgressCount = inquiryRoomRepository.countByStatus(InquiryStatus.IN_PROGRESS);
+        return UnresolvedInquiryRoomCounts.of(unconfirmedCount, inProgressCount);
     }
 
     public InquiryRoom getOwnedRoom(Long roomId, InquiryRequester requester) {

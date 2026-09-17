@@ -29,6 +29,6 @@ public class InquiryImageController implements InquiryImageControllerApi {
             @RequestParam("images") List<MultipartFile> images
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return new InquiryImageUploadResponse(inquiryImageService.uploadImages(requester, images));
+        return InquiryImageUploadResponse.of(inquiryImageService.uploadImages(requester, images));
     }
 }

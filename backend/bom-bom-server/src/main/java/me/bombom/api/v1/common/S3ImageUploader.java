@@ -27,17 +27,12 @@ public class S3ImageUploader {
                     .addContext("bucketName", bucketName)
                     .addContext("key", key)
                     .addContext("message", e.getMessage());
-        } catch (SdkException e) {
+        } catch (SdkException | IOException e) {
             throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
                     .addContext("operation", "s3GetImageUrl")
                     .addContext("bucketName", bucketName)
                     .addContext("key", key)
                     .addContext("message", e.getMessage());
-        } catch (IOException e) {
-            throw new CServerErrorException(ErrorDetail.INTERNAL_SERVER_ERROR)
-                    .addContext("operation", "s3GetImageUrl")
-                    .addContext("bucketName", bucketName)
-                    .addContext("key", key);
         }
     }
 }

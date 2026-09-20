@@ -109,10 +109,6 @@ public class ChallengeCommentService {
         return CreateCommentResponse.of(isFirstCompletion, isChallengeCompleted);
     }
 
-    /**
-     * 이 코멘트로 인한 출석 처리로 출석률이 수료 기준을 처음 넘어서는지 판단한다.
-     * 출석 처리는 커밋 이후 이벤트에서 반영되므로, 반영 후 출석률을 미리 계산해 직전 출석률과 비교한다.
-     */
     private boolean isChallengeCompletedByThisComment(
             Long challengeId,
             ChallengeParticipant participant,

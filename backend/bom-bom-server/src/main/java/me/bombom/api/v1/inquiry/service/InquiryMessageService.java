@@ -10,15 +10,12 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryMessage;
-import me.bombom.api.v1.inquiry.domain.InquiryMessageEditHistory;
 import me.bombom.api.v1.inquiry.domain.InquiryMessageImage;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
-import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
-import me.bombom.api.v1.inquiry.repository.InquiryMessageEditHistoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageImageRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
 import org.springframework.stereotype.Service;
@@ -32,7 +29,6 @@ public class InquiryMessageService {
 
     private final InquiryMessageRepository inquiryMessageRepository;
     private final InquiryMessageImageRepository inquiryMessageImageRepository;
-    private final InquiryMessageEditHistoryRepository inquiryMessageEditHistoryRepository;
     private final InquiryRoomService inquiryRoomService;
     private final Clock clock;
 
@@ -60,20 +56,6 @@ public class InquiryMessageService {
                 .collect(Collectors.groupingBy(InquiryMessageImage::getMessageId));
 
         return InquiryMessagePageResponse.of(pageMessages, imagesByMessageId, hasNext);
-    }
-
-    @Transactional
-    public InquiryMessageResponse updateMessage(
-            InquiryRequester requester, Long roomId, Long messageId, UpdateInquiryMessageRequest request
-    ) {
-        inquiryRoomService.getOwnedRoom(roomId, requester);
-        InquiryMessage message = getMessageInRoom(roomId, messageId);
-        validateWrittenByUser(message);
-
-        inquiryMessageEditHistoryRepository.save(new InquiryMessageEditHistory(message.getId(), message.getContent()));
-        message.updateContent(request.content());
-        List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(List.of(messageId));
-        return InquiryMessageResponse.of(message, images);
     }
 
     @Transactional

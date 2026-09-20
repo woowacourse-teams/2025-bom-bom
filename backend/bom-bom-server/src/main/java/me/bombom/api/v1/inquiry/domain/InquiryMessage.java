@@ -56,10 +56,6 @@ public class InquiryMessage extends BaseEntity {
         return this.senderType == InquirySenderType.USER;
     }
 
-    public void updateContent(String content) {
-        this.content = content;
-    }
-
     public void delete(LocalDateTime now) {
         this.deletedAt = now;
     }

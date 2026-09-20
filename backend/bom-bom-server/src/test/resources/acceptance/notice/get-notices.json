@@ -5,6 +5,7 @@
       "title": "공지1",
       "content": "content",
       "notice_category": "UPDATE",
+      "visibility": "PUBLIC",
       "created_at": "2026-01-01 10:00:00.000000",
       "updated_at": "2026-01-01 10:00:00.000000"
     },
@@ -13,6 +14,7 @@
       "title": "공지2",
       "content": "content",
       "notice_category": "EVENT",
+      "visibility": "PUBLIC",
       "created_at": "2026-01-01 11:00:00.000000",
       "updated_at": "2026-01-01 11:00:00.000000"
     },
@@ -21,8 +23,18 @@
       "title": "공지3",
       "content": "content",
       "notice_category": "NOTICE",
+      "visibility": "PUBLIC",
       "created_at": "2026-01-01 12:00:00.000000",
       "updated_at": "2026-01-01 12:00:00.000000"
+    },
+    {
+      "id": 4,
+      "title": null,
+      "content": null,
+      "notice_category": null,
+      "visibility": "PRIVATE",
+      "created_at": "2026-01-01 13:00:00.000000",
+      "updated_at": "2026-01-01 13:00:00.000000"
     }
   ]
 }

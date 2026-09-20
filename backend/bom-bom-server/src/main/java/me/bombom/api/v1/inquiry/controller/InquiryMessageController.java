@@ -1,0 +1,75 @@
+package me.bombom.api.v1.inquiry.controller;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.inquiry.dto.InquiryRequester;
+import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
+import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
+import me.bombom.api.v1.inquiry.resolver.GuestId;
+import me.bombom.api.v1.inquiry.service.InquiryMessageService;
+import me.bombom.api.v1.member.domain.Member;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@Validated
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/inquiries/rooms/{roomId}/messages")
+public class InquiryMessageController implements InquiryMessageControllerApi {
+
+    private final InquiryMessageService inquiryMessageService;
+
+    @Override
+    @PostMapping
+    public InquiryMessageResponse sendMessage(
+            @LoginMember(anonymous = true) Member member,
+            @GuestId String guestId,
+            @PathVariable Long roomId,
+            @Valid @RequestBody SendInquiryMessageRequest request
+    ) {
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
+        return inquiryMessageService.sendMessage(requester, roomId, request);
+    }
+
+    @Override
+    @GetMapping
+    public InquiryMessagePageResponse getMessages(
+            @LoginMember(anonymous = true) Member member,
+            @GuestId String guestId,
+            @PathVariable Long roomId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "20")
+            @Positive(message = "size는 1 이상의 값이어야 합니다.")
+            @Max(value = 50, message = "size는 50 이하의 값이어야 합니다.")
+            int size
+    ) {
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
+        return inquiryMessageService.getMessages(requester, roomId, cursor, size);
+    }
+
+    @Override
+    @DeleteMapping("/{messageId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMessage(
+            @LoginMember(anonymous = true) Member member,
+            @GuestId String guestId,
+            @PathVariable Long roomId,
+            @PathVariable Long messageId
+    ) {
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
+        inquiryMessageService.deleteMessage(requester, roomId, messageId);
+    }
+}

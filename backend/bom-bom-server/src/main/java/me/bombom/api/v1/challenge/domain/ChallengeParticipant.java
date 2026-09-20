@@ -73,10 +73,18 @@ public class ChallengeParticipant extends BaseEntity {
     }
 
     public int calculateProgress(int totalDays) {
+        return calculateProgress(this.completedDays, totalDays);
+    }
+
+    public int calculateProgressWithAdditionalDay(int totalDays) {
+        return calculateProgress(this.completedDays + 1, totalDays);
+    }
+
+    private static int calculateProgress(int completedDays, int totalDays) {
         if (totalDays <= 0) {
             return 0;
         }
-        int progress = (int) ((double) this.completedDays / totalDays * 100);
+        int progress = (int) ((double) completedDays / totalDays * 100);
         return Math.min(progress, 100);
     }
 

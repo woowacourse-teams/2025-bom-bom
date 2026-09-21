@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import news.bombom.article.service.ArticleArrivalNotificationProcessor;
 import news.bombom.challenge.service.ChallengeStartNotificationProcessor;
 import news.bombom.challenge.service.ChallengeTodoReminderNotificationProcessor;
+import news.bombom.inquiry.service.InquiryMessageArrivalNotificationProcessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ public class NotificationScheduler {
     private final ArticleArrivalNotificationProcessor articleProcessor;
     private final ChallengeTodoReminderNotificationProcessor challengeProcessor;
     private final ChallengeStartNotificationProcessor challengeStartProcessor;
+    private final InquiryMessageArrivalNotificationProcessor inquiryMessageArrivalProcessor;
 
     @Scheduled(fixedDelay = 30000)
     public void processPendingNotifications() {
@@ -63,6 +65,18 @@ public class NotificationScheduler {
             challengeStartProcessor.processPendingNotifications(now);
         } catch (Exception e) {
             log.error("Processor 실행 중 오류 발생: type={}", challengeStartProcessor.type(), e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void processInquiryMessageArrivalNotifications() {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("문의 답변 알림 Processor 실행");
+
+        try {
+            inquiryMessageArrivalProcessor.processPendingNotifications(now);
+        } catch (Exception e) {
+            log.error("Processor 실행 중 오류 발생: type={}", inquiryMessageArrivalProcessor.type(), e);
         }
     }
 }

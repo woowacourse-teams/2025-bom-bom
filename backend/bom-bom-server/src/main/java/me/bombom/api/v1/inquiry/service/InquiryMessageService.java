@@ -17,7 +17,6 @@ import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.event.InquiryMessageSentEvent;
-import me.bombom.api.v1.inquiry.repository.InquiryMessageEditHistoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageImageRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,7 +31,6 @@ public class InquiryMessageService {
 
     private final InquiryMessageRepository inquiryMessageRepository;
     private final InquiryMessageImageRepository inquiryMessageImageRepository;
-    private final InquiryMessageEditHistoryRepository inquiryMessageEditHistoryRepository;
     private final InquiryRoomService inquiryRoomService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;

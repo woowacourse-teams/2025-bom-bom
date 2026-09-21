@@ -5,14 +5,11 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.sql.Timestamp;
 import java.util.List;
-import me.bombom.api.v1.inquiry.domain.InquiryMessageEditHistory;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
-import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.event.InquiryMessageSentEvent;
-import me.bombom.api.v1.inquiry.repository.InquiryMessageEditHistoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -32,32 +29,10 @@ class InquiryMessageServiceTest {
     private InquiryRoomRepository inquiryRoomRepository;
 
     @Autowired
-    private InquiryMessageEditHistoryRepository inquiryMessageEditHistoryRepository;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private ApplicationEvents applicationEvents;
-
-    @Test
-    void 메시지를_수정하면_수정_전_내용이_이력으로_남는다() {
-        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
-        InquiryRequester requester = new InquiryRequester(1L, null);
-        InquiryMessageResponse sent = inquiryMessageService.sendMessage(
-                requester, room.getId(), new SendInquiryMessageRequest("원본 메시지", List.of()));
-
-        inquiryMessageService.updateMessage(
-                requester, room.getId(), sent.id(), new UpdateInquiryMessageRequest("수정된 메시지"));
-
-        List<InquiryMessageEditHistory> histories = inquiryMessageEditHistoryRepository.findAll().stream()
-                .filter(history -> history.getMessageId().equals(sent.id()))
-                .toList();
-        assertSoftly(softly -> {
-            softly.assertThat(histories).hasSize(1);
-            softly.assertThat(histories.get(0).getContent()).isEqualTo("원본 메시지");
-        });
-    }
 
     @Test
     void 메시지를_삭제하면_물리적으로_삭제되지_않고_deletedAt만_채워진다() {

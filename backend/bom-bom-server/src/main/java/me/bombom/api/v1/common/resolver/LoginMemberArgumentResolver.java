@@ -26,7 +26,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     private static final String SESSION_COOKIE_PATH = "/";
     private static final String SESSION_DOMAIN_ATTRIBUTE_PREFIX = "; Domain=";
     private static final String SESSION_COOKIE_SECURE_FLAGS = "; Secure; HttpOnly; SameSite=None";
-    private static final String SESSION_COOKIE_HEADER_FORMAT = "%s=; Max-Age=0; Path=%s%s" + SESSION_COOKIE_SECURE_FLAGS;
+    private static final String SESSION_COOKIE_HEADER_FORMAT =
+            "%s=; Max-Age=0; Path=%s%s" + SESSION_COOKIE_SECURE_FLAGS;
 
     private final String sessionCookieName;
     private final String sessionCookieDomain;
@@ -39,7 +40,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(LoginMember.class)
-                && (parameter.getParameterType().equals(Member.class) || parameter.getParameterType().equals(Long.class));
+                && (parameter.getParameterType().equals(Member.class) || parameter.getParameterType()
+                .equals(Long.class));
     }
 
     @Override
@@ -132,6 +134,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             return;
         }
 
+        log.warn("세션 쿠키는 존재하지만 인증 복원에 실패하여 세션을 무효화합니다 - requestUri: {}", request.getRequestURI());
         invalidateSessionIfPresent(request);
         SecurityContextHolder.clearContext();
         expireSessionCookie(response);

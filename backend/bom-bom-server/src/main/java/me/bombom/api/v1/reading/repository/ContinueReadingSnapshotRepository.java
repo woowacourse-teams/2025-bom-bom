@@ -36,9 +36,9 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
 
     @Query(value = """
             SELECT
-                m.nickname AS nickname,
-                rs.rank_order AS `rank`,
-                rs.day_count AS dayCount,
+                ranked.nickname AS nickname,
+                ranked.rank_order AS `rank`,
+                ranked.day_count AS dayCount,
                 rb.badge_grade AS rankingBadgeGrade,
                 rb.period_year AS rankingBadgeYear,
                 rb.period_month AS rankingBadgeMonth,
@@ -46,30 +46,39 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
                 cb_latest.challenge_name AS challengeBadgeName,
                 cb_latest.challenge_generation AS challengeBadgeGeneration,
                 sb_latest.streak_day_count AS streakDayCount
-            FROM continue_reading_snapshot rs
-            JOIN member m ON rs.member_id = m.id
-            LEFT JOIN badge rb ON rb.member_id = rs.member_id
+            FROM (
+                SELECT
+                    rs.member_id,
+                    m.nickname,
+                    rs.rank_order,
+                    rs.day_count
+                FROM continue_reading_snapshot rs
+                JOIN member m ON rs.member_id = m.id
+                ORDER BY rs.rank_order, m.nickname
+                LIMIT :limit
+            ) ranked
+            LEFT JOIN badge rb ON rb.member_id = ranked.member_id
                 AND rb.badge_category = 'RANKING'
                 AND rb.period_year = :lastMonthYear
                 AND rb.period_month = :lastMonthValue
             LEFT JOIN LATERAL (
-                SELECT cb.*
+                SELECT cb.badge_grade, cb.challenge_name, cb.challenge_generation
                 FROM badge cb
-                WHERE cb.member_id = rs.member_id
+                WHERE cb.member_id = ranked.member_id
                     AND cb.badge_category = 'CHALLENGE'
                 ORDER BY cb.created_at DESC
                 LIMIT 1
             ) cb_latest ON true
             LEFT JOIN LATERAL (
-                SELECT sb.*
+                SELECT sb.streak_day_count
                 FROM badge sb
-                WHERE sb.member_id = rs.member_id
+                WHERE sb.member_id = ranked.member_id
                     AND sb.badge_category = 'STREAK'
                 ORDER BY sb.streak_day_count DESC,
                 sb.created_at DESC
                 LIMIT 1
             ) sb_latest ON true
-            ORDER BY rs.rank_order, m.nickname
+            ORDER BY ranked.rank_order, ranked.nickname
             LIMIT :limit
             """, nativeQuery = true)
     List<ContinueReadingRankFlat> findContinueReadingRanking(

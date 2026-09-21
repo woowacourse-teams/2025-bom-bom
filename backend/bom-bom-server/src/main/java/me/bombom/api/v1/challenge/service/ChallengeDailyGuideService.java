@@ -111,7 +111,7 @@ public class ChallengeDailyGuideService {
         DailyGuideCommentContext context = loadCommentCreationContext(challengeId, dayIndex, memberId);
         validateCommentCreation(context);
         saveDailyGuideComment(context.participant(), context.guide(), request);
-        return CreateCommentResponse.from(handleFirstDay(context.participant(), memberId, dayIndex, today));
+        return CreateCommentResponse.of(handleFirstDay(context.participant(), memberId, dayIndex, today), false);
     }
 
     public MemberDailyCommentResponse getDailyGuideComment(Long challengeId, int dayIndex, Long memberId) {

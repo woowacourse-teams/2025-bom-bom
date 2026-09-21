@@ -55,6 +55,16 @@ class AuthControllerTest {
                 .statusCode(400);
     }
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"google", "apple"})
+    void 세션_없는_OAuth_콜백은_기존_실패_페이지로_리다이렉트한다(String provider) {
+        var response = RestAssured.given().redirects().follow(false)
+                .queryParam("code", "unused-test-code").queryParam("state", "unused-test-state")
+                .when().get("/login/oauth2/code/" + provider)
+                .then().statusCode(302).extract().response();
+        assertThat(response.header("Location")).endsWith("/login?error");
+    }
+
     private static String checkSignup(String field, String userInput) {
         return RestAssured.given()
                 .accept(ContentType.JSON)

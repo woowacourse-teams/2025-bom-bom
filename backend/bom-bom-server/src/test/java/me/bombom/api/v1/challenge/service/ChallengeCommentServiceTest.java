@@ -112,12 +112,81 @@ class ChallengeCommentServiceTest {
         List<ChallengeComment> comments = challengeCommentRepository.findAll();
         assertSoftly(softly -> {
             softly.assertThat(response.isFirstCompletion()).isTrue();
+            softly.assertThat(response.isChallengeCompleted()).isFalse();
             softly.assertThat(comments).hasSize(1);
             softly.assertThat(comments.getFirst().getNewsletterId()).isEqualTo(fixture.newsletter().getId());
             softly.assertThat(comments.getFirst().getParticipantId()).isEqualTo(fixture.participant().getId());
             softly.assertThat(comments.getFirst().getArticleTitle()).isEqualTo(article.getTitle());
             softly.assertThat(comments.getFirst().getQuotation()).isEqualTo("기억할 문장");
             softly.assertThat(comments.getFirst().getComment()).isEqualTo(VALID_COMMENT);
+        });
+    }
+
+    @Test
+    void 이번_코멘트로_출석률이_수료_기준에_도달하면_챌린지_수료로_응답한다() {
+        // given (10일 챌린지에서 7일 출석 -> 이번 출석으로 8일, 80% 도달)
+        clock.setDate(WEEKDAY);
+        CommentFixture fixture = saveCommentFixture(7);
+        Article article = saveArticle(fixture.member(), fixture.newsletter());
+
+        // when
+        CreateCommentResponse response = challengeCommentService.createChallengeComment(
+                fixture.member().getId(),
+                fixture.challenge().getId(),
+                new ChallengeCommentRequest(article.getId(), "기억할 문장", VALID_COMMENT)
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.isFirstCompletion()).isTrue();
+            softly.assertThat(response.isChallengeCompleted()).isTrue();
+        });
+    }
+
+    @Test
+    void 이미_수료_기준을_넘긴_상태에서_작성한_코멘트는_챌린지_수료로_응답하지_않는다() {
+        // given (10일 챌린지에서 이미 8일 출석 -> 이번 코멘트 전에 이미 80%)
+        clock.setDate(WEEKDAY);
+        CommentFixture fixture = saveCommentFixture(8);
+        Article article = saveArticle(fixture.member(), fixture.newsletter());
+
+        // when
+        CreateCommentResponse response = challengeCommentService.createChallengeComment(
+                fixture.member().getId(),
+                fixture.challenge().getId(),
+                new ChallengeCommentRequest(article.getId(), "기억할 문장", VALID_COMMENT)
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.isFirstCompletion()).isTrue();
+            softly.assertThat(response.isChallengeCompleted()).isFalse();
+        });
+    }
+
+    @Test
+    void 같은_날_두_번째_코멘트는_첫_완료도_챌린지_수료도_아니다() {
+        // given
+        clock.setDate(WEEKDAY);
+        CommentFixture fixture = saveCommentFixture(7);
+        Article article = saveArticle(fixture.member(), fixture.newsletter());
+        challengeCommentService.createChallengeComment(
+                fixture.member().getId(),
+                fixture.challenge().getId(),
+                new ChallengeCommentRequest(article.getId(), "기억할 문장", VALID_COMMENT)
+        );
+
+        // when
+        CreateCommentResponse response = challengeCommentService.createChallengeComment(
+                fixture.member().getId(),
+                fixture.challenge().getId(),
+                new ChallengeCommentRequest(article.getId(), "두 번째 문장", VALID_COMMENT)
+        );
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.isFirstCompletion()).isFalse();
+            softly.assertThat(response.isChallengeCompleted()).isFalse();
         });
     }
 
@@ -290,11 +359,15 @@ class ChallengeCommentServiceTest {
     }
 
     private CommentFixture saveCommentFixture() {
+        return saveCommentFixture(0);
+    }
+
+    private CommentFixture saveCommentFixture(int completedDays) {
         Member member = saveMember("cm");
         Challenge challenge = saveChallenge();
         ChallengeTeam team = challengeTeamRepository.save(TestFixture.createChallengeTeam(challenge.getId(), 0));
         challengeTodoRepository.save(TestFixture.createChallengeTodo(challenge.getId(), ChallengeTodoType.COMMENT));
-        ChallengeParticipant participant = saveParticipant(challenge, team, member);
+        ChallengeParticipant participant = saveParticipant(challenge, team, member, completedDays);
         Newsletter newsletter = saveNewsletter();
 
         return new CommentFixture(member, challenge, team, participant, newsletter);
@@ -312,11 +385,20 @@ class ChallengeCommentServiceTest {
     }
 
     private ChallengeParticipant saveParticipant(Challenge challenge, ChallengeTeam team, Member member) {
+        return saveParticipant(challenge, team, member, 0);
+    }
+
+    private ChallengeParticipant saveParticipant(
+            Challenge challenge,
+            ChallengeTeam team,
+            Member member,
+            int completedDays
+    ) {
         return challengeParticipantRepository.save(TestFixture.createChallengeParticipantWithTeam(
                 challenge.getId(),
                 member.getId(),
                 team.getId(),
-                0,
+                completedDays,
                 0
         ));
     }

@@ -1,0 +1,21 @@
+{
+  "member": [
+    { "id": 2, "provider": "provider", "provider_id": "streak-zeta", "email": "zeta@example.com", "nickname": "Zeta", "gender": "FEMALE", "role_id": 1 },
+    { "id": 3, "provider": "provider", "provider_id": "streak-alpha", "email": "alpha@example.com", "nickname": "Alpha", "gender": "FEMALE", "role_id": 1 },
+    { "id": 4, "provider": "provider", "provider_id": "streak-lower", "email": "lower@example.com", "nickname": "Lower", "gender": "FEMALE", "role_id": 1 }
+  ],
+  "continue_reading_snapshot": [
+    { "id": 2, "member_id": 2, "day_count": 10, "rank_order": 1 },
+    { "id": 3, "member_id": 3, "day_count": 10, "rank_order": 1 },
+    { "id": 4, "member_id": 4, "day_count": 1, "rank_order": 4 }
+  ],
+  "badge": [
+    { "id": 1, "member_id": 3, "badge_category": "RANKING", "badge_grade": "BRONZE", "period_year": 2026, "period_month": 7 },
+    { "id": 2, "member_id": 3, "badge_category": "RANKING", "badge_grade": "GOLD", "period_year": 2026, "period_month": 8 },
+    { "id": 3, "member_id": 3, "badge_category": "CHALLENGE", "badge_grade": "GOLD", "challenge_name": "이전 챌린지", "challenge_generation": 1, "created_at": "2026-07-01T00:00:00" },
+    { "id": 4, "member_id": 3, "badge_category": "CHALLENGE", "badge_grade": "SILVER", "challenge_name": "최근 챌린지", "challenge_generation": 2, "created_at": "2026-08-01T00:00:00" },
+    { "id": 5, "member_id": 3, "badge_category": "STREAK", "streak_day_count": 30, "created_at": "2026-07-01T00:00:00" },
+    { "id": 6, "member_id": 3, "badge_category": "STREAK", "streak_day_count": 7, "created_at": "2026-08-01T00:00:00" },
+    { "id": 7, "member_id": 4, "badge_category": "STREAK", "streak_day_count": 100, "created_at": "2026-08-01T00:00:00" }
+  ]
+}

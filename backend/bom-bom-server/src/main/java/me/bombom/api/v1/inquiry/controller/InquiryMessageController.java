@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
-import me.bombom.api.v1.inquiry.dto.request.UpdateInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.resolver.GuestId;
@@ -17,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,20 +57,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             int size
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return inquiryMessageService.getMessagesAndMarkAsRead(requester, roomId, cursor, size);
-    }
-
-    @Override
-    @PatchMapping("/{messageId}")
-    public InquiryMessageResponse updateMessage(
-            @LoginMember(anonymous = true) Member member,
-            @GuestId String guestId,
-            @PathVariable Long roomId,
-            @PathVariable Long messageId,
-            @Valid @RequestBody UpdateInquiryMessageRequest request
-    ) {
-        InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return inquiryMessageService.updateMessage(requester, roomId, messageId, request);
+        return inquiryMessageService.getMessages(requester, roomId, cursor, size);
     }
 
     @Override

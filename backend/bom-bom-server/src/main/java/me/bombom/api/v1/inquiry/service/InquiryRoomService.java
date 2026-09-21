@@ -84,8 +84,7 @@ public class InquiryRoomService {
 
     private void validateRequester(InquiryRequester requester) {
         if (requester.memberId() == null && requester.guestId() == null) {
-            throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
-                    .addContext("reason", "member_id_or_guest_id_required");
+            throw new CIllegalArgumentException(ErrorDetail.MISSING_REQUESTER_IDENTIFIER);
         }
     }
 

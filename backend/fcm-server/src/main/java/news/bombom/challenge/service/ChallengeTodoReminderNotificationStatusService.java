@@ -48,4 +48,12 @@ public class ChallengeTodoReminderNotificationStatusService
         notification.markFailed(reason);
         notificationRepository.save(notification);
     }
+
+    @Override
+    @Transactional
+    public void handleRejected(ChallengeTodoReminderNotification notification) {
+        log.info("챌린지 TODO 리마인더 알림 수신 거부: memberId={}", notification.getMemberId());
+        notification.markFailed("알림 수신 거부");
+        notificationRepository.save(notification);
+    }
 }

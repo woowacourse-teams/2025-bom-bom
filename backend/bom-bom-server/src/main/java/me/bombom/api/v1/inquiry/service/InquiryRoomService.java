@@ -48,7 +48,7 @@ public class InquiryRoomService {
                 requester.memberId(), requester.guestId(), pageable);
 
         List<Long> roomIds = rooms.map(InquiryRoom::getId).toList();
-        Map<Long, Long> latestAdminMessageIdByRoomId = inquiryMessageRepository.findLatestAdminMessageIdByRoomIdIn(
+        Map<Long, Long> latestAdminMessageIdByRoomId = inquiryMessageRepository.findLatestAdminMessageIdsByRoomIds(
                 roomIds);
 
         return rooms.map(room -> InquiryRoomResponse.of(room, hasUnreadMessage(room, latestAdminMessageIdByRoomId)));

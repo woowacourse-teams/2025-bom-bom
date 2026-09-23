@@ -32,7 +32,7 @@ public class InquiryMessageRepositoryImpl implements CustomInquiryMessageReposit
     }
 
     @Override
-    public Map<Long, Long> findLatestAdminMessageIdByRoomIdIn(List<Long> roomIds) {
+    public Map<Long, Long> findLatestAdminMessageIdsByRoomIds(List<Long> roomIds) {
         if (roomIds.isEmpty()) {
             return Map.of();
         }

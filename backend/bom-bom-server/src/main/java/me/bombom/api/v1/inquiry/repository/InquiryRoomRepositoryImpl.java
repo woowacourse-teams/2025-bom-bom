@@ -1,5 +1,6 @@
 package me.bombom.api.v1.inquiry.repository;
 
+import static me.bombom.api.v1.inquiry.domain.QInquiryMessage.inquiryMessage;
 import static me.bombom.api.v1.inquiry.domain.QInquiryRoom.inquiryRoom;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -7,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.inquiry.domain.InquirySenderType;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,23 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
                 .where(requesterEq);
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public boolean existsUnreadAdminMessage(Long memberId, String guestId) {
+        Integer result = jpaQueryFactory
+                .selectOne()
+                .from(inquiryRoom)
+                .join(inquiryMessage).on(inquiryMessage.roomId.eq(inquiryRoom.id))
+                .where(
+                        requesterEq(memberId, guestId),
+                        inquiryMessage.senderType.eq(InquirySenderType.ADMIN),
+                        inquiryRoom.lastReadMessageIdByUser.isNull()
+                                .or(inquiryMessage.id.gt(inquiryRoom.lastReadMessageIdByUser))
+                )
+                .fetchFirst();
+
+        return result != null;
     }
 
     private BooleanExpression requesterEq(Long memberId, String guestId) {

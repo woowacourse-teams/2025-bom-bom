@@ -43,6 +43,25 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
+    @Bean(name = "inquiryDiscordExecutor")
+    public Executor inquiryDiscordExecutor(InquiryDiscordAsyncExecutorProperties props) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(props.getCorePoolSize());
+        executor.setMaxPoolSize(props.getMaxPoolSize());
+        executor.setQueueCapacity(props.getQueueCapacity());
+        executor.setThreadNamePrefix("inquiry-discord-");
+        executor.setRejectedExecutionHandler((runnable, threadPoolExecutor) ->
+                log.error("[문의 Discord 알림 거부] 스레드풀 큐가 가득 차 알림 작업이 거부되었습니다. "
+                        + "activeCount={}, poolSize={}, queueSize={}",
+                        threadPoolExecutor.getActiveCount(),
+                        threadPoolExecutor.getPoolSize(),
+                        threadPoolExecutor.getQueue().size()));
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        executor.initialize();
+        return executor;
+    }
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (ex, method, params) -> log.error(

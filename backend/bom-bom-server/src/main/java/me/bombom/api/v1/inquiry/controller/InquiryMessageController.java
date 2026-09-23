@@ -57,7 +57,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             int size
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return inquiryMessageService.getMessages(requester, roomId, cursor, size);
+        return inquiryMessageService.getMessagesAndMarkAsRead(requester, roomId, cursor, size);
     }
 
     @Override

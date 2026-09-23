@@ -6,6 +6,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.article.event.MarkAsReadEvent;
+import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.member.service.MemberService;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
@@ -24,6 +25,12 @@ public class DiscordWebhookNotifier {
     @Value("${discord.webhook.operationError.url}")
     private String operationErrorWebhookUrl;
 
+    @Value("${discord.webhook.inquiry.url}")
+    private String inquiryWebhookUrl;
+
+    @Value("${spring.profiles.active:local}")
+    private String activeProfile;
+
     private final WebhookHttpClient webhookClient;
     private final MemberService memberService;
     private final NewsletterService newsletterService;
@@ -37,7 +44,8 @@ public class DiscordWebhookNotifier {
                         "color", 0x00C853,
                         "fields", List.of(
                                 Map.of("name", "🧑‍💻 닉네임 : ", "value", "**" + nickname + "**", "inline", true),
-                                Map.of("name", "🕒 가입 시각 : ", "value", "<t:" + (System.currentTimeMillis() / 1000) + ":F>", "inline", true),
+                                Map.of("name", "🕒 가입 시각 : ", "value",
+                                        "<t:" + (System.currentTimeMillis() / 1000) + ":F>", "inline", true),
                                 Map.of("name", "🌸 현재 총 회원 수 : ", "value", totalMemberCount + "명")
                         )
                 )
@@ -82,6 +90,43 @@ public class DiscordWebhookNotifier {
                         "timestamp", Instant.now().toString())));
 
         webhookClient.post(operationErrorWebhookUrl, body);
+    }
+
+    public void sendInquiryDailyStatusNotification(UnresolvedInquiryRoomCounts statusCounts) {
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of(
+                        "title", withEnvironmentPrefix("📊 오늘의 문의 현황"),
+                        "color", 0x3498DB,
+                        "fields", List.of(
+                                Map.of("name", "🆕 미확인", "value", statusCounts.unconfirmedCount() + "건", "inline", true),
+                                Map.of("name", "🔄 진행중", "value", statusCounts.inProgressCount() + "건", "inline", true)
+                        ),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(inquiryWebhookUrl, body);
+    }
+
+    public void sendInquiryNewMessageNotification(String content, String assigneeNickname) {
+        String assigneeText = assigneeNickname == null ? "담당자 조회 실패" : assigneeNickname;
+
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of(
+                        "title", withEnvironmentPrefix("💬 새로운 문의 메시지가 도착했어요"),
+                        "color", 0xF1C40F,
+                        "fields", List.of(
+                                Map.of("name", "🏷️ 담당자", "value", assigneeText, "inline", true),
+                                Map.of("name", "📝 내용", "value", content.isBlank() ? "(이미지)" : content)
+                        ),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(inquiryWebhookUrl, body);
+    }
+
+    private String withEnvironmentPrefix(String title) {
+        if ("prod".equals(activeProfile)) {
+            return title;
+        }
+        return "[" + activeProfile.toUpperCase() + "] " + title;
     }
 
     private String getNewsletterInfo(Long newsletterId) {

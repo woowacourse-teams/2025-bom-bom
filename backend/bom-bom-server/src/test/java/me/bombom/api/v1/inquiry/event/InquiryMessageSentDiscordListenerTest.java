@@ -29,11 +29,11 @@ class InquiryMessageSentDiscordListenerTest {
     private FakeDiscordWebhookNotifier fakeDiscordWebhookNotifier;
 
     @Test
-    void 담당자가_없으면_담당자_없이_알림을_보낸다() {
+    void 담당자가_없으면_미지정으로_알림을_보낸다() {
         listener.on(new InquiryMessageSentEvent("문의합니다", null));
 
         FakeDiscordWebhookNotifier.InquiryNewMessageNotification notification = awaitFirstNotification();
-        assertThat(notification.assigneeText()).isNull();
+        assertThat(notification.assigneeText()).isEqualTo("미지정");
     }
 
     @Test

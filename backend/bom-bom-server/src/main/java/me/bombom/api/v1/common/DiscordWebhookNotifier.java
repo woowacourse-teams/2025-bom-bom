@@ -107,7 +107,7 @@ public class DiscordWebhookNotifier {
     }
 
     public void sendInquiryNewMessageNotification(String content, String assigneeNickname) {
-        String assigneeText = assigneeNickname == null ? "담당자 미지정" : assigneeNickname;
+        String assigneeText = assigneeNickname == null ? "담당자 조회 실패" : assigneeNickname;
 
         Map<String, Object> body = Map.of("embeds", List.of(
                 Map.of(

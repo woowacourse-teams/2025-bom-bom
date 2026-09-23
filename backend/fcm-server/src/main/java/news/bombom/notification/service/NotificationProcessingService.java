@@ -27,6 +27,7 @@ public class NotificationProcessingService {
         Long memberId = notification.getMemberId();
         if (!notificationSettingService.isEnabled(memberId, category)) {
             log.info("알림 수신 동의하지 않음: memberId={}, category={}", memberId, category);
+            statusHandler.handleRejected(notification);
             return;
         }
 

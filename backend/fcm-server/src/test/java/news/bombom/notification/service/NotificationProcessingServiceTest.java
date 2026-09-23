@@ -78,6 +78,25 @@ class NotificationProcessingServiceTest {
     }
 
     @Test
+    @DisplayName("아티클 알림 설정이 비활성화되어 있으면 거부 처리로 즉시 격리한다")
+    void processNotification_Article_SettingsDisabled_HandlesRejected() {
+        // Given
+        ArticleArrivalNotification notification = createNotification();
+        when(notificationSettingService.isEnabled(TEST_MEMBER_ID, NotificationCategory.ARTICLE))
+                .thenReturn(false);
+
+        // When
+        notificationProcessingService.processNotification(
+                notification,
+                NotificationCategory.ARTICLE,
+                articleStatusService
+        );
+
+        // Then
+        verify(articleStatusService, times(1)).handleRejected(notification);
+    }
+
+    @Test
     @DisplayName("아티클 알림 설정이 활성화되어 있고 토큰이 있으면 전송한다")
     void processNotification_Article_SettingsEnabledAndTokensExist_SendsNotification() {
         // Given

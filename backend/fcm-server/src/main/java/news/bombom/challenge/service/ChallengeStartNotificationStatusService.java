@@ -48,4 +48,12 @@ public class ChallengeStartNotificationStatusService
         notification.markFailed(reason);
         notificationRepository.save(notification);
     }
+
+    @Override
+    @Transactional
+    public void handleRejected(ChallengeStartNotification notification) {
+        log.info("챌린지 시작 알림 수신 거부: memberId={}", notification.getMemberId());
+        notification.markFailed("알림 수신 거부");
+        notificationRepository.save(notification);
+    }
 }

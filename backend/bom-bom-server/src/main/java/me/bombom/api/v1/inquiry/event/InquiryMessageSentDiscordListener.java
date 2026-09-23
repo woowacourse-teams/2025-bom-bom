@@ -20,7 +20,7 @@ public class InquiryMessageSentDiscordListener {
     private final MemberRepository memberRepository;
     private final MemberDiscordAccountRepository memberDiscordAccountRepository;
 
-    @Async
+    @Async("inquiryDiscordExecutor")
     @TransactionalEventListener
     public void on(InquiryMessageSentEvent event) {
         try {

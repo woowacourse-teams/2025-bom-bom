@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -60,11 +59,6 @@ public class WebhookHttpClient {
                     url, e.getStatusCode(), e);
             throw e;
         }
-    }
-
-    @Recover
-    public void recoverPost(Exception e, String url, Object body) {
-        throw (e instanceof RuntimeException re) ? re : new IllegalStateException(e);
     }
 
     private ClientHttpRequestFactory createRequestFactory() {

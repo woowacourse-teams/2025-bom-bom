@@ -18,7 +18,7 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
     private final List<InquiryNewMessageNotification> inquiryNewMessageNotifications = new ArrayList<>();
 
     public FakeDiscordWebhookNotifier() {
-        super(null, null, null);
+        super(null, null, null, null);
     }
 
     @Override

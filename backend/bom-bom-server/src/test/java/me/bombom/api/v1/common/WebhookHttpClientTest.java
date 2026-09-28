@@ -2,6 +2,7 @@ package me.bombom.api.v1.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -58,6 +59,17 @@ class WebhookHttpClientTest {
         // when & then
         assertThatCode(() -> webhookHttpClient.post(webhookUrl(), Map.of("content", "hello")))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void postWithRetry는_웹훅_전송에_실패하면_예외를_호출자에게_전파한다() {
+        // given
+        server.createContext("/webhook", exchange -> sendResponse(exchange, 500));
+        WebhookHttpClient webhookHttpClient = new WebhookHttpClient(RestClient.builder());
+
+        // when & then
+        assertThatThrownBy(() -> webhookHttpClient.postWithRetry(webhookUrl(), Map.of("content", "hello")))
+                .isInstanceOf(RuntimeException.class);
     }
 
     private String webhookUrl() {

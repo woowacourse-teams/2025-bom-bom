@@ -119,7 +119,12 @@ public class DiscordWebhookNotifier {
                         ),
                         "timestamp", Instant.now().toString())));
 
-        webhookClient.post(inquiryWebhookUrl, body);
+        try {
+            webhookClient.postWithRetry(inquiryWebhookUrl, body);
+        } catch (Exception e) {
+            log.error("[ERROR] 문의 알림 디스코드 웹훅 전송 실패, 관리자 확인 필요: content={}, assignee={}",
+                    content, assigneeText, e);
+        }
     }
 
     private String withEnvironmentPrefix(String title) {

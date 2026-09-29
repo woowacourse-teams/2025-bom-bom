@@ -43,6 +43,27 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
+    @Bean(name = "inquiryDiscordExecutor")
+    public Executor inquiryDiscordExecutor(InquiryDiscordAsyncExecutorProperties props) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(props.getCorePoolSize());
+        executor.setMaxPoolSize(props.getMaxPoolSize());
+        executor.setQueueCapacity(props.getQueueCapacity());
+        executor.setThreadNamePrefix("inquiry-discord-");
+        executor.setRejectedExecutionHandler((runnable, threadPoolExecutor) ->
+                log.error("[문의 Discord 알림 거부] 알림 작업이 거부되어 유실되었습니다. task={}, "
+                                + "isShutdown={}, activeCount={}, poolSize={}/{}, queueSize={}/{}",
+                        runnable,
+                        threadPoolExecutor.isShutdown(),
+                        threadPoolExecutor.getActiveCount(),
+                        threadPoolExecutor.getPoolSize(), props.getMaxPoolSize(),
+                        threadPoolExecutor.getQueue().size(), props.getQueueCapacity()));
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(60);
+        executor.initialize();
+        return executor;
+    }
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (ex, method, params) -> log.error(

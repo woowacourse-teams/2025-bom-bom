@@ -69,4 +69,8 @@ public class InquiryRoom extends BaseEntity {
         }
         return Objects.equals(this.guestId, guestId);
     }
+
+    public void updateLastReadMessageIdByUser(Long messageId) {
+        this.lastReadMessageIdByUser = messageId;
+    }
 }

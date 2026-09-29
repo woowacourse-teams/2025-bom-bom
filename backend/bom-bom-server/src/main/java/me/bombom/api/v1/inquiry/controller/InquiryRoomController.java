@@ -6,6 +6,7 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.CreateInquiryRoomRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.inquiry.resolver.GuestId;
 import me.bombom.api.v1.inquiry.service.InquiryRoomService;
 import me.bombom.api.v1.member.domain.Member;
@@ -45,5 +46,15 @@ public class InquiryRoomController implements InquiryRoomControllerApi {
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryRoomService.getRooms(requester, pageable);
+    }
+
+    @Override
+    @GetMapping("/unread-status")
+    public InquiryUnreadStatusResponse getUnreadStatus(
+            @LoginMember(anonymous = true) Member member,
+            @GuestId String guestId
+    ) {
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
+        return inquiryRoomService.getUnreadStatus(requester);
     }
 }

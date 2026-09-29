@@ -1,12 +1,18 @@
 package me.bombom.api.v1.inquiry.service;
 
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
+import me.bombom.api.v1.inquiry.domain.InquiryStatus;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
+import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.inquiry.repository.InquiryCategoryRepository;
+import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InquiryRoomService {
 
     private final InquiryRoomRepository inquiryRoomRepository;
+    private final InquiryMessageRepository inquiryMessageRepository;
     private final InquiryCategoryRepository inquiryCategoryRepository;
 
     @Transactional
@@ -31,14 +38,33 @@ public class InquiryRoomService {
                 : InquiryRoom.createGuestInquiryRoom(requester.guestId(), categoryId);
 
         InquiryRoom saved = inquiryRoomRepository.save(room);
-        return InquiryRoomResponse.from(saved);
+        return InquiryRoomResponse.of(saved, false);
     }
 
     public Page<InquiryRoomResponse> getRooms(InquiryRequester requester, Pageable pageable) {
         validateRequester(requester);
 
-        return inquiryRoomRepository.findRoomsByRequester(requester.memberId(), requester.guestId(), pageable)
-                .map(InquiryRoomResponse::from);
+        Page<InquiryRoom> rooms = inquiryRoomRepository.findRoomsByRequester(
+                requester.memberId(), requester.guestId(), pageable);
+
+        List<Long> roomIds = rooms.map(InquiryRoom::getId).toList();
+        Map<Long, Long> latestAdminMessageIdByRoomId = inquiryMessageRepository.findLatestAdminMessageIdsByRoomIds(
+                roomIds);
+
+        return rooms.map(room -> InquiryRoomResponse.of(room, hasUnreadMessage(room, latestAdminMessageIdByRoomId)));
+    }
+
+    public UnresolvedInquiryRoomCounts countUnresolvedRooms() {
+        long unconfirmedCount = inquiryRoomRepository.countByStatus(InquiryStatus.UNCONFIRMED);
+        long inProgressCount = inquiryRoomRepository.countByStatus(InquiryStatus.IN_PROGRESS);
+        return UnresolvedInquiryRoomCounts.of(unconfirmedCount, inProgressCount);
+    }
+
+    public InquiryUnreadStatusResponse getUnreadStatus(InquiryRequester requester) {
+        validateRequester(requester);
+
+        boolean hasUnread = inquiryRoomRepository.existsUnreadAdminMessage(requester.memberId(), requester.guestId());
+        return InquiryUnreadStatusResponse.of(hasUnread);
     }
 
     public InquiryRoom getOwnedRoom(Long roomId, InquiryRequester requester) {
@@ -67,5 +93,13 @@ public class InquiryRoomService {
             throw new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                     .addContext("categoryId", categoryId);
         }
+    }
+
+    private boolean hasUnreadMessage(InquiryRoom room, Map<Long, Long> latestAdminMessageIdByRoomId) {
+        Long latestAdminMessageId = latestAdminMessageIdByRoomId.get(room.getId());
+        if (latestAdminMessageId == null) {
+            return false;
+        }
+        return room.getLastReadMessageIdByUser() == null || latestAdminMessageId > room.getLastReadMessageIdByUser();
     }
 }

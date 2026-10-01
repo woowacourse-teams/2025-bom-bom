@@ -56,8 +56,9 @@ public class ArticleArrivalNotificationStatusService implements NotificationStat
     @Override
     @Transactional
     public void handleRejected(ArticleArrivalNotification notification) {
-        log.info("알림 수신 거부로 인한 데이터 격리: notificationId={}", notification.getId());
-        moveToFailedTable(notification);
+        log.info("알림 수신 거부로 아티클 알림 삭제: notificationId={}, memberId={}", notification.getId(),
+                notification.getMemberId());
+        notificationRepository.delete(notification);
     }
 
     @Transactional

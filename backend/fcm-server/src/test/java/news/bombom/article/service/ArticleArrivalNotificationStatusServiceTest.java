@@ -1,6 +1,7 @@
 package news.bombom.article.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -30,8 +31,8 @@ class ArticleArrivalNotificationStatusServiceTest {
     private ArticleArrivalNotificationStatusService statusService;
 
     @Test
-    @DisplayName("알림 수신 거부 시 재시도 여부와 무관하게 즉시 실패 테이블로 이관하고 원본을 삭제한다")
-    void handleRejected_MovesToFailedTableAndDeletesOriginal() {
+    @DisplayName("알림 수신 거부 시 실패 테이블로 이관하지 않고 원본을 바로 삭제한다")
+    void handleRejected_DeletesOriginalWithoutMovingToFailedTable() {
         // Given
         ArticleArrivalNotification notification = ArticleArrivalNotification.builder()
                 .memberId(1L)
@@ -45,7 +46,7 @@ class ArticleArrivalNotificationStatusServiceTest {
         statusService.handleRejected(notification);
 
         // Then
-        verify(articleArrivalNotificationFailedRepository, times(1)).save(any(ArticleArrivalNotificationFailed.class));
         verify(notificationRepository, times(1)).delete(notification);
+        verify(articleArrivalNotificationFailedRepository, never()).save(any(ArticleArrivalNotificationFailed.class));
     }
 }

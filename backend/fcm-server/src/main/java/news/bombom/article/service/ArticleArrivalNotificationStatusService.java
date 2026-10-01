@@ -53,6 +53,14 @@ public class ArticleArrivalNotificationStatusService implements NotificationStat
         moveToFailedTableIfExceeded(notification);
     }
 
+    @Override
+    @Transactional
+    public void handleRejected(ArticleArrivalNotification notification) {
+        log.info("알림 수신 거부로 아티클 알림 삭제: notificationId={}, memberId={}", notification.getId(),
+                notification.getMemberId());
+        notificationRepository.delete(notification);
+    }
+
     @Transactional
     public void moveToFailedTableIfExceeded(ArticleArrivalNotification notification) {
         if (!notification.shouldRetry()) {

@@ -8,4 +8,6 @@ public interface NotificationStatusHandler<T extends Notification> {
     void updateStatus(T notification, NotificationResultResponse result);
 
     void markAsFailed(T notification, String reason);
+
+    void handleRejected(T notification);
 }

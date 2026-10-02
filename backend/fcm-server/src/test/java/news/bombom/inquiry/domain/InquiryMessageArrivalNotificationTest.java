@@ -3,6 +3,7 @@ package news.bombom.inquiry.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
+import news.bombom.notification.domain.NotificationStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,19 +61,16 @@ class InquiryMessageArrivalNotificationTest {
     }
 
     @Test
-    @DisplayName("3차 실패 시 5분 뒤로 재시도 시각을 계산한다")
-    void calculateNextRetryTime_ThirdAttempt_5Minutes() {
+    @DisplayName("3차 실패 시 재시도 횟수를 소진하여 DEAD 상태가 되고 재시도 시각이 없다")
+    void markFailed_ThirdAttempt_BecomesDead() {
         InquiryMessageArrivalNotification notification = createNotification();
         notification.markFailed("일시적 오류");
         notification.markFailed("일시적 오류");
 
-        LocalDateTime before = LocalDateTime.now();
         notification.markFailed("일시적 오류");
-        LocalDateTime after = LocalDateTime.now();
 
-        assertThat(notification.getNextRetryAt())
-                .isAfterOrEqualTo(before.plusMinutes(5))
-                .isBeforeOrEqualTo(after.plusMinutes(5));
+        assertThat(notification.getStatus()).isEqualTo(NotificationStatus.DEAD);
+        assertThat(notification.getNextRetryAt()).isNull();
     }
 
     private InquiryMessageArrivalNotification createNotification() {

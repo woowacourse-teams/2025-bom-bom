@@ -15,8 +15,8 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @Query("""
             select n
-            from Notice n
-            join NoticeRepresentative r on r.noticeId = n.id
+            from NoticeRepresentative r
+            join r.notice n
             where n.visibility = :visibility
             """)
     Optional<Notice> findRepresentativeByVisibility(@Param("visibility") NoticeVisibility visibility);

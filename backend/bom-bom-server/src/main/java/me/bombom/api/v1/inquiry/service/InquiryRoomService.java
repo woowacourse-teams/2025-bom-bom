@@ -67,6 +67,11 @@ public class InquiryRoomService {
         return InquiryUnreadStatusResponse.of(hasUnread);
     }
 
+    public InquiryRoomResponse getRoom(Long roomId, InquiryRequester requester) {
+        InquiryRoom room = getOwnedRoom(roomId, requester);
+        return InquiryRoomResponse.of(room, false);
+    }
+
     public InquiryRoom getOwnedRoom(Long roomId, InquiryRequester requester) {
         validateRequester(requester);
 

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +47,17 @@ public class InquiryRoomController implements InquiryRoomControllerApi {
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
         return inquiryRoomService.getRooms(requester, pageable);
+    }
+
+    @Override
+    @GetMapping("/{roomId}")
+    public InquiryRoomResponse getRoom(
+            @LoginMember(anonymous = true) Member member,
+            @GuestId String guestId,
+            @PathVariable Long roomId
+    ) {
+        InquiryRequester requester = InquiryRequester.of(member, guestId);
+        return inquiryRoomService.getRoom(roomId, requester);
     }
 
     @Override

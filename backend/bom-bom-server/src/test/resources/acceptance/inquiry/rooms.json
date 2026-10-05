@@ -9,9 +9,20 @@
     {
       "id": 1,
       "provider": "provider",
-      "provider_id": "inquiry-user",
-      "email": "inquiry-user@bombom.news",
-      "nickname": "문의회원",
+      "provider_id": "inquiry-user-1",
+      "email": "inquiry-user-1@bombom.news",
+      "nickname": "문의회원1",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    },
+    {
+      "id": 2,
+      "provider": "provider",
+      "provider_id": "inquiry-user-2",
+      "email": "inquiry-user-2@bombom.news",
+      "nickname": "문의회원2",
       "gender": "FEMALE",
       "role_id": 1,
       "created_at": "${CURRENT_DATE_TIME}",

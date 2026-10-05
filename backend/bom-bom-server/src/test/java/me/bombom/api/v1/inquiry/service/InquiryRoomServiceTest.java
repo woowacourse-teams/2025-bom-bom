@@ -1,8 +1,11 @@
 package me.bombom.api.v1.inquiry.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.domain.InquiryStatus;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
@@ -87,6 +90,35 @@ class InquiryRoomServiceTest {
         InquiryUnreadStatusResponse response = inquiryRoomService.getUnreadStatus(requester);
 
         assertThat(response.hasUnread()).isFalse();
+    }
+
+    @Test
+    void 본인_소유_방을_단건_조회한다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = inquiryRoomService.getRoom(room.getId(), requester);
+
+        assertThat(response.id()).isEqualTo(room.getId());
+    }
+
+    @Test
+    void 존재하지_않는_방을_조회하면_예외가_발생한다() {
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        assertThatThrownBy(() -> inquiryRoomService.getRoom(-1L, requester))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    void 타인의_방을_조회하면_예외가_발생한다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester otherRequester = new InquiryRequester(2L, null);
+
+        assertThatThrownBy(() -> inquiryRoomService.getRoom(room.getId(), otherRequester))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.FORBIDDEN_RESOURCE);
     }
 
     @Test

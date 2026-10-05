@@ -28,7 +28,7 @@ public interface InquiryMessageControllerApi {
     InquiryMessageResponse sendMessage(
             Member member,
             String guestId,
-            @Parameter(description = "채팅방 ID") Long roomId,
+            @Parameter(description = "채팅방 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
             @Valid SendInquiryMessageRequest request
     );
 
@@ -45,7 +45,7 @@ public interface InquiryMessageControllerApi {
     InquiryMessagePageResponse getMessages(
             Member member,
             String guestId,
-            @Parameter(description = "채팅방 ID") Long roomId,
+            @Parameter(description = "채팅방 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
             @Parameter(description = "커서 (마지막으로 받은 메시지 ID)") Long cursor,
             @Parameter(description = "조회 개수")
             @Positive(message = "size는 1 이상의 값이어야 합니다.")
@@ -65,7 +65,7 @@ public interface InquiryMessageControllerApi {
     void deleteMessage(
             Member member,
             String guestId,
-            @Parameter(description = "채팅방 ID") Long roomId,
-            @Parameter(description = "메시지 ID") Long messageId
+            @Parameter(description = "채팅방 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
+            @Parameter(description = "메시지 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long messageId
     );
 }

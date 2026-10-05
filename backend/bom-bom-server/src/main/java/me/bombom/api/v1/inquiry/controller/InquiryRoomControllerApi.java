@@ -1,10 +1,12 @@
 package me.bombom.api.v1.inquiry.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.inquiry.dto.request.CreateInquiryRoomRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
@@ -46,7 +48,11 @@ public interface InquiryRoomControllerApi {
             @ApiResponse(responseCode = "403", description = "본인이 소유한 채팅방이 아님"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 채팅방")
     })
-    InquiryRoomResponse getRoom(Member member, String guestId, Long roomId);
+    InquiryRoomResponse getRoom(
+            Member member,
+            String guestId,
+            @Parameter(description = "채팅방 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId
+    );
 
     @Operation(
             summary = "문의 미확인 상태 조회",

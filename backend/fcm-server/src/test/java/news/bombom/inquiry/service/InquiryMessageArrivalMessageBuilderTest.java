@@ -44,10 +44,12 @@ class InquiryMessageArrivalMessageBuilderTest {
     }
 
     private InquiryMessageArrivalNotification createNotification() {
-        return InquiryMessageArrivalNotification.builder()
+        InquiryMessageArrivalNotification notification = InquiryMessageArrivalNotification.builder()
                 .memberId(1L)
                 .roomId(10L)
-                .content("답변 내용입니다")
+                .messageId(100L)
                 .build();
+        notification.assignContent("답변 내용입니다");
+        return notification;
     }
 }

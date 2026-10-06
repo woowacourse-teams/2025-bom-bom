@@ -2,10 +2,17 @@ package news.bombom.inquiry.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import news.bombom.inquiry.domain.InquiryMessage;
 import news.bombom.inquiry.domain.InquiryMessageArrivalNotification;
+import news.bombom.inquiry.domain.InquiryRoom;
 import news.bombom.inquiry.repository.InquiryMessageArrivalNotificationRepository;
+import news.bombom.inquiry.repository.InquiryMessageRepository;
+import news.bombom.inquiry.repository.InquiryRoomRepository;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationStatus;
 import news.bombom.notification.scheduler.NotificationProcessor;
@@ -18,6 +25,8 @@ import org.springframework.stereotype.Component;
 public class InquiryMessageArrivalNotificationProcessor implements NotificationProcessor {
 
     private final InquiryMessageArrivalNotificationRepository notificationRepository;
+    private final InquiryRoomRepository inquiryRoomRepository;
+    private final InquiryMessageRepository inquiryMessageRepository;
     private final NotificationProcessingService notificationProcessingService;
     private final InquiryMessageArrivalNotificationStatusService statusService;
 
@@ -36,6 +45,12 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
 
         log.info("[{}] 처리할 알림 개수: {}", type(), pendingNotifications.size());
 
+        Map<Long, InquiryRoom> roomsById = findRoomsById(pendingNotifications);
+        List<InquiryMessageArrivalNotification> unreadNotifications = pendingNotifications.stream()
+                .filter(notification -> !isAlreadyRead(notification, roomsById))
+                .toList();
+        Map<Long, String> contentsByMessageId = findContentsByMessageId(unreadNotifications);
+
         for (InquiryMessageArrivalNotification notification : pendingNotifications) {
             try {
                 if (!notification.shouldRetry()) {
@@ -44,6 +59,12 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
                     continue;
                 }
 
+                if (isAlreadyRead(notification, roomsById)) {
+                    statusService.deleteAlreadyRead(notification);
+                    continue;
+                }
+
+                notification.assignContent(contentsByMessageId.get(notification.getMessageId()));
                 notificationProcessingService.processNotification(
                         notification,
                         NotificationCategory.INQUIRY_MESSAGE_ARRIVAL,
@@ -53,5 +74,30 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
                 log.error("[{}] 알림 처리 중 오류 발생: notificationId={}", type(), notification.getId(), e);
             }
         }
+    }
+
+    private boolean isAlreadyRead(InquiryMessageArrivalNotification notification, Map<Long, InquiryRoom> roomsById) {
+        InquiryRoom room = roomsById.get(notification.getRoomId());
+        return room != null && room.hasRead(notification.getMessageId());
+    }
+
+    private Map<Long, InquiryRoom> findRoomsById(List<InquiryMessageArrivalNotification> notifications) {
+        List<Long> roomIds = notifications.stream()
+                .map(InquiryMessageArrivalNotification::getRoomId)
+                .distinct()
+                .toList();
+
+        return inquiryRoomRepository.findAllById(roomIds).stream()
+                .collect(Collectors.toMap(InquiryRoom::getId, Function.identity()));
+    }
+
+    private Map<Long, String> findContentsByMessageId(List<InquiryMessageArrivalNotification> notifications) {
+        List<Long> messageIds = notifications.stream()
+                .map(InquiryMessageArrivalNotification::getMessageId)
+                .distinct()
+                .toList();
+
+        return inquiryMessageRepository.findAllById(messageIds).stream()
+                .collect(Collectors.toMap(InquiryMessage::getId, InquiryMessage::getContent));
     }
 }

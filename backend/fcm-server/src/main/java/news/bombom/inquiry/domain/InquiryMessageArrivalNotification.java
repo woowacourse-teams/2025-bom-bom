@@ -2,6 +2,7 @@ package news.bombom.inquiry.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,19 +18,22 @@ import news.bombom.notification.domain.NotificationStatus;
 public class InquiryMessageArrivalNotification extends Notification {
 
     private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final int CONTENT_MAX_LENGTH = 20;
 
     @Column(nullable = false)
     private Long roomId;
 
-    @Column(nullable = false, length = CONTENT_MAX_LENGTH)
+    @Column(nullable = false)
+    private Long messageId;
+
+    // DB 컬럼 아님: 발송 시점에 messageId로 조회한 content를 잠깐 들고 있는 값 (Processor가 채워줌)
+    @Transient
     private String content;
 
     @Builder
     public InquiryMessageArrivalNotification(
             @NonNull Long memberId,
             @NonNull Long roomId,
-            @NonNull String content,
+            @NonNull Long messageId,
             NotificationStatus status,
             int attempts,
             LocalDateTime nextRetryAt,
@@ -37,6 +41,10 @@ public class InquiryMessageArrivalNotification extends Notification {
     ) {
         super(memberId, status, attempts, nextRetryAt, lastError);
         this.roomId = roomId;
+        this.messageId = messageId;
+    }
+
+    public void assignContent(String content) {
         this.content = content;
     }
 

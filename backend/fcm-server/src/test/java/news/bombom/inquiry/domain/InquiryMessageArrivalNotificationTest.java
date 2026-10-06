@@ -77,7 +77,7 @@ class InquiryMessageArrivalNotificationTest {
         return InquiryMessageArrivalNotification.builder()
                 .memberId(1L)
                 .roomId(10L)
-                .content("답변 내용입니다")
+                .messageId(100L)
                 .build();
     }
 }

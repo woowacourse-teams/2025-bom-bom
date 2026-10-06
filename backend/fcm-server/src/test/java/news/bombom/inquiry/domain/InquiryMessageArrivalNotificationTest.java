@@ -12,7 +12,7 @@ class InquiryMessageArrivalNotificationTest {
 
     @Test
     @DisplayName("시도 횟수가 3회 미만이면 재시도한다")
-    void shouldRetry_UnderMaxAttempts_ReturnsTrue() {
+    void 시도_횟수가_3회_미만이면_재시도한다() {
         InquiryMessageArrivalNotification notification = createNotification();
         notification.markFailed("일시적 오류");
         notification.markFailed("일시적 오류");
@@ -22,7 +22,7 @@ class InquiryMessageArrivalNotificationTest {
 
     @Test
     @DisplayName("시도 횟수가 3회에 도달하면 재시도하지 않는다")
-    void shouldRetry_ReachedMaxAttempts_ReturnsFalse() {
+    void 시도_횟수가_3회에_도달하면_재시도하지_않는다() {
         InquiryMessageArrivalNotification notification = createNotification();
         notification.markFailed("일시적 오류");
         notification.markFailed("일시적 오류");
@@ -33,7 +33,7 @@ class InquiryMessageArrivalNotificationTest {
 
     @Test
     @DisplayName("1차 실패 시 30초 뒤로 재시도 시각을 계산한다")
-    void calculateNextRetryTime_FirstAttempt_30Seconds() {
+    void 첫번째_실패_시_30초_뒤로_재시도_시각을_계산한다() {
         InquiryMessageArrivalNotification notification = createNotification();
 
         LocalDateTime before = LocalDateTime.now();
@@ -47,7 +47,7 @@ class InquiryMessageArrivalNotificationTest {
 
     @Test
     @DisplayName("2차 실패 시 2분 뒤로 재시도 시각을 계산한다")
-    void calculateNextRetryTime_SecondAttempt_2Minutes() {
+    void 두번째_실패_시_2분_뒤로_재시도_시각을_계산한다() {
         InquiryMessageArrivalNotification notification = createNotification();
         notification.markFailed("일시적 오류");
 
@@ -62,7 +62,7 @@ class InquiryMessageArrivalNotificationTest {
 
     @Test
     @DisplayName("3차 실패 시 재시도 횟수를 소진하여 DEAD 상태가 되고 재시도 시각이 없다")
-    void markFailed_ThirdAttempt_BecomesDead() {
+    void 세번째_실패_시_재시도_횟수를_소진하여_DEAD_상태가_되고_재시도_시각이_없다() {
         InquiryMessageArrivalNotification notification = createNotification();
         notification.markFailed("일시적 오류");
         notification.markFailed("일시적 오류");

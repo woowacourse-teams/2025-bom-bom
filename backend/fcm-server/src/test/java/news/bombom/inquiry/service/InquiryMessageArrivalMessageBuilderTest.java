@@ -16,7 +16,7 @@ class InquiryMessageArrivalMessageBuilderTest {
 
     @Test
     @DisplayName("문의 답변 알림을 지원한다")
-    void supports_InquiryMessageArrivalNotification_ReturnsTrue() {
+    void 문의_답변_알림을_지원한다() {
         InquiryMessageArrivalNotification notification = createNotification();
 
         assertThat(builder.supports(notification)).isTrue();
@@ -24,7 +24,7 @@ class InquiryMessageArrivalMessageBuilderTest {
 
     @Test
     @DisplayName("title, body, data를 포함한 알림 메시지를 생성한다")
-    void build_CreatesNotificationMessageWithTitleBodyAndData() {
+    void title_body_data를_포함한_알림_메시지를_생성한다() {
         InquiryMessageArrivalNotification notification = createNotification();
         MemberFcmToken token = MemberFcmToken.builder()
                 .memberId(1L)

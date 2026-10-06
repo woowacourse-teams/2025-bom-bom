@@ -6,16 +6,13 @@ import news.bombom.inquiry.domain.InquiryMessageArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.dto.NotificationMessage;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("문의 답변 알림 메시지 빌더 테스트")
 class InquiryMessageArrivalMessageBuilderTest {
 
     private final InquiryMessageArrivalMessageBuilder builder = new InquiryMessageArrivalMessageBuilder();
 
     @Test
-    @DisplayName("문의 답변 알림을 지원한다")
     void 문의_답변_알림을_지원한다() {
         InquiryMessageArrivalNotification notification = createNotification();
 
@@ -23,7 +20,6 @@ class InquiryMessageArrivalMessageBuilderTest {
     }
 
     @Test
-    @DisplayName("title, body, data를 포함한 알림 메시지를 생성한다")
     void title_body_data를_포함한_알림_메시지를_생성한다() {
         InquiryMessageArrivalNotification notification = createNotification();
         MemberFcmToken token = MemberFcmToken.builder()

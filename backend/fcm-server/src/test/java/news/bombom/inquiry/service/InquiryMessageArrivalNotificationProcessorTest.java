@@ -20,7 +20,6 @@ import news.bombom.inquiry.repository.InquiryRoomRepository;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationStatus;
 import news.bombom.notification.service.NotificationProcessingService;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +27,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("문의 답변 알림 Processor 테스트")
 class InquiryMessageArrivalNotificationProcessorTest {
 
     @Mock
@@ -50,7 +48,6 @@ class InquiryMessageArrivalNotificationProcessorTest {
     private InquiryMessageArrivalNotificationProcessor processor;
 
     @Test
-    @DisplayName("아직 읽지 않은 알림은 메시지의 roomId와 content를 채워 발송을 요청한다")
     void 아직_읽지_않은_알림은_메시지의_roomId와_content를_채워_발송을_요청한다() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
         InquiryMessageArrivalNotification notification = createNotification(100L);
@@ -76,7 +73,6 @@ class InquiryMessageArrivalNotificationProcessorTest {
     }
 
     @Test
-    @DisplayName("이미 읽은 알림은 삭제하고 발송하지 않는다")
     void 이미_읽은_알림은_삭제하고_발송하지_않는다() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
         InquiryMessageArrivalNotification notification = createNotification(100L);
@@ -95,7 +91,6 @@ class InquiryMessageArrivalNotificationProcessorTest {
     }
 
     @Test
-    @DisplayName("최대 재시도 횟수 초과 알림은 건너뛴다")
     void 최대_재시도_횟수_초과_알림은_건너뛴다() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
 

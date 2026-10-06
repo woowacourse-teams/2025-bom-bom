@@ -50,17 +50,17 @@ class InquiryMessageArrivalNotificationProcessorTest {
     private InquiryMessageArrivalNotificationProcessor processor;
 
     @Test
-    @DisplayName("아직 읽지 않은 알림은 내용을 채워 발송을 요청한다")
-    void processPendingNotifications_Unread_ProcessesWithContent() {
+    @DisplayName("아직 읽지 않은 알림은 메시지의 roomId와 content를 채워 발송을 요청한다")
+    void processPendingNotifications_Unread_ProcessesWithRoomIdAndContent() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
-        InquiryMessageArrivalNotification notification = createNotification(10L, 100L);
+        InquiryMessageArrivalNotification notification = createNotification(100L);
+        InquiryMessage message = createMessage(100L, 10L, "답변 내용");
         InquiryRoom room = createRoom(10L, null);
 
         when(notificationRepository.findRetryCandidates(anyList(), any()))
                 .thenReturn(List.of(notification));
+        when(inquiryMessageRepository.findAllById(List.of(100L))).thenReturn(List.of(message));
         when(inquiryRoomRepository.findAllById(List.of(10L))).thenReturn(List.of(room));
-        when(inquiryMessageRepository.findAllById(List.of(100L)))
-                .thenReturn(List.of(createMessage(100L, "답변 내용")));
 
         processor.processPendingNotifications(now);
 
@@ -71,6 +71,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
                 NotificationCategory.INQUIRY_MESSAGE_ARRIVAL,
                 statusService
         );
+        assertThat(notification.getRoomId()).isEqualTo(10L);
         assertThat(notification.getContent()).isEqualTo("답변 내용");
     }
 
@@ -78,11 +79,13 @@ class InquiryMessageArrivalNotificationProcessorTest {
     @DisplayName("이미 읽은 알림은 삭제하고 발송하지 않는다")
     void processPendingNotifications_AlreadyRead_DeletesWithoutProcessing() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
-        InquiryMessageArrivalNotification notification = createNotification(10L, 100L);
+        InquiryMessageArrivalNotification notification = createNotification(100L);
+        InquiryMessage message = createMessage(100L, 10L, "답변 내용");
         InquiryRoom room = createRoom(10L, 100L);
 
         when(notificationRepository.findRetryCandidates(anyList(), any()))
                 .thenReturn(List.of(notification));
+        when(inquiryMessageRepository.findAllById(List.of(100L))).thenReturn(List.of(message));
         when(inquiryRoomRepository.findAllById(List.of(10L))).thenReturn(List.of(room));
 
         processor.processPendingNotifications(now);
@@ -98,7 +101,6 @@ class InquiryMessageArrivalNotificationProcessorTest {
 
         InquiryMessageArrivalNotification exceeded = InquiryMessageArrivalNotification.builder()
                 .memberId(1L)
-                .roomId(10L)
                 .messageId(100L)
                 .status(NotificationStatus.FAILED)
                 .attempts(3)
@@ -106,6 +108,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
 
         when(notificationRepository.findRetryCandidates(anyList(), any()))
                 .thenReturn(Collections.singletonList(exceeded));
+        when(inquiryMessageRepository.findAllById(List.of(100L))).thenReturn(List.of());
 
         processor.processPendingNotifications(now);
 
@@ -113,10 +116,9 @@ class InquiryMessageArrivalNotificationProcessorTest {
         verify(statusService, never()).deleteAlreadyRead(any());
     }
 
-    private InquiryMessageArrivalNotification createNotification(Long roomId, Long messageId) {
+    private InquiryMessageArrivalNotification createNotification(Long messageId) {
         return InquiryMessageArrivalNotification.builder()
                 .memberId(1L)
-                .roomId(roomId)
                 .messageId(messageId)
                 .build();
     }
@@ -128,9 +130,10 @@ class InquiryMessageArrivalNotificationProcessorTest {
                 .build();
     }
 
-    private InquiryMessage createMessage(Long id, String content) {
+    private InquiryMessage createMessage(Long id, Long roomId, String content) {
         return InquiryMessage.builder()
                 .id(id)
+                .roomId(roomId)
                 .content(content)
                 .build();
     }

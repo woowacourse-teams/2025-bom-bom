@@ -1,6 +1,7 @@
 package news.bombom.inquiry.service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -45,11 +46,8 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
 
         log.info("[{}] 처리할 알림 개수: {}", type(), pendingNotifications.size());
 
-        Map<Long, InquiryRoom> roomsById = findRoomsById(pendingNotifications);
-        List<InquiryMessageArrivalNotification> unreadNotifications = pendingNotifications.stream()
-                .filter(notification -> !isAlreadyRead(notification, roomsById))
-                .toList();
-        Map<Long, String> contentsByMessageId = findContentsByMessageId(unreadNotifications);
+        Map<Long, InquiryMessage> messagesByMessageId = findMessagesByMessageId(pendingNotifications);
+        Map<Long, InquiryRoom> roomsByRoomId = findRoomsByRoomId(messagesByMessageId.values());
 
         for (InquiryMessageArrivalNotification notification : pendingNotifications) {
             try {
@@ -59,12 +57,15 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
                     continue;
                 }
 
-                if (isAlreadyRead(notification, roomsById)) {
+                InquiryMessage message = messagesByMessageId.get(notification.getMessageId());
+                InquiryRoom room = message == null ? null : roomsByRoomId.get(message.getRoomId());
+                if (room != null && room.hasRead(notification.getMessageId())) {
                     statusService.deleteAlreadyRead(notification);
                     continue;
                 }
 
-                notification.assignContent(contentsByMessageId.get(notification.getMessageId()));
+                notification.assignRoomId(message == null ? null : message.getRoomId());
+                notification.assignContent(message == null ? null : message.getContent());
                 notificationProcessingService.processNotification(
                         notification,
                         NotificationCategory.INQUIRY_MESSAGE_ARRIVAL,
@@ -76,28 +77,23 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
         }
     }
 
-    private boolean isAlreadyRead(InquiryMessageArrivalNotification notification, Map<Long, InquiryRoom> roomsById) {
-        InquiryRoom room = roomsById.get(notification.getRoomId());
-        return room != null && room.hasRead(notification.getMessageId());
-    }
-
-    private Map<Long, InquiryRoom> findRoomsById(List<InquiryMessageArrivalNotification> notifications) {
-        List<Long> roomIds = notifications.stream()
-                .map(InquiryMessageArrivalNotification::getRoomId)
-                .distinct()
-                .toList();
-
-        return inquiryRoomRepository.findAllById(roomIds).stream()
-                .collect(Collectors.toMap(InquiryRoom::getId, Function.identity()));
-    }
-
-    private Map<Long, String> findContentsByMessageId(List<InquiryMessageArrivalNotification> notifications) {
+    private Map<Long, InquiryMessage> findMessagesByMessageId(List<InquiryMessageArrivalNotification> notifications) {
         List<Long> messageIds = notifications.stream()
                 .map(InquiryMessageArrivalNotification::getMessageId)
                 .distinct()
                 .toList();
 
         return inquiryMessageRepository.findAllById(messageIds).stream()
-                .collect(Collectors.toMap(InquiryMessage::getId, InquiryMessage::getContent));
+                .collect(Collectors.toMap(InquiryMessage::getId, Function.identity()));
+    }
+
+    private Map<Long, InquiryRoom> findRoomsByRoomId(Collection<InquiryMessage> messages) {
+        List<Long> roomIds = messages.stream()
+                .map(InquiryMessage::getRoomId)
+                .distinct()
+                .toList();
+
+        return inquiryRoomRepository.findAllById(roomIds).stream()
+                .collect(Collectors.toMap(InquiryRoom::getId, Function.identity()));
     }
 }

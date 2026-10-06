@@ -46,9 +46,9 @@ class InquiryMessageArrivalMessageBuilderTest {
     private InquiryMessageArrivalNotification createNotification() {
         InquiryMessageArrivalNotification notification = InquiryMessageArrivalNotification.builder()
                 .memberId(1L)
-                .roomId(10L)
                 .messageId(100L)
                 .build();
+        notification.assignRoomId(10L);
         notification.assignContent("답변 내용입니다");
         return notification;
     }

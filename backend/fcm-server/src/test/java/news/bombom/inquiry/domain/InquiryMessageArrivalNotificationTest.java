@@ -76,7 +76,6 @@ class InquiryMessageArrivalNotificationTest {
     private InquiryMessageArrivalNotification createNotification() {
         return InquiryMessageArrivalNotification.builder()
                 .memberId(1L)
-                .roomId(10L)
                 .messageId(100L)
                 .build();
     }

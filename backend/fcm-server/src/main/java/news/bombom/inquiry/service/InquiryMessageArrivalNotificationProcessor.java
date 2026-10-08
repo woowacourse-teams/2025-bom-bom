@@ -60,12 +60,10 @@ public class InquiryMessageArrivalNotificationProcessor implements NotificationP
                 InquiryMessage message = messagesByMessageId.get(notification.getMessageId());
                 InquiryRoom room = message == null ? null : roomsByRoomId.get(message.getRoomId());
                 if (room != null && room.hasRead(notification.getMessageId())) {
-                    statusService.deleteAlreadyRead(notification);
+                    statusService.deleteAlreadyRead(notification, room.getId());
                     continue;
                 }
 
-                notification.assignRoomId(message == null ? null : message.getRoomId());
-                notification.assignContent(message == null ? null : message.getContent());
                 notificationProcessingService.processNotification(
                         notification,
                         NotificationCategory.INQUIRY_MESSAGE_ARRIVAL,

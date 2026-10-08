@@ -48,7 +48,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
     private InquiryMessageArrivalNotificationProcessor processor;
 
     @Test
-    void 아직_읽지_않은_알림은_메시지의_roomId와_content를_채워_발송을_요청한다() {
+    void 아직_읽지_않은_알림은_발송을_요청한다() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
         InquiryMessageArrivalNotification notification = createNotification(100L);
         InquiryMessage message = createMessage(100L, 10L, "답변 내용");
@@ -68,8 +68,6 @@ class InquiryMessageArrivalNotificationProcessorTest {
                 NotificationCategory.INQUIRY_MESSAGE_ARRIVAL,
                 statusService
         );
-        assertThat(notification.getRoomId()).isEqualTo(10L);
-        assertThat(notification.getContent()).isEqualTo("답변 내용");
     }
 
     @Test
@@ -86,7 +84,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
 
         processor.processPendingNotifications(now);
 
-        verify(statusService, times(1)).deleteAlreadyRead(notification);
+        verify(statusService, times(1)).deleteAlreadyRead(notification, 10L);
         verify(notificationProcessingService, never()).processNotification(any(), any(), any());
     }
 
@@ -108,7 +106,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
         processor.processPendingNotifications(now);
 
         verify(notificationProcessingService, never()).processNotification(any(), any(), any());
-        verify(statusService, never()).deleteAlreadyRead(any());
+        verify(statusService, never()).deleteAlreadyRead(any(), any());
     }
 
     private InquiryMessageArrivalNotification createNotification(Long messageId) {

@@ -140,8 +140,60 @@ class InquiryRoomControllerTest {
                 .statusCode(400);
     }
 
-    private static void createRoom(String headerName, String headerValue) {
+    @Test
+    @ResetsAcceptanceData
+    void 본인의_채팅방을_단건_조회한다() {
+        Long roomId = createRoomAndGetId(AcceptanceTestHeaders.MEMBER_ID, "1");
+
+        Map<String, Object> result = RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .when()
+                .get("/api/v1/inquiries/rooms/{roomId}", roomId)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.get("id")).isEqualTo(roomId.intValue());
+            softly.assertThat(result.get("categoryId")).isEqualTo(1);
+            softly.assertThat(result.get("status")).isEqualTo("UNCONFIRMED");
+        });
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 타인의_채팅방을_단건_조회할_수_없다() {
+        Long roomId = createRoomAndGetId(AcceptanceTestHeaders.MEMBER_ID, "1");
+
         RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 2)
+                .when()
+                .get("/api/v1/inquiries/rooms/{roomId}", roomId)
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void 존재하지_않는_채팅방을_단건_조회할_수_없다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .when()
+                .get("/api/v1/inquiries/rooms/{roomId}", 999999)
+                .then()
+                .statusCode(404);
+    }
+
+    private static void createRoom(String headerName, String headerValue) {
+        createRoomAndGetId(headerName, headerValue);
+    }
+
+    private static Long createRoomAndGetId(String headerName, String headerValue) {
+        Integer id = RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .header(headerName, headerValue)
@@ -149,7 +201,11 @@ class InquiryRoomControllerTest {
                 .when()
                 .post("/api/v1/inquiries/rooms")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getInt("id");
+        return id.longValue();
     }
 
     @SuppressWarnings("unchecked")

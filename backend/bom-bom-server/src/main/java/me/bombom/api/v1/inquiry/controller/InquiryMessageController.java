@@ -37,7 +37,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
     public InquiryMessageResponse sendMessage(
             @LoginMember(anonymous = true) Member member,
             @GuestId String guestId,
-            @PathVariable Long roomId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
             @Valid @RequestBody SendInquiryMessageRequest request
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
@@ -49,7 +49,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
     public InquiryMessagePageResponse getMessages(
             @LoginMember(anonymous = true) Member member,
             @GuestId String guestId,
-            @PathVariable Long roomId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "20")
             @Positive(message = "size는 1 이상의 값이어야 합니다.")
@@ -57,7 +57,7 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
             int size
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return inquiryMessageService.getMessages(requester, roomId, cursor, size);
+        return inquiryMessageService.getMessagesAndMarkAsRead(requester, roomId, cursor, size);
     }
 
     @Override
@@ -66,8 +66,8 @@ public class InquiryMessageController implements InquiryMessageControllerApi {
     public void deleteMessage(
             @LoginMember(anonymous = true) Member member,
             @GuestId String guestId,
-            @PathVariable Long roomId,
-            @PathVariable Long messageId
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long messageId
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
         inquiryMessageService.deleteMessage(requester, roomId, messageId);

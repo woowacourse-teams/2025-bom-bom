@@ -25,14 +25,18 @@ public class WebhookHttpClient {
     @Async
     public void post(String url, Object body) {
         try {
-            restClient.post()
-                    .uri(url)
-                    .body(body)
-                    .retrieve()
-                    .toBodilessEntity();
+            postSync(url, body);
         } catch (Exception e) {
             log.warn("[WARN] Webhook 전송 실패: {}", e.getMessage(), e);
         }
+    }
+
+    public void postSync(String url, Object body) {
+        restClient.post()
+                .uri(url)
+                .body(body)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     private ClientHttpRequestFactory createRequestFactory() {

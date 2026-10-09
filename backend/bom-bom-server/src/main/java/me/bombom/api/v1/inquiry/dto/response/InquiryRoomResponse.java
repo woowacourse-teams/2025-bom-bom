@@ -8,15 +8,17 @@ public record InquiryRoomResponse(
         Long id,
         Long categoryId,
         InquiryStatus status,
+        boolean hasUnreadMessage,
         LocalDateTime createdAt,
         LocalDateTime closedAt
 ) {
 
-    public static InquiryRoomResponse from(InquiryRoom room) {
+    public static InquiryRoomResponse of(InquiryRoom room, boolean hasUnreadMessage) {
         return new InquiryRoomResponse(
                 room.getId(),
                 room.getCategoryId(),
                 room.getStatus(),
+                hasUnreadMessage,
                 room.getCreatedAt(),
                 room.getClosedAt()
         );

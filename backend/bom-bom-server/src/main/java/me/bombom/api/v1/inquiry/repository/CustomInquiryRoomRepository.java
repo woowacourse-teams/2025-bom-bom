@@ -7,4 +7,6 @@ import org.springframework.data.domain.Pageable;
 public interface CustomInquiryRoomRepository {
 
     Page<InquiryRoom> findRoomsByRequester(Long memberId, String guestId, Pageable pageable);
+
+    boolean existsUnreadAdminMessage(Long memberId, String guestId);
 }

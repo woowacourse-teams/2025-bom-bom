@@ -1,12 +1,15 @@
 package me.bombom.api.v1.inquiry.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import me.bombom.api.v1.inquiry.dto.request.CreateInquiryRoomRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.member.domain.Member;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -34,4 +37,30 @@ public interface InquiryRoomControllerApi {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 (회원/비회원 식별 불가 등)")
     })
     Page<InquiryRoomResponse> getRooms(Member member, String guestId, @ParameterObject Pageable pageable);
+
+    @Operation(
+            summary = "문의 채팅방 단건 조회",
+            description = "roomId로 문의 채팅방 상세 정보를 조회합니다. 본인이 소유한 채팅방만 조회할 수 있습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "채팅방 단건 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 (회원/비회원 식별 불가 등)"),
+            @ApiResponse(responseCode = "403", description = "본인이 소유한 채팅방이 아님"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 채팅방")
+    })
+    InquiryRoomResponse getRoom(
+            Member member,
+            String guestId,
+            @Parameter(description = "채팅방 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId
+    );
+
+    @Operation(
+            summary = "문의 미확인 상태 조회",
+            description = "내 문의 채팅방 중 아직 읽지 않은 어드민 응답이 하나라도 있는지 여부를 조회합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "미확인 상태 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 (회원/비회원 식별 불가 등)")
+    })
+    InquiryUnreadStatusResponse getUnreadStatus(Member member, String guestId);
 }

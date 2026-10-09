@@ -55,4 +55,12 @@ public class InquiryMessageArrivalNotificationStatusService
                 notification.getMemberId(), notification.getId(), notification.getAttempts(),
                 notification.shouldRetry(), notification.getNextRetryAt());
     }
+
+    @Override
+    @Transactional
+    public void handleRejected(InquiryMessageArrivalNotification notification) {
+        log.info("알림 수신 거부로 문의 답변 알림 삭제: notificationId={}, memberId={}", notification.getId(),
+                notification.getMemberId());
+        notificationRepository.delete(notification);
+    }
 }

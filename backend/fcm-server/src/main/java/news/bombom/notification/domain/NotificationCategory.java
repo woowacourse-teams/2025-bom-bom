@@ -14,6 +14,7 @@ public enum NotificationCategory {
     EVENT(false, true, "bombom_event"),
     CHALLENGE_TODO_REMINDER(true, false, null),
     CHALLENGE_START(true, false, null),
+    INQUIRY_MESSAGE_ARRIVAL(true, false, null),
     ;
 
     private final boolean defaultSetting;

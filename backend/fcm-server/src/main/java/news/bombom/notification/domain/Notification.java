@@ -55,7 +55,13 @@ public abstract class Notification extends BaseEntity {
         this.status = NotificationStatus.FAILED;
         this.attempts++;
         this.lastError = reason;
-        this.nextRetryAt = calculateNextRetryTime(this.attempts);
+
+        if (shouldRetry()) {
+            this.nextRetryAt = calculateNextRetryTime(this.attempts);
+        } else {
+            this.status = NotificationStatus.DEAD;
+            this.nextRetryAt = null;
+        }
     }
 
     /**

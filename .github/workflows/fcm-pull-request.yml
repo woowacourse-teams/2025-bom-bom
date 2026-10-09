@@ -1,0 +1,50 @@
+name: pull requset - fcm
+
+on:
+  pull_request:
+    types: [ opened, edited, synchronize ]
+    branches:
+      - fcm-server
+
+jobs:
+  fcm-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/fcm-server
+    steps:
+      - name: Github Repository 파일 불러오기
+        uses: actions/checkout@v4
+
+      - name: JDK v21 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: fcm application.yml 생성 (prod, test)
+        env:
+          PROD_YML: ${{ secrets.FCM_APPLICATION_PROD_YML }}
+          TEST_YML: ${{ secrets.FCM_APPLICATION_TEST_YML }}
+        run: |
+          mkdir -p src/main/resources src/test/resources
+          echo "$PROD_YML" > src/main/resources/application.yml
+          echo "$TEST_YML" > src/test/resources/application.yml
+
+      - name: fcm reminder-messages.yml 생성
+        env:
+          REMINDER_MESSAGES: ${{ secrets.FCM_CHALLENGE_REMINDER_MESSAGES_YML }}
+        run: |
+          echo "$REMINDER_MESSAGES" > src/main/resources/reminder-messages.yml
+
+      - name: 빌드 및 테스트
+        shell: bash
+        run: ./gradlew build --no-daemon
+
+      - name: 테스트 리포트 생성
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: JUnit Test Report
+          path: backend/fcm-server/build/test-results/test/*.xml
+          reporter: java-junit

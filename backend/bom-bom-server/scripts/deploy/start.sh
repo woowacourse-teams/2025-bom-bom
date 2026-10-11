@@ -25,6 +25,7 @@ DATABASE="$(get_parameter DATABASE)"
 MYSQL_USER="$(get_parameter MYSQL_USER)"
 MYSQL_PASSWORD="$(get_parameter MYSQL_PASSWORD)"
 PROD_OTEL_ENDPOINT="$(get_parameter PROD_OTEL_ENDPOINT)"
+PROD_LOKI_ENDPOINT="$(get_parameter PROD_LOKI_ENDPOINT)"
 export OAUTH2_APPLE_PRIVATE_KEY
 OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$(get_parameter OAUTH2_APPLE_PRIVATE_KEY)")"
 
@@ -53,6 +54,7 @@ install -m 600 /dev/null "$ENV_FILE"
   printf 'MYSQL_PASSWORD=%s\n' "$MYSQL_PASSWORD"
   printf 'SPRING_PROFILES_ACTIVE=prod\n'
   printf 'PROD_OTEL_ENDPOINT=%s\n' "$PROD_OTEL_ENDPOINT"
+  printf 'PROD_LOKI_ENDPOINT=%s\n' "$PROD_LOKI_ENDPOINT"
 } > "$ENV_FILE"
 
 cd "$APP_DIR"

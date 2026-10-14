@@ -18,7 +18,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @Value("${spring.servlet.multipart.max-file-size}")
+    @Value("${spring.servlet.multipart.max-file-size:1MB}")
     private DataSize maxFileSize;
 
     @ExceptionHandler(CIllegalArgumentException.class)

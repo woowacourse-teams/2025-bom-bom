@@ -9,9 +9,14 @@ import java.util.Map;
 import me.bombom.support.acceptance.AcceptanceTest;
 import me.bombom.support.acceptance.AcceptanceTestHeaders;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.unit.DataSize;
 
 @AcceptanceTest("acceptance/inquiry/upload-images.json")
 class InquiryImageControllerTest {
+
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize maxFileSize;
 
     @Test
     void 이미지_한_장을_업로드한다() {
@@ -64,6 +69,20 @@ class InquiryImageControllerTest {
                 .post("/api/v1/inquiries/images")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void 파일_크기_제한을_초과하면_거부한다() {
+        byte[] oversizedContent = new byte[(int) maxFileSize.toBytes() + 1];
+
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .multiPart("images", "big.png", oversizedContent, "image/png")
+                .when()
+                .post("/api/v1/inquiries/images")
+                .then()
+                .statusCode(413);
     }
 
     @SuppressWarnings("unchecked")

@@ -15,7 +15,7 @@ import org.springframework.util.unit.DataSize;
 @AcceptanceTest("acceptance/inquiry/upload-images.json")
 class InquiryImageControllerTest {
 
-    @Value("${spring.servlet.multipart.max-file-size}")
+    @Value("${spring.servlet.multipart.max-file-size:1MB}")
     private DataSize maxFileSize;
 
     @Test

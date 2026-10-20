@@ -23,18 +23,21 @@ public class InquiryMessageArrivalNotificationStatusService
     public void updateStatus(InquiryMessageArrivalNotification notification, NotificationResultResponse result) {
         if (result.successCount() > 0) {
             notification.markSent();
+            notificationRepository.save(notification);
             log.info("문의 답변 알림 발송 완료: notificationId={}, 성공={}, 실패={}, 스킵={}",
                     notification.getId(), result.successCount(), result.failCount(), result.skippedCount());
             return;
         }
         if (result.skippedCount() == result.totalDevices()) {
             notification.markSent();
+            notificationRepository.save(notification);
             log.info("문의 답변 알림 모든 기기 스킵: notificationId={}, 스킵={}",
                     notification.getId(), result.skippedCount());
             return;
         }
 
         notification.markFailed(result.errorMessages());
+        notificationRepository.save(notification);
         log.error("문의 답변 알림 모든 기기 발송 실패: notificationId={}, attempts={}, shouldRetry={}, nextRetryAt={}",
                 notification.getId(), notification.getAttempts(), notification.shouldRetry(),
                 notification.getNextRetryAt());
@@ -51,6 +54,7 @@ public class InquiryMessageArrivalNotificationStatusService
     @Transactional
     public void markAsFailed(InquiryMessageArrivalNotification notification, String reason) {
         notification.markFailed(reason);
+        notificationRepository.save(notification);
         log.warn("문의 답변 알림 FCM 토큰이 없습니다: memberId={}, notificationId={}, attempts={}, shouldRetry={}, nextRetryAt={}",
                 notification.getMemberId(), notification.getId(), notification.getAttempts(),
                 notification.shouldRetry(), notification.getNextRetryAt());

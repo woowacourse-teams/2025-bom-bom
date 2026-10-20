@@ -109,16 +109,16 @@ class InquiryMessageArrivalNotificationStatusServicePersistenceTest {
     }
 
     @Test
-    void 이미_읽은_알림은_삭제하지_않고_SENT_상태로_DB에_저장되고_재시도_대상에서_제외된다() {
+    void 이미_읽은_알림은_삭제하지_않고_SKIPPED_상태로_DB에_저장되고_재시도_대상에서_제외된다() {
         // given
         InquiryMessageArrivalNotification notification = saveDetachedNotificationEntity(NotificationStatus.PENDING, 0);
 
         // when
-        statusService.markAlreadyReadAsSent(notification, 20L);
+        statusService.markAlreadyReadAsSkipped(notification, 20L);
 
         // then
         InquiryMessageArrivalNotification saved = notificationRepository.findById(notification.getId()).orElseThrow();
-        assertThat(saved.getStatus()).isEqualTo(NotificationStatus.SENT);
+        assertThat(saved.getStatus()).isEqualTo(NotificationStatus.SKIPPED);
 
         List<InquiryMessageArrivalNotification> retryCandidates = notificationRepository.findRetryCandidates(
                 List.of(NotificationStatus.PENDING, NotificationStatus.FAILED), LocalDateTime.now());

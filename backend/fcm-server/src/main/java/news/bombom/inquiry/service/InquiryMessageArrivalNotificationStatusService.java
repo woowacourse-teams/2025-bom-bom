@@ -44,10 +44,10 @@ public class InquiryMessageArrivalNotificationStatusService
     }
 
     @Transactional
-    public void markAlreadyReadAsSent(InquiryMessageArrivalNotification notification, Long roomId) {
-        notification.markSent();
+    public void markAlreadyReadAsSkipped(InquiryMessageArrivalNotification notification, Long roomId) {
+        notification.markSkipped();
         notificationRepository.save(notification);
-        log.info("문의 답변 알림 발송 전 사용자가 메시지를 이미 읽어 SENT 처리: notificationId={}, roomId={}, messageId={}",
+        log.info("문의 답변 알림 발송 전 사용자가 메시지를 이미 읽어 SKIPPED 처리: notificationId={}, roomId={}, messageId={}",
                 notification.getId(), roomId, notification.getMessageId());
     }
 

@@ -23,34 +23,39 @@ public class InquiryMessageArrivalNotificationStatusService
     public void updateStatus(InquiryMessageArrivalNotification notification, NotificationResultResponse result) {
         if (result.successCount() > 0) {
             notification.markSent();
+            notificationRepository.save(notification);
             log.info("문의 답변 알림 발송 완료: notificationId={}, 성공={}, 실패={}, 스킵={}",
                     notification.getId(), result.successCount(), result.failCount(), result.skippedCount());
             return;
         }
         if (result.skippedCount() == result.totalDevices()) {
             notification.markSent();
+            notificationRepository.save(notification);
             log.info("문의 답변 알림 모든 기기 스킵: notificationId={}, 스킵={}",
                     notification.getId(), result.skippedCount());
             return;
         }
 
         notification.markFailed(result.errorMessages());
+        notificationRepository.save(notification);
         log.error("문의 답변 알림 모든 기기 발송 실패: notificationId={}, attempts={}, shouldRetry={}, nextRetryAt={}",
                 notification.getId(), notification.getAttempts(), notification.shouldRetry(),
                 notification.getNextRetryAt());
     }
 
     @Transactional
-    public void deleteAlreadyRead(InquiryMessageArrivalNotification notification, Long roomId) {
-        log.info("문의 답변 알림 발송 전 사용자가 메시지를 이미 읽어 알림 삭제: notificationId={}, roomId={}, messageId={}",
+    public void markAlreadyReadAsSkipped(InquiryMessageArrivalNotification notification, Long roomId) {
+        notification.markSkipped();
+        notificationRepository.save(notification);
+        log.info("문의 답변 알림 발송 전 사용자가 메시지를 이미 읽어 SKIPPED 처리: notificationId={}, roomId={}, messageId={}",
                 notification.getId(), roomId, notification.getMessageId());
-        notificationRepository.delete(notification);
     }
 
     @Override
     @Transactional
     public void markAsFailed(InquiryMessageArrivalNotification notification, String reason) {
         notification.markFailed(reason);
+        notificationRepository.save(notification);
         log.warn("문의 답변 알림 FCM 토큰이 없습니다: memberId={}, notificationId={}, attempts={}, shouldRetry={}, nextRetryAt={}",
                 notification.getMemberId(), notification.getId(), notification.getAttempts(),
                 notification.shouldRetry(), notification.getNextRetryAt());

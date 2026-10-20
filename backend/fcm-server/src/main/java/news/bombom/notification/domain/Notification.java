@@ -64,6 +64,12 @@ public abstract class Notification extends BaseEntity {
         }
     }
 
+    public void markSkipped() {
+        this.status = NotificationStatus.SKIPPED;
+        this.nextRetryAt = null;
+        this.lastError = null;
+    }
+
     /**
      * 기본은 재시도 없음. 필요한 경우 하위 클래스 override.
      */

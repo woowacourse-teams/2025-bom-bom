@@ -71,7 +71,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
     }
 
     @Test
-    void 이미_읽은_알림은_삭제하고_발송하지_않는다() {
+    void 이미_읽은_알림은_SENT로_처리하고_발송하지_않는다() {
         LocalDateTime now = LocalDateTime.of(2026, 2, 16, 10, 0);
         InquiryMessageArrivalNotification notification = createNotification(100L);
         InquiryMessage message = createMessage(100L, 10L, "답변 내용");
@@ -84,7 +84,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
 
         processor.processPendingNotifications(now);
 
-        verify(statusService, times(1)).deleteAlreadyRead(notification, 10L);
+        verify(statusService, times(1)).markAlreadyReadAsSent(notification, 10L);
         verify(notificationProcessingService, never()).processNotification(any(), any(), any());
     }
 
@@ -106,7 +106,7 @@ class InquiryMessageArrivalNotificationProcessorTest {
         processor.processPendingNotifications(now);
 
         verify(notificationProcessingService, never()).processNotification(any(), any(), any());
-        verify(statusService, never()).deleteAlreadyRead(any(), any());
+        verify(statusService, never()).markAlreadyReadAsSent(any(), any());
     }
 
     private InquiryMessageArrivalNotification createNotification(Long messageId) {

@@ -44,10 +44,11 @@ public class InquiryMessageArrivalNotificationStatusService
     }
 
     @Transactional
-    public void deleteAlreadyRead(InquiryMessageArrivalNotification notification, Long roomId) {
-        log.info("문의 답변 알림 발송 전 사용자가 메시지를 이미 읽어 알림 삭제: notificationId={}, roomId={}, messageId={}",
+    public void markAlreadyReadAsSent(InquiryMessageArrivalNotification notification, Long roomId) {
+        notification.markSent();
+        notificationRepository.save(notification);
+        log.info("문의 답변 알림 발송 전 사용자가 메시지를 이미 읽어 SENT 처리: notificationId={}, roomId={}, messageId={}",
                 notification.getId(), roomId, notification.getMessageId());
-        notificationRepository.delete(notification);
     }
 
     @Override

@@ -42,6 +42,14 @@ jobs:
           mkdir -p src/test/resources
           echo "$TEST_YML" > src/test/resources/application.yml
 
+          for key in SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD; do
+            expected="\${$key}"
+            if ! grep -Fq "$expected" src/main/resources/application.yml; then
+              echo "FCM_APPLICATION_PROD_YML must reference $expected" >&2
+              exit 1
+            fi
+          done
+
       - name: fcm reminder-messages.yml 생성
         env:
           REMINDER_MESSAGES: ${{ secrets.FCM_CHALLENGE_REMINDER_MESSAGES_YML }}
@@ -106,10 +114,30 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest
           docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest bombom-fcm:latest
 
-      - name: Stop and remove existing bombom-fcm container
-        run: |
-          docker rm -f bombom-fcm || true
-
       - name: Deploy with Docker Compose
+        env:
+          AWS_REGION: ap-northeast-2
+          FCM_DB_PARAMETER_PATH: /bom-bom/fcm/prod
         run: |
-          docker compose up -d fcm-app
+          set -euo pipefail
+
+          get_parameter() {
+            aws ssm get-parameter \
+              --name "${FCM_DB_PARAMETER_PATH}/$1" \
+              --with-decryption \
+              --query 'Parameter.Value' \
+              --output text \
+              --region "$AWS_REGION"
+          }
+
+          export FCM_SPRING_DATASOURCE_URL="$(get_parameter SPRING_DATASOURCE_URL)"
+          export FCM_SPRING_DATASOURCE_USERNAME="$(get_parameter SPRING_DATASOURCE_USERNAME)"
+          export FCM_SPRING_DATASOURCE_PASSWORD="$(get_parameter SPRING_DATASOURCE_PASSWORD)"
+
+          : "${FCM_SPRING_DATASOURCE_URL:?FCM SPRING_DATASOURCE_URL SSM parameter is empty}"
+          : "${FCM_SPRING_DATASOURCE_USERNAME:?FCM SPRING_DATASOURCE_USERNAME SSM parameter is empty}"
+          : "${FCM_SPRING_DATASOURCE_PASSWORD:?FCM SPRING_DATASOURCE_PASSWORD SSM parameter is empty}"
+
+          # Fail before replacing the running container if config is incomplete.
+          docker compose config >/dev/null
+          docker compose up -d --remove-orphans --force-recreate fcm-app

@@ -59,6 +59,16 @@ jobs:
         run: |
           mkdir -p src/main/resources
           printf '%s' "${APPLICATION_PROD_PROPERTIES}" > src/main/resources/application.yml
+          for key in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY; do
+            if ! grep -Fq "\${$key}" src/main/resources/application.yml; then
+              echo "APPLICATION_PROD_PROPERTIES must reference \${$key}" >&2
+              exit 1
+            fi
+          done
+          if grep -Eq 'https?://(discord(app)?\.com)/api/webhooks/' src/main/resources/application.yml; then
+            echo "Discord webhook URL must not be embedded in the application config or image" >&2
+            exit 1
+          fi
 
       - name: Gradle 빌드
         run: ./gradlew assemble --profile --no-daemon --stacktrace --info
@@ -79,6 +89,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    environment: dev
     needs: build
     defaults:
       run:
@@ -108,12 +119,11 @@ jobs:
       - name: 테스트 실행
         env:
           SPRING_PROFILES_ACTIVE: test
-          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/discord_webhook_new_member
-          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/discord_webhook_operation_error
-          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_DEV_URL }}
+          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/new-member
+          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/operation-error
+          DISCORD_WEBHOOK_INQUIRY: https://example.invalid/discord/inquiry
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
-          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_DEV_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew test --profile --no-daemon --stacktrace --info
 

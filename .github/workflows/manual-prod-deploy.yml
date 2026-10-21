@@ -39,6 +39,16 @@ jobs:
         run: |
           mkdir -p src/main/resources src/test/resources
           printf '%s' "${APPLICATION_PROD_PROPERTIES}" > src/main/resources/application.yml
+          for key in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY; do
+            if ! grep -Fq "\${$key}" src/main/resources/application.yml; then
+              echo "APPLICATION_PROD_PROPERTIES must reference \${$key}" >&2
+              exit 1
+            fi
+          done
+          if grep -Eq 'https?://(discord(app)?\.com)/api/webhooks/' src/main/resources/application.yml; then
+            echo "Discord webhook URL must not be embedded in the application config or image" >&2
+            exit 1
+          fi
 
       - name: only 빌드
         run: ./gradlew clean assemble --no-daemon --stacktrace --info
@@ -52,6 +62,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    environment: dev
     needs: build
     defaults:
       run:
@@ -78,12 +89,11 @@ jobs:
       - name: 테스트 실행
         env:
           SPRING_PROFILES_ACTIVE: test
-          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/discord_webhook_new_member
-          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/discord_webhook_operation_error
-          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_DEV_URL }}
+          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/new-member
+          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/operation-error
+          DISCORD_WEBHOOK_INQUIRY: https://example.invalid/discord/inquiry
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
-          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_DEV_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
           ./gradlew test --no-daemon --stacktrace --info
 
@@ -138,7 +148,7 @@ jobs:
         working-directory: ./backend/bom-bom-server
 
     environment:
-      name: production
+      name: prod
       url: https://api.bombom.news
 
     steps:
@@ -156,6 +166,7 @@ jobs:
 
       - name: .env file 생성
         run: |
+          umask 077
           cat <<EOF > .env
           RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
           DATABASE=${{ secrets.PROD_DATABASE }}
@@ -164,31 +175,45 @@ jobs:
           SPRING_PROFILES_ACTIVE=prod
           PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
+          set -euo pipefail
+          get_parameter() {
+            aws ssm get-parameter \
+              --name "/bom-bom/prod/$1" \
+              --with-decryption \
+              --query 'Parameter.Value' \
+              --output text \
+              --region ap-northeast-2
+          }
+          umask 077
+          {
+            printf 'DISCORD_WEBHOOK_NEW_MEMBER=%s\n' "$(get_parameter DISCORD_WEBHOOK_NEW_MEMBER)"
+            printf 'DISCORD_WEBHOOK_OPERATION_ERROR=%s\n' "$(get_parameter DISCORD_WEBHOOK_OPERATION_ERROR)"
+            printf 'DISCORD_WEBHOOK_INQUIRY=%s\n' "$(get_parameter DISCORD_WEBHOOK_INQUIRY)"
+          } >> .env
+          chmod 600 .env
 
-      - name: 컨테이너 재실행 (Apple·Discord ENV 주입)
+      - name: 컨테이너 재실행 (Apple 키 환경변수 주입)
         shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
-          DISCORD_WEBHOOK_NEW_MEMBER: ${{ secrets.DISCORD_WEBHOOK_NEW_MEMBER_URL }}
-          DISCORD_WEBHOOK_OPERATION_ERROR: ${{ secrets.DISCORD_WEBHOOK_OPERATION_ERROR_URL }}
-          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_URL }}
         run: |
           set -euo pipefail
-          : "${DISCORD_WEBHOOK_NEW_MEMBER:?DISCORD_WEBHOOK_NEW_MEMBER_URL 시크릿이 없습니다}"
-          : "${DISCORD_WEBHOOK_OPERATION_ERROR:?DISCORD_WEBHOOK_OPERATION_ERROR_URL 시크릿이 없습니다}"
-          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY,DISCORD_WEBHOOK_NEW_MEMBER,DISCORD_WEBHOOK_OPERATION_ERROR,DISCORD_WEBHOOK_INQUIRY docker compose \
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env config >/dev/null
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY,DISCORD_WEBHOOK_NEW_MEMBER,DISCORD_WEBHOOK_OPERATION_ERROR,DISCORD_WEBHOOK_INQUIRY docker compose \
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env down || true
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY,DISCORD_WEBHOOK_NEW_MEMBER,DISCORD_WEBHOOK_OPERATION_ERROR,DISCORD_WEBHOOK_INQUIRY docker compose \
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
+
+      - name: 배포 환경 파일 삭제
+        if: always()
+        run: rm -f .env
 
       - name: Docker 리소스 정리
         run: |
@@ -204,7 +229,7 @@ jobs:
         working-directory: ./backend/bom-bom-server
 
     environment:
-      name: production
+      name: prod
       url: https://api.bombom.news
 
     steps:
@@ -222,6 +247,7 @@ jobs:
 
       - name: .env file 생성
         run: |
+          umask 077
           cat <<EOF > .env
           RDS_ENDPOINT=${{ secrets.PROD_RDS_ENDPOINT }}
           DATABASE=${{ secrets.PROD_DATABASE }}
@@ -230,31 +256,45 @@ jobs:
           SPRING_PROFILES_ACTIVE=prod
           PROD_OTEL_ENDPOINT=${{ secrets.PROD_OTEL_ENDPOINT }}
           EOF
+          set -euo pipefail
+          get_parameter() {
+            aws ssm get-parameter \
+              --name "/bom-bom/prod/$1" \
+              --with-decryption \
+              --query 'Parameter.Value' \
+              --output text \
+              --region ap-northeast-2
+          }
+          umask 077
+          {
+            printf 'DISCORD_WEBHOOK_NEW_MEMBER=%s\n' "$(get_parameter DISCORD_WEBHOOK_NEW_MEMBER)"
+            printf 'DISCORD_WEBHOOK_OPERATION_ERROR=%s\n' "$(get_parameter DISCORD_WEBHOOK_OPERATION_ERROR)"
+            printf 'DISCORD_WEBHOOK_INQUIRY=%s\n' "$(get_parameter DISCORD_WEBHOOK_INQUIRY)"
+          } >> .env
+          chmod 600 .env
 
-      - name: 컨테이너 재실행 (Apple·Discord ENV 주입)
+      - name: 컨테이너 재실행 (Apple 키 환경변수 주입)
         shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
-          DISCORD_WEBHOOK_NEW_MEMBER: ${{ secrets.DISCORD_WEBHOOK_NEW_MEMBER_URL }}
-          DISCORD_WEBHOOK_OPERATION_ERROR: ${{ secrets.DISCORD_WEBHOOK_OPERATION_ERROR_URL }}
-          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_URL }}
         run: |
           set -euo pipefail
-          : "${DISCORD_WEBHOOK_NEW_MEMBER:?DISCORD_WEBHOOK_NEW_MEMBER_URL 시크릿이 없습니다}"
-          : "${DISCORD_WEBHOOK_OPERATION_ERROR:?DISCORD_WEBHOOK_OPERATION_ERROR_URL 시크릿이 없습니다}"
-          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           echo "HOST_LEN=${#OAUTH2_APPLE_PRIVATE_KEY}"
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY,DISCORD_WEBHOOK_NEW_MEMBER,DISCORD_WEBHOOK_OPERATION_ERROR,DISCORD_WEBHOOK_INQUIRY docker compose \
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env config >/dev/null
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY,DISCORD_WEBHOOK_NEW_MEMBER,DISCORD_WEBHOOK_OPERATION_ERROR,DISCORD_WEBHOOK_INQUIRY docker compose \
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env down || true
 
-          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY,DISCORD_WEBHOOK_NEW_MEMBER,DISCORD_WEBHOOK_OPERATION_ERROR,DISCORD_WEBHOOK_INQUIRY docker compose \
+          sudo --preserve-env=OAUTH2_APPLE_PRIVATE_KEY docker compose \
             -f docker-compose-prod-sub.yml --env-file .env \
             up -d --remove-orphans --pull=always --force-recreate
+
+      - name: 배포 환경 파일 삭제
+        if: always()
+        run: rm -f .env
 
       - name: Docker 리소스 정리
         run: |

@@ -9,6 +9,7 @@ on:
 jobs:
   prod-test:
     runs-on: ubuntu-latest
+    environment: dev
     defaults:
       run:
         working-directory: ./backend/bom-bom-server
@@ -38,12 +39,11 @@ jobs:
         shell: bash
         env:
           SPRING_PROFILES_ACTIVE: test
-          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/discord_webhook_new_member
-          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/discord_webhook_operation_error
-          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_DEV_URL }}
+          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/new-member
+          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/operation-error
+          DISCORD_WEBHOOK_INQUIRY: https://example.invalid/discord/inquiry
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
-          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_DEV_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew build --no-daemon
 

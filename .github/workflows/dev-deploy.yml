@@ -39,6 +39,9 @@ jobs:
         shell: bash
         env:
           SPRING_PROFILES_ACTIVE: test
+          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/discord_webhook_new_member
+          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/discord_webhook_operation_error
+          DISCORD_WEBHOOK_INQUIRY: https://example.invalid/discord/discord_webhook_inquiry
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "${APPLE_P8_ESCAPED:?APPLE_P8_ESCAPED 시크릿이 없습니다}")"
@@ -111,17 +114,20 @@ jobs:
           echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}" >> .env
           echo "DEV_OTEL_ENDPOINT=${{ secrets.DEV_OTEL_ENDPOINT }}" >> .env
 
-      - name: 환경변수 검증
-        run: |
-          docker compose -f docker-compose-dev.yml --env-file .env config | grep -E 'SPRING_' || true
-
-      - name: 컨테이너 재실행 (p8 ENV 주입)
+      - name: 컨테이너 재실행 (Apple·Discord ENV 주입)
         shell: bash
         env:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+          DISCORD_WEBHOOK_NEW_MEMBER: ${{ secrets.DISCORD_WEBHOOK_NEW_MEMBER_URL }}
+          DISCORD_WEBHOOK_OPERATION_ERROR: ${{ secrets.DISCORD_WEBHOOK_OPERATION_ERROR_URL }}
+          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_URL }}
         run: |
           set -euo pipefail
+          : "${DISCORD_WEBHOOK_NEW_MEMBER:?DISCORD_WEBHOOK_NEW_MEMBER_URL 시크릿이 없습니다}"
+          : "${DISCORD_WEBHOOK_OPERATION_ERROR:?DISCORD_WEBHOOK_OPERATION_ERROR_URL 시크릿이 없습니다}"
+          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          docker compose --env-file .env -f docker-compose-dev.yml config >/dev/null
           docker compose --env-file .env -f docker-compose-dev.yml down || true
           OAUTH2_APPLE_PRIVATE_KEY="$OAUTH2_APPLE_PRIVATE_KEY" \
           docker compose --env-file .env -f docker-compose-dev.yml up -d

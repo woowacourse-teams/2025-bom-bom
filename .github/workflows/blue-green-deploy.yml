@@ -53,6 +53,7 @@ jobs:
           cache: gradle
 
       - name: application.yml 생성 (Prod 환경)
+        shell: bash
         env:
           APPLICATION_PROD_PROPERTIES: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
         run: |
@@ -107,6 +108,9 @@ jobs:
       - name: 테스트 실행
         env:
           SPRING_PROFILES_ACTIVE: test
+          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/discord_webhook_new_member
+          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/discord_webhook_operation_error
+          DISCORD_WEBHOOK_INQUIRY: https://example.invalid/discord/discord_webhook_inquiry
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"

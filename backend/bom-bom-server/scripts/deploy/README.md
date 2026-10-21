@@ -19,11 +19,16 @@ discord:
 
 컨테이너 실행 단계에서 다음 GitHub Actions Secrets를 읽습니다.
 
-| 컨테이너 환경변수 | GitHub Secret |
-| --- | --- |
-| `DISCORD_WEBHOOK_NEW_MEMBER` | `DISCORD_WEBHOOK_NEW_MEMBER_URL` |
-| `DISCORD_WEBHOOK_OPERATION_ERROR` | `DISCORD_WEBHOOK_OPERATION_ERROR_URL` |
-| `DISCORD_WEBHOOK_INQUIRY` | `DISCORD_WEBHOOK_INQUIRY_URL` |
+| 컨테이너 환경변수 | 개발 배포 GitHub Secret | 수동 운영 배포 GitHub Secret |
+| --- | --- | --- |
+| `DISCORD_WEBHOOK_NEW_MEMBER` | `DISCORD_WEBHOOK_NEW_MEMBER_URL` | `DISCORD_WEBHOOK_NEW_MEMBER_URL` |
+| `DISCORD_WEBHOOK_OPERATION_ERROR` | `DISCORD_WEBHOOK_OPERATION_ERROR_URL` | `DISCORD_WEBHOOK_OPERATION_ERROR_URL` |
+| `DISCORD_WEBHOOK_INQUIRY` | `DISCORD_WEBHOOK_INQUIRY_DEV_URL` | `DISCORD_WEBHOOK_INQUIRY_URL` |
+
+개발 서버에서 사용할 별도 문의 웹훅 URL을 `DISCORD_WEBHOOK_INQUIRY_DEV_URL`에
+등록합니다. 개발·운영 YAML은 모두 `${DISCORD_WEBHOOK_INQUIRY}`를 참조하며,
+배포 단계에서 환경에 맞는 값을 전달합니다. 개발 전용 Secret이 없으면 운영 URL로
+대체하지 않고 기존 컨테이너를 중지하기 전에 배포를 실패시킵니다.
 
 테스트 실행 단계에는 실제 URL 대신 `example.invalid` 테스트용 값을 전달합니다.
 

@@ -120,12 +120,12 @@ jobs:
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
           DISCORD_WEBHOOK_NEW_MEMBER: ${{ secrets.DISCORD_WEBHOOK_NEW_MEMBER_URL }}
           DISCORD_WEBHOOK_OPERATION_ERROR: ${{ secrets.DISCORD_WEBHOOK_OPERATION_ERROR_URL }}
-          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_URL }}
+          DISCORD_WEBHOOK_INQUIRY: ${{ secrets.DISCORD_WEBHOOK_INQUIRY_DEV_URL }}
         run: |
           set -euo pipefail
           : "${DISCORD_WEBHOOK_NEW_MEMBER:?DISCORD_WEBHOOK_NEW_MEMBER_URL 시크릿이 없습니다}"
           : "${DISCORD_WEBHOOK_OPERATION_ERROR:?DISCORD_WEBHOOK_OPERATION_ERROR_URL 시크릿이 없습니다}"
-          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_URL 시크릿이 없습니다}"
+          : "${DISCORD_WEBHOOK_INQUIRY:?DISCORD_WEBHOOK_INQUIRY_DEV_URL 시크릿이 없습니다}"
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           docker compose --env-file .env -f docker-compose-dev.yml config >/dev/null
           docker compose --env-file .env -f docker-compose-dev.yml down || true

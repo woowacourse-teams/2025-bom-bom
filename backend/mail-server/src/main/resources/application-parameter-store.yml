@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: "aws-parameterstore:/bom-bom/prod/"
+  cloud:
+    aws:
+      parameterstore:
+        enabled: true
+      region:
+        static: ap-northeast-2
+  datasource:
+    url: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=utf8
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver

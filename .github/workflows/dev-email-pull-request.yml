@@ -33,5 +33,12 @@ jobs:
           echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
             > src/test/resources/application.yml
 
+      - name: Remove legacy database credentials from generated config
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 scripts/remove-datasource-credentials.py \
+            src/main/resources/application.yml \
+            src/main/resources/application-docker.yml
+
       - name: 빌드하기 및 테스트 하기
         run: ./gradlew clean build

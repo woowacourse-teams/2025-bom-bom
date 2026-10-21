@@ -63,6 +63,9 @@ dependencies {
     testImplementation("org.springframework.integration:spring-integration-test")
     testImplementation("org.springframework.security:spring-security-test")
 
+    // AWS Parameter Store
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-parameter-store:3.4.2")
+
     // db
     runtimeOnly("com.mysql:mysql-connector-j")
 }

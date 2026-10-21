@@ -1,6 +1,6 @@
 # Discord 웹훅 실행 시 주입
 
-`APPLICATION_DEV_PROPERTIES`와 `APPLICATION_PROD_PROPERTIES` GitHub Secret의
+`APPLICATION_DEV_PROPERTIES`, `APPLICATION_TEST_PROPERTIES`, `APPLICATION_PROD_PROPERTIES` GitHub Secret의
 설정은 URL 원문 대신 다음 환경변수 참조를 사용합니다. 빌드에서는 이 내용을
 그대로 `application.yml`에 저장하고, Spring이 시작될 때 값을 읽습니다.
 
@@ -30,7 +30,18 @@ discord:
 배포 단계에서 환경에 맞는 값을 전달합니다. 개발 전용 Secret이 없으면 운영 URL로
 대체하지 않고 기존 컨테이너를 중지하기 전에 배포를 실패시킵니다.
 
-테스트 실행 단계에는 실제 URL 대신 `example.invalid` 테스트용 값을 전달합니다.
+## 자동 테스트
+
+개발 설정과 테스트 설정은 별도 파일입니다. `APPLICATION_TEST_PROPERTIES`는
+`src/test/resources/application.yml`에 저장하고, 개발·운영 설정은 해당 빌드의
+`src/main/resources/application.yml`에 저장합니다.
+
+테스트 YAML의 `discord.webhook.inquiry.url`도 `${DISCORD_WEBHOOK_INQUIRY}`를
+참조합니다. 모든 테스트 실행 단계는 이 환경변수에 개발 서버와 동일한
+`DISCORD_WEBHOOK_INQUIRY_DEV_URL` Secret을 전달합니다. 테스트용 문의 URL을
+더미 값으로 대체하지 않으며, Secret이 없으면 테스트 실행 전에 실패합니다.
+
+테스트의 회원 가입·운영 오류 웹훅 환경변수는 `example.invalid` 더미 값을 유지합니다.
 
 ## Blue-Green 운영 배포
 

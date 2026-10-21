@@ -16,6 +16,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       LOGGING_FILE_NAME: /logs/bombom-prod.log
       OAUTH2_APPLE_PRIVATE_KEY: ${OAUTH2_APPLE_PRIVATE_KEY}
+      DISCORD_WEBHOOK_NEW_MEMBER: ${DISCORD_WEBHOOK_NEW_MEMBER:?required}
+      DISCORD_WEBHOOK_OPERATION_ERROR: ${DISCORD_WEBHOOK_OPERATION_ERROR:?required}
+      DISCORD_WEBHOOK_INQUIRY: ${DISCORD_WEBHOOK_INQUIRY:?required}
+      SPRING_APPLICATION_JSON: >-
+        {"discord":{"webhook":{"new_member":{"url":"${DISCORD_WEBHOOK_NEW_MEMBER}"},"operationError":{"url":"${DISCORD_WEBHOOK_OPERATION_ERROR}"},"inquiry":{"url":"${DISCORD_WEBHOOK_INQUIRY}"}}}}
       JAVA_TOOL_OPTIONS: "
           -javaagent:/otel/opentelemetry-javaagent.jar
           -Xms230m

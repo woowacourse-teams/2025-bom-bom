@@ -39,10 +39,14 @@ if [ -z "$DOCKER_IMAGE" ]; then
   exit 1
 fi
 
-if [[ ! "$DOCKER_IMAGE" =~ ^[A-Za-z0-9._/-]+/bom-bom:prod-[A-Za-z0-9._-]+$ ]]; then
+if [[ ! "$DOCKER_IMAGE" =~ ^[0-9]{12}\.dkr\.ecr\.ap-northeast-2\.amazonaws\.com/[a-z0-9._/-]+:prod-[A-Za-z0-9._-]+$ ]]; then
   echo "Invalid DOCKER_IMAGE: $DOCKER_IMAGE" >&2
   exit 1
 fi
+
+aws ecr get-login-password --region ap-northeast-2 \
+  | docker login --username AWS --password-stdin \
+    "${DOCKER_IMAGE%%/*}"
 
 install -m 600 /dev/null "$ENV_FILE"
 {

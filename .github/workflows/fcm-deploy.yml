@@ -42,13 +42,10 @@ jobs:
           mkdir -p src/test/resources
           echo "$TEST_YML" > src/test/resources/application.yml
 
-          for key in SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD; do
-            expected="\${$key}"
-            if ! grep -Fq "$expected" src/main/resources/application.yml; then
-              echo "FCM_APPLICATION_PROD_YML must reference $expected" >&2
-              exit 1
-            fi
-          done
+      - name: Remove legacy database credentials from generated config
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 scripts/remove-datasource-credentials.py src/main/resources/application.yml
 
       - name: fcm reminder-messages.yml 생성
         env:
@@ -114,30 +111,9 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest
           docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/bombom-fcm:latest bombom-fcm:latest
 
+      - name: Check Parameter Store access before stopping the server
+        run: bash scripts/check-parameter-store.sh
+
       - name: Deploy with Docker Compose
-        env:
-          AWS_REGION: ap-northeast-2
-          FCM_DB_PARAMETER_PATH: /bom-bom/fcm/prod
         run: |
-          set -euo pipefail
-
-          get_parameter() {
-            aws ssm get-parameter \
-              --name "${FCM_DB_PARAMETER_PATH}/$1" \
-              --with-decryption \
-              --query 'Parameter.Value' \
-              --output text \
-              --region "$AWS_REGION"
-          }
-
-          export FCM_SPRING_DATASOURCE_URL="$(get_parameter SPRING_DATASOURCE_URL)"
-          export FCM_SPRING_DATASOURCE_USERNAME="$(get_parameter SPRING_DATASOURCE_USERNAME)"
-          export FCM_SPRING_DATASOURCE_PASSWORD="$(get_parameter SPRING_DATASOURCE_PASSWORD)"
-
-          : "${FCM_SPRING_DATASOURCE_URL:?FCM SPRING_DATASOURCE_URL SSM parameter is empty}"
-          : "${FCM_SPRING_DATASOURCE_USERNAME:?FCM SPRING_DATASOURCE_USERNAME SSM parameter is empty}"
-          : "${FCM_SPRING_DATASOURCE_PASSWORD:?FCM SPRING_DATASOURCE_PASSWORD SSM parameter is empty}"
-
-          # Fail before replacing the running container if config is incomplete.
-          docker compose config >/dev/null
-          docker compose up -d --remove-orphans --force-recreate fcm-app
+          docker compose up -d fcm-app

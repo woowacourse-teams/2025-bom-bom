@@ -11,9 +11,6 @@ services:
     environment:
       TZ: Asia/Seoul
       GOOGLE_APPLICATION_CREDENTIALS: /app/key/bombom-fcm.json
-      SPRING_DATASOURCE_URL: ${FCM_SPRING_DATASOURCE_URL:?FCM_SPRING_DATASOURCE_URL is required}
-      SPRING_DATASOURCE_USERNAME: ${FCM_SPRING_DATASOURCE_USERNAME:?FCM_SPRING_DATASOURCE_USERNAME is required}
-      SPRING_DATASOURCE_PASSWORD: ${FCM_SPRING_DATASOURCE_PASSWORD:?FCM_SPRING_DATASOURCE_PASSWORD is required}
     volumes:
       - /srv/bombom/secrets/bombom-fcm.json:/app/key/bombom-fcm.json:ro
       - /srv/bombom/logs:/app/logs

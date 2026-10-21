@@ -29,6 +29,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    // AWS Parameter Store
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-parameter-store:3.4.2")
+
     // db
     implementation("mysql:mysql-connector-java:8.0.33")
     runtimeOnly("com.h2database:h2")

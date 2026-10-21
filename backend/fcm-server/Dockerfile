@@ -27,4 +27,4 @@ EXPOSE 8080
 
 # 8. 애플리케이션 실행
 #   - env로 JAVA_OPTS, SPRING_CONFIG_ADDITIONAL_LOCATION, GOOGLE_APPLICATION_CREDENTIALS 넘길 수 있음
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Duser.timezone=Asia/Seoul -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Duser.timezone=Asia/Seoul -jar app.jar --spring.profiles.active=parameter-store"]

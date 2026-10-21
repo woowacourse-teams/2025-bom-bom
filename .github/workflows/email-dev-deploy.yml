@@ -33,6 +33,13 @@ jobs:
           echo "${{ secrets.EMAIL_APPLICATION_TEST_PROPERTIES }}" \
             > src/test/resources/application.yml
 
+      - name: Remove legacy database credentials from generated config
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 scripts/remove-datasource-credentials.py \
+            src/main/resources/application.yml \
+            src/main/resources/application-docker.yml
+
       - name: Build JAR
         run: ./gradlew clean build
 
@@ -74,6 +81,9 @@ jobs:
         with:
           username: ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}
           password: ${{ secrets.EMAIL_DOCKERHUB_TOKEN }}
+
+      - name: Check Parameter Store access before stopping the server
+        run: bash scripts/check-parameter-store.sh
 
       - name: Stop & Remove Previous Compose
         run: |

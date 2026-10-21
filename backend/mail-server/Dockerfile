@@ -16,6 +16,6 @@ COPY build/libs/*.jar app.jar
 USER ${APP_USER}
 
 ENTRYPOINT ["java","-jar","/app/app.jar", \
-            "--spring.profiles.active=docker", \
+            "--spring.profiles.active=docker,parameter-store", \
             "--integration.file.maildir=/maildir/new", \
             "-Duser.timezone=Asia/Seoul"]

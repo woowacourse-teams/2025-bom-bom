@@ -48,6 +48,7 @@ services:
       OTEL_PROPAGATORS: tracecontext,baggage
       OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS: /actuator/.*
     volumes:
+      - ${APPLICATION_YML_FILE:?required}:/app/config/application.yml:ro
       - /home/ec2-user/bombom-prod/logs:/logs
       - /home/ec2-user/bombom-prod/opentelemetry/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
       - /home/ec2-user/bombom-prod/dumps:/dumps

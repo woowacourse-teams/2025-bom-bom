@@ -19,6 +19,8 @@ import me.bombom.api.v1.auth.service.OAuth2LoginService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -55,6 +57,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final String PROD_PROFILE = "prod";
+    private static final List<String> ALLOWED_ORIGIN_PATTERNS = List.of(
+            "https://bombom.news",
+            "https://*.bombom.news",
+            "https://appleid.apple.com"
+    );
+    private static final List<String> LOCAL_ORIGIN_PATTERNS = List.of(
+            "http://localhost:[*]",
+            "http://127.0.0.1:[*]"
+    );
+
+    private final Environment environment;
+
+    public SecurityConfig(Environment environment) {
+        this.environment = environment;
+    }
 
     @Value("${swagger.admin.username}")
     private String adminUsername;
@@ -107,7 +126,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*"); // 모든 origin 허용, 필요에 따라 특정 origin으로 변경 가능
+        // Apple 로그인 콜백은 appleid.apple.com에서 form_post로 들어오므로 허용해야 한다.
+        configuration.setAllowedOriginPatterns(ALLOWED_ORIGIN_PATTERNS);
+        if (!environment.acceptsProfiles(Profiles.of(PROD_PROFILE))) {
+            LOCAL_ORIGIN_PATTERNS.forEach(configuration::addAllowedOriginPattern);
+        }
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true);

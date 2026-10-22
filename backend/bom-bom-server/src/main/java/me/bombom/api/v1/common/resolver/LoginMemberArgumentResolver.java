@@ -25,7 +25,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private static final String SESSION_COOKIE_PATH = "/";
     private static final String SESSION_DOMAIN_ATTRIBUTE_PREFIX = "; Domain=";
-    private static final String SESSION_COOKIE_SECURE_FLAGS = "; Secure; HttpOnly; SameSite=None";
+    private static final String SESSION_COOKIE_SECURE_FLAGS = "; Secure; HttpOnly";
     private static final String SESSION_COOKIE_HEADER_FORMAT =
             "%s=; Max-Age=0; Path=%s%s" + SESSION_COOKIE_SECURE_FLAGS;
 

@@ -21,6 +21,9 @@ public class GlobalExceptionHandler {
     @Value("${spring.servlet.multipart.max-file-size:1MB}")
     private DataSize maxFileSize;
 
+    @Value("${spring.servlet.multipart.max-request-size:1MB}")
+    private DataSize maxRequestSize;
+
     @ExceptionHandler(CIllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(CIllegalArgumentException e) {
         if (!e.getContext().isEmpty()) {
@@ -112,9 +115,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         String message = ErrorDetail.MULTIPART_SIZE_EXCEEDED.getMessage()
-                + " (제한: %dMB)".formatted(maxFileSize.toMegabytes());
+                + " (한 장 제한: %dMB, 전체 제한: %dMB)".formatted(maxFileSize.toMegabytes(), maxRequestSize.toMegabytes());
 
-        log.info("multipart size limit {} exceeded: {}", maxFileSize, e.getMessage());
+        log.info("multipart size limit exceeded: maxFileSize={}, maxRequestSize={}, message={}",
+                maxFileSize, maxRequestSize, e.getMessage());
         return ResponseEntity.status(ErrorDetail.MULTIPART_SIZE_EXCEEDED.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.MULTIPART_SIZE_EXCEEDED, message));
     }

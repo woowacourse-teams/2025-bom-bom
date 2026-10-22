@@ -8,7 +8,8 @@ services:
     ports:
       - 80:8080
       - 8081:8081
-    mem_limit: 660m
+    mem_limit: 1.2g
+    memswap_limit: 1.2g
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/${DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
@@ -23,10 +24,10 @@ services:
         {"discord":{"webhook":{"new_member":{"url":"${DISCORD_WEBHOOK_NEW_MEMBER}"},"operationError":{"url":"${DISCORD_WEBHOOK_OPERATION_ERROR}"},"inquiry":{"url":"${DISCORD_WEBHOOK_INQUIRY}"}}}}
       JAVA_TOOL_OPTIONS: "
           -javaagent:/otel/opentelemetry-javaagent.jar
-          -Xms230m
-          -Xmx230m
-          -XX:MaxMetaspaceSize=200m
-          -XX:+UseParallelGC
+          -Xms512m
+          -Xmx512m
+          -XX:MaxMetaspaceSize=256m
+          -XX:+UseG1GC
           -XX:MaxDirectMemorySize=32m
           -XX:NativeMemoryTracking=summary
           -XX:+UnlockExperimentalVMOptions

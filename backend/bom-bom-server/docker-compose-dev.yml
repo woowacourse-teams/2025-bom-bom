@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   bombom-server-dev:
-    image: bombomnewsletter/bom-bom:latest
+    image: ${DOCKER_IMAGE:?required}
     container_name: bombom-server-dev
     pull_policy: always
     restart: unless-stopped

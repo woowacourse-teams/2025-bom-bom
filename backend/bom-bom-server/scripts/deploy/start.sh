@@ -5,6 +5,7 @@ AWS_REGION="${AWS_REGION:-ap-northeast-2}"
 PARAMETER_PATH="${PARAMETER_PATH:-/bom-bom/prod}"
 APP_DIR="${APP_DIR:-/opt/bom-bom/app}"
 ENV_FILE="${ENV_FILE:-/opt/bom-bom/deploy/.env}"
+APPLICATION_YML_FILE="${APPLICATION_YML_FILE:-/opt/bom-bom/deploy/application.yml}"
 RELEASE_ENV_FILE="${RELEASE_ENV_FILE:-/opt/bom-bom/app/release.env}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose-prod.yml}"
 SERVER_CONTAINER_NAME="${SERVER_CONTAINER_NAME:-prod}"
@@ -25,6 +26,10 @@ DATABASE="$(get_parameter DATABASE)"
 MYSQL_USER="$(get_parameter MYSQL_USER)"
 MYSQL_PASSWORD="$(get_parameter MYSQL_PASSWORD)"
 PROD_OTEL_ENDPOINT="$(get_parameter PROD_OTEL_ENDPOINT)"
+export DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY
+DISCORD_WEBHOOK_NEW_MEMBER="$(get_parameter DISCORD_WEBHOOK_NEW_MEMBER)"
+DISCORD_WEBHOOK_OPERATION_ERROR="$(get_parameter DISCORD_WEBHOOK_OPERATION_ERROR)"
+DISCORD_WEBHOOK_INQUIRY="$(get_parameter DISCORD_WEBHOOK_INQUIRY)"
 export OAUTH2_APPLE_PRIVATE_KEY
 OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$(get_parameter OAUTH2_APPLE_PRIVATE_KEY)")"
 
@@ -39,14 +44,26 @@ if [ -z "$DOCKER_IMAGE" ]; then
   exit 1
 fi
 
-if [[ ! "$DOCKER_IMAGE" =~ ^[A-Za-z0-9._/-]+/bom-bom:prod-[A-Za-z0-9._-]+$ ]]; then
+if [[ ! "$DOCKER_IMAGE" =~ ^[0-9]{12}\.dkr\.ecr\.ap-northeast-2\.amazonaws\.com/[a-z0-9._/-]+:prod-[A-Za-z0-9._-]+$ ]]; then
   echo "Invalid DOCKER_IMAGE: $DOCKER_IMAGE" >&2
+  exit 1
+fi
+
+aws ecr get-login-password --region ap-northeast-2 \
+  | docker login --username AWS --password-stdin \
+    "${DOCKER_IMAGE%%/*}"
+
+install -m 600 /dev/null "$APPLICATION_YML_FILE"
+get_parameter APPLICATION_YML > "$APPLICATION_YML_FILE"
+if [ ! -s "$APPLICATION_YML_FILE" ]; then
+  echo "APPLICATION_YML is empty" >&2
   exit 1
 fi
 
 install -m 600 /dev/null "$ENV_FILE"
 {
   printf 'DOCKER_IMAGE=%s\n' "$DOCKER_IMAGE"
+  printf 'APPLICATION_YML_FILE=%s\n' "$APPLICATION_YML_FILE"
   printf 'RDS_ENDPOINT=%s\n' "$RDS_ENDPOINT"
   printf 'DATABASE=%s\n' "$DATABASE"
   printf 'MYSQL_USER=%s\n' "$MYSQL_USER"

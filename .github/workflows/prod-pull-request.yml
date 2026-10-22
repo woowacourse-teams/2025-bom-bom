@@ -24,14 +24,12 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: 설정 파일 생성(프로덕션/테스트)
+      - name: 설정 파일 생성(테스트)
         shell: bash
         env:
-          APPLICATION_PROD_PROPERTIES: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
           APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
         run: |
-          mkdir -p src/main/resources src/test/resources
-          printf '%s' "${APPLICATION_PROD_PROPERTIES:-}" > src/main/resources/application.yml
+          mkdir -p src/test/resources
           printf '%s' "$APPLICATION_TEST_PROPERTIES" > src/test/resources/application.yml
 
       - name: 빌드 및 테스트

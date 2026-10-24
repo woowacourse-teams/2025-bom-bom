@@ -26,6 +26,15 @@ class OAuth2DiagnosticsFilterTest {
     }
 
     @Test
+    void 외부_애플_POST_콜백도_진단하고_정리한다() throws Exception {
+        var request = new MockHttpServletRequest("POST", "/login/sso/verify/success/apple");
+        request.setServletPath("/login/sso/verify/success/apple");
+        filter.doFilter(request, new MockHttpServletResponse(), (req, res) ->
+                assertThat(diagnostics.snapshot()).containsEntry("provider", "apple"));
+        assertThat(diagnostics.snapshot()).isEmpty();
+    }
+
+    @Test
     void 일반_API_요청에는_진단_세션을_생성하지_않는다() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/articles");
         request.setServletPath("/api/v1/articles");

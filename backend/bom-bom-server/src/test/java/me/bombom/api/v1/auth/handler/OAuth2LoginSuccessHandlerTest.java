@@ -2,6 +2,8 @@ package me.bombom.api.v1.auth.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -30,12 +32,14 @@ class OAuth2LoginSuccessHandlerTest {
 
     private OAuth2LoginSuccessHandler handler;
     private UniqueUserInfoGenerator uniqueUserInfoGenerator;
+    private MemberService memberService;
 
     @BeforeEach
     void setUp() {
         uniqueUserInfoGenerator = mock(UniqueUserInfoGenerator.class);
+        memberService = mock(MemberService.class);
         handler = new OAuth2LoginSuccessHandler(
-                mock(MemberService.class),
+                memberService,
                 uniqueUserInfoGenerator
         );
         ReflectionTestUtils.setField(handler, "redirectUriWhitelist", List.of(FRONTEND_BASE_URL));
@@ -68,6 +72,83 @@ class OAuth2LoginSuccessHandlerTest {
         handler.onAuthenticationSuccess(request, response, authentication(Map.of("sub", "oauth-user"), mock(Member.class)));
 
         assertThat(response.getRedirectedUrl()).isEqualTo(redirectUrl + "/");
+    }
+
+    @Test
+    void 재인증한_회원이_탈퇴_대상과_다르면_탈퇴하지_않는다() throws Exception {
+        var request = requestWithRedirectUrl(FRONTEND_BASE_URL);
+        request.getSession().setAttribute("pendingWithdraw", true);
+        request.getSession().setAttribute("withdrawMemberId", 1L);
+        Member other = mock(Member.class);
+        when(other.getId()).thenReturn(2L);
+        var response = new MockHttpServletResponse();
+
+        handler.onAuthenticationSuccess(request, response, authentication(Map.of("sub", "other-user"), other));
+
+        assertThat(response.getRedirectedUrl()).isEqualTo(FRONTEND_BASE_URL + "/login?error=reauth_mismatch");
+        verify(memberService, never()).withdraw(1L);
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    @Test
+    void 미가입_계정으로_재인증하면_탈퇴하지_않는다() throws Exception {
+        var request = requestWithRedirectUrl(FRONTEND_BASE_URL);
+        request.getSession().setAttribute("pendingWithdraw", true);
+        request.getSession().setAttribute("withdrawMemberId", 1L);
+        var response = new MockHttpServletResponse();
+
+        handler.onAuthenticationSuccess(request, response, authentication(NEW_MEMBER_ATTRIBUTES, null));
+
+        assertThat(response.getRedirectedUrl()).isEqualTo(FRONTEND_BASE_URL + "/login?error=reauth_mismatch");
+        verify(memberService, never()).withdraw(1L);
+    }
+
+    @Test
+    void 동일_회원으로_재인증해야_탈퇴를_진행한다() throws Exception {
+        var request = requestWithRedirectUrl(FRONTEND_BASE_URL);
+        request.getSession().setAttribute("pendingWithdraw", true);
+        request.getSession().setAttribute("withdrawMemberId", 1L);
+        Member member = mock(Member.class);
+        when(member.getId()).thenReturn(1L);
+        var response = new MockHttpServletResponse();
+
+        handler.onAuthenticationSuccess(request, response, authentication(Map.of("sub", "same-user"), member));
+
+        verify(memberService).withdraw(1L);
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "https://www.bombom.news.evil.example/path",
+            "https://www.bombom.news@evil.example/path",
+            "https://www.bombom.news:444/path",
+            "https://www.bombom.news%2eevil.example/path"
+    })
+    void 허용_주소와_접두사만_같은_리다이렉트를_거부한다(String redirectUrl) throws Exception {
+        var request = requestWithRedirectUrl(redirectUrl);
+        var response = new MockHttpServletResponse();
+        handler.onAuthenticationSuccess(request, response, authentication(Map.of("sub", "oauth-user"), mock(Member.class)));
+        assertThat(response.getRedirectedUrl()).isEqualTo(FRONTEND_BASE_URL + "/");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"https://www.bombom.news:443/blog", "https://WWW.BOMBOM.NEWS/blog"})
+    void 같은_Origin의_기본_포트와_호스트_대소문자는_허용한다(String redirectUrl) throws Exception {
+        var response = new MockHttpServletResponse();
+        handler.onAuthenticationSuccess(requestWithRedirectUrl(redirectUrl), response,
+                authentication(Map.of("sub", "oauth-user"), mock(Member.class)));
+        assertThat(response.getRedirectedUrl()).isEqualTo(redirectUrl + "/");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/allowed-bypass", "/allowed/../outside", "/allowed/%2e%2e/outside"})
+    void 경로가_포함된_허용_목록의_경계를_우회할_수_없다(String path) throws Exception {
+        ReflectionTestUtils.setField(handler, "redirectUriWhitelist", List.of(FRONTEND_BASE_URL + "/allowed"));
+        var response = new MockHttpServletResponse();
+        handler.onAuthenticationSuccess(requestWithRedirectUrl(FRONTEND_BASE_URL + path), response,
+                authentication(Map.of("sub", "oauth-user"), mock(Member.class)));
+        assertThat(response.getRedirectedUrl()).isEqualTo(FRONTEND_BASE_URL + "/");
     }
 
     private MockHttpServletRequest requestWithRedirectUrl(String redirectUrl) {

@@ -52,24 +52,6 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: application.yml 생성 (Prod 환경)
-        shell: bash
-        env:
-          APPLICATION_PROD_PROPERTIES: ${{ secrets.APPLICATION_PROD_PROPERTIES }}
-        run: |
-          mkdir -p src/main/resources
-          printf '%s' "${APPLICATION_PROD_PROPERTIES}" > src/main/resources/application.yml
-          for key in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY; do
-            if ! grep -Fq "\${$key}" src/main/resources/application.yml; then
-              echo "APPLICATION_PROD_PROPERTIES must reference \${$key}" >&2
-              exit 1
-            fi
-          done
-          if grep -Eq 'https?://(discord(app)?\.com)/api/webhooks/' src/main/resources/application.yml; then
-            echo "Discord webhook URL must not be embedded in the application config or image" >&2
-            exit 1
-          fi
-
       - name: Gradle 빌드
         run: ./gradlew assemble --profile --no-daemon --stacktrace --info
 
@@ -89,7 +71,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    environment: dev
     needs: build
     defaults:
       run:
@@ -119,9 +100,6 @@ jobs:
       - name: 테스트 실행
         env:
           SPRING_PROFILES_ACTIVE: test
-          DISCORD_WEBHOOK_NEW_MEMBER: https://example.invalid/discord/new-member
-          DISCORD_WEBHOOK_OPERATION_ERROR: https://example.invalid/discord/operation-error
-          DISCORD_WEBHOOK_INQUIRY: https://example.invalid/discord/inquiry
           APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
         run: |
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
@@ -156,18 +134,21 @@ jobs:
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 
-      - name: DockerHub 로그인
-        uses: docker/login-action@v3
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Docker 이미지 빌드 및 푸시
         run: |
           docker buildx build \
             --platform linux/arm64,linux/amd64 \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:prod \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:${{ env.DOCKER_IMAGE_TAG }} \
+            -t ${{ env.ECR_IMAGE }}:prod \
+            -t ${{ env.ECR_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }} \
             --push .
           echo "✅ Docker 이미지 푸시 완료"
 
@@ -213,8 +194,8 @@ jobs:
 
       - name: CodeDeploy 번들 생성
         run: |
-          printf 'DOCKER_IMAGE=%s/bom-bom:%s\n' \
-            "${{ secrets.DOCKERHUB_USERNAME }}" \
+          printf 'DOCKER_IMAGE=%s:%s\n' \
+            "${{ env.ECR_IMAGE }}" \
             "${{ env.DOCKER_IMAGE_TAG }}" > release.env
 
           test -f appspec.yml
@@ -383,8 +364,8 @@ jobs:
 
       - name: CodeDeploy 번들 생성
         run: |
-          printf 'DOCKER_IMAGE=%s/bom-bom:%s\n' \
-            "${{ secrets.DOCKERHUB_USERNAME }}" \
+          printf 'DOCKER_IMAGE=%s:%s\n' \
+            "${{ env.ECR_IMAGE }}" \
             "${{ env.DOCKER_IMAGE_TAG }}" > release.env
 
           test -f appspec.yml
@@ -447,17 +428,22 @@ jobs:
     if: ${{ needs.deploy-prod7.result == 'success' && needs.deploy-prod6.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: DockerHub 로그인
-        uses: docker/login-action@v3
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
       - name: latest-stable → 새 안정판으로 갱신
         run: |
-          SRC="${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:${{ env.DOCKER_IMAGE_TAG }}"
-          docker pull "$SRC"
-          docker tag "$SRC" "${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable"
-          docker push "${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest-stable"
+          SRC="${{ env.ECR_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
+          docker buildx imagetools create \
+            --tag "${{ env.ECR_IMAGE }}:latest-stable" "$SRC"
           echo "✅ latest-stable 갱신 완료"
 
   # ---------------------------------------------------

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   bombom-server-dev:
-    image: bombomnewsletter/bom-bom:latest
+    image: ${DOCKER_IMAGE:?required}
     container_name: bombom-server-dev
     pull_policy: always
     restart: unless-stopped
@@ -18,6 +18,9 @@ services:
 
       # Apple p8 (ENV로 주입)
       OAUTH2_APPLE_PRIVATE_KEY: ${OAUTH2_APPLE_PRIVATE_KEY}
+      DISCORD_WEBHOOK_NEW_MEMBER: ${DISCORD_WEBHOOK_NEW_MEMBER:?required}
+      DISCORD_WEBHOOK_OPERATION_ERROR: ${DISCORD_WEBHOOK_OPERATION_ERROR:?required}
+      DISCORD_WEBHOOK_INQUIRY: ${DISCORD_WEBHOOK_INQUIRY:?required}
 
       # Discord 웹훅 (컨테이너 실행 시 주입)
       DISCORD_WEBHOOK_NEW_MEMBER: ${DISCORD_WEBHOOK_NEW_MEMBER:?DISCORD_WEBHOOK_NEW_MEMBER is required}

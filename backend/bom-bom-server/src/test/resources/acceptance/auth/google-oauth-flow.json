@@ -1,0 +1,15 @@
+{
+  "member": [
+    {
+      "id": 901,
+      "provider": "google",
+      "provider_id": "test-google-subject",
+      "email": "google-flow@example.test",
+      "nickname": "google.flow",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    }
+  ]
+}

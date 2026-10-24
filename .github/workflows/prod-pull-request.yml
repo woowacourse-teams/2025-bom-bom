@@ -9,7 +9,6 @@ on:
 jobs:
   prod-test:
     runs-on: ubuntu-latest
-    environment: dev
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

@@ -94,7 +94,9 @@ UPDATE_ARGS=(
   --task-definition "$TASK_DEFINITION_ARN"
   --deployment-configuration "$(deployment_configuration "$STRATEGY")"
 )
-if [ "$STRATEGY" = "blue-green" ]; then
+# 대상 그룹 연결은 롤링에서 블루그린으로 처음 바꿀 때만 보낸다. 이후 어느 대상 그룹이 운영 중인지는 ECS가 관리한다.
+CURRENT_STRATEGY="$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[0].deploymentConfiguration.strategy' --output text)"
+if [ "$STRATEGY" = "blue-green" ] && [ "$CURRENT_STRATEGY" != "BLUE_GREEN" ]; then
   UPDATE_ARGS+=(--load-balancers "[{\"targetGroupArn\":\"$BLUE_TARGET_GROUP_ARN\",\"containerName\":\"$CONTAINER_NAME\",\"containerPort\":8080,\"advancedConfiguration\":{\"alternateTargetGroupArn\":\"$GREEN_TARGET_GROUP_ARN\",\"productionListenerRule\":\"$PRODUCTION_LISTENER_RULE_ARN\",\"roleArn\":\"$INFRASTRUCTURE_ROLE_ARN\"}}]")
 fi
 aws ecs update-service "${UPDATE_ARGS[@]}" --query 'service.serviceName' --output text >/dev/null

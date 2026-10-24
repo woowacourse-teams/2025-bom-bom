@@ -17,6 +17,8 @@ env:
   WORKING_BRANCH: main
   CODEDEPLOY_BUNDLE_PREFIX: bom-bom
   DOCKER_IMAGE_TAG: prod-${{ github.sha }}
+  ECR_IMAGE: ${{ secrets.ECR_IMAGE }}
+  ECR_REGION: ap-northeast-2
 
 jobs:
   # 0) Release ID 생성 (후보/안정판 폴더 공통 식별자)
@@ -71,7 +73,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: build
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

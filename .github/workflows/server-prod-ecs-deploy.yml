@@ -1,0 +1,195 @@
+name: Backend Production ECS Deploy
+
+# main 머지 시 블루그린으로 자동 배포한다. 머지한 PR에 deploy:rolling 또는 deploy:recreate 라벨이 있으면 그 방식으로 배포한다.
+# 수동 실행 때는 배포 방식을 고른다.
+# 전환 기간에는 기존 blue-green-deploy.yml과 같이 돌지 않도록 저장소 변수 ECS_DEPLOY_ENABLED가 true일 때만 자동 배포한다.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/bom-bom-server/**"
+      - ".github/workflows/server-prod-ecs-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: "배포 방식 (blue-green: 무중단·bake 15분, rolling: 한 대씩, recreate: 전부 내리고 다시 띄움·중단 있음)"
+        required: true
+        default: blue-green
+        type: choice
+        options:
+          - blue-green
+          - rolling
+          - recreate
+      image_tag:
+        description: "이미 있는 이미지 태그로 배포할 때만 입력 (예: prod-<sha>). 비우면 새로 빌드"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: read
+
+concurrency:
+  group: server-prod-ecs-deploy
+  cancel-in-progress: false
+
+env:
+  WORKING_BRANCH: main
+  DOCKER_IMAGE_TAG: prod-${{ github.sha }}
+  ECR_IMAGE: ${{ secrets.ECR_IMAGE }}
+  ECR_REGION: ap-northeast-2
+
+jobs:
+  test:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag == '' || github.event_name == 'push' && vars.ECS_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+          submodules: recursive
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: application.yml 생성 (Test)
+        env:
+          APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
+        run: |
+          mkdir -p src/test/resources
+          printf '%s' "${APPLICATION_TEST_PROPERTIES}" > src/test/resources/application.yml
+
+      - name: 테스트 실행
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          APPLE_P8_ESCAPED: ${{ secrets.APPLE_P8_ESCAPED }}
+        run: |
+          export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
+          ./gradlew test --no-daemon --stacktrace --info
+
+  docker-image:
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+          submodules: recursive
+
+      - name: JDK 21 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: Gradle 빌드
+        run: ./gradlew assemble --no-daemon --stacktrace --info
+
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Docker 이미지 빌드 및 푸시
+        run: |
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -t ${{ env.ECR_IMAGE }}:prod \
+            -t ${{ env.ECR_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }} \
+            --push .
+
+  deploy:
+    needs: docker-image
+    # image_tag를 입력한 수동 실행은 빌드를 건너뛰므로 앞 job이 skipped여도 진행한다
+    if: ${{ always() && (needs.docker-image.result == 'success' || github.event_name == 'workflow_dispatch' && inputs.image_tag != '') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.WORKING_BRANCH }}
+
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: 배포 방식 결정
+        id: strategy
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_STRATEGY: ${{ inputs.strategy }}
+        run: |
+          STRATEGY=blue-green
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            STRATEGY="$DISPATCH_STRATEGY"
+          else
+            LABELS="$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].labels[].name' 2>/dev/null || true)"
+            if echo "$LABELS" | grep -Fxq "deploy:recreate"; then
+              STRATEGY=recreate
+            elif echo "$LABELS" | grep -Fxq "deploy:rolling"; then
+              STRATEGY=rolling
+            fi
+          fi
+          echo "배포 방식: $STRATEGY"
+          echo "value=$STRATEGY" >> "$GITHUB_OUTPUT"
+
+      - name: ECS 배포
+        env:
+          STRATEGY: ${{ steps.strategy.outputs.value }}
+          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && inputs.image_tag || env.DOCKER_IMAGE_TAG }}
+          BLUE_GREEN_READY: ${{ vars.ECS_BLUE_GREEN_READY == 'true' }}
+        run: ./scripts/ecs/deploy.sh "${ECR_IMAGE}:${IMAGE_TAG}" "$STRATEGY"
+
+  promote-stable-image:
+    needs: deploy
+    if: ${{ always() && needs.deploy.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: latest-stable → 새 안정판으로 갱신
+        env:
+          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && inputs.image_tag || env.DOCKER_IMAGE_TAG }}
+        run: |
+          docker buildx imagetools create \
+            --tag "${ECR_IMAGE}:latest-stable" "${ECR_IMAGE}:${IMAGE_TAG}"

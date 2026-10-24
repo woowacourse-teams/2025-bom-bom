@@ -1,0 +1,71 @@
+name: Backend Production ECS Rollback
+
+# 이전 task definition 리비전으로 되돌린다. 리비전 번호는 ECS 콘솔 또는
+# `aws ecs list-task-definitions --family-prefix bombom-prod-app --sort DESC`로 확인한다.
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "롤백 사유"
+        required: true
+        type: string
+      revision:
+        description: "되돌릴 bombom-prod-app task definition 리비전 번호 (예: 12)"
+        required: true
+        type: string
+      strategy:
+        description: "롤백 방식 (rolling: 무중단, recreate: 전부 내리고 다시 띄움·중단 있음·가장 빠름, blue-green: bake 15분)"
+        required: true
+        default: rolling
+        type: choice
+        options:
+          - rolling
+          - recreate
+          - blue-green
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: server-prod-ecs-deploy
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    defaults:
+      run:
+        working-directory: ./backend/bom-bom-server
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 롤백 정보 확인
+        env:
+          REASON: ${{ inputs.reason }}
+          REVISION: ${{ inputs.revision }}
+          STRATEGY: ${{ inputs.strategy }}
+        run: |
+          if [[ ! "$REVISION" =~ ^[0-9]+$ ]]; then
+            echo "리비전은 숫자여야 합니다: $REVISION" >&2
+            exit 1
+          fi
+          echo "롤백 사유: $REASON"
+          echo "롤백 대상: bombom-prod-app:$REVISION ($STRATEGY)"
+
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: ECS 롤백
+        env:
+          REVISION: ${{ inputs.revision }}
+          STRATEGY: ${{ inputs.strategy }}
+          BLUE_GREEN_READY: ${{ vars.ECS_BLUE_GREEN_READY == 'true' }}
+        run: ./scripts/ecs/deploy.sh "$REVISION" "$STRATEGY"

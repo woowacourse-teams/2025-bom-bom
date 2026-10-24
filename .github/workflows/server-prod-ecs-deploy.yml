@@ -170,27 +170,3 @@ jobs:
           IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && inputs.image_tag || env.DOCKER_IMAGE_TAG }}
           BLUE_GREEN_READY: ${{ vars.ECS_BLUE_GREEN_READY == 'true' }}
         run: ./scripts/ecs/deploy.sh "${ECR_IMAGE}:${IMAGE_TAG}" "$STRATEGY"
-
-  promote-stable-image:
-    needs: deploy
-    if: ${{ always() && needs.deploy.result == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: AWS 인증
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.ECR_REGION }}
-
-      - name: ECR 로그인
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Docker Buildx 설정
-        uses: docker/setup-buildx-action@v3
-
-      - name: latest-stable → 새 안정판으로 갱신
-        env:
-          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && inputs.image_tag || env.DOCKER_IMAGE_TAG }}
-        run: |
-          docker buildx imagetools create \
-            --tag "${ECR_IMAGE}:latest-stable" "${ECR_IMAGE}:${IMAGE_TAG}"

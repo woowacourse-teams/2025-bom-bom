@@ -131,7 +131,7 @@ jobs:
           echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}" >> .env
           echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}" >> .env
           echo "DEV_OTEL_ENDPOINT=${{ secrets.DEV_OTEL_ENDPOINT }}" >> .env
-          for name in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY; do
+          for name in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY GOOGLE_CLIENT_SECRET; do
             value="$(aws ssm get-parameter --name "/bom-bom/dev/${name}" --with-decryption --query Parameter.Value --output text)"
             echo "::add-mask::${value}"
             echo "${name}=${value}" >> .env

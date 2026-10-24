@@ -21,6 +21,7 @@ services:
       DISCORD_WEBHOOK_NEW_MEMBER: ${DISCORD_WEBHOOK_NEW_MEMBER:?required}
       DISCORD_WEBHOOK_OPERATION_ERROR: ${DISCORD_WEBHOOK_OPERATION_ERROR:?required}
       DISCORD_WEBHOOK_INQUIRY: ${DISCORD_WEBHOOK_INQUIRY:?required}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?required}
 
       # OpenTelemetry
       JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar

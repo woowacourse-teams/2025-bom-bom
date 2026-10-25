@@ -155,7 +155,7 @@ public class EmailIntegrationConfig {
                         router -> router
                                 .subFlowMapping(FailureType.DISCARDED, flow -> moveEvaluatedFile(flow, DIR_DISCARDED))
                                 .subFlowMapping(FailureType.RETRYABLE, this::keepInProgress)
-                                .subFlowMapping(FailureType.FAILED, flow -> moveEvaluatedFile(flow, DIR_FAILED)))
+                                .subFlowMapping(FailureType.FAILED, this::moveFailedFile))
                 .get();
     }
 
@@ -180,6 +180,18 @@ public class EmailIntegrationConfig {
             log.warn("일시적 오류로 in-progress 에 남김, requeue 후 재처리: {}",
                     exception.getEvaluationResult(), exception.getMostSpecificCause());
         });
+    }
+
+    /**
+     * parsing-failed 는 사람이 원인을 보고 다시 처리해야 하므로, 옮기기 전에 파일 이름과 원인 예외를 남긴다.
+     */
+    private void moveFailedFile(IntegrationFlowDefinition<?> flow) {
+        flow.transform(MessageHandlingExpressionEvaluatingAdviceException.class, exception -> {
+            log.error("메일 처리 실패, parsing-failed 로 이동: {}",
+                    exception.getEvaluationResult(), exception.getMostSpecificCause());
+            return exception;
+        });
+        moveEvaluatedFile(flow, DIR_FAILED);
     }
 
     private void moveEvaluatedFile(IntegrationFlowDefinition<?> flow, String dirName) {

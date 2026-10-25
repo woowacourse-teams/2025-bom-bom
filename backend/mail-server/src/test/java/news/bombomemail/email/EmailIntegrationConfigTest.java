@@ -1,5 +1,6 @@
 package news.bombomemail.email;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
@@ -18,7 +19,10 @@ import news.bombomemail.email.service.EmailService;
 import news.bombomemail.email.service.EmailService.DiscardedEmailException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -28,6 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.CannotCreateTransactionException;
 
 @SpringJUnitConfig(EmailIntegrationConfigTest.TestConfig.class)
+@ExtendWith(OutputCaptureExtension.class)
 class EmailIntegrationConfigTest {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
@@ -73,7 +78,7 @@ class EmailIntegrationConfigTest {
     }
 
     @Test
-    void 처리에_실패한_메일은_parsing_failed로_이동한다() throws Exception {
+    void 처리에_실패한_메일은_원인을_남기고_parsing_failed로_이동한다(CapturedOutput output) throws Exception {
         // given
         doThrow(new IllegalStateException("파싱 실패"))
                 .when(emailService).processEmailFile(fileNamed("failed.eml"));
@@ -83,6 +88,10 @@ class EmailIntegrationConfigTest {
 
         // then
         awaitMovedTo("parsing-failed", "failed.eml");
+        assertThat(output.getOut())
+                .contains("메일 처리 실패, parsing-failed 로 이동")
+                .contains("failed.eml")
+                .contains("IllegalStateException: 파싱 실패");
     }
 
     @Test

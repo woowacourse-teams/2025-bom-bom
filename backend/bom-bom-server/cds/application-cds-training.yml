@@ -1,0 +1,195 @@
+# CDS 학습 실행 전용 설정. 이미지 빌드 중 앱 컨텍스트만 띄웠다 끄므로 DB에 접속하지 않고 값은 모두 가짜다.
+# 운영 설정(SSM /bom-bom/prod/APPLICATION_YML)과 키 구조를 맞춘다. 운영 설정에 필수 키가 늘면 여기도 추가한다.
+spring:
+  profiles:
+    active: prod
+  application:
+    name: bom-bom-server
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 8
+      connection-timeout: 30000
+    url: jdbc:mysql://localhost:3306/cds
+    username: cds
+    password: cds
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate.boot.allow_jdbc_metadata_access: false
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    out-of-order: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: cds-training
+            client-secret: cds-training
+            scope:
+            - email
+            - profile
+          apple:
+            client-id: cds-training
+            client-secret: cds-training
+            redirect-uri: http://localhost
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: cds-training
+            scope:
+            - openid
+            - name
+            - email
+        provider:
+          google:
+            authorization-uri: http://localhost
+            token-uri: http://localhost
+            user-info-uri: http://localhost
+            user-name-attribute: cds-training
+          apple:
+            authorization-uri: http://localhost
+            token-uri: http://localhost
+            jwk-set-uri: http://localhost
+            user-name-attribute: cds-training
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      s3:
+        inquiry-bucket: cds-training
+frontend:
+  base-url: http://localhost
+  local-url: http://localhost
+app:
+  auth:
+    redirect-uri-whitelist: http://localhost
+oauth2:
+  apple:
+    team-id: cds-training
+    key-id: cds-training
+    client-id: cds-training
+    private-key: ${CDS_TRAINING_APPLE_PRIVATE_KEY}
+    bundle-id: cds-training
+  google:
+    app-client-id: cds-training
+server:
+  servlet:
+    session:
+      timeout: 30d
+      cookie:
+        name: cds-training
+        domain: cds-training
+        same-site: None
+        secure: true
+        max-age: 10368010s
+  tomcat:
+    accept-count: 150
+    max-connections: 2000
+    threads:
+      max: 150
+  forward-headers-strategy: framework
+management:
+  server:
+    port: 8081
+    address: 0.0.0.0
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: false
+        http.client.requests: false
+      slo:
+        http.server.requests: 5ms,10ms,25ms,50ms,100ms,250ms,500ms,1s,2s,3s,5s,10s
+        http.client.requests: 5ms,10ms,25ms,50ms,100ms,250ms,500ms,1s,2s,3s,5s,10s
+  observations:
+    long-task-timer:
+      enabled: false
+logging:
+  file:
+    name: "/tmp/cds/cds.log"
+swagger:
+  profile: cds-training
+  admin:
+    username: cds-training
+    password: cds-training
+  url:
+    prod: http://localhost
+    dev: http://localhost
+    local: http://localhost
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+discord:
+  webhook:
+    new_member:
+      url: http://localhost
+    operationError:
+      url: http://localhost
+    inquiry:
+      url: http://localhost
+ranking:
+  reading:
+    monthly:
+      cron: 0 0 4 * * *
+      zone: Asia/Seoul
+    continue:
+      cron: 0 0 4 * * *
+      zone: Asia/Seoul
+inquiry:
+  scheduler:
+    daily-status-report:
+      cron: 0 0 4 * * *
+      zone: Asia/Seoul
+scheduler:
+  remove-article:
+    max-count:
+      admin: 1000
+      user: 500
+challenge:
+  highlight:
+    truncate-ratio: 0.08
+  scheduler:
+    todo-reminder-first-cron: 0 0 4 * * *
+    todo-reminder-second-cron: 0 0 4 * * *
+aws:
+  lambda:
+    playwright:
+      function-name: cds-training
+      region: ap-northeast-2
+      access-key: cds-training
+      secret-key: cds-training
+async:
+  executor:
+    core-pool-size: 1
+    max-pool-size: 3
+    queue-capacity: 50
+bom-bom:
+  rate-limit:
+    read-count:
+      bucket-capacity: 3
+      refill-seconds: 50

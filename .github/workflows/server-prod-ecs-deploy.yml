@@ -82,7 +82,8 @@ jobs:
   # 테스트와 병렬로 빌드한다. 배포는 테스트와 빌드가 모두 성공해야 진행한다.
   docker-image:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag == '' || github.event_name == 'push' && vars.ECS_DEPLOY_ENABLED == 'true' }}
-    runs-on: ubuntu-latest
+    # 이미지 빌드 중 CDS 학습 실행(java)이 돌므로 에뮬레이션 없이 arm64 runner에서 빌드한다
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         working-directory: ./backend/bom-bom-server

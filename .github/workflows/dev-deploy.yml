@@ -5,6 +5,14 @@ on:
     branches:
       - server-dev
 
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  ECR_IMAGE: ${{ secrets.ECR_DEV_IMAGE }}
+  ECR_REGION: ap-northeast-2
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,11 +55,14 @@ jobs:
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 
-      - name: DockerHub 로그인
-        uses: docker/login-action@v3
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          role-to-assume: ${{ secrets.AWS_DEV_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Docker 이미지 빌드 및 푸시
         run: |
@@ -62,9 +73,9 @@ jobs:
           fi
           docker buildx build \
             --platform linux/arm64,linux/amd64 \
-            --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache \
-            --cache-to=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:buildcache,mode=max \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest \
+            --cache-from=type=registry,ref=${{ env.ECR_IMAGE }}:buildcache \
+            --cache-to=type=registry,ref=${{ env.ECR_IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true \
+            -t ${{ env.ECR_IMAGE }}:latest \
             --push .
 
   deploy:
@@ -80,15 +91,24 @@ jobs:
         with:
           submodules: recursive
 
+      - name: AWS 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEV_ROLE_ARN }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Docker 이미지 Pull
         run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          IMAGE=${{ env.ECR_IMAGE }}:latest
           docker pull "$IMAGE"
 
       - name: 이미지 변경 여부 확인
         id: compare_digest
         run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/bom-bom:latest
+          IMAGE=${{ env.ECR_IMAGE }}:latest
           NEW=$(docker inspect --format='{{.Id}}' "$IMAGE")
           if docker inspect bombom-server-dev &>/dev/null; then
             CURRENT=$(docker inspect --format='{{.Image}}' bombom-server-dev)
@@ -106,10 +126,16 @@ jobs:
 
       - name: .env 파일 생성
         run: |
+          echo "DOCKER_IMAGE=${{ env.ECR_IMAGE }}:latest" >> .env
           echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.DEV_SPRING_DATASOURCE_URL }}" >> .env
           echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}" >> .env
           echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}" >> .env
           echo "DEV_OTEL_ENDPOINT=${{ secrets.DEV_OTEL_ENDPOINT }}" >> .env
+          for name in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY GOOGLE_CLIENT_SECRET; do
+            value="$(aws ssm get-parameter --name "/bom-bom/dev/${name}" --with-decryption --query Parameter.Value --output text)"
+            echo "::add-mask::${value}"
+            echo "${name}=${value}" >> .env
+          done
 
       - name: 환경변수 검증
         run: |

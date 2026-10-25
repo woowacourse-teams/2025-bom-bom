@@ -11,6 +11,7 @@ import me.bombom.api.v1.auth.diagnostic.OAuth2Diagnostics;
 import me.bombom.api.v1.auth.diagnostic.OAuth2DiagnosticsFilter;
 import me.bombom.api.v1.auth.handler.OAuth2LoginFailureHandler;
 import me.bombom.api.v1.auth.handler.OAuth2LoginSuccessHandler;
+import me.bombom.api.v1.auth.repository.AppleOAuth2AuthorizationRequestRepository;
 import me.bombom.api.v1.auth.resolver.AppleAuthorizationRequestResolver;
 import me.bombom.api.v1.auth.service.AppleOAuth2Service;
 import me.bombom.api.v1.auth.service.CustomOAuth2UserService;
@@ -19,8 +20,8 @@ import me.bombom.api.v1.auth.service.OAuth2LoginService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -33,19 +34,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory;
+import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenValidator;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.util.StringUtils;
@@ -57,23 +63,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    private static final String PROD_PROFILE = "prod";
-    private static final List<String> ALLOWED_ORIGIN_PATTERNS = List.of(
-            "https://bombom.news",
-            "https://*.bombom.news",
-            "https://appleid.apple.com"
-    );
-    private static final List<String> LOCAL_ORIGIN_PATTERNS = List.of(
-            "http://localhost:[*]",
-            "http://127.0.0.1:[*]"
-    );
-
-    private final Environment environment;
-
-    public SecurityConfig(Environment environment) {
-        this.environment = environment;
-    }
 
     @Value("${swagger.admin.username}")
     private String adminUsername;
@@ -90,6 +79,16 @@ public class SecurityConfig {
     @Value("${server.servlet.session.cookie.domain:}")
     private String cookieDomain;
 
+    @Value("${server.servlet.session.cookie.same-site:None}")
+    private String cookieSameSite;
+
+    // 운영은 설정값이 없어 기본값을 쓴다. 기존 운영과 같이 봄봄 도메인과 모든 서브도메인을 허용한다.
+    @Value("${app.cors.allowed-origins:${frontend.base-url},https://bombom.news,https://*.bombom.news}")
+    private List<String> allowedOrigins;
+
+    @Value("${app.security.csrf-enabled:false}")
+    private boolean csrfEnabled;
+
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
@@ -99,19 +98,39 @@ public class SecurityConfig {
             OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
             OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegatingAccessTokenClient,
             ClientRegistrationRepository clientRegistrationRepository,
-            OAuth2Diagnostics diagnostics
+            OAuth2Diagnostics diagnostics,
+            AppleOAuth2AuthorizationRequestRepository appleOAuth2AuthorizationRequestRepository
     ) throws Exception {
         http
                 .addFilterBefore(new OAuth2DiagnosticsFilter(diagnostics), OAuth2AuthorizationRequestRedirectFilter.class)
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> {
+                    if (csrfEnabled) {
+                        // 외부 IdP의 POST는 OAuth state/nonce와 브라우저 연결 쿠키로 검증한다.
+                        csrf.ignoringRequestMatchers(
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login/sso/verify/success/apple"),
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login/oauth2/code/apple"));
+                    } else {
+                        csrf.disable();
+                    }
+                })
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
+                        .withObjectPostProcessor(new ObjectPostProcessor<OAuth2LoginAuthenticationFilter>() {
+                            @Override
+                            public <O extends OAuth2LoginAuthenticationFilter> O postProcess(O filter) {
+                                filter.setRequiresAuthenticationRequestMatcher(new OrRequestMatcher(
+                                        PathPatternRequestMatcher.withDefaults().matcher("/login/oauth2/code/*"),
+                                        PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login/sso/verify/success/apple")));
+                                return filter;
+                            }
+                        })
                         .authorizationEndpoint(authorization ->
                                 authorization.authorizationRequestResolver(new AppleAuthorizationRequestResolver(clientRegistrationRepository))
+                                        .authorizationRequestRepository(appleOAuth2AuthorizationRequestRepository)
                         )
                         .tokenEndpoint(token -> token.accessTokenResponseClient(delegatingAccessTokenClient))
                         .userInfoEndpoint(userInfo -> userInfo
@@ -126,17 +145,21 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Apple 로그인 콜백은 appleid.apple.com에서 form_post로 들어오므로 허용해야 한다.
-        configuration.setAllowedOriginPatterns(ALLOWED_ORIGIN_PATTERNS);
-        if (!environment.acceptsProfiles(Profiles.of(PROD_PROFILE))) {
-            LOCAL_ORIGIN_PATTERNS.forEach(configuration::addAllowedOriginPattern);
-        }
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Apple의 브라우저 POST 콜백에만 Apple Origin을 허용한다.
+        CorsConfiguration appleCallback = new CorsConfiguration();
+        appleCallback.setAllowedOrigins(List.of("https://appleid.apple.com"));
+        appleCallback.setAllowedMethods(List.of("POST"));
+        appleCallback.setAllowedHeaders(List.of("Content-Type"));
+        appleCallback.setAllowCredentials(true);
+        source.registerCorsConfiguration("/login/sso/verify/success/apple", appleCallback);
+        source.registerCorsConfiguration("/login/oauth2/code/apple", appleCallback);
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
@@ -207,11 +230,11 @@ public class SecurityConfig {
             @Value("${spring.security.oauth2.client.provider.apple.jwk-set-uri}") String jwkSetUri,
             @Value("${spring.security.oauth2.client.registration.apple.client-id}") String audience) {
 
-        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation("https://appleid.apple.com");
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
         // Audience(aud) 클레임 검증을 위한 Validator 추가
         OAuth2TokenValidator<Jwt> audienceValidator = token -> {
-            return token.getAudience().contains(audience)
+            return token.getAudience() != null && token.getAudience().contains(audience)
                     ? org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.success()
                     : org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.failure(new org.springframework.security.oauth2.core.OAuth2Error("invalid_token", "The required audience is missing", null));
         };
@@ -227,13 +250,21 @@ public class SecurityConfig {
     public JwtDecoderFactory<ClientRegistration> idTokenDecoderFactory(JwtDecoder jwtDecoder) {
         // JwtDecoderFactory를 Bean으로 직접 등록합니다.
         // Spring Security는 이 Bean을 자동으로 사용하여 ID 토큰을 검증합니다.
+        var defaultFactory = new OidcIdTokenDecoderFactory();
         return clientRegistration -> {
             if (clientRegistration.getRegistrationId().equals("apple")) {
-                // "apple" 로그인일 경우, 우리가 만든 audience 검증 기능이 포함된 JwtDecoder를 사용합니다.
-                return jwtDecoder;
+                // 서명/issuer/audience 검사에 Spring 기본 OIDC 필수 클레임 검증도 유지한다.
+                var validator = new OidcIdTokenValidator(clientRegistration);
+                return value -> {
+                    Jwt token = jwtDecoder.decode(value);
+                    var validation = validator.validate(token);
+                    if (validation.hasErrors()) {
+                        throw new JwtValidationException("Invalid Apple ID token", validation.getErrors());
+                    }
+                    return token;
+                };
             }
-            // 다른 OIDC 제공자(예: Google)는 Spring Security의 기본 디코더를 사용합니다.
-            return JwtDecoders.fromOidcIssuerLocation(clientRegistration.getProviderDetails().getIssuerUri());
+            return defaultFactory.createDecoder(clientRegistration);
         };
     }
 
@@ -243,7 +274,7 @@ public class SecurityConfig {
         serializer.setCookieName(cookieName);
         serializer.setUseHttpOnlyCookie(true);
         serializer.setUseSecureCookie(true);
-        serializer.setSameSite("None");
+        serializer.setSameSite(cookieSameSite);
         serializer.setCookiePath("/");
         if (StringUtils.hasText(cookieDomain)) {
             serializer.setDomainName(cookieDomain);

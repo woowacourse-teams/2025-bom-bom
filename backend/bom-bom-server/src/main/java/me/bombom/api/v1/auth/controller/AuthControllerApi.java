@@ -36,7 +36,8 @@ public interface AuthControllerApi {
     })
     void signup(
         @Parameter(description = "회원가입 요청 데이터") @Valid @RequestBody MemberSignupRequest signupRequest,
-        HttpServletRequest request
+        HttpServletRequest request,
+        HttpServletResponse response
     );
 
     @Operation(

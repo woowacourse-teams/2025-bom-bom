@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ECS 운영 앱 배포: 새 이미지로 task definition을 등록하고 고른 방식으로 서비스를 업데이트한 뒤 결과를 기다린다.
-# 사용법: deploy.sh <이미지 URI 또는 task definition 리비전 번호> <blue-green|rolling|recreate>
+# 사용법: deploy.sh <이미지 URI 또는 task definition 리비전 번호> <blue-green|rolling|inplace>
 set -euo pipefail
 
 AWS_REGION="${AWS_REGION:-ap-northeast-2}"
@@ -59,19 +59,19 @@ deployment_configuration() {
     rolling)
       printf '{"strategy":"ROLLING","minimumHealthyPercent":50,"maximumPercent":100,"deploymentCircuitBreaker":{"enable":true,"rollback":true}}'
       ;;
-    recreate)
+    inplace)
       printf '{"strategy":"ROLLING","minimumHealthyPercent":0,"maximumPercent":100,"deploymentCircuitBreaker":{"enable":true,"rollback":true}}'
       ;;
     *)
-      echo "알 수 없는 배포 방식: $1 (blue-green|rolling|recreate)" >&2
+      echo "알 수 없는 배포 방식: $1 (blue-green|rolling|inplace)" >&2
       exit 1
       ;;
   esac
 }
 
 case "$STRATEGY" in
-  blue-green|rolling|recreate) ;;
-  *) echo "알 수 없는 배포 방식: $STRATEGY (blue-green|rolling|recreate)" >&2; exit 1 ;;
+  blue-green|rolling|inplace) ;;
+  *) echo "알 수 없는 배포 방식: $STRATEGY (blue-green|rolling|inplace)" >&2; exit 1 ;;
 esac
 
 if [ "$STRATEGY" = "blue-green" ] && [ "$BLUE_GREEN_READY" != "true" ]; then

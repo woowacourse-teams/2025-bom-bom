@@ -82,7 +82,8 @@ public class SecurityConfig {
     @Value("${server.servlet.session.cookie.same-site:None}")
     private String cookieSameSite;
 
-    @Value("${app.cors.allowed-origins:${frontend.base-url}}")
+    // 운영은 설정값이 없어 기본값을 쓴다. 기존 운영과 같이 봄봄 도메인과 모든 서브도메인을 허용한다.
+    @Value("${app.cors.allowed-origins:${frontend.base-url},https://bombom.news,https://*.bombom.news}")
     private List<String> allowedOrigins;
 
     @Value("${app.security.csrf-enabled:false}")
@@ -144,7 +145,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true);

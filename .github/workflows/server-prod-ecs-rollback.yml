@@ -14,13 +14,13 @@ on:
         required: true
         type: string
       strategy:
-        description: "롤백 방식 (rolling: 무중단, recreate: 전부 내리고 다시 띄움·중단 있음·가장 빠름, blue-green: bake 15분)"
+        description: "롤백 방식 (rolling: 무중단, inplace: 전부 내리고 다시 띄움·중단 있음·가장 빠름, blue-green: bake 15분)"
         required: true
         default: rolling
         type: choice
         options:
           - rolling
-          - recreate
+          - inplace
           - blue-green
 
 permissions:

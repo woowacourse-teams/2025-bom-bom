@@ -1,6 +1,6 @@
 name: Backend Production ECS Deploy
 
-# main 머지 시 블루그린으로 자동 배포한다. 머지한 PR에 deploy:rolling 또는 deploy:recreate 라벨이 있으면 그 방식으로 배포한다.
+# main 머지 시 블루그린으로 자동 배포한다. 머지한 PR에 deploy:rolling 또는 deploy:inplace 라벨이 있으면 그 방식으로 배포한다.
 # 수동 실행 때는 배포 방식을 고른다.
 # 전환 기간에는 기존 blue-green-deploy.yml과 같이 돌지 않도록 저장소 변수 ECS_DEPLOY_ENABLED가 true일 때만 자동 배포한다.
 on:
@@ -13,14 +13,14 @@ on:
   workflow_dispatch:
     inputs:
       strategy:
-        description: "배포 방식 (blue-green: 무중단·bake 15분, rolling: 한 대씩, recreate: 전부 내리고 다시 띄움·중단 있음)"
+        description: "배포 방식 (blue-green: 무중단·bake 15분, rolling: 한 대씩, inplace: 전부 내리고 다시 띄움·중단 있음)"
         required: true
         default: blue-green
         type: choice
         options:
           - blue-green
           - rolling
-          - recreate
+          - inplace
       image_tag:
         description: "이미 있는 이미지 태그로 배포할 때만 입력 (예: prod-<sha>). 비우면 새로 빌드"
         required: false
@@ -155,8 +155,8 @@ jobs:
             STRATEGY="$DISPATCH_STRATEGY"
           else
             LABELS="$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].labels[].name' 2>/dev/null || true)"
-            if echo "$LABELS" | grep -Fxq "deploy:recreate"; then
-              STRATEGY=recreate
+            if echo "$LABELS" | grep -Fxq "deploy:inplace"; then
+              STRATEGY=inplace
             elif echo "$LABELS" | grep -Fxq "deploy:rolling"; then
               STRATEGY=rolling
             fi

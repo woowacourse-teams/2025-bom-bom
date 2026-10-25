@@ -38,8 +38,19 @@ cp /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem "${EXEC_DIR}/certs/tls-ca-b
 chmod 400 "${EXEC_DIR}/certs/tls-ca-bundle.pem"
 rm -rf /tmp/ssm-binaries
 
+# 앱 이미지의 베이스(Dockerfile FROM)를 미리 받아 둔다. 새 서버에서 앱 이미지 pull이 짧아진다.
+# docker.service는 cloud-init이 끝나길 기다리므로 user data 안에서는 dockerd를 직접 잠깐 띄운다.
+dockerd > /tmp/dockerd-bake.log 2>&1 &
+DOCKERD_PID=$!
+for i in $(seq 1 30); do docker info > /dev/null 2>&1 && break; sleep 2; done
+docker pull amazoncorretto:21
+docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' >> /etc/bombom/ami-packages.txt
+kill "$DOCKERD_PID"
+wait "$DOCKERD_PID" || true
+rm -f /tmp/dockerd-bake.log
+
 systemctl disable docker.service ecs.service || true
-rpm -qa | grep -E "^(docker|amazon-ecs-init)-" > /etc/bombom/ami-packages.txt
+rpm -qa | grep -E "^(docker|amazon-ecs-init)-" >> /etc/bombom/ami-packages.txt
 dnf clean all
 rm -rf /var/lib/ecs/data/* /var/log/ecs/*
 touch /etc/bombom/ami-baked

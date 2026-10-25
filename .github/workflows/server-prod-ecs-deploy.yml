@@ -79,8 +79,9 @@ jobs:
           export OAUTH2_APPLE_PRIVATE_KEY="$(printf '%b' "$APPLE_P8_ESCAPED")"
           ./gradlew test --no-daemon --stacktrace --info
 
+  # 테스트와 병렬로 빌드한다. 배포는 테스트와 빌드가 모두 성공해야 진행한다.
   docker-image:
-    needs: test
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag == '' || github.event_name == 'push' && vars.ECS_DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -114,18 +115,18 @@ jobs:
       - name: ECR 로그인
         uses: aws-actions/amazon-ecr-login@v2
 
+      # 운영 ECS 호스트가 모두 arm64라 arm64만 빌드한다
       - name: Docker 이미지 빌드 및 푸시
         run: |
           docker buildx build \
-            --platform linux/arm64,linux/amd64 \
-            -t ${{ env.ECR_IMAGE }}:prod \
+            --platform linux/arm64 \
             -t ${{ env.ECR_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }} \
             --push .
 
   deploy:
-    needs: docker-image
-    # image_tag를 입력한 수동 실행은 빌드를 건너뛰므로 앞 job이 skipped여도 진행한다
-    if: ${{ always() && (needs.docker-image.result == 'success' || github.event_name == 'workflow_dispatch' && inputs.image_tag != '') }}
+    needs: [test, docker-image]
+    # image_tag를 입력한 수동 실행은 테스트·빌드를 건너뛰므로 앞 job이 skipped여도 진행한다
+    if: ${{ always() && (needs.test.result == 'success' && needs.docker-image.result == 'success' || github.event_name == 'workflow_dispatch' && inputs.image_tag != '') }}
     runs-on: ubuntu-latest
     timeout-minutes: 70
     defaults:
@@ -169,27 +170,3 @@ jobs:
           IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && inputs.image_tag || env.DOCKER_IMAGE_TAG }}
           BLUE_GREEN_READY: ${{ vars.ECS_BLUE_GREEN_READY == 'true' }}
         run: ./scripts/ecs/deploy.sh "${ECR_IMAGE}:${IMAGE_TAG}" "$STRATEGY"
-
-  promote-stable-image:
-    needs: deploy
-    if: ${{ always() && needs.deploy.result == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: AWS 인증
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.ECR_REGION }}
-
-      - name: ECR 로그인
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Docker Buildx 설정
-        uses: docker/setup-buildx-action@v3
-
-      - name: latest-stable → 새 안정판으로 갱신
-        env:
-          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && inputs.image_tag || env.DOCKER_IMAGE_TAG }}
-        run: |
-          docker buildx imagetools create \
-            --tag "${ECR_IMAGE}:latest-stable" "${ECR_IMAGE}:${IMAGE_TAG}"

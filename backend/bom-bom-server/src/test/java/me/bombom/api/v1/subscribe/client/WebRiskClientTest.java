@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -56,7 +57,7 @@ class WebRiskClientTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "null", "[]", "not-json", "{\"threat\":{}}", "{\"threat\":{\"threatTypes\":[]}}"})
+    @ValueSource(strings = {"", "null", "[]", "not-json", "{\"threat\":{}}", "{\"threat\":{\"threatTypes\":[]}}", "{\"error\":{}}", "{\"threat\":null}", "true"})
     void 비정상_응답은_미탐지로_간주하지_않는다(String body) {
         server.expect(queryParam("uri", UriUtils.encode("https://newsletter.example/leave", StandardCharsets.UTF_8)))
                 .andRespond(withSuccess(body, MediaType.APPLICATION_JSON));
@@ -66,7 +67,7 @@ class WebRiskClientTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {302, 400, 403, 429, 500})
+    @ValueSource(ints = {301, 302, 307, 308, 400, 401, 403, 404, 429, 500, 502, 503, 504})
     void HTTP_오류는_민감정보_없이_검사실패로_처리한다(int status) {
         server.expect(queryParam("uri", UriUtils.encode("https://newsletter.example/leave?token=secret", StandardCharsets.UTF_8)))
                 .andRespond(withStatus(HttpStatus.valueOf(status)));
@@ -88,9 +89,11 @@ class WebRiskClientTest {
         server.verify();
     }
 
-    @Test
-    void 키가_없으면_외부요청_없이_검사를_건너뛴다() {
-        WebRiskClient unconfigured = new WebRiskClient(builder, "", Duration.ofSeconds(3), Duration.ofSeconds(5));
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "  \t  "})
+    void 키가_없으면_외부요청_없이_검사를_건너뛴다(String apiKey) {
+        WebRiskClient unconfigured = new WebRiskClient(builder, apiKey, Duration.ofSeconds(3), Duration.ofSeconds(5));
         assertThat(unconfigured.isThreat("https://newsletter.example/leave")).isFalse();
         server.verify();
     }

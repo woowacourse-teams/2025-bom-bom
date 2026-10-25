@@ -58,3 +58,12 @@ Lambda 경계에서 정상 URL 전달, 위협/오류 시 호출 차단도 확인
 - [공식 등록 예제](https://docs.cloud.google.com/web-risk/docs/using-sample-app)
 - [API 키 관리](https://docs.cloud.google.com/docs/authentication/api-keys)
 - [요금표](https://cloud.google.com/web-risk/pricing)
+
+## 추가 검증 (2026-10-25)
+
+- 관련 5개 테스트 클래스 총 48개 통과: 클라이언트 31개, Spring 설정 주입 3개,
+  Web Risk → Playwright → UnsubscribeAgent 연결 8개, 기존 Playwright/Agent 6개.
+- Google의 401/403/429/5xx 오류는 재시도 대상이며 Lambda 호출이 없는 것을 확인했다.
+- dev 배포는 별도 GitHub Secret `GOOGLE_WEB_RISK_API_KEY`를 `.env`로 전달하고
+  Compose가 컨테이너에 주입한다. 키 유무 두 경우 모두 Compose 설정 변환을 검증했다.
+- 이는 실제 Google API 인증이나 dev 서버 배포 실행을 검증한 결과는 아니다.

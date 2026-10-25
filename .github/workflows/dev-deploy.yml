@@ -125,12 +125,15 @@ jobs:
           fi
 
       - name: .env 파일 생성
+        env:
+          GOOGLE_WEB_RISK_API_KEY: ${{ secrets.GOOGLE_WEB_RISK_API_KEY }}
         run: |
           echo "DOCKER_IMAGE=${{ env.ECR_IMAGE }}:latest" >> .env
           echo "DEV_SPRING_DATASOURCE_URL=${{ secrets.DEV_SPRING_DATASOURCE_URL }}" >> .env
           echo "DEV_SPRING_DATASOURCE_USERNAME=${{ secrets.DEV_SPRING_DATASOURCE_USERNAME }}" >> .env
           echo "DEV_SPRING_DATASOURCE_PASSWORD=${{ secrets.DEV_SPRING_DATASOURCE_PASSWORD }}" >> .env
           echo "DEV_OTEL_ENDPOINT=${{ secrets.DEV_OTEL_ENDPOINT }}" >> .env
+          printf '%s\n' "GOOGLE_WEB_RISK_API_KEY=${GOOGLE_WEB_RISK_API_KEY:-}" >> .env
           for name in DISCORD_WEBHOOK_NEW_MEMBER DISCORD_WEBHOOK_OPERATION_ERROR DISCORD_WEBHOOK_INQUIRY; do
             value="$(aws ssm get-parameter --name "/bom-bom/dev/${name}" --with-decryption --query Parameter.Value --output text)"
             echo "::add-mask::${value}"

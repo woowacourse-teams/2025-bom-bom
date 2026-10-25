@@ -31,6 +31,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -52,6 +55,9 @@ public class AuthController implements AuthControllerApi{
     private final AppleOAuth2Service appleOAuth2Service;
     private final GoogleOAuth2LoginService googleOAuth2LoginService;
     private final UniqueUserInfoGenerator uniqueUserInfoGenerator;
+    @Value("${server.servlet.session.cookie.same-site:None}")
+    private String sessionCookieSameSite;
+
     @Value("${server.servlet.session.cookie.name:JSESSIONID}")
     private String cookieName;
     @Value("${server.servlet.session.cookie.domain:}")
@@ -60,7 +66,7 @@ public class AuthController implements AuthControllerApi{
     @Override
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request) {
+    public void signup(@Valid @RequestBody MemberSignupRequest signupRequest, HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             throw new UnauthorizedException(ErrorDetail.MISSING_OAUTH_DATA)
@@ -78,12 +84,7 @@ public class AuthController implements AuthControllerApi{
         Member newMember = memberService.signup(pendingMember, signupRequest);
         session.removeAttribute("pendingMember");
 
-        // 회원가입 후 로그인 처리 - 세션에 인증 정보 저장
-        OAuth2AuthenticationToken authentication = createAuthenticationToken(newMember);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        // 세션에 인증 정보 저장 (다음 요청에서도 로그인 상태 유지)
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        establishAuthentication(newMember, request, response);
     }
 
     @Override
@@ -125,7 +126,7 @@ public class AuthController implements AuthControllerApi{
 //            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 제공자입니다.");
 //            return null;
 //        }
-        return handleNativeResult(nativeLoginRequest, loginResult, request);
+        return handleNativeResult(nativeLoginRequest, loginResult, request, response);
     }
 
     @Override
@@ -186,17 +187,14 @@ public class AuthController implements AuthControllerApi{
     private NativeLoginResponse handleNativeResult(
             NativeLoginRequest nativeLoginRequest,
             Optional<Member> member,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
         // 세션 생성 트리거 (컨테이너가 Set-Cookie: JSESSIONID를 설정)
         request.getSession(true);
 
         if (member.isPresent()) {
-            OAuth2AuthenticationToken authentication = createAuthenticationToken(member.get());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            HttpSession session = request.getSession();
-            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            establishAuthentication(member.get(), request, response);
 
             // 기존 회원 -> 로그인 완료
             return new NativeLoginResponse(true, null, null);
@@ -206,6 +204,21 @@ public class AuthController implements AuthControllerApi{
             String uniqueNickname = uniqueUserInfoGenerator.getUniqueNickname(nativeLoginRequest.nickname());
             return new NativeLoginResponse(false, uniqueEmailLocalPart, uniqueNickname);
         }
+    }
+
+    private void establishAuthentication(Member member, HttpServletRequest request, HttpServletResponse response) {
+        request.getSession(true);
+        OAuth2AuthenticationToken authentication = createAuthenticationToken(member);
+        // 컨트롤러에서 직접 로그인하는 경로에도 세션 고정 방지와 CSRF 갱신을 적용한다.
+        new ChangeSessionIdAuthenticationStrategy()
+                .onAuthentication(authentication, request, response);
+        new CsrfAuthenticationStrategy(
+                new HttpSessionCsrfTokenRepository())
+                .onAuthentication(authentication, request, response);
+        var context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", context);
     }
 
     private void expireSessionCookie(HttpServletResponse response) {
@@ -218,9 +231,9 @@ public class AuthController implements AuthControllerApi{
             jsid.setDomain(cookieDomain);
         }
         response.addCookie(jsid);
-        // Ensure SameSite=None for cross-site
+        // 세션 발급 시의 SameSite 정책과 일치시킨다.
         String domainAttribute = StringUtils.hasText(cookieDomain) ? "; Domain=" + cookieDomain : "";
-        response.addHeader("Set-Cookie", cookieName + "=; Max-Age=0; Path=/" + domainAttribute + "; Secure; HttpOnly; SameSite=None");
+        response.addHeader("Set-Cookie", cookieName + "=; Max-Age=0; Path=/" + domainAttribute + "; Secure; HttpOnly; SameSite=" + sessionCookieSameSite);
     }
 
     private OAuth2AuthenticationToken createAuthenticationToken(Member member) {

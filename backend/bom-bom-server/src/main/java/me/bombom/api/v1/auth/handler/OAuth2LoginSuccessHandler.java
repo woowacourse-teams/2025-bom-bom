@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -64,6 +65,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // === 탈퇴 처리 ===
         if (pendingWithdraw != null && pendingWithdraw && withdrawMemberId != null) {
+            if (!(authentication.getPrincipal() instanceof CustomOAuth2User user)
+                    || user.getMember() == null || !withdrawMemberId.equals(user.getMember().getId())) {
+                log.warn("탈퇴 재인증 회원이 대상 회원과 일치하지 않습니다.");
+                session.invalidate();
+                SecurityContextHolder.clearContext();
+                response.sendRedirect(frontendBaseUrl + "/login?error=reauth_mismatch");
+                return;
+            }
             handleWithdrawAfterReAuth(withdrawMemberId, request, response);
         } else {
             // === 로그인 처리 ===
@@ -165,6 +174,42 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         return params.toString();
     }
 
+    private boolean isAllowedRedirect(String value) {
+        try {
+            URI target = URI.create(value).normalize();
+            if (target.getUserInfo() != null || target.getHost() == null
+                    || !("https".equalsIgnoreCase(target.getScheme()) || "http".equalsIgnoreCase(target.getScheme()))) {
+                return false;
+            }
+            return redirectUriWhitelist.stream().anyMatch(base -> matchesRedirect(target, base));
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
+    private boolean matchesRedirect(URI target, String configured) {
+        try {
+            URI allowed = URI.create(configured).normalize();
+            if (allowed.getScheme() == null || allowed.getHost() == null || allowed.getUserInfo() != null
+                    || !allowed.getScheme().equalsIgnoreCase(target.getScheme())
+                    || !allowed.getHost().equalsIgnoreCase(target.getHost())
+                    || effectivePort(allowed) != effectivePort(target)) {
+                return false;
+            }
+            String basePath = StringUtils.trimTrailingCharacter(allowed.getPath(), '/');
+            if (basePath == null || basePath.isEmpty()) return true;
+            String targetPath = URI.create(target.getPath()).normalize().getPath();
+            return basePath.equals(targetPath) || targetPath.startsWith(basePath + "/");
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
+    private int effectivePort(URI uri) {
+        if (uri.getPort() != -1) return uri.getPort();
+        return "https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80;
+    }
+
     private String getBaseUrl(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -172,7 +217,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             if (StringUtils.hasText(redirectUrl)) {
                 redirectUrl = redirectUrl.strip();
                 log.debug("Checking redirectUrl: {} against whitelist: {}", redirectUrl, redirectUriWhitelist);
-                if (redirectUriWhitelist.stream().anyMatch(redirectUrl::startsWith)) {
+                if (isAllowedRedirect(redirectUrl)) {
                     log.debug("Redirect URL matched whitelist: {}", redirectUrl);
                     return redirectUrl;
                 } else {

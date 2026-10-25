@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import news.bombomemail.article.service.ReceivedMailService.DuplicateEmailException;
 import news.bombomemail.email.service.EmailService.DiscardedEmailException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +38,7 @@ public class EmailIntegrationConfig {
     private static final String DIR_PROCESSED = "processed";
     private static final String DIR_FAILED = "parsing-failed";
     private static final String DIR_DISCARDED = "discarded";
+    private static final String DIR_DUPLICATE = "duplicate";
 
     private static final long POLL_DELAY_MILLIS = 1000;
     // 한 스레드에서 순서대로 처리하므로 한 번의 폴링에서 여러 통을 연달아 처리해도 같은 파일을 두 번 읽지 않는다.
@@ -166,6 +168,7 @@ public class EmailIntegrationConfig {
                         this::classifyFailure,
                         router -> router
                                 .subFlowMapping(FailureType.DISCARDED, flow -> moveEvaluatedFile(flow, DIR_DISCARDED))
+                                .subFlowMapping(FailureType.DUPLICATE, this::moveDuplicateFile)
                                 .subFlowMapping(FailureType.RETRYABLE, this::keepInProgress)
                                 .subFlowMapping(FailureType.FAILED, this::moveFailedFile))
                 .get();
@@ -174,6 +177,9 @@ public class EmailIntegrationConfig {
     private FailureType classifyFailure(MessageHandlingExpressionEvaluatingAdviceException exception) {
         if (exception.contains(DiscardedEmailException.class)) {
             return FailureType.DISCARDED;
+        }
+        if (exception.contains(DuplicateEmailException.class)) {
+            return FailureType.DUPLICATE;
         }
         if (RETRYABLE_EXCEPTIONS.stream().anyMatch(exception::contains)) {
             return FailureType.RETRYABLE;
@@ -192,6 +198,26 @@ public class EmailIntegrationConfig {
             log.warn("일시적 오류로 in-progress 에 남김, requeue 후 재처리: {}",
                     exception.getEvaluationResult(), exception.getMostSpecificCause());
         });
+    }
+
+    /**
+     * 이미 저장한 메일이다. 먼저 저장된 아티클과 Message-ID 를 남기고 duplicate 로 옮긴다.
+     */
+    private void moveDuplicateFile(IntegrationFlowDefinition<?> flow) {
+        flow.transform(MessageHandlingExpressionEvaluatingAdviceException.class, exception -> {
+            log.warn("중복 메일, duplicate 로 이동: {} ({})",
+                    exception.getEvaluationResult(), findCause(exception, DuplicateEmailException.class).getMessage());
+            return exception;
+        });
+        moveEvaluatedFile(flow, DIR_DUPLICATE);
+    }
+
+    private Throwable findCause(Throwable throwable, Class<? extends Throwable> type) {
+        Throwable current = throwable;
+        while (current != null && !type.isInstance(current)) {
+            current = current.getCause();
+        }
+        return current == null ? throwable : current;
     }
 
     /**
@@ -216,6 +242,7 @@ public class EmailIntegrationConfig {
 
     private enum FailureType {
         DISCARDED,
+        DUPLICATE,
         RETRYABLE,
         FAILED
     }

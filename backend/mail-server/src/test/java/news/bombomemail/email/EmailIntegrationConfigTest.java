@@ -19,6 +19,7 @@ import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
+import news.bombomemail.article.service.ReceivedMailService.DuplicateEmailException;
 import news.bombomemail.email.service.EmailService;
 import news.bombomemail.email.service.EmailService.DiscardedEmailException;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +80,22 @@ class EmailIntegrationConfigTest {
 
         // then
         awaitMovedTo("discarded", "discarded.eml");
+    }
+
+    @Test
+    void 이미_받은_메일은_duplicate로_이동한다(CapturedOutput output) throws Exception {
+        // given
+        doThrow(new DuplicateEmailException("이미 받은 메일: memberId=1, articleId=10, messageId=<a@example>"))
+                .when(emailService).processEmailFile(fileNamed("duplicate.eml"));
+
+        // when
+        deliver("duplicate.eml");
+
+        // then
+        awaitMovedTo("duplicate", "duplicate.eml");
+        assertThat(output.getOut())
+                .contains("중복 메일, duplicate 로 이동")
+                .contains("articleId=10");
     }
 
     @Test

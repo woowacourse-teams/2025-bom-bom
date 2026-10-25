@@ -31,11 +31,15 @@ public class MaildirCleanupScheduler {
     @Value("${maildir.discarded-retention-days:15}")
     private int discardedRetentionDays;
 
+    @Value("${maildir.duplicate-retention-days:15}")
+    private int duplicateRetentionDays;
+
     @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
     public void cleanupMaildir() {
         cleanup("processed", processedRetentionDays);
         cleanup("parsing-failed", failedRetentionDays);
         cleanup("discarded", discardedRetentionDays);
+        cleanup("duplicate", duplicateRetentionDays);
     }
 
     private void cleanup(String dirName, int retentionDays) {

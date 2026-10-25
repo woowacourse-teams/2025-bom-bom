@@ -3,6 +3,7 @@ package news.bombomemail.email;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -14,7 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 import news.bombomemail.email.service.EmailService;
 import news.bombomemail.email.service.EmailService.DiscardedEmailException;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,6 +113,27 @@ class EmailIntegrationConfigTest {
                 .atMost(TIMEOUT)
                 .until(() -> Files.exists(BASE_DIR.resolve("in-progress").resolve("db-down.eml"))
                         && Files.notExists(BASE_DIR.resolve("parsing-failed").resolve("db-down.eml")));
+    }
+
+    @Test
+    void in_progress로_옮길_때_수정_시각을_지금으로_바꾼다() throws Exception {
+        // given
+        AtomicReference<Instant> modifiedAtProcessing = new AtomicReference<>();
+        doAnswer(invocation -> {
+            File file = invocation.getArgument(0);
+            modifiedAtProcessing.set(Instant.ofEpochMilli(file.lastModified()));
+            return null;
+        }).when(emailService).processEmailFile(fileNamed("waited.eml"));
+        Instant beforeDelivery = Instant.now().minusSeconds(1);
+
+        // when
+        Path waited = Files.writeString(Files.createTempFile("waited", ".eml"), "Subject: test\r\n\r\nbody");
+        Files.setLastModifiedTime(waited, FileTime.from(Instant.now().minus(Duration.ofHours(2))));
+        Files.move(waited, Files.createDirectories(BASE_DIR.resolve("new")).resolve("waited.eml"));
+
+        // then
+        awaitMovedTo("processed", "waited.eml");
+        assertThat(modifiedAtProcessing.get()).isAfter(beforeDelivery);
     }
 
     @Test

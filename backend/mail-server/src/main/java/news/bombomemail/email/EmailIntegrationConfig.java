@@ -122,12 +122,24 @@ public class EmailIntegrationConfig {
                         c -> c.poller(Pollers.fixedDelay(POLL_DELAY_MILLIS)
                                 .maxMessagesPerPoll(MAX_MESSAGES_PER_POLL)
                                 .getObject()))
+                .transform(File.class, this::markPickedUp)
                 .handle(Files.outboundGateway(inProgressDir)
                         .autoCreateDirectory(true)
                         .deleteSourceFiles(true))
                 .handle("emailService", "processEmailFile",
                         e -> e.advice(emailProcessingAdvice()))
                 .get();
+    }
+
+    /**
+     * 이동해도 수정 시각은 바뀌지 않는다. 도착 시각이 그대로면 new 에서 오래 기다린 메일을
+     * InProgressRequeueScheduler 가 처리 도중에 new 로 되돌릴 수 있어서, 옮기기 직전에 지금 시각으로 바꾼다.
+     */
+    private File markPickedUp(File file) {
+        if (!file.setLastModified(System.currentTimeMillis())) {
+            log.warn("수정 시각 갱신 실패: {}", file.getAbsolutePath());
+        }
+        return file;
     }
 
     @Bean

@@ -38,16 +38,19 @@ public class EmailService {
 
             boolean saved = articleService.save(mimeMessage, contents);
             if (!saved) {
-                throw new BusinessProcessingException("아티클 저장 실패: " + inProgressFile.getName());
+                throw new DiscardedEmailException("폐기 대상 메일: " + inProgressFile.getName());
             }
 
             log.info("아티클 처리 완료: {}", inProgressFile.getAbsolutePath());
         }
     }
 
-    public static class BusinessProcessingException extends RuntimeException {
+    /**
+     * 미등록 수신자·발신자처럼 저장하지 않고 버리는 메일. 처리 실패와 구분해 discarded 로 이동한다.
+     */
+    public static class DiscardedEmailException extends RuntimeException {
 
-        public BusinessProcessingException(String message) {
+        public DiscardedEmailException(String message) {
             super(message);
         }
     }

@@ -19,10 +19,10 @@ public class InProgressRequeueScheduler {
     @Value("${maildir.base-dir}")
     private String baseDir;
 
-    @Value("${maildir.in-progress-stale-minutes:60}")
+    @Value("${maildir.in-progress-stale-minutes:30}")
     private long staleMinutes;
 
-    @Scheduled(fixedDelayString = "${maildir.in-progress-requeue-interval-ms:1800000}")
+    @Scheduled(fixedDelayString = "${maildir.in-progress-requeue-interval-ms:600000}")
     public void requeueStaleInProgress() {
         File inProgressDir = resolveDir(DIR_IN_PROGRESS);
         File newDir = resolveDir(DIR_NEW);

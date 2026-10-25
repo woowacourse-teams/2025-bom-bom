@@ -94,3 +94,6 @@ jobs:
         run: |
           docker compose pull mail-app
           docker compose up -d mail-app
+
+      - name: Remove Dangling Images
+        run: docker image prune -f

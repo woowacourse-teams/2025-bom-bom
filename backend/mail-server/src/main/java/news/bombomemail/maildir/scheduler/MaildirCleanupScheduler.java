@@ -25,23 +25,35 @@ public class MaildirCleanupScheduler {
     @Value("${maildir.processed-retention-days:5}")
     private int processedRetentionDays;
 
-    @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
-    public void cleanupProcessed() {
-        Path processedDir = Paths.get(baseDir, "processed");
+    @Value("${maildir.failed-retention-days:15}")
+    private int failedRetentionDays;
 
-        DirectoryRetentionCleaner.CleanupResult result = cleaner.cleanup(processedDir, processedRetentionDays);
+    @Value("${maildir.discarded-retention-days:15}")
+    private int discardedRetentionDays;
+
+    @Scheduled(cron = DAILY_CRON, zone = TIME_ZONE)
+    public void cleanupMaildir() {
+        cleanup("processed", processedRetentionDays);
+        cleanup("parsing-failed", failedRetentionDays);
+        cleanup("discarded", discardedRetentionDays);
+    }
+
+    private void cleanup(String dirName, int retentionDays) {
+        Path dir = Paths.get(baseDir, dirName);
+
+        DirectoryRetentionCleaner.CleanupResult result = cleaner.cleanup(dir, retentionDays);
 
         if (result.scanFailed()) {
-            log.error("processed 정리 실패(스캔 실패): dir={}, deleted={}, failed={}",
-                    processedDir, result.deleted(), result.failed());
+            log.error("{} 정리 실패(스캔 실패): dir={}, deleted={}, failed={}",
+                    dirName, dir, result.deleted(), result.failed());
             return;
         }
 
         if (result.deleted() > 0 || result.failed() > 0) {
-            log.info("processed 정리 완료: dir={}, deleted={}, failed={}, retentionDays={}",
-                    processedDir, result.deleted(), result.failed(), processedRetentionDays);
+            log.info("{} 정리 완료: dir={}, deleted={}, failed={}, retentionDays={}",
+                    dirName, dir, result.deleted(), result.failed(), retentionDays);
         } else {
-            log.debug("processed 정리 대상 없음: dir={}, retentionDays={}", processedDir, processedRetentionDays);
+            log.debug("{} 정리 대상 없음: dir={}, retentionDays={}", dirName, dir, retentionDays);
         }
     }
 }

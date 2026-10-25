@@ -18,7 +18,7 @@ import news.bombomemail.article.util.UnsubscribeUrlExtractor;
 import news.bombomemail.article.util.html.HtmlCleanerConfig;
 import news.bombomemail.email.EmailConfig;
 import news.bombomemail.subscribe.service.UnsubscribePatternReloadService;
-import news.bombomemail.email.service.EmailService.BusinessProcessingException;
+import news.bombomemail.email.service.EmailService.DiscardedEmailException;
 import news.bombomemail.member.domain.Gender;
 import news.bombomemail.member.domain.Member;
 import news.bombomemail.member.repository.MemberRepository;
@@ -153,7 +153,7 @@ class EmailServiceTest {
 
         // when
         assertThatThrownBy(() -> emailService.processEmailFile(emlFile))
-                .isInstanceOf(BusinessProcessingException.class);
+                .isInstanceOf(DiscardedEmailException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();
@@ -198,7 +198,7 @@ class EmailServiceTest {
 
         // when
         assertThatThrownBy(() -> emailService.processEmailFile(file.toFile()))
-                .isInstanceOf(BusinessProcessingException.class);
+                .isInstanceOf(DiscardedEmailException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();
@@ -218,7 +218,7 @@ class EmailServiceTest {
 
         // when
         assertThatThrownBy(() -> emailService.processEmailFile(file.toFile()))
-                .isInstanceOf(BusinessProcessingException.class);
+                .isInstanceOf(DiscardedEmailException.class);
 
         // then
         assertThat(articleRepository.findAll()).isEmpty();

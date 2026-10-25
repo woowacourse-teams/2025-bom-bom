@@ -17,6 +17,7 @@ BLUE_TARGET_GROUP_ARN="${BLUE_TARGET_GROUP_ARN:-arn:aws:elasticloadbalancing:ap-
 GREEN_TARGET_GROUP_ARN="${GREEN_TARGET_GROUP_ARN:-arn:aws:elasticloadbalancing:ap-northeast-2:715432481104:targetgroup/bombom-prod-tg-green/ffd5cf588aec07d8}"
 PRODUCTION_LISTENER_RULE_ARN="${PRODUCTION_LISTENER_RULE_ARN:-arn:aws:elasticloadbalancing:ap-northeast-2:715432481104:listener-rule/app/bombom-prod/4fe928a12ab8c4b5/abe138f9d3faa61d/f554be468be5a6d3}"
 INFRASTRUCTURE_ROLE_ARN="${INFRASTRUCTURE_ROLE_ARN:-arn:aws:iam::715432481104:role/bombomProdEcsInfrastructure}"
+AUTO_SCALING_GROUP_NAME="${AUTO_SCALING_GROUP_NAME:-bombom-prod-ecs}"
 
 TARGET="${1:?이미지 URI 또는 task definition 리비전 번호가 필요합니다}"
 STRATEGY="${2:-blue-green}"
@@ -69,6 +70,32 @@ deployment_configuration() {
   esac
 }
 
+# 블루그린은 서버가 부족하면 green task를 한 개씩 만들어 서버도 한 대씩 늘어난다.
+# 배포 전에 green task 수만큼 서버를 미리 늘려 동시에 띄운다. 남는 서버는 capacity provider가 줄인다.
+prescale_capacity() {
+  local service_desired asg_desired asg_max target
+  service_desired="$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[0].desiredCount' --output text)"
+  read -r asg_desired asg_max <<<"$(aws autoscaling describe-auto-scaling-groups \
+    --auto-scaling-group-names "$AUTO_SCALING_GROUP_NAME" \
+    --query 'AutoScalingGroups[0].[DesiredCapacity,MaxSize]' \
+    --output text)" || true
+  if ! [[ "$service_desired" =~ ^[0-9]+$ && "$asg_desired" =~ ^[0-9]+$ && "$asg_max" =~ ^[0-9]+$ ]]; then
+    echo "서버 수를 읽지 못해 미리 증설을 생략합니다." >&2
+    return
+  fi
+  target=$(( asg_desired + service_desired ))
+  [ "$target" -gt "$asg_max" ] && target="$asg_max"
+  if [ "$target" -le "$asg_desired" ]; then
+    echo "서버 미리 증설 생략 (desired ${asg_desired}, max ${asg_max})"
+    return
+  fi
+  if aws autoscaling set-desired-capacity --auto-scaling-group-name "$AUTO_SCALING_GROUP_NAME" --desired-capacity "$target"; then
+    echo "서버 미리 증설: ${asg_desired} → ${target}"
+  else
+    echo "서버 미리 증설 실패. capacity provider 증설로 계속 진행합니다." >&2
+  fi
+}
+
 case "$STRATEGY" in
   blue-green|rolling|inplace) ;;
   *) echo "알 수 없는 배포 방식: $STRATEGY (blue-green|rolling|inplace)" >&2; exit 1 ;;
@@ -98,6 +125,9 @@ UPDATE_ARGS=(
 CURRENT_STRATEGY="$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[0].deploymentConfiguration.strategy' --output text)"
 if [ "$STRATEGY" = "blue-green" ] && [ "$CURRENT_STRATEGY" != "BLUE_GREEN" ]; then
   UPDATE_ARGS+=(--load-balancers "[{\"targetGroupArn\":\"$BLUE_TARGET_GROUP_ARN\",\"containerName\":\"$CONTAINER_NAME\",\"containerPort\":8080,\"advancedConfiguration\":{\"alternateTargetGroupArn\":\"$GREEN_TARGET_GROUP_ARN\",\"productionListenerRule\":\"$PRODUCTION_LISTENER_RULE_ARN\",\"roleArn\":\"$INFRASTRUCTURE_ROLE_ARN\"}}]")
+fi
+if [ "$STRATEGY" = "blue-green" ]; then
+  prescale_capacity
 fi
 aws ecs update-service "${UPDATE_ARGS[@]}" --query 'service.serviceName' --output text >/dev/null
 

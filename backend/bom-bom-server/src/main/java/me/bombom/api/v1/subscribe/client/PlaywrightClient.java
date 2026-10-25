@@ -21,11 +21,19 @@ public class PlaywrightClient {
 
     private final ObjectMapper objectMapper;
     private final LambdaClient lambdaClient;
+    private final WebRiskClient webRiskClient;
 
     @Value("${aws.lambda.playwright.function-name}")
     private String functionName;
 
     public PlaywrightResponse executeUnsubscribe(String url, UnsubscribePatterns patterns) {
+        try {
+            if (webRiskClient.isThreat(url)) {
+                return new PlaywrightResponse(403, false, "피싱 또는 악성 URL로 탐지되었습니다.", null);
+            }
+        } catch (WebRiskUnavailableException e) {
+            return new PlaywrightResponse(503, false, "URL 위협 검사를 완료하지 못했습니다.", null);
+        }
         PlaywrightRequest requestBody = PlaywrightRequest.of(url, patterns);
         try {
             String payload = objectMapper.writeValueAsString(requestBody);

@@ -1,5 +1,6 @@
 package news.bombomemail.maildir.scheduler;
 
+import jakarta.annotation.PostConstruct;
 import java.io.File;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,21 @@ public class InProgressRequeueScheduler {
     @Value("${maildir.in-progress-stale-minutes:30}")
     private long staleMinutes;
 
+    /**
+     * 앱이 처리 도중 꺼지면 파일이 in-progress 에 남는다. 빈 초기화 시점은 메일 폴러가 시작되기 전이라
+     * 처리 중인 파일이 없으므로, 기준 시간과 상관없이 모두 new 로 되돌린다.
+     */
+    @PostConstruct
+    public void requeueAllOnStartup() {
+        requeueModifiedBefore(Long.MAX_VALUE);
+    }
+
     @Scheduled(fixedDelayString = "${maildir.in-progress-requeue-interval-ms:600000}")
     public void requeueStaleInProgress() {
+        requeueModifiedBefore(cutoffMillis(staleMinutes));
+    }
+
+    private void requeueModifiedBefore(long cutoffMillis) {
         File inProgressDir = resolveDir(DIR_IN_PROGRESS);
         File newDir = resolveDir(DIR_NEW);
 
@@ -33,8 +47,6 @@ public class InProgressRequeueScheduler {
         if (!ensureDirectory(newDir)) {
             return;
         }
-
-        long cutoffMillis = cutoffMillis(staleMinutes);
 
         File[] files = inProgressDir.listFiles(File::isFile);
         if (files == null) {

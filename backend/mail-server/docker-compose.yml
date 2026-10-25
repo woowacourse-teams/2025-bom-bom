@@ -1,6 +1,6 @@
 services:
   mail-app:
-    image: ryandia/bombom-email:latest
+    image: ryandia/bombom-email:${EMAIL_IMAGE_TAG:-latest}
     restart: unless-stopped
     logging:
       driver: json-file

@@ -58,6 +58,7 @@ jobs:
             --platform linux/arm64,linux/amd64 \
             --push \
             -t ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}/bombom-email:latest \
+            -t ${{ secrets.EMAIL_DOCKERHUB_USERNAME }}/bombom-email:${{ github.sha }} \
             .
 
   deploy:
@@ -68,6 +69,8 @@ jobs:
       - email
     env:
       MAIL_SERVER_INTERNAL_API_KEY: ${{ secrets.MAIL_SERVER_INTERNAL_API_KEY }}
+      # 커밋 SHA 태그로 배포한다. 이전 배포 실행의 Deploy 작업을 다시 실행하면 그 버전으로 되돌아간다.
+      EMAIL_IMAGE_TAG: ${{ github.sha }}
     defaults:
       run:
         working-directory: backend/mail-server
@@ -95,5 +98,11 @@ jobs:
           docker compose pull mail-app
           docker compose up -d mail-app
 
-      - name: Remove Dangling Images
-        run: docker image prune -f
+      - name: Remove Old Images
+        # 되돌리기용으로 최근 SHA 태그 3개만 남긴다. 실행 중인 이미지는 지워지지 않는다.
+        run: |
+          docker image prune -f
+          docker images ryandia/bombom-email --format '{{.Tag}}' \
+            | grep -vE '^(latest|<none>)$' \
+            | tail -n +4 \
+            | xargs -r -I{} docker rmi ryandia/bombom-email:{} || true

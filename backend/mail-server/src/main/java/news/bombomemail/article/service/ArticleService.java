@@ -15,6 +15,7 @@ import news.bombomemail.article.event.ArticleSource;
 import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.article.repository.ArticleRepository;
+import news.bombomemail.article.service.ReceivedMailService.ReceivedMailKey;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
 import news.bombomemail.article.util.UnsubscribeUrlExtractor;
@@ -42,6 +43,7 @@ public class ArticleService {
     private final NewsletterVerificationRepository newsletterVerificationRepository;
     private final HtmlTagCleaner htmlTagCleaner;
     private final UnsubscribeUrlExtractor unsubscribeUrlExtractor;
+    private final ReceivedMailService receivedMailService;
 
     @Transactional
     public boolean save(MimeMessage message, String contents) throws MessagingException, DataAccessException {
@@ -55,8 +57,12 @@ public class ArticleService {
             return false;
         }
 
+        Optional<ReceivedMailKey> receivedMailKey = receivedMailService.keyOf(member.getId(), message);
+        receivedMailKey.ifPresent(receivedMailService::ensureNotReceived);
+
         String contentsText = htmlTagCleaner.clean(contents);
         Article article = articleRepository.save(buildArticle(message, contents, contentsText, member, newsletter));
+        receivedMailKey.ifPresent(key -> receivedMailService.record(key, article.getId()));
         String unsubscribeUrl = unsubscribeUrlExtractor.extract(article.getContents());
 
         applicationEventPublisher.publishEvent(ArticleArrivedEvent.of(

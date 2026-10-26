@@ -16,6 +16,7 @@ import news.bombomemail.article.domain.Article;
 import news.bombomemail.article.event.ArticleArrivedEvent;
 import news.bombomemail.article.repository.ArticleRepository;
 import news.bombomemail.article.service.ReceivedMailService.ReceivedMailKey;
+import news.bombomemail.article.util.ContentsTextTruncator;
 import news.bombomemail.article.util.ReadingTimeCalculator;
 import news.bombomemail.article.util.SummaryGenerator;
 import news.bombomemail.article.util.UnsubscribeUrlExtractor;
@@ -60,7 +61,11 @@ public class ArticleService {
         Optional<ReceivedMailKey> receivedMailKey = receivedMailService.keyOf(member.getId(), message);
         receivedMailKey.ifPresent(receivedMailService::ensureNotReceived);
 
-        String contentsText = htmlTagCleaner.clean(contents);
+        // [임시 코드 - 제거 예정] article.contents_text가 TEXT라서 긴 본문은 저장에 실패한다.
+        // MEDIUMTEXT 마이그레이션 후 아래 한 줄로 되돌리고,
+        // ContentsTextTruncator와 ContentsTextTruncatorTest를 함께 제거할 것:
+        //     String contentsText = htmlTagCleaner.clean(contents);
+        String contentsText = truncateContentsText(htmlTagCleaner.clean(contents), message);
         Article article = articleRepository.save(buildArticle(message, contents, contentsText, member, newsletter));
         receivedMailKey.ifPresent(key -> receivedMailService.record(key, article.getId()));
         String unsubscribeUrl = unsubscribeUrlExtractor.extract(article.getContents());
@@ -76,6 +81,36 @@ public class ArticleService {
                 )
         );
         return true;
+    }
+
+    /**
+     * [임시 코드 - 제거 예정] MEDIUMTEXT 마이그레이션 후 이 메서드를 제거할 것.
+     *
+     * <p>잘린 아티클은 WARN 로그로 남긴다. 마이그레이션 이후 이 로그를 기준으로
+     * 원본 메일을 재처리해야 온전한 본문으로 복구된다.
+     */
+    private String truncateContentsText(String contentsText, MimeMessage message) {
+        String truncated = ContentsTextTruncator.truncate(contentsText);
+        if (truncated == contentsText) {
+            return contentsText;
+        }
+        log.warn("본문 평문이 contents_text 상한({}바이트)을 넘어 잘라서 저장합니다. {}바이트 → {}바이트, 제목: {}",
+                ContentsTextTruncator.MAX_BYTES,
+                ContentsTextTruncator.byteLength(contentsText),
+                ContentsTextTruncator.byteLength(truncated),
+                safeSubject(message));
+        return truncated;
+    }
+
+    /**
+     * [임시 코드 - 제거 예정] 잘림 로그가 메일 제목 조회 실패로 저장을 막지 않도록 감싼다.
+     */
+    private String safeSubject(MimeMessage message) {
+        try {
+            return message.getSubject();
+        } catch (MessagingException e) {
+            return "(제목 조회 실패)";
+        }
     }
 
     private Member resolveMember(MimeMessage message) throws MessagingException {

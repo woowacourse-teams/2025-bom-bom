@@ -1,9 +1,11 @@
 package me.bombom.api.v1.inquiry.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import me.bombom.api.v1.inquiry.dto.response.InquiryImageUploadResponse;
 import me.bombom.api.v1.member.domain.Member;
@@ -18,7 +20,14 @@ public interface InquiryImageControllerApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이미지 업로드 성공"),
-            @ApiResponse(responseCode = "400", description = "이미지 개수가 4장을 초과하거나, 이미지 형식이 아니거나, 요청자를 식별할 수 없음")
+            @ApiResponse(responseCode = "400", description = "이미지 개수가 4장을 초과하거나, 이미지 형식이 아니거나, 요청자를 식별할 수 없음"),
+            @ApiResponse(responseCode = "403", description = "요청자가 소유하지 않은 문의방"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 문의방")
     })
-    InquiryImageUploadResponse uploadImages(Member member, String guestId, List<MultipartFile> images);
+    InquiryImageUploadResponse uploadImages(
+            Member member,
+            String guestId,
+            @Parameter(description = "문의방 ID") @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
+            List<MultipartFile> images
+    );
 }

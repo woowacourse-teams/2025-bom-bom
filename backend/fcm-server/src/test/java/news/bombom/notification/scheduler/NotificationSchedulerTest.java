@@ -66,9 +66,15 @@ class NotificationSchedulerTest {
     }
 
     @Test
-    @DisplayName("문의 답변 알림 스케줄이 문의 답변 알림 Processor를 호출한다")
-    void processInquiryMessageArrivalNotifications_DelegatesToInquiryMessageArrivalProcessor() {
-        notificationScheduler.processInquiryMessageArrivalNotifications();
+    void 평일_문의_답변_알림_스케줄이_문의_답변_알림_Processor를_호출한다() {
+        notificationScheduler.processInquiryMessageArrivalNotificationsOnWeekday();
+
+        verify(inquiryMessageArrivalProcessor, times(1)).processPendingNotifications(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void 주말_문의_답변_알림_스케줄이_문의_답변_알림_Processor를_호출한다() {
+        notificationScheduler.processInquiryMessageArrivalNotificationsOnWeekend();
 
         verify(inquiryMessageArrivalProcessor, times(1)).processPendingNotifications(org.mockito.ArgumentMatchers.any());
     }

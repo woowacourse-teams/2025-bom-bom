@@ -68,8 +68,17 @@ public class NotificationScheduler {
         }
     }
 
-    @Scheduled(fixedDelay = 10000)
-    public void processInquiryMessageArrivalNotifications() {
+    @Scheduled(cron = "0/10 * 8-21 * * MON-FRI", zone = "Asia/Seoul")
+    public void processInquiryMessageArrivalNotificationsOnWeekday() {
+        processInquiryMessageArrivalNotifications();
+    }
+
+    @Scheduled(cron = "0/10 * 12-21 * * SAT,SUN", zone = "Asia/Seoul")
+    public void processInquiryMessageArrivalNotificationsOnWeekend() {
+        processInquiryMessageArrivalNotifications();
+    }
+
+    private void processInquiryMessageArrivalNotifications() {
         LocalDateTime now = LocalDateTime.now();
         log.info("문의 답변 알림 Processor 실행");
 

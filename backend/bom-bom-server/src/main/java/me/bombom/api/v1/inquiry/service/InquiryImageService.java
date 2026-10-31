@@ -12,6 +12,8 @@ import me.bombom.api.v1.common.S3ImageUploader;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.CServerErrorException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
+import me.bombom.api.v1.image.domain.ImageUploadBucketKey;
+import me.bombom.api.v1.image.service.ImageUploadTokenConsumeHandler;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class InquiryImageService {
 
     private final S3ImageUploader imageUploader;
     private final InquiryRoomService inquiryRoomService;
+    private final ImageUploadTokenConsumeHandler imageUploadTokenConsumeHandler;
 
     @Value("${spring.cloud.aws.s3.inquiry-bucket}")
     private String inquiryBucketName;
@@ -38,9 +41,24 @@ public class InquiryImageService {
         validateImageCount(images);
         images.forEach(this::validateImageContentType);
 
-        return images.stream()
-                .map(this::uploadImage)
-                .toList();
+        ImageUploadBucketKey bucketKey = ImageUploadBucketKey.of(requester.memberId(), requester.guestId());
+        consumeTokens(bucketKey, images.size());
+
+        try {
+            return images.stream()
+                    .map(this::uploadImage)
+                    .toList();
+        } catch (RuntimeException e) {
+            imageUploadTokenConsumeHandler.refund(bucketKey, images.size());
+            throw e;
+        }
+    }
+
+    private void consumeTokens(ImageUploadBucketKey bucketKey, int imageCount) {
+        if (!imageUploadTokenConsumeHandler.consumeIfWithinRateLimit(bucketKey, imageCount)) {
+            throw new CIllegalArgumentException(ErrorDetail.IMAGE_UPLOAD_RATE_LIMIT_EXCEEDED)
+                    .addContext("imageCount", imageCount);
+        }
     }
 
     private void validateImageCount(List<MultipartFile> images) {

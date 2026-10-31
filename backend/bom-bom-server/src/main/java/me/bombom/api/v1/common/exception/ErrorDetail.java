@@ -25,6 +25,7 @@ public enum ErrorDetail {
     PRECONDITION_FAILED(HttpStatus.BAD_REQUEST, "M012", "사전 조건을 만족하지 않습니다."),
     MISSING_REQUESTER_IDENTIFIER(HttpStatus.BAD_REQUEST, "M013", "회원 또는 게스트 식별값이 필요합니다."),
     MULTIPART_SIZE_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "M014", "업로드 가능한 파일 크기를 초과했습니다."),
+    IMAGE_UPLOAD_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "M015", "이미지 업로드 횟수 제한을 초과했습니다. 잠시 후 다시 시도해주세요."),
 
     /*
      * J : 인증

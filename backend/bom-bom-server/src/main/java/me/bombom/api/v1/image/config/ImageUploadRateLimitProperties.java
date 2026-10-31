@@ -20,8 +20,8 @@ public record ImageUploadRateLimitProperties(
 
     public record Policy(
 
-            @DefaultValue("30") int bucketCapacity,
-            @DefaultValue("1800") int refillSeconds
+            @DefaultValue("10") int bucketCapacity,
+            @DefaultValue("3600") int refillSeconds
     ) {
     }
 }

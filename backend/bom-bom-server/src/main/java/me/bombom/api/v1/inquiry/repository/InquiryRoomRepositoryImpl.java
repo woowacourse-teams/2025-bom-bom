@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.inquiry.domain.InquirySenderType;
 import me.bombom.api.v1.inquiry.dto.InquiryRoomWithAssignee;
@@ -41,6 +42,16 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
                 .where(requesterEq);
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Optional<InquiryRoomWithAssignee> findRoomWithAssigneeById(Long roomId) {
+        return Optional.ofNullable(jpaQueryFactory
+                .select(new QInquiryRoomWithAssignee(inquiryRoom, member.nickname))
+                .from(inquiryRoom)
+                .leftJoin(member).on(member.id.eq(inquiryRoom.assigneeId))
+                .where(inquiryRoom.id.eq(roomId))
+                .fetchFirst());
     }
 
     @Override

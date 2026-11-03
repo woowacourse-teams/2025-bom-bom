@@ -210,6 +210,47 @@ class InquiryRoomServiceTest {
         });
     }
 
+    @Test
+    void 단건_조회에도_담당자_닉네임이_포함된다() {
+        Member assignee = memberRepository.save(TestFixture.createUniqueMember("단건담당", "assignee-single-1"));
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", assignee.getId(), room.getId());
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = inquiryRoomService.getRoom(room.getId(), requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.assigneeId()).isEqualTo(assignee.getId());
+            softly.assertThat(response.assigneeNickname()).isEqualTo("단건담당");
+        });
+    }
+
+    @Test
+    void 단건_조회에서_담당자가_없으면_담당자_정보가_null이다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = inquiryRoomService.getRoom(room.getId(), requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.assigneeId()).isNull();
+            softly.assertThat(response.assigneeNickname()).isNull();
+        });
+    }
+
+    @Test
+    void 비회원도_단건_조회에서_담당자_닉네임을_받는다() {
+        Member assignee = memberRepository.save(TestFixture.createUniqueMember("게스트담당", "assignee-guest-1"));
+        String guestId = "11111111-1111-4111-8111-111111111111";
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createGuestInquiryRoom(guestId, 1L));
+        jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", assignee.getId(), room.getId());
+        InquiryRequester requester = new InquiryRequester(null, guestId);
+
+        InquiryRoomResponse response = inquiryRoomService.getRoom(room.getId(), requester);
+
+        assertThat(response.assigneeNickname()).isEqualTo("게스트담당");
+    }
+
     private InquiryRoomResponse getFirstRoom(InquiryRequester requester) {
         Pageable pageable = PageRequest.of(0, 20);
         return inquiryRoomService.getRooms(requester, pageable).getContent().get(0);

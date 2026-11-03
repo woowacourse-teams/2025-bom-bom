@@ -59,6 +59,17 @@ public class InquiryRoomService {
         ));
     }
 
+    public InquiryRoomResponse getRoom(Long roomId, InquiryRequester requester) {
+        validateRequester(requester);
+
+        InquiryRoomWithAssignee row = inquiryRoomRepository.findRoomWithAssigneeById(roomId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext("roomId", roomId));
+        validateOwnership(row.room(), requester);
+
+        return InquiryRoomResponse.of(row.room(), false, row.assigneeNickname());
+    }
+
     public UnresolvedInquiryRoomCounts countUnresolvedRooms() {
         long unconfirmedCount = inquiryRoomRepository.countByStatus(InquiryStatus.UNCONFIRMED);
         long inProgressCount = inquiryRoomRepository.countByStatus(InquiryStatus.IN_PROGRESS);
@@ -72,22 +83,13 @@ public class InquiryRoomService {
         return InquiryUnreadStatusResponse.of(hasUnread);
     }
 
-    public InquiryRoomResponse getRoom(Long roomId, InquiryRequester requester) {
-        InquiryRoom room = getOwnedRoom(roomId, requester);
-        return InquiryRoomResponse.of(room, false);
-    }
-
     public InquiryRoom getOwnedRoom(Long roomId, InquiryRequester requester) {
         validateRequester(requester);
 
         InquiryRoom room = inquiryRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext("roomId", roomId));
-
-        if (!room.isOwnedBy(requester.memberId(), requester.guestId())) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                    .addContext("roomId", roomId);
-        }
+        validateOwnership(room, requester);
 
         return room;
     }
@@ -111,5 +113,12 @@ public class InquiryRoomService {
             return false;
         }
         return room.getLastReadMessageIdByUser() == null || latestAdminMessageId > room.getLastReadMessageIdByUser();
+    }
+
+    private void validateOwnership(InquiryRoom room, InquiryRequester requester) {
+        if (!room.isOwnedBy(requester.memberId(), requester.guestId())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext("roomId", room.getId());
+        }
     }
 }

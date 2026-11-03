@@ -11,12 +11,21 @@ public record InquiryMessageResponse(
         Long roomId,
         InquirySenderType senderType,
         Long adminId,
+        String adminNickname,
         String content,
         List<String> imageUrls,
         LocalDateTime createdAt
 ) {
 
     public static InquiryMessageResponse of(InquiryMessage message, List<InquiryMessageImage> images) {
+        return of(message, images, null);
+    }
+
+    public static InquiryMessageResponse of(
+            InquiryMessage message,
+            List<InquiryMessageImage> images,
+            String adminNickname
+    ) {
         List<String> imageUrls = images.stream()
                 .map(InquiryMessageImage::getImageUrl)
                 .toList();
@@ -25,6 +34,7 @@ public record InquiryMessageResponse(
                 message.getRoomId(),
                 message.getSenderType(),
                 message.getAdminId(),
+                adminNickname,
                 message.getContent(),
                 imageUrls,
                 message.getCreatedAt()

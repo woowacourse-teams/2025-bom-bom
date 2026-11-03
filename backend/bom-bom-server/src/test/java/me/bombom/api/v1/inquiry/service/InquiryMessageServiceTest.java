@@ -5,12 +5,15 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.sql.Timestamp;
 import java.util.List;
+import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.event.InquiryMessageSentEvent;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,9 @@ class InquiryMessageServiceTest {
 
     @Autowired
     private InquiryRoomRepository inquiryRoomRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -112,5 +118,64 @@ class InquiryMessageServiceTest {
         Long lastReadMessageIdByUser = jdbcTemplate.queryForObject(
                 "SELECT last_read_message_id_by_user FROM inquiry_room WHERE id = ?", Long.class, room.getId());
         assertThat(lastReadMessageIdByUser).isNull();
+    }
+
+    @Test
+    void 어드민_메시지에_작성자_닉네임이_함께_조회된다() {
+        Member admin = memberRepository.save(TestFixture.createUniqueMember("상담봄봄", "admin-nickname-1"));
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        insertAdminMessage(room.getId(), admin.getId(), "답변드립니다");
+
+        List<InquiryMessageResponse> messages = inquiryMessageService
+                .getMessagesAndMarkAsRead(requester, room.getId(), null, 20)
+                .messages();
+
+        assertSoftly(softly -> {
+            softly.assertThat(messages).hasSize(1);
+            softly.assertThat(messages.get(0).adminId()).isEqualTo(admin.getId());
+            softly.assertThat(messages.get(0).adminNickname()).isEqualTo("상담봄봄");
+        });
+    }
+
+    @Test
+    void 유저_메시지의_작성자_닉네임은_null이다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        inquiryMessageService.sendMessage(requester, room.getId(), new SendInquiryMessageRequest("문의합니다", List.of()));
+
+        List<InquiryMessageResponse> messages = inquiryMessageService
+                .getMessagesAndMarkAsRead(requester, room.getId(), null, 20)
+                .messages();
+
+        assertSoftly(softly -> {
+            softly.assertThat(messages).hasSize(1);
+            softly.assertThat(messages.get(0).adminId()).isNull();
+            softly.assertThat(messages.get(0).adminNickname()).isNull();
+        });
+    }
+
+    @Test
+    void 작성자_회원이_존재하지_않으면_닉네임은_null이다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        insertAdminMessage(room.getId(), 999_999L, "탈퇴한 담당자의 답변");
+
+        List<InquiryMessageResponse> messages = inquiryMessageService
+                .getMessagesAndMarkAsRead(requester, room.getId(), null, 20)
+                .messages();
+
+        assertSoftly(softly -> {
+            softly.assertThat(messages).hasSize(1);
+            softly.assertThat(messages.get(0).adminId()).isEqualTo(999_999L);
+            softly.assertThat(messages.get(0).adminNickname()).isNull();
+        });
+    }
+
+    private void insertAdminMessage(Long roomId, Long adminId, String content) {
+        jdbcTemplate.update("""
+                INSERT INTO inquiry_message (room_id, sender_type, admin_id, content, created_at, updated_at)
+                VALUES (?, 'ADMIN', ?, ?, NOW(6), NOW(6))
+                """, roomId, adminId, content);
     }
 }

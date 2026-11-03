@@ -26,10 +26,7 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
     public Page<InquiryRoomWithAssignee> findRoomsByRequester(Long memberId, String guestId, Pageable pageable) {
         BooleanExpression requesterEq = requesterEq(memberId, guestId);
 
-        List<InquiryRoomWithAssignee> content = jpaQueryFactory
-                .select(new QInquiryRoomWithAssignee(inquiryRoom, member.nickname))
-                .from(inquiryRoom)
-                .leftJoin(member).on(member.id.eq(inquiryRoom.assigneeId))
+        List<InquiryRoomWithAssignee> content = selectRoomWithAssignee()
                 .where(requesterEq)
                 .orderBy(inquiryRoom.createdAt.desc(), inquiryRoom.id.desc())
                 .offset(pageable.getOffset())
@@ -46,10 +43,7 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
 
     @Override
     public Optional<InquiryRoomWithAssignee> findRoomWithAssigneeById(Long roomId) {
-        return Optional.ofNullable(jpaQueryFactory
-                .select(new QInquiryRoomWithAssignee(inquiryRoom, member.nickname))
-                .from(inquiryRoom)
-                .leftJoin(member).on(member.id.eq(inquiryRoom.assigneeId))
+        return Optional.ofNullable(selectRoomWithAssignee()
                 .where(inquiryRoom.id.eq(roomId))
                 .fetchFirst());
     }
@@ -75,5 +69,12 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
         return memberId != null
                 ? inquiryRoom.memberId.eq(memberId)
                 : inquiryRoom.guestId.eq(guestId);
+    }
+
+    private JPAQuery<InquiryRoomWithAssignee> selectRoomWithAssignee() {
+        return jpaQueryFactory
+                .select(new QInquiryRoomWithAssignee(inquiryRoom, member.nickname))
+                .from(inquiryRoom)
+                .leftJoin(member).on(member.id.eq(inquiryRoom.assigneeId));
     }
 }

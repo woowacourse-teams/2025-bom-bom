@@ -8,6 +8,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.domain.InquiryStatus;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
+import me.bombom.api.v1.inquiry.dto.InquiryRoomWithAssignee;
 import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
@@ -44,14 +45,18 @@ public class InquiryRoomService {
     public Page<InquiryRoomResponse> getRooms(InquiryRequester requester, Pageable pageable) {
         validateRequester(requester);
 
-        Page<InquiryRoom> rooms = inquiryRoomRepository.findRoomsByRequester(
+        Page<InquiryRoomWithAssignee> rooms = inquiryRoomRepository.findRoomsByRequester(
                 requester.memberId(), requester.guestId(), pageable);
 
-        List<Long> roomIds = rooms.map(InquiryRoom::getId).toList();
+        List<Long> roomIds = rooms.map(row -> row.room().getId()).toList();
         Map<Long, Long> latestAdminMessageIdByRoomId = inquiryMessageRepository.findLatestAdminMessageIdsByRoomIds(
                 roomIds);
 
-        return rooms.map(room -> InquiryRoomResponse.of(room, hasUnreadMessage(room, latestAdminMessageIdByRoomId)));
+        return rooms.map(row -> InquiryRoomResponse.of(
+                row.room(),
+                hasUnreadMessage(row.room(), latestAdminMessageIdByRoomId),
+                row.assigneeNickname()
+        ));
     }
 
     public UnresolvedInquiryRoomCounts countUnresolvedRooms() {

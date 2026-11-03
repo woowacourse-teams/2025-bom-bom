@@ -4,6 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
@@ -13,6 +17,8 @@ import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.inquiry.repository.InquiryRoomRepository;
+import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.member.repository.MemberRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +34,9 @@ class InquiryRoomServiceTest {
 
     @Autowired
     private InquiryRoomRepository inquiryRoomRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -138,6 +147,66 @@ class InquiryRoomServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(counts.unconfirmedCount()).isEqualTo(1);
             softly.assertThat(counts.inProgressCount()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void 방_목록에_담당자_닉네임이_함께_조회된다() {
+        Member assignee = memberRepository.save(TestFixture.createUniqueMember("담당봄봄", "assignee-list-1"));
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", assignee.getId(), room.getId());
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.assigneeId()).isEqualTo(assignee.getId());
+            softly.assertThat(response.assigneeNickname()).isEqualTo("담당봄봄");
+        });
+    }
+
+    @Test
+    void 담당자가_배정되지_않은_방은_담당자_정보가_null이다() {
+        inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.assigneeId()).isNull();
+            softly.assertThat(response.assigneeNickname()).isNull();
+        });
+    }
+
+    @Test
+    void 담당자_회원이_존재하지_않으면_닉네임만_null이다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", 999_999L, room.getId());
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.assigneeId()).isEqualTo(999_999L);
+            softly.assertThat(response.assigneeNickname()).isNull();
+        });
+    }
+
+    @Test
+    void 담당자가_있는_방과_없는_방이_섞여있어도_각각_매핑된다() {
+        Member assignee = memberRepository.save(TestFixture.createUniqueMember("섞임담당", "assignee-mixed-1"));
+        InquiryRoom assigned = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", assignee.getId(), assigned.getId());
+        InquiryRoom unassigned = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        List<InquiryRoomResponse> rooms = inquiryRoomService.getRooms(requester, PageRequest.of(0, 20)).getContent();
+
+        Map<Long, InquiryRoomResponse> byId = rooms.stream()
+                .collect(Collectors.toMap(InquiryRoomResponse::id, room -> room));
+        assertSoftly(softly -> {
+            softly.assertThat(byId.get(assigned.getId()).assigneeNickname()).isEqualTo("섞임담당");
+            softly.assertThat(byId.get(unassigned.getId()).assigneeNickname()).isNull();
         });
     }
 

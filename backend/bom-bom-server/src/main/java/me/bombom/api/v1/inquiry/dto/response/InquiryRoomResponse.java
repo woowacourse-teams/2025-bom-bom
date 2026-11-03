@@ -15,11 +15,15 @@ public record InquiryRoomResponse(
         LocalDateTime closedAt
 ) {
 
-    public static InquiryRoomResponse of(InquiryRoom room, boolean hasUnreadMessage) {
+    public static InquiryRoomResponse ofUnassignedRoom(InquiryRoom room, boolean hasUnreadMessage) {
         return of(room, hasUnreadMessage, null);
     }
 
-    public static InquiryRoomResponse of(InquiryRoom room, boolean hasUnreadMessage, String assigneeNickname) {
+    public static InquiryRoomResponse of(
+            InquiryRoom room,
+            boolean hasUnreadMessage,
+            String assigneeNickname
+    ) {
         return new InquiryRoomResponse(
                 room.getId(),
                 room.getCategoryId(),

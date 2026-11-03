@@ -49,7 +49,7 @@ public class InquiryMessageService {
         applicationEventPublisher.publishEvent(
                 new InquiryMessageSentEvent(message.getContent(), room.getAssigneeId()));
 
-        return InquiryMessageResponse.of(message, images);
+        return InquiryMessageResponse.ofUserMessage(message, images);
     }
 
     @Transactional

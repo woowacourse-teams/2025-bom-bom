@@ -17,7 +17,7 @@ public record InquiryMessageResponse(
         LocalDateTime createdAt
 ) {
 
-    public static InquiryMessageResponse of(InquiryMessage message, List<InquiryMessageImage> images) {
+    public static InquiryMessageResponse ofUserMessage(InquiryMessage message, List<InquiryMessageImage> images) {
         return of(message, images, null);
     }
 

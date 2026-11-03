@@ -39,7 +39,7 @@ public class InquiryRoomService {
                 : InquiryRoom.createGuestInquiryRoom(requester.guestId(), categoryId);
 
         InquiryRoom saved = inquiryRoomRepository.save(room);
-        return InquiryRoomResponse.of(saved, false);
+        return InquiryRoomResponse.ofUnassignedRoom(saved, false);
     }
 
     public Page<InquiryRoomResponse> getRooms(InquiryRequester requester, Pageable pageable) {

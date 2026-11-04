@@ -117,3 +117,33 @@ jobs:
       - name: Deploy with Docker Compose
         run: |
           docker compose up -d fcm-app
+
+      - name: FCM container health check
+        run: |
+          container_name="bombom-fcm"
+          health_url="http://127.0.0.1:8081/actuator/health"
+          max_attempts=30
+
+          for attempt in $(seq 1 "$max_attempts"); do
+            status="$(docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true)"
+
+            if [ "$status" != "running" ]; then
+              echo "FCM 컨테이너가 실행 중이 아닙니다. 현재 상태: ${status:-없음}"
+              docker compose ps
+              docker compose logs --no-color --tail=200 fcm-app || true
+              exit 1
+            fi
+
+            if docker exec "$container_name" wget -qO- "$health_url" >/dev/null; then
+              echo "FCM 헬스체크 성공: $health_url"
+              exit 0
+            fi
+
+            echo "헬스체크 대기 중 (${attempt}/${max_attempts})"
+            sleep 10
+          done
+
+          echo "FCM 헬스체크가 5분 안에 통과하지 못했습니다."
+          docker compose ps
+          docker compose logs --no-color --tail=200 fcm-app || true
+          exit 1

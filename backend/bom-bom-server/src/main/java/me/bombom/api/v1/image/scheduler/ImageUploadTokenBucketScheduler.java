@@ -20,8 +20,12 @@ public class ImageUploadTokenBucketScheduler {
     @Scheduled(cron = GUEST_BUCKET_CLEANUP_CRON, zone = TIME_ZONE)
     @SchedulerLock(name = "cleanup_expired_guest_image_upload_buckets", lockAtLeastFor = "PT4S", lockAtMostFor = "PT5M")
     public void cleanupExpiredGuestBuckets() {
-        log.info("비회원 이미지 업로드 rate limit 버킷(ImageUploadTokenBucket) 정리 시작");
-        imageUploadRateLimitService.cleanupExpiredGuestBuckets();
-        log.info("비회원 이미지 업로드 rate limit 버킷(ImageUploadTokenBucket) 정리 종료");
+        log.info("비회원 이미지 업로드 버킷 정리 시작");
+        try {
+            imageUploadRateLimitService.cleanupExpiredGuestBuckets();
+            log.info("비회원 이미지 업로드 버킷 정리 종료");
+        } catch (Exception e) {
+            log.warn("비회원 이미지 업로드 버킷 정리 실패", e);
+        }
     }
 }

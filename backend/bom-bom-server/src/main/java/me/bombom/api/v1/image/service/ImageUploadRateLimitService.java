@@ -10,6 +10,7 @@ import me.bombom.api.v1.image.domain.ImageUploadBucketKey;
 import me.bombom.api.v1.image.domain.ImageUploadOwnerType;
 import me.bombom.api.v1.image.repository.ImageUploadTokenBucketRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -61,5 +62,11 @@ public class ImageUploadRateLimitService {
         );
 
         log.info("만료된 비회원 이미지 업로드 버킷 정리 완료 - threshold={}, deleted={}", threshold, deletedCount);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteByMemberId(Long memberId) {
+        String bucketId = ImageUploadBucketKey.fromMemberId(memberId).value();
+        imageUploadTokenBucketRepository.deleteById(bucketId);
     }
 }

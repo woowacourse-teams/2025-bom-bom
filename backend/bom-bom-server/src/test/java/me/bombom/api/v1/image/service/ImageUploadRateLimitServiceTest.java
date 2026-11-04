@@ -191,6 +191,29 @@ class ImageUploadRateLimitServiceTest {
         assertThat(imageUploadTokenBucketRepository.findById(memberKey.value())).isPresent();
     }
 
+    @Test
+    void 회원의_버킷을_삭제한다() {
+        saveBucket(memberKey, 10.0);
+
+        imageUploadRateLimitService.deleteByMemberId(MEMBER_ID);
+
+        assertThat(imageUploadTokenBucketRepository.findById(memberKey.value())).isEmpty();
+    }
+
+    @Test
+    void 회원의_버킷을_삭제해도_다른_회원의_버킷은_남는다() {
+        ImageUploadBucketKey otherMemberKey = ImageUploadBucketKey.fromMemberId(MEMBER_ID + 1);
+        saveBucket(memberKey, 10.0);
+        saveBucket(otherMemberKey, 10.0);
+
+        imageUploadRateLimitService.deleteByMemberId(MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(imageUploadTokenBucketRepository.findById(memberKey.value())).isEmpty();
+            softly.assertThat(imageUploadTokenBucketRepository.findById(otherMemberKey.value())).isPresent();
+        });
+    }
+
     private void saveBucket(ImageUploadBucketKey key, double tokens, LocalDateTime updatedAt) {
         imageUploadTokenBucketRepository.save(
                 TestFixture.createImageUploadTokenBucket(key.value(), tokens, updatedAt));

@@ -41,7 +41,8 @@ public class InquiryImageService {
         validateImageCount(images);
         images.forEach(this::validateImageContentType);
 
-        ImageUploadBucketKey bucketKey = ImageUploadBucketKey.of(requester.memberId(), requester.guestId());
+        ImageUploadBucketKey bucketKey = ImageUploadBucketKey.ofRequester(
+                requester.memberId(), requester.guestId());
         consumeTokens(bucketKey, images.size());
 
         try {

@@ -41,8 +41,8 @@ class ImageUploadRateLimitServiceTest {
     @BeforeEach
     void setUp() {
         clock.setInstant(NOW.atZone(SEOUL).toInstant());
-        memberKey = ImageUploadBucketKey.of(MEMBER_ID, null);
-        guestKey = ImageUploadBucketKey.of(null, GUEST_ID);
+        memberKey = ImageUploadBucketKey.fromMemberId(MEMBER_ID);
+        guestKey = ImageUploadBucketKey.fromGuestId(GUEST_ID);
     }
 
     @Test

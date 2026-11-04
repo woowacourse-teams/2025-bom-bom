@@ -10,6 +10,7 @@ import me.bombom.api.v1.bookmark.service.BookmarkService;
 import me.bombom.api.v1.challenge.service.ChallengeWithdrawService;
 import me.bombom.api.v1.coupon.service.CouponService;
 import me.bombom.api.v1.highlight.service.HighlightService;
+import me.bombom.api.v1.image.service.ImageUploadRateLimitService;
 import me.bombom.api.v1.member.service.MemberFcmTokenService;
 import me.bombom.api.v1.member.service.MemberNotificationSettingService;
 import me.bombom.api.v1.member.service.WarningService;
@@ -42,6 +43,7 @@ public class WithdrawDataCleanupService {
     private final MaeilMailSubscribeService maeilMailSubscribeService;
     private final MemberFcmTokenService memberFcmTokenService;
     private final MemberNotificationSettingService memberNotificationSettingService;
+    private final ImageUploadRateLimitService imageUploadRateLimitService;
 
     public boolean cleanupByMemberId(Long memberId) {
         return cleanupByMemberId(memberId, null);
@@ -62,6 +64,7 @@ public class WithdrawDataCleanupService {
         isSucceeded &= runSafely("매일메일", memberId, maeilMailSubscribeService::deleteAllByMemberId);
         isSucceeded &= runSafely("FCM 토큰", memberId, memberFcmTokenService::deleteAllByMemberId);
         isSucceeded &= runSafely("알림 설정", memberId, memberNotificationSettingService::deleteAllByMemberId);
+        isSucceeded &= runSafely("이미지 업로드 제한", memberId, imageUploadRateLimitService::deleteByMemberId);
         return isSucceeded;
     }
 

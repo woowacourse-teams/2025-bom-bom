@@ -22,6 +22,7 @@ class ImageUploadRateLimitServiceTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 1, 1, 10, 0);
     private static final long MEMBER_ID = 1L;
     private static final String GUEST_ID = "e4560796-3db9-4f26-828a-c356c91d5076";
+    private static final int GUEST_BUCKET_RETENTION_DAYS = 15;
 
     @Autowired
     private ImageUploadRateLimitService imageUploadRateLimitService;
@@ -161,6 +162,38 @@ class ImageUploadRateLimitServiceTest {
         imageUploadRateLimitService.refund(memberKey, 4);
 
         assertThat(updatedAtOf(memberKey)).isEqualTo(consumedAt);
+    }
+
+    @Test
+    void 보존_기간이_지난_비회원_버킷을_삭제한다() {
+        saveBucket(guestKey, 10.0, NOW.minusDays(GUEST_BUCKET_RETENTION_DAYS).minusSeconds(1));
+
+        imageUploadRateLimitService.cleanupExpiredGuestBuckets();
+
+        assertThat(imageUploadTokenBucketRepository.findById(guestKey.value())).isEmpty();
+    }
+
+    @Test
+    void 보존_기간이_지나지_않은_비회원_버킷은_삭제하지_않는다() {
+        saveBucket(guestKey, 10.0, NOW.minusDays(GUEST_BUCKET_RETENTION_DAYS).plusSeconds(1));
+
+        imageUploadRateLimitService.cleanupExpiredGuestBuckets();
+
+        assertThat(imageUploadTokenBucketRepository.findById(guestKey.value())).isPresent();
+    }
+
+    @Test
+    void 보존_기간이_지나도_회원_버킷은_삭제하지_않는다() {
+        saveBucket(memberKey, 10.0, NOW.minusDays(GUEST_BUCKET_RETENTION_DAYS).minusDays(100));
+
+        imageUploadRateLimitService.cleanupExpiredGuestBuckets();
+
+        assertThat(imageUploadTokenBucketRepository.findById(memberKey.value())).isPresent();
+    }
+
+    private void saveBucket(ImageUploadBucketKey key, double tokens, LocalDateTime updatedAt) {
+        imageUploadTokenBucketRepository.save(
+                TestFixture.createImageUploadTokenBucket(key.value(), tokens, updatedAt));
     }
 
     private void saveBucket(ImageUploadBucketKey key, double tokens) {

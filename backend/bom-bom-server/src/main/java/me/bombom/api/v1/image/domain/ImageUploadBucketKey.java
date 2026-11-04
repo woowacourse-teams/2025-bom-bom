@@ -41,7 +41,11 @@ public record ImageUploadBucketKey(ImageUploadOwnerType ownerType, String value)
         return fromGuestId(guestId);
     }
 
+    public static String keyPrefixOf(ImageUploadOwnerType ownerType) {
+        return ownerType.getKeyPrefix() + DELIMITER;
+    }
+
     private static ImageUploadBucketKey create(ImageUploadOwnerType ownerType, String identifier) {
-        return new ImageUploadBucketKey(ownerType, ownerType.getKeyPrefix() + DELIMITER + identifier);
+        return new ImageUploadBucketKey(ownerType, keyPrefixOf(ownerType) + identifier);
     }
 }

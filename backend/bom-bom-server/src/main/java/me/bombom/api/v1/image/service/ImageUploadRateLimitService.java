@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.image.config.ImageUploadRateLimitProperties;
 import me.bombom.api.v1.image.config.ImageUploadRateLimitProperties.Policy;
 import me.bombom.api.v1.image.domain.ImageUploadBucketKey;
+import me.bombom.api.v1.image.domain.ImageUploadOwnerType;
 import me.bombom.api.v1.image.repository.ImageUploadTokenBucketRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ImageUploadRateLimitService {
+
+    private static final int GUEST_BUCKET_RETENTION_DAYS = 15;
 
     private final ImageUploadTokenBucketRepository imageUploadTokenBucketRepository;
     private final ImageUploadRateLimitProperties properties;
@@ -46,5 +49,17 @@ public class ImageUploadRateLimitService {
     public void refund(ImageUploadBucketKey bucketKey, int imageCount) {
         Policy policy = properties.getPolicy(bucketKey.ownerType());
         imageUploadTokenBucketRepository.refund(bucketKey.value(), policy.bucketCapacity(), imageCount);
+    }
+
+    @Transactional
+    public void cleanupExpiredGuestBuckets() {
+        LocalDateTime threshold = LocalDateTime.now(clock).minusDays(GUEST_BUCKET_RETENTION_DAYS);
+
+        int deletedCount = imageUploadTokenBucketRepository.bulkDeleteByKeyPrefixAndUpdatedAtBefore(
+                ImageUploadBucketKey.keyPrefixOf(ImageUploadOwnerType.GUEST),
+                threshold
+        );
+
+        log.info("만료된 비회원 이미지 업로드 버킷 정리 완료 - threshold={}, deleted={}", threshold, deletedCount);
     }
 }

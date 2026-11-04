@@ -13,7 +13,7 @@ public interface ImageUploadTokenBucketRepository extends JpaRepository<ImageUpl
     @Query(value = """
             INSERT IGNORE INTO image_upload_token_bucket (bucket_key, tokens, updated_at)
             VALUES (:bucketKey, :bucketCapacity, :now)
-    """, nativeQuery = true)
+            """, nativeQuery = true)
     void insertIfAbsent(
             @Param("bucketKey") String bucketKey,
             @Param("bucketCapacity") int bucketCapacity,
@@ -27,7 +27,7 @@ public interface ImageUploadTokenBucketRepository extends JpaRepository<ImageUpl
                 updated_at = :now
             WHERE bucket_key = :bucketKey
               AND LEAST(:bucketCapacity, tokens + TIMESTAMPDIFF(SECOND, updated_at, :now) / :refillSeconds) >= :cost
-    """, nativeQuery = true)
+            """, nativeQuery = true)
     int refillAndTryConsume(
             @Param("bucketKey") String bucketKey,
             @Param("bucketCapacity") int bucketCapacity,
@@ -44,10 +44,24 @@ public interface ImageUploadTokenBucketRepository extends JpaRepository<ImageUpl
             UPDATE image_upload_token_bucket
             SET tokens = LEAST(:bucketCapacity, tokens + :cost)
             WHERE bucket_key = :bucketKey
-    """, nativeQuery = true)
+            """, nativeQuery = true)
     int refund(
             @Param("bucketKey") String bucketKey,
             @Param("bucketCapacity") int bucketCapacity,
             @Param("cost") int cost
+    );
+
+    /**
+     * 스케줄러 정리 전용 메서드로, 같은 트랜잭션에 영속 엔티티가 없어 flush/clear를 하지 않는다.
+     */
+    @Modifying
+    @Query("""
+            DELETE FROM ImageUploadTokenBucket b
+            WHERE b.bucketKey LIKE CONCAT(:keyPrefix, '%')
+              AND b.updatedAt < :threshold
+            """)
+    int bulkDeleteByKeyPrefixAndUpdatedAtBefore(
+            @Param("keyPrefix") String keyPrefix,
+            @Param("threshold") LocalDateTime threshold
     );
 }

@@ -5,8 +5,12 @@ import static me.bombom.api.v1.inquiry.domain.QInquiryRoom.inquiryRoom;
 import static me.bombom.api.v1.member.domain.QMember.member;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Coalesce;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +32,7 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
 
         List<InquiryRoomWithAssignee> content = selectRoomWithAssignee()
                 .where(requesterEq)
-                .orderBy(inquiryRoom.createdAt.desc(), inquiryRoom.id.desc())
+                .orderBy(latestMessageCreatedAt().desc(), inquiryRoom.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -76,5 +80,19 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
                 .select(new QInquiryRoomWithAssignee(inquiryRoom, member.nickname))
                 .from(inquiryRoom)
                 .leftJoin(member).on(member.id.eq(inquiryRoom.assigneeId));
+    }
+
+    /**
+     * 방의 마지막 메시지 시각입니다. 메시지가 없는 방은 방 생성 시각으로 대체합니다.
+     */
+    private ComparableExpressionBase<LocalDateTime> latestMessageCreatedAt() {
+        return new Coalesce<>(
+                LocalDateTime.class,
+                JPAExpressions
+                        .select(inquiryMessage.createdAt.max())
+                        .from(inquiryMessage)
+                        .where(inquiryMessage.roomId.eq(inquiryRoom.id)),
+                inquiryRoom.createdAt)
+                .getValue();
     }
 }

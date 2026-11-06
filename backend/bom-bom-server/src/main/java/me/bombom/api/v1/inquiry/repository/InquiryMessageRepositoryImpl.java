@@ -75,13 +75,7 @@ public class InquiryMessageRepositoryImpl implements CustomInquiryMessageReposit
                 .leftJoin(member).on(member.id.eq(inquiryMessage.adminId))
                 .where(
                         inquiryMessage.roomId.in(roomIds),
-                        inquiryMessage.id.in(
-                                JPAExpressions
-                                        .select(latestMessage.id.max())
-                                        .from(latestMessage)
-                                        .where(latestMessage.roomId.in(roomIds))
-                                        .groupBy(latestMessage.roomId)
-                        )
+                        hasNoLaterMessageInRoom()
                 )
                 .fetch();
 
@@ -97,5 +91,21 @@ public class InquiryMessageRepositoryImpl implements CustomInquiryMessageReposit
             return null;
         }
         return inquiryMessage.id.lt(cursor);
+    }
+
+    /**
+     * 같은 방에 자신보다 뒤에 오는 메시지가 없는지 판별합니다.
+     */
+    private BooleanExpression hasNoLaterMessageInRoom() {
+        return JPAExpressions
+                .selectOne()
+                .from(latestMessage)
+                .where(
+                        latestMessage.roomId.eq(inquiryMessage.roomId),
+                        latestMessage.createdAt.gt(inquiryMessage.createdAt)
+                                .or(latestMessage.createdAt.eq(inquiryMessage.createdAt)
+                                        .and(latestMessage.id.gt(inquiryMessage.id)))
+                )
+                .notExists();
     }
 }

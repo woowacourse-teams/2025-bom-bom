@@ -15,7 +15,7 @@ public record LastMessageResponse(
         return new LastMessageResponse(
                 message.getContent(),
                 message.getSenderType(),
-                message.getSenderType() == InquirySenderType.ADMIN ? adminNickname : null,
+                adminNickname,
                 message.getCreatedAt()
         );
     }

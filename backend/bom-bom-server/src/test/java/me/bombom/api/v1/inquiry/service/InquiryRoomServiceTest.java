@@ -251,6 +251,140 @@ class InquiryRoomServiceTest {
         assertThat(response.assigneeNickname()).isEqualTo("게스트담당");
     }
 
+    @Test
+    void 방_목록은_최신_메시지가_늦은_방부터_정렬된다() {
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        InquiryRoom olderRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom newerRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        // 먼저 만들어진 방에 더 늦은 메시지를 넣어, 방 생성순과 메시지순이 어긋나게 한다
+        insertUserMessageAt(olderRoom.getId(), "나중 메시지", "2026-11-03 12:00:00");
+        insertUserMessageAt(newerRoom.getId(), "이전 메시지", "2026-11-03 10:00:00");
+
+        List<InquiryRoomResponse> rooms = getRooms(requester);
+
+        assertThat(rooms).extracting(InquiryRoomResponse::id)
+                .containsExactly(olderRoom.getId(), newerRoom.getId());
+    }
+
+    @Test
+    void 메시지가_없는_방은_방_생성시각을_기준으로_정렬된다() {
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        InquiryRoom roomWithMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom emptyRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(roomWithMessage.getId(), "오래된 메시지", "2020-01-01 00:00:00");
+
+        List<InquiryRoomResponse> rooms = getRooms(requester);
+
+        assertThat(rooms).extracting(InquiryRoomResponse::id)
+                .containsExactly(emptyRoom.getId(), roomWithMessage.getId());
+    }
+
+    @Test
+    void 방_목록은_마지막_메시지_내용을_함께_반환한다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(room.getId(), "첫 문의", "2026-11-03 10:00:00");
+        insertUserMessageAt(room.getId(), "마지막 문의", "2026-11-03 12:00:00");
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertThat(response.lastMessage().content()).isEqualTo("마지막 문의");
+    }
+
+    @Test
+    void 나중에_저장된_메시지의_생성시각이_더_빠르면_생성시각이_늦은_메시지가_마지막_메시지다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(room.getId(), "먼저 저장된 메시지", "2026-11-03 12:00:00");
+        insertUserMessageAt(room.getId(), "나중에 저장된 메시지", "2026-11-03 10:00:00");
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertThat(response.lastMessage().content()).isEqualTo("먼저 저장된 메시지");
+    }
+
+    @Test
+    void 생성시각이_같으면_나중에_저장된_메시지가_마지막_메시지다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(room.getId(), "먼저 저장된 메시지", "2026-11-03 12:00:00");
+        insertUserMessageAt(room.getId(), "나중에 저장된 메시지", "2026-11-03 12:00:00");
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertThat(response.lastMessage().content()).isEqualTo("나중에 저장된 메시지");
+    }
+
+    @Test
+    void 생성시각이_저장순서와_어긋나도_정렬된_방의_마지막_메시지가_일치한다() {
+        InquiryRoom roomWithEarlierMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom roomWithLaterMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(roomWithLaterMessage.getId(), "먼저 저장되었지만 시각은 나중", "2026-11-03 12:00:00");
+        insertUserMessageAt(roomWithEarlierMessage.getId(), "나중에 저장되었지만 시각은 먼저", "2026-11-03 10:00:00");
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        List<InquiryRoomResponse> rooms = getRooms(requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(rooms.get(0).id()).isEqualTo(roomWithLaterMessage.getId());
+            softly.assertThat(rooms.get(0).lastMessage().content()).isEqualTo("먼저 저장되었지만 시각은 나중");
+        });
+    }
+
+    @Test
+    void 메시지가_없는_방의_마지막_메시지는_null이다() {
+        inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertThat(response.lastMessage()).isNull();
+    }
+
+    @Test
+    void 마지막_메시지가_어드민이면_어드민_닉네임을_함께_반환한다() {
+        Member admin = memberRepository.save(TestFixture.createUniqueMember("상담원", "admin-last-msg"));
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertAdminMessageAt(room.getId(), admin.getId(), "답변드립니다", "2026-11-03 12:00:00");
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.lastMessage().content()).isEqualTo("답변드립니다");
+            softly.assertThat(response.lastMessage().adminNickname()).isEqualTo("상담원");
+        });
+    }
+
+    @Test
+    void 마지막_메시지가_사용자면_어드민_닉네임은_null이다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(room.getId(), "문의합니다", "2026-11-03 12:00:00");
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertThat(response.lastMessage().adminNickname()).isNull();
+    }
+
+    private List<InquiryRoomResponse> getRooms(InquiryRequester requester) {
+        return inquiryRoomService.getRooms(requester, PageRequest.of(0, 20)).getContent();
+    }
+
+    private void insertUserMessageAt(Long roomId, String content, String createdAt) {
+        jdbcTemplate.update(
+                "INSERT INTO inquiry_message (room_id, sender_type, content, created_at, updated_at) "
+                        + "VALUES (?, 'USER', ?, ?, ?)",
+                roomId, content, createdAt, createdAt);
+    }
+
+    private void insertAdminMessageAt(Long roomId, Long adminId, String content, String createdAt) {
+        jdbcTemplate.update(
+                "INSERT INTO inquiry_message (room_id, sender_type, admin_id, content, created_at, updated_at) "
+                        + "VALUES (?, 'ADMIN', ?, ?, ?, ?)",
+                roomId, adminId, content, createdAt, createdAt);
+    }
+
     private InquiryRoomResponse getFirstRoom(InquiryRequester requester) {
         Pageable pageable = PageRequest.of(0, 20);
         return inquiryRoomService.getRooms(requester, pageable).getContent().get(0);

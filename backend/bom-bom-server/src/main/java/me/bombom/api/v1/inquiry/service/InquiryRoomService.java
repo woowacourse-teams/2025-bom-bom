@@ -7,10 +7,12 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.domain.InquiryStatus;
+import me.bombom.api.v1.inquiry.dto.InquiryMessageWithAdmin;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.InquiryRoomWithAssignee;
 import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.dto.response.LastMessageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.inquiry.repository.InquiryCategoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
@@ -51,11 +53,14 @@ public class InquiryRoomService {
         List<Long> roomIds = rooms.map(row -> row.room().getId()).toList();
         Map<Long, Long> latestAdminMessageIdByRoomId = inquiryMessageRepository.findLatestAdminMessageIdsByRoomIds(
                 roomIds);
+        Map<Long, InquiryMessageWithAdmin> latestMessageByRoomId = inquiryMessageRepository.findLatestMessagesByRoomIds(
+                roomIds);
 
         return rooms.map(row -> InquiryRoomResponse.of(
                 row.room(),
                 hasUnreadMessage(row.room(), latestAdminMessageIdByRoomId),
-                row.assigneeNickname()
+                row.assigneeNickname(),
+                toLastMessage(latestMessageByRoomId.get(row.room().getId()))
         ));
     }
 
@@ -113,6 +118,13 @@ public class InquiryRoomService {
             return false;
         }
         return room.getLastReadMessageIdByUser() == null || latestAdminMessageId > room.getLastReadMessageIdByUser();
+    }
+
+    private LastMessageResponse toLastMessage(InquiryMessageWithAdmin latestMessage) {
+        if (latestMessage == null) {
+            return null;
+        }
+        return LastMessageResponse.of(latestMessage.message(), latestMessage.adminNickname());
     }
 
     private void validateOwnership(InquiryRoom room, InquiryRequester requester) {

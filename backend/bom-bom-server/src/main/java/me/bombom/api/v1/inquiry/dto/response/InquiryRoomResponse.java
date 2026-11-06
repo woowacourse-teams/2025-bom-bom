@@ -12,7 +12,8 @@ public record InquiryRoomResponse(
         String assigneeNickname,
         boolean hasUnreadMessage,
         LocalDateTime createdAt,
-        LocalDateTime closedAt
+        LocalDateTime closedAt,
+        LastMessageResponse lastMessage
 ) {
 
     public static InquiryRoomResponse ofUnassignedRoom(InquiryRoom room, boolean hasUnreadMessage) {
@@ -24,6 +25,15 @@ public record InquiryRoomResponse(
             boolean hasUnreadMessage,
             String assigneeNickname
     ) {
+        return of(room, hasUnreadMessage, assigneeNickname, null);
+    }
+
+    public static InquiryRoomResponse of(
+            InquiryRoom room,
+            boolean hasUnreadMessage,
+            String assigneeNickname,
+            LastMessageResponse lastMessage
+    ) {
         return new InquiryRoomResponse(
                 room.getId(),
                 room.getCategoryId(),
@@ -32,7 +42,8 @@ public record InquiryRoomResponse(
                 assigneeNickname,
                 hasUnreadMessage,
                 room.getCreatedAt(),
-                room.getClosedAt()
+                room.getClosedAt(),
+                lastMessage
         );
     }
 }

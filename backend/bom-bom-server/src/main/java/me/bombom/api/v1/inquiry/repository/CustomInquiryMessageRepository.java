@@ -9,4 +9,6 @@ public interface CustomInquiryMessageRepository {
     List<InquiryMessageWithAdmin> findMessagesByCursor(Long roomId, Long cursor, int size);
 
     Map<Long, Long> findLatestAdminMessageIdsByRoomIds(List<Long> roomIds);
+
+    Map<Long, InquiryMessageWithAdmin> findLatestMessagesByRoomIds(List<Long> roomIds);
 }

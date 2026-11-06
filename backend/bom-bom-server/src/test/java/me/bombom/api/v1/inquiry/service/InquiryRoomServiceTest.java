@@ -159,37 +159,28 @@ class InquiryRoomServiceTest {
 
         InquiryRoomResponse response = getFirstRoom(requester);
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.assigneeId()).isEqualTo(assignee.getId());
-            softly.assertThat(response.assigneeNickname()).isEqualTo("담당봄봄");
-        });
+        assertThat(response.assigneeNickname()).isEqualTo("담당봄봄");
     }
 
     @Test
-    void 담당자가_배정되지_않은_방은_담당자_정보가_null이다() {
+    void 담당자가_배정되지_않은_방은_담당자_닉네임이_null이다() {
         inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         InquiryRequester requester = new InquiryRequester(1L, null);
 
         InquiryRoomResponse response = getFirstRoom(requester);
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.assigneeId()).isNull();
-            softly.assertThat(response.assigneeNickname()).isNull();
-        });
+        assertThat(response.assigneeNickname()).isNull();
     }
 
     @Test
-    void 담당자_회원이_존재하지_않으면_닉네임만_null이다() {
+    void 담당자_회원이_존재하지_않으면_닉네임이_null이다() {
         InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         jdbcTemplate.update("UPDATE inquiry_room SET assignee_id = ? WHERE id = ?", 999_999L, room.getId());
         InquiryRequester requester = new InquiryRequester(1L, null);
 
         InquiryRoomResponse response = getFirstRoom(requester);
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.assigneeId()).isEqualTo(999_999L);
-            softly.assertThat(response.assigneeNickname()).isNull();
-        });
+        assertThat(response.assigneeNickname()).isNull();
     }
 
     @Test
@@ -219,23 +210,17 @@ class InquiryRoomServiceTest {
 
         InquiryRoomResponse response = inquiryRoomService.getRoom(room.getId(), requester);
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.assigneeId()).isEqualTo(assignee.getId());
-            softly.assertThat(response.assigneeNickname()).isEqualTo("단건담당");
-        });
+        assertThat(response.assigneeNickname()).isEqualTo("단건담당");
     }
 
     @Test
-    void 단건_조회에서_담당자가_없으면_담당자_정보가_null이다() {
+    void 단건_조회에서_담당자가_없으면_담당자_닉네임이_null이다() {
         InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         InquiryRequester requester = new InquiryRequester(1L, null);
 
         InquiryRoomResponse response = inquiryRoomService.getRoom(room.getId(), requester);
 
-        assertSoftly(softly -> {
-            softly.assertThat(response.assigneeId()).isNull();
-            softly.assertThat(response.assigneeNickname()).isNull();
-        });
+        assertThat(response.assigneeNickname()).isNull();
     }
 
     @Test

@@ -26,6 +26,7 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    // TODO: 커서 기반 페이지네이션으로 수정
     @Override
     public Page<InquiryRoomWithAssignee> findRoomsByRequester(Long memberId, String guestId, Pageable pageable) {
         BooleanExpression requesterEq = requesterEq(memberId, guestId);

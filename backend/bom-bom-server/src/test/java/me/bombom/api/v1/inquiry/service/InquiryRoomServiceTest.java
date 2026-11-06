@@ -327,6 +327,35 @@ class InquiryRoomServiceTest {
     }
 
     @Test
+    void 마지막_메시지가_삭제되면_그_이전_메시지가_마지막_메시지가_된다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(room.getId(), "이전 메시지", "2026-11-03 10:00:00");
+        insertUserMessageAt(room.getId(), "삭제될 마지막 메시지", "2026-11-03 12:00:00");
+        softDeleteLatestMessage(room.getId());
+        InquiryRequester requester = new InquiryRequester(1L, null);
+
+        InquiryRoomResponse response = getFirstRoom(requester);
+
+        assertThat(response.lastMessage().content()).isEqualTo("이전 메시지");
+    }
+
+    @Test
+    void 삭제된_메시지는_방_정렬_기준에서_제외된다() {
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        InquiryRoom roomWithDeletedMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom roomWithLiveMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(roomWithDeletedMessage.getId(), "오래된 살아있는 메시지", "2026-11-03 10:00:00");
+        insertUserMessageAt(roomWithDeletedMessage.getId(), "삭제될 최신 메시지", "2026-11-03 14:00:00");
+        softDeleteLatestMessage(roomWithDeletedMessage.getId());
+        insertUserMessageAt(roomWithLiveMessage.getId(), "살아있는 메시지", "2026-11-03 12:00:00");
+
+        List<InquiryRoomResponse> rooms = getRooms(requester);
+
+        assertThat(rooms).extracting(InquiryRoomResponse::id)
+                .containsExactly(roomWithLiveMessage.getId(), roomWithDeletedMessage.getId());
+    }
+
+    @Test
     void 마지막_메시지가_어드민이면_어드민_닉네임을_함께_반환한다() {
         Member admin = memberRepository.save(TestFixture.createUniqueMember("상담원", "admin-last-msg"));
         InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
@@ -354,6 +383,16 @@ class InquiryRoomServiceTest {
 
     private List<InquiryRoomResponse> getRooms(InquiryRequester requester) {
         return inquiryRoomService.getRooms(requester, PageRequest.of(0, 20)).getContent();
+    }
+
+    private void softDeleteLatestMessage(Long roomId) {
+        jdbcTemplate.update("""
+                UPDATE inquiry_message
+                SET deleted_at = NOW(6)
+                WHERE id = (SELECT max_id FROM (
+                    SELECT MAX(id) AS max_id FROM inquiry_message WHERE room_id = ?
+                ) AS latest)
+                """, roomId);
     }
 
     private void insertUserMessageAt(Long roomId, String content, String createdAt) {

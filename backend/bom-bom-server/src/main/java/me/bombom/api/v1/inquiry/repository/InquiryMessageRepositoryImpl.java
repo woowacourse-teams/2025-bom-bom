@@ -1,27 +1,36 @@
 package me.bombom.api.v1.inquiry.repository;
 
 import static me.bombom.api.v1.inquiry.domain.QInquiryMessage.inquiryMessage;
+import static me.bombom.api.v1.member.domain.QMember.member;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import me.bombom.api.v1.inquiry.domain.InquiryMessage;
 import me.bombom.api.v1.inquiry.domain.InquirySenderType;
+import me.bombom.api.v1.inquiry.domain.QInquiryMessage;
+import me.bombom.api.v1.inquiry.dto.InquiryMessageWithAdmin;
+import me.bombom.api.v1.inquiry.dto.QInquiryMessageWithAdmin;
 
 @RequiredArgsConstructor
 public class InquiryMessageRepositoryImpl implements CustomInquiryMessageRepository {
 
+    private static final QInquiryMessage latestMessage = new QInquiryMessage("latestMessage");
+
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<InquiryMessage> findMessagesByCursor(Long roomId, Long cursor, int size) {
+    public List<InquiryMessageWithAdmin> findMessagesByCursor(Long roomId, Long cursor, int size) {
         return jpaQueryFactory
-                .selectFrom(inquiryMessage)
+                .select(new QInquiryMessageWithAdmin(inquiryMessage, member.nickname))
+                .from(inquiryMessage)
+                .leftJoin(member).on(member.id.eq(inquiryMessage.adminId))
                 .where(
                         inquiryMessage.roomId.eq(roomId),
                         cursorLessThan(cursor)
@@ -54,10 +63,49 @@ public class InquiryMessageRepositoryImpl implements CustomInquiryMessageReposit
                 ));
     }
 
+    @Override
+    public Map<Long, InquiryMessageWithAdmin> findLatestMessagesByRoomIds(List<Long> roomIds) {
+        if (roomIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<InquiryMessageWithAdmin> results = jpaQueryFactory
+                .select(new QInquiryMessageWithAdmin(inquiryMessage, member.nickname))
+                .from(inquiryMessage)
+                .leftJoin(member).on(member.id.eq(inquiryMessage.adminId))
+                .where(
+                        inquiryMessage.roomId.in(roomIds),
+                        hasNoLaterMessageInRoom()
+                )
+                .fetch();
+
+        return results.stream()
+                .collect(Collectors.toMap(
+                        result -> result.message().getRoomId(),
+                        Function.identity()
+                ));
+    }
+
     private BooleanExpression cursorLessThan(Long cursor) {
         if (cursor == null) {
             return null;
         }
         return inquiryMessage.id.lt(cursor);
+    }
+
+    /**
+     * 같은 방에 자신보다 뒤에 오는 메시지가 없는지 판별합니다.
+     */
+    private BooleanExpression hasNoLaterMessageInRoom() {
+        return JPAExpressions
+                .selectOne()
+                .from(latestMessage)
+                .where(
+                        latestMessage.roomId.eq(inquiryMessage.roomId),
+                        latestMessage.createdAt.gt(inquiryMessage.createdAt)
+                                .or(latestMessage.createdAt.eq(inquiryMessage.createdAt)
+                                        .and(latestMessage.id.gt(inquiryMessage.id)))
+                )
+                .notExists();
     }
 }

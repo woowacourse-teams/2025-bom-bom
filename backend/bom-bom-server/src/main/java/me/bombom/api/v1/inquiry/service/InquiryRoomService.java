@@ -7,9 +7,12 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.domain.InquiryStatus;
+import me.bombom.api.v1.inquiry.dto.InquiryMessageWithAdmin;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
+import me.bombom.api.v1.inquiry.dto.InquiryRoomWithAssignee;
 import me.bombom.api.v1.inquiry.dto.UnresolvedInquiryRoomCounts;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
+import me.bombom.api.v1.inquiry.dto.response.LastMessageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.inquiry.repository.InquiryCategoryRepository;
 import me.bombom.api.v1.inquiry.repository.InquiryMessageRepository;
@@ -38,20 +41,38 @@ public class InquiryRoomService {
                 : InquiryRoom.createGuestInquiryRoom(requester.guestId(), categoryId);
 
         InquiryRoom saved = inquiryRoomRepository.save(room);
-        return InquiryRoomResponse.of(saved, false);
+        return InquiryRoomResponse.ofUnassignedRoom(saved, false);
     }
 
     public Page<InquiryRoomResponse> getRooms(InquiryRequester requester, Pageable pageable) {
         validateRequester(requester);
 
-        Page<InquiryRoom> rooms = inquiryRoomRepository.findRoomsByRequester(
+        Page<InquiryRoomWithAssignee> rooms = inquiryRoomRepository.findRoomsByRequester(
                 requester.memberId(), requester.guestId(), pageable);
 
-        List<Long> roomIds = rooms.map(InquiryRoom::getId).toList();
+        List<Long> roomIds = rooms.map(row -> row.room().getId()).toList();
         Map<Long, Long> latestAdminMessageIdByRoomId = inquiryMessageRepository.findLatestAdminMessageIdsByRoomIds(
                 roomIds);
+        Map<Long, InquiryMessageWithAdmin> latestMessageByRoomId = inquiryMessageRepository.findLatestMessagesByRoomIds(
+                roomIds);
 
-        return rooms.map(room -> InquiryRoomResponse.of(room, hasUnreadMessage(room, latestAdminMessageIdByRoomId)));
+        return rooms.map(row -> InquiryRoomResponse.of(
+                row.room(),
+                hasUnreadMessage(row.room(), latestAdminMessageIdByRoomId),
+                row.assigneeNickname(),
+                toLastMessage(latestMessageByRoomId.get(row.room().getId()))
+        ));
+    }
+
+    public InquiryRoomResponse getRoom(Long roomId, InquiryRequester requester) {
+        validateRequester(requester);
+
+        InquiryRoomWithAssignee row = inquiryRoomRepository.findRoomWithAssigneeById(roomId)
+                .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
+                        .addContext("roomId", roomId));
+        validateOwnership(row.room(), requester);
+
+        return InquiryRoomResponse.of(row.room(), false, row.assigneeNickname());
     }
 
     public UnresolvedInquiryRoomCounts countUnresolvedRooms() {
@@ -67,22 +88,13 @@ public class InquiryRoomService {
         return InquiryUnreadStatusResponse.of(hasUnread);
     }
 
-    public InquiryRoomResponse getRoom(Long roomId, InquiryRequester requester) {
-        InquiryRoom room = getOwnedRoom(roomId, requester);
-        return InquiryRoomResponse.of(room, false);
-    }
-
     public InquiryRoom getOwnedRoom(Long roomId, InquiryRequester requester) {
         validateRequester(requester);
 
         InquiryRoom room = inquiryRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext("roomId", roomId));
-
-        if (!room.isOwnedBy(requester.memberId(), requester.guestId())) {
-            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
-                    .addContext("roomId", roomId);
-        }
+        validateOwnership(room, requester);
 
         return room;
     }
@@ -106,5 +118,19 @@ public class InquiryRoomService {
             return false;
         }
         return room.getLastReadMessageIdByUser() == null || latestAdminMessageId > room.getLastReadMessageIdByUser();
+    }
+
+    private LastMessageResponse toLastMessage(InquiryMessageWithAdmin latestMessage) {
+        if (latestMessage == null) {
+            return null;
+        }
+        return LastMessageResponse.of(latestMessage.message(), latestMessage.adminNickname());
+    }
+
+    private void validateOwnership(InquiryRoom room, InquiryRequester requester) {
+        if (!room.isOwnedBy(requester.memberId(), requester.guestId())) {
+            throw new CIllegalArgumentException(ErrorDetail.FORBIDDEN_RESOURCE)
+                    .addContext("roomId", room.getId());
+        }
     }
 }

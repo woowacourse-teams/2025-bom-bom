@@ -32,6 +32,8 @@ import me.bombom.api.v1.challenge.service.ChallengeCommentReplyService;
 import me.bombom.api.v1.challenge.service.ChallengeCommentService;
 import me.bombom.api.v1.coupon.domain.CouponIssue;
 import me.bombom.api.v1.coupon.repository.CouponIssueRepository;
+import me.bombom.api.v1.image.domain.ImageUploadBucketKey;
+import me.bombom.api.v1.image.repository.ImageUploadTokenBucketRepository;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.domain.MemberFcmToken;
 import me.bombom.api.v1.member.domain.MemberNotificationSetting;
@@ -88,6 +90,9 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private MemberReadTokenBucketRepository memberReadTokenBucketRepository;
+
+    @Autowired
+    private ImageUploadTokenBucketRepository imageUploadTokenBucketRepository;
 
     @Autowired
     private ArticleReadHistoryRepository articleReadHistoryRepository;
@@ -151,6 +156,8 @@ class WithdrawDataCleanupServiceTest {
                 .tokens(5)
                 .updatedAt(LocalDateTime.now())
                 .build());
+        imageUploadTokenBucketRepository.save(TestFixture.createImageUploadTokenBucket(
+                ImageUploadBucketKey.fromMemberId(memberId).value(), 5, LocalDateTime.now()));
         articleReadHistoryRepository.save(ArticleReadHistory.builder()
                 .memberId(memberId)
                 .articleId(1L)
@@ -233,6 +240,8 @@ class WithdrawDataCleanupServiceTest {
             softly.assertThat(challengeCommentLikeRepository.existsByParticipantIdAndCommentId(participantId, commentId))
                     .isFalse();
             softly.assertThat(memberReadTokenBucketRepository.findById(memberId)).isEmpty();
+            softly.assertThat(imageUploadTokenBucketRepository.findById(
+                    ImageUploadBucketKey.fromMemberId(memberId).value())).isEmpty();
             softly.assertThat(articleReadHistoryRepository.countByMemberId(memberId)).isZero();
             softly.assertThat(memberFcmTokenRepository.count()).isZero();
             softly.assertThat(articleArrivalNotificationRepository.count()).isZero();

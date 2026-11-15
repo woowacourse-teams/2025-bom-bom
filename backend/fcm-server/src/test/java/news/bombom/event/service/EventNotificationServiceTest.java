@@ -58,7 +58,7 @@ class EventNotificationServiceTest {
         EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.BEFORE_MINUTES, 30);
         
         when(eventService.getEvent(EVENT_ID)).thenReturn(event);
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap()))
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(NotificationResult.success("message-id-123"));
         when(scheduleRepository.save(any(EventNotificationSchedule.class))).thenReturn(schedule);
 
@@ -73,7 +73,8 @@ class EventNotificationServiceTest {
                 eq(EVENT_TOPIC),
                 eq(EVENT_NAME),
                 anyString(),
-                anyMap()
+                anyMap(),
+                eq(NotificationCategory.EVENT)
         );
         verify(scheduleRepository, times(1)).save(schedule);
     }
@@ -86,7 +87,7 @@ class EventNotificationServiceTest {
         EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.AT_START, null);
         
         when(eventService.getEvent(EVENT_ID)).thenReturn(event);
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap()))
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(NotificationResult.success("message-id-123"));
         when(scheduleRepository.save(any(EventNotificationSchedule.class))).thenReturn(schedule);
 
@@ -99,7 +100,8 @@ class EventNotificationServiceTest {
                 eq(EVENT_TOPIC),
                 eq(EVENT_NAME),
                 anyString(),
-                anyMap()
+                anyMap(),
+                eq(NotificationCategory.EVENT)
         );
         verify(scheduleRepository, times(1)).save(schedule);
     }
@@ -117,7 +119,7 @@ class EventNotificationServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("이벤트를 찾을 수 없습니다");
         
-        verify(fcmNotificationSender, never()).sendToTopic(anyString(), anyString(), anyString(), anyMap());
+        verify(fcmNotificationSender, never()).sendToTopic(anyString(), anyString(), anyString(), anyMap(), any());
     }
 
     @Test
@@ -128,7 +130,7 @@ class EventNotificationServiceTest {
         EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.AT_START, null);
         
         when(eventService.getEvent(EVENT_ID)).thenReturn(event);
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap()))
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(NotificationResult.failure("FCM 발송 실패"));
 
         // when & then
@@ -136,7 +138,7 @@ class EventNotificationServiceTest {
 
         // then
         assertThat(schedule.isSent()).isFalse();
-        verify(fcmNotificationSender, times(1)).sendToTopic(anyString(), anyString(), anyString(), anyMap());
+        verify(fcmNotificationSender, times(1)).sendToTopic(anyString(), anyString(), anyString(), anyMap(), any());
         verify(scheduleRepository, never()).save(any());
     }
 
@@ -148,7 +150,7 @@ class EventNotificationServiceTest {
         EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.BEFORE_MINUTES, 30);
         
         when(eventService.getEvent(EVENT_ID)).thenReturn(event);
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap()))
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(NotificationResult.success("message-id"));
 
         // when
@@ -159,7 +161,8 @@ class EventNotificationServiceTest {
                 eq(EVENT_TOPIC),
                 eq(EVENT_NAME),
                 anyString(),
-                anyMap()
+                anyMap(),
+                eq(NotificationCategory.EVENT)
         );
     }
 
@@ -171,7 +174,7 @@ class EventNotificationServiceTest {
         EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.AT_START, null);
         
         when(eventService.getEvent(EVENT_ID)).thenReturn(event);
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap()))
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(NotificationResult.success("message-id"));
 
         // when
@@ -182,7 +185,8 @@ class EventNotificationServiceTest {
                 eq(EVENT_TOPIC),
                 eq(EVENT_NAME),
                 anyString(),
-                anyMap()
+                anyMap(),
+                eq(NotificationCategory.EVENT)
         );
     }
 
@@ -194,7 +198,7 @@ class EventNotificationServiceTest {
         EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.BEFORE_MINUTES, 30);
         
         when(eventService.getEvent(EVENT_ID)).thenReturn(event);
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap()))
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(NotificationResult.success("message-id"));
 
         // when
@@ -212,7 +216,8 @@ class EventNotificationServiceTest {
                             && dataMap.containsKey("scheduleType")
                             && dataMap.get("eventId").equals(EVENT_ID.toString())
                             && dataMap.get("scheduleType").equals("BEFORE_MINUTES");
-                })
+                }),
+                any()
         );
     }
 

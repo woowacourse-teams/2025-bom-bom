@@ -39,7 +39,7 @@ public class EventNotificationService {
                 "notificationType", NotificationCategory.EVENT,
                 "scheduleType", schedule.getType().name()
         );
-        NotificationResult result = fcmNotificationSender.sendToTopic(EVENT_TOPIC, title, body, data);
+        NotificationResult result = fcmNotificationSender.sendToTopic(EVENT_TOPIC, title, body, data, NotificationCategory.EVENT);
         if (result.isSuccess()) {
             schedule.markAsSent();
             scheduleRepository.save(schedule);

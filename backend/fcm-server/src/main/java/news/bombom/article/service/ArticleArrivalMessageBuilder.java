@@ -4,6 +4,7 @@ import java.util.Map;
 import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
@@ -27,6 +28,7 @@ public class ArticleArrivalMessageBuilder implements NotificationMessageBuilder 
                 .title(article.getNewsletterName())
                 .content(article.getArticleTitle())
                 .type(NotificationType.FCM)
+                .category(NotificationCategory.ARTICLE)
                 .data(Map.of(
                         "articleId", String.valueOf(article.getArticleId()),
                         "notificationType", NotificationPayloadType.ARTICLE

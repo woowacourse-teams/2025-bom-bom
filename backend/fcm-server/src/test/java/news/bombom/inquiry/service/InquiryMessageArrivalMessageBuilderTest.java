@@ -8,6 +8,7 @@ import news.bombom.inquiry.domain.InquiryMessage;
 import news.bombom.inquiry.domain.InquiryMessageArrivalNotification;
 import news.bombom.inquiry.repository.InquiryMessageRepository;
 import news.bombom.notification.domain.MemberFcmToken;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.dto.NotificationMessage;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,7 @@ class InquiryMessageArrivalMessageBuilderTest {
         assertThat(result.getData())
                 .containsEntry("roomId", "10")
                 .containsEntry("notificationType", NotificationPayloadType.INQUIRY_MESSAGE_ARRIVAL);
+        assertThat(result.getCategory()).isEqualTo(NotificationCategory.INQUIRY_MESSAGE_ARRIVAL);
     }
 
     private InquiryMessageArrivalNotification createNotification() {

@@ -151,7 +151,7 @@ class NotificationServiceTest {
         // Given
         String topic = "test-topic";
         NotificationResult expectedResult = NotificationResult.success("test-message-id");
-        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap())).thenReturn(expectedResult);
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any())).thenReturn(expectedResult);
 
         // When
         NotificationResult result = notificationService.sendNotificationToTopic(topic, TEST_TITLE, TEST_BODY, TEST_ARTICLE_ID);
@@ -160,7 +160,7 @@ class NotificationServiceTest {
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getMessageId()).isEqualTo("test-message-id");
 
-        verify(fcmNotificationSender, times(1)).sendToTopic(eq(topic), eq(TEST_TITLE), eq(TEST_BODY), anyMap());
+        verify(fcmNotificationSender, times(1)).sendToTopic(eq(topic), eq(TEST_TITLE), eq(TEST_BODY), anyMap(), any());
     }
 
     @Test
@@ -173,7 +173,7 @@ class NotificationServiceTest {
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorMessage()).contains("토픽명이 유효하지 않습니다");
 
-        verify(fcmNotificationSender, never()).sendToTopic(anyString(), anyString(), anyString(), anyMap());
+        verify(fcmNotificationSender, never()).sendToTopic(anyString(), anyString(), anyString(), anyMap(), any());
     }
 
     @Test

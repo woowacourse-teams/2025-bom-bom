@@ -3,6 +3,7 @@ package news.bombom.notification.dto;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationType;
 
 /**
@@ -32,6 +33,11 @@ public class NotificationMessage {
     private final NotificationType type;
 
     /**
+     * 알림 카테고리 (FCM analytics label로 사용, null이면 라벨 미설정)
+     */
+    private final NotificationCategory category;
+
+    /**
      * 추가 데이터 (articleId, notificationType 등)
      */
     private final Map<String, Object> data;
@@ -48,12 +54,13 @@ public class NotificationMessage {
 
     @Builder
     public NotificationMessage(String recipient, String title, String content,
-                                NotificationType type, Map<String, Object> data,
-                                Integer priority, Long ttl) {
+                                NotificationType type, NotificationCategory category,
+                                Map<String, Object> data, Integer priority, Long ttl) {
         this.recipient = recipient;
         this.title = title;
         this.content = content;
         this.type = type;
+        this.category = category;
         this.data = data;
         this.priority = priority != null ? priority : 1;
         this.ttl = ttl != null ? ttl : 86400000L; // 24시간

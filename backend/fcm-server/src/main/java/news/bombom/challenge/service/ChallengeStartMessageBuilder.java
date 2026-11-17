@@ -4,6 +4,7 @@ import java.util.Map;
 import news.bombom.challenge.domain.ChallengeStartNotification;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
@@ -29,6 +30,7 @@ public class ChallengeStartMessageBuilder implements NotificationMessageBuilder 
                 .title(title)
                 .content(content)
                 .type(NotificationType.FCM)
+                .category(NotificationCategory.CHALLENGE_START)
                 .data(Map.of(
                         "challengeId", String.valueOf(startNotification.getChallengeId()),
                         "notificationType", NotificationPayloadType.CHALLENGE_START

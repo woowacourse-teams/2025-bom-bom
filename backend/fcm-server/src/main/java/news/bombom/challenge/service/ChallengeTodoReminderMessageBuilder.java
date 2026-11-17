@@ -8,6 +8,7 @@ import news.bombom.challenge.domain.ChallengeTodoReminderNotification;
 import news.bombom.challenge.service.ReminderMessageProperties.PhaseMessage;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
@@ -34,6 +35,7 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
                 .title(buildTitle(remind, params))
                 .content(buildBody(remind, params))
                 .type(NotificationType.FCM)
+                .category(NotificationCategory.CHALLENGE_TODO_REMINDER)
                 .data(Map.of(
                         "challengeId", String.valueOf(remind.getChallengeId()),
                         "notificationType", NotificationPayloadType.DEFAULT

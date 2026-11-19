@@ -277,22 +277,10 @@ class InquiryRoomServiceTest {
     }
 
     @Test
-    void 나중에_저장된_메시지의_생성시각이_더_빠르면_생성시각이_늦은_메시지가_마지막_메시지다() {
+    void 생성시각과_관계없이_가장_나중에_저장된_메시지가_마지막_메시지다() {
         InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         insertUserMessageAt(room.getId(), "먼저 저장된 메시지", "2026-11-03 12:00:00");
         insertUserMessageAt(room.getId(), "나중에 저장된 메시지", "2026-11-03 10:00:00");
-        InquiryRequester requester = new InquiryRequester(1L, null);
-
-        InquiryRoomResponse response = getFirstRoom(requester);
-
-        assertThat(response.lastMessage().content()).isEqualTo("먼저 저장된 메시지");
-    }
-
-    @Test
-    void 생성시각이_같으면_나중에_저장된_메시지가_마지막_메시지다() {
-        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
-        insertUserMessageAt(room.getId(), "먼저 저장된 메시지", "2026-11-03 12:00:00");
-        insertUserMessageAt(room.getId(), "나중에 저장된 메시지", "2026-11-03 12:00:00");
         InquiryRequester requester = new InquiryRequester(1L, null);
 
         InquiryRoomResponse response = getFirstRoom(requester);
@@ -301,18 +289,21 @@ class InquiryRoomServiceTest {
     }
 
     @Test
-    void 생성시각이_저장순서와_어긋나도_정렬된_방의_마지막_메시지가_일치한다() {
-        InquiryRoom roomWithEarlierMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
-        InquiryRoom roomWithLaterMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
-        insertUserMessageAt(roomWithLaterMessage.getId(), "먼저 저장되었지만 시각은 나중", "2026-11-03 12:00:00");
-        insertUserMessageAt(roomWithEarlierMessage.getId(), "나중에 저장되었지만 시각은 먼저", "2026-11-03 10:00:00");
+    void 방은_마지막_메시지의_생성시각으로_정렬되고_미리보기와_일치한다() {
+        InquiryRoom invertedRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom normalRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        // invertedRoom: 생성시각이 가장 늦은 메시지(12:00)와 마지막으로 저장된 메시지(10:00)가 다르다
+        insertUserMessageAt(invertedRoom.getId(), "시각은 가장 늦은 메시지", "2026-11-03 12:00:00");
+        insertUserMessageAt(normalRoom.getId(), "다른 방 메시지", "2026-11-03 11:00:00");
+        insertUserMessageAt(invertedRoom.getId(), "마지막으로 저장된 메시지", "2026-11-03 10:00:00");
         InquiryRequester requester = new InquiryRequester(1L, null);
 
         List<InquiryRoomResponse> rooms = getRooms(requester);
 
         assertSoftly(softly -> {
-            softly.assertThat(rooms.get(0).id()).isEqualTo(roomWithLaterMessage.getId());
-            softly.assertThat(rooms.get(0).lastMessage().content()).isEqualTo("먼저 저장되었지만 시각은 나중");
+            softly.assertThat(rooms).extracting(InquiryRoomResponse::id)
+                    .containsExactly(normalRoom.getId(), invertedRoom.getId());
+            softly.assertThat(rooms.get(1).lastMessage().content()).isEqualTo("마지막으로 저장된 메시지");
         });
     }
 

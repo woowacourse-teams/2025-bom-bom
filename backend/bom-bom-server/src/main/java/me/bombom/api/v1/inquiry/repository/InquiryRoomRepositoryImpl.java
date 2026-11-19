@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.inquiry.domain.InquirySenderType;
+import me.bombom.api.v1.inquiry.domain.QInquiryMessage;
 import me.bombom.api.v1.inquiry.dto.InquiryRoomWithAssignee;
 import me.bombom.api.v1.inquiry.dto.QInquiryRoomWithAssignee;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,8 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
+
+    private static final QInquiryMessage latestMessage = new QInquiryMessage("latestMessage");
 
     private final JPAQueryFactory jpaQueryFactory;
 
@@ -84,15 +87,20 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
     }
 
     /**
-     * 방의 마지막 메시지 시각입니다. 메시지가 없는 방은 방 생성 시각으로 대체합니다.
+     * 방의 마지막 메시지(id가 가장 큰 메시지)의 생성 시각입니다. 메시지가 없는 방은 방 생성 시각으로 대체합니다.
      */
     private ComparableExpressionBase<LocalDateTime> latestMessageCreatedAt() {
         return new Coalesce<>(
                 LocalDateTime.class,
                 JPAExpressions
-                        .select(inquiryMessage.createdAt.max())
-                        .from(inquiryMessage)
-                        .where(inquiryMessage.roomId.eq(inquiryRoom.id)),
+                        .select(latestMessage.createdAt)
+                        .from(latestMessage)
+                        .where(latestMessage.id.eq(
+                                JPAExpressions
+                                        .select(inquiryMessage.id.max())
+                                        .from(inquiryMessage)
+                                        .where(inquiryMessage.roomId.eq(inquiryRoom.id))
+                        )),
                 inquiryRoom.createdAt)
                 .getValue();
     }

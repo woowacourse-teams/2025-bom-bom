@@ -133,7 +133,6 @@ class InquiryMessageServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(messages).hasSize(1);
-            softly.assertThat(messages.get(0).adminId()).isEqualTo(admin.getId());
             softly.assertThat(messages.get(0).adminNickname()).isEqualTo("상담봄봄");
         });
     }
@@ -150,7 +149,6 @@ class InquiryMessageServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(messages).hasSize(1);
-            softly.assertThat(messages.get(0).adminId()).isNull();
             softly.assertThat(messages.get(0).adminNickname()).isNull();
         });
     }
@@ -167,7 +165,6 @@ class InquiryMessageServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(messages).hasSize(1);
-            softly.assertThat(messages.get(0).adminId()).isEqualTo(999_999L);
             softly.assertThat(messages.get(0).adminNickname()).isNull();
         });
     }

@@ -11,4 +11,8 @@ public record ErrorResponse(
     public static ErrorResponse from(ErrorDetail errorDetail){
         return new ErrorResponse(errorDetail.getStatus(), errorDetail.getCode(), errorDetail.getMessage());
     }
+
+    public static ErrorResponse from(ErrorDetail errorDetail, String message){
+        return new ErrorResponse(errorDetail.getStatus(), errorDetail.getCode(), message);
+    }
 }

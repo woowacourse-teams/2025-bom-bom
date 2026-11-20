@@ -33,6 +33,7 @@ import me.bombom.api.v1.highlight.domain.Highlight;
 import me.bombom.api.v1.highlight.domain.HighlightLocation;
 import me.bombom.api.v1.highlight.dto.request.HighlightCreateRequest;
 import me.bombom.api.v1.highlight.dto.request.HighlightLocationRequest;
+import me.bombom.api.v1.image.domain.ImageUploadTokenBucket;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.enums.Gender;
 import me.bombom.api.v1.newsletter.domain.Category;
@@ -938,6 +939,18 @@ public final class TestFixture {
     public static MemberReadTokenBucket createMemberReadTokenBucket(Long memberId, double tokens, LocalDateTime updatedAt) {
         return MemberReadTokenBucket.builder()
                 .memberId(memberId)
+                .tokens(tokens)
+                .updatedAt(updatedAt)
+                .build();
+    }
+
+    public static ImageUploadTokenBucket createImageUploadTokenBucket(
+            String bucketKey,
+            double tokens,
+            LocalDateTime updatedAt
+    ) {
+        return ImageUploadTokenBucket.builder()
+                .bucketKey(bucketKey)
                 .tokens(tokens)
                 .updatedAt(updatedAt)
                 .build();

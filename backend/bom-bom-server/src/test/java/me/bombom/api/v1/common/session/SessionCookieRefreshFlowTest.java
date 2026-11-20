@@ -1,6 +1,7 @@
 package me.bombom.api.v1.common.session;
 
 import static me.bombom.support.acceptance.AcceptanceTestHeaders.MEMBER_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import io.restassured.RestAssured;
@@ -19,7 +20,7 @@ import org.springframework.session.SessionRepository;
         "acceptance/common/member.json",
         "acceptance/member/member.json"
 })
-class SessionCookieRefreshAcceptanceTest {
+class SessionCookieRefreshFlowTest {
 
     private static final long MEMBER_ID_VALUE = 1L;
 
@@ -60,8 +61,8 @@ class SessionCookieRefreshAcceptanceTest {
 
         // then
         // 인증 정보가 없는 세션 쿠키는 기존 동작대로 만료(Max-Age=0)될 수 있으므로, 세션 ID 재발급 여부만 본다.
-        assertSoftly(softly -> softly.assertThat(response.headers().getValues(HttpHeaders.SET_COOKIE))
-                .noneMatch(setCookie -> setCookie.startsWith(sessionCookieName + "=" + encodedSessionId)));
+        assertThat(response.headers().getValues(HttpHeaders.SET_COOKIE))
+                .noneMatch(setCookie -> setCookie.startsWith(sessionCookieName + "=" + encodedSessionId));
     }
 
     private Response requestMyProfile(String encodedSessionId) {

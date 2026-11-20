@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.time.Clock;
 import java.time.Duration;
+import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * 그래서 매일 쓰는 사용자도 로그인 7일 뒤 로그아웃된다. 쿠키를 다시 받을 때마다 7일 상한이 새로 시작되므로,
  * 7일 안에 다시 쓰는 사용자는 로그인이 유지된다.
  */
+@RequiredArgsConstructor
 public class SessionCookieRefreshInterceptor implements HandlerInterceptor {
 
     public static final String REFRESHED_AT_ATTRIBUTE = "sessionCookieRefreshedAt";
@@ -28,16 +30,6 @@ public class SessionCookieRefreshInterceptor implements HandlerInterceptor {
     private final CookieSerializer cookieSerializer;
     private final Clock clock;
     private final Duration refreshInterval;
-
-    public SessionCookieRefreshInterceptor(
-            CookieSerializer cookieSerializer,
-            Clock clock,
-            Duration refreshInterval
-    ) {
-        this.cookieSerializer = cookieSerializer;
-        this.clock = clock;
-        this.refreshInterval = refreshInterval;
-    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

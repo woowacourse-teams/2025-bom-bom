@@ -2,18 +2,27 @@ package me.bombom.api.v1.common.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @Value("${spring.servlet.multipart.max-file-size:1MB}")
+    private DataSize maxFileSize;
+
+    @Value("${spring.servlet.multipart.max-request-size:1MB}")
+    private DataSize maxRequestSize;
 
     @ExceptionHandler(CIllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(CIllegalArgumentException e) {
@@ -101,6 +110,17 @@ public class GlobalExceptionHandler {
         log.info("Request body parse error: {}", e.getMessage());
         return ResponseEntity.status(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION.getStatus())
                 .body(ErrorResponse.from(ErrorDetail.INVALID_REQUEST_PARAMETER_VALIDATION));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        String message = ErrorDetail.MULTIPART_SIZE_EXCEEDED.getMessage()
+                + " (한 장 제한: %dMB, 전체 제한: %dMB)".formatted(maxFileSize.toMegabytes(), maxRequestSize.toMegabytes());
+
+        log.info("multipart size limit exceeded: maxFileSize={}, maxRequestSize={}, message={}",
+                maxFileSize, maxRequestSize, e.getMessage());
+        return ResponseEntity.status(ErrorDetail.MULTIPART_SIZE_EXCEEDED.getStatus())
+                .body(ErrorResponse.from(ErrorDetail.MULTIPART_SIZE_EXCEEDED, message));
     }
 
     @ExceptionHandler(Exception.class)

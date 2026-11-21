@@ -8,6 +8,9 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 import me.bombom.support.acceptance.AcceptanceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,7 @@ import org.springframework.session.SessionRepository;
 class SessionCookieRefreshFlowTest {
 
     private static final long MEMBER_ID_VALUE = 1L;
+    private static final int CONCURRENT_REQUEST_COUNT = 8;
 
     @Autowired
     private SessionRepository<? extends Session> sessionRepository;
@@ -31,7 +35,7 @@ class SessionCookieRefreshFlowTest {
     private String sessionCookieName;
 
     @Test
-    void 로그인된_회원의_첫_요청에는_같은_세션_ID로_세션_쿠키를_다시_내려보내고_다음_요청에는_보내지_않는다() {
+    void 로그인된_회원의_요청마다_같은_세션_ID로_세션_쿠키를_다시_내려보낸다() {
         // given
         String encodedSessionId = encode(createSession(sessionRepository));
 
@@ -41,10 +45,30 @@ class SessionCookieRefreshFlowTest {
 
         // then
         assertSoftly(softly -> {
+            softly.assertThat(firstResponse.statusCode()).isEqualTo(200);
+            softly.assertThat(secondResponse.statusCode()).isEqualTo(200);
             softly.assertThat(firstResponse.header(HttpHeaders.SET_COOKIE))
                     .startsWith(sessionCookieName + "=" + encodedSessionId + ";");
-            softly.assertThat(secondResponse.header(HttpHeaders.SET_COOKIE)).isNull();
+            softly.assertThat(secondResponse.header(HttpHeaders.SET_COOKIE))
+                    .startsWith(sessionCookieName + "=" + encodedSessionId + ";");
         });
+    }
+
+    @Test
+    void 같은_세션으로_동시에_들어온_요청이_모두_성공한다() {
+        // given
+        String encodedSessionId = encode(createSession(sessionRepository));
+
+        // when
+        List<Integer> statusCodes = IntStream.range(0, CONCURRENT_REQUEST_COUNT)
+                .mapToObj(index -> CompletableFuture.supplyAsync(() -> requestMyProfile(encodedSessionId).statusCode()))
+                .toList()
+                .stream()
+                .map(CompletableFuture::join)
+                .toList();
+
+        // then
+        assertThat(statusCodes).containsOnly(200);
     }
 
     @Test
@@ -70,7 +94,7 @@ class SessionCookieRefreshFlowTest {
                 .header(MEMBER_ID, MEMBER_ID_VALUE)
                 .cookie(sessionCookieName, encodedSessionId)
                 .when().get("/api/v1/members/me/profile")
-                .then().statusCode(200)
+                .then()
                 .extract().response();
     }
 

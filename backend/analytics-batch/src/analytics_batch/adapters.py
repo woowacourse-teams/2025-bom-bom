@@ -197,16 +197,34 @@ class BigQuerySink:
         self._query(self.core_ddl(spec), None)
         self._query(self.merge_sql(spec), run_id)
 
+    def replace_run(self, spec: TableSpec, run_id: str) -> None:
+        self._query(self.replace_sql(spec), run_id)
+
     # --- SQL ---
 
     def core_ddl(self, spec: TableSpec) -> str:
         columns = ",\n  ".join(f"{c.name} {c.bq_type}" for c in spec.columns)
         batch = ",\n  ".join(f"{name} {bq_type}" for name, bq_type in BATCH_COLUMNS)
-        cluster = f"\nCLUSTER BY {', '.join(spec.cluster_columns)}" if spec.cluster_columns else ""
         return (
-            f"CREATE TABLE IF NOT EXISTS `{self._project}.{self._core}.{spec.name}` (\n  {columns},\n  {batch}\n)\n"
-            f"PARTITION BY DATE({spec.partition_column}){cluster}"
+            f"CREATE TABLE IF NOT EXISTS `{self._project}.{self._core}.{spec.name}` (\n  {columns},\n  {batch}\n)"
+            f"{self._layout(spec)}"
         )
+
+    def replace_sql(self, spec: TableSpec) -> str:
+        """core를 한 실행 분량으로 통째로 바꾼다. 한 문장이라 중간 상태가 보이지 않는다."""
+        names = ", ".join(spec.column_names + [name for name, _ in BATCH_COLUMNS])
+        return (
+            f"CREATE OR REPLACE TABLE `{self._project}.{self._core}.{spec.name}`"
+            f"{self._layout(spec)}\nAS\n"
+            f"SELECT {names} FROM `{self._project}.{self._raw}.{spec.name}`\n"
+            f"WHERE _run_id = @run_id"
+        )
+
+    @staticmethod
+    def _layout(spec: TableSpec) -> str:
+        partition = f"\nPARTITION BY DATE({spec.partition_column})" if spec.partition_column else ""
+        cluster = f"\nCLUSTER BY {', '.join(spec.cluster_columns)}" if spec.cluster_columns else ""
+        return f"{partition}{cluster}"
 
     def merge_sql(self, spec: TableSpec) -> str:
         names = spec.column_names + [name for name, _ in BATCH_COLUMNS]

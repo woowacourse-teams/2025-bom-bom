@@ -67,6 +67,11 @@ class FakeSink:
             if row["_run_id"] == run_id:
                 self.core[row["id"]] = row
 
+    def replace_run(self, spec, run_id):
+        if self.fail_merge:
+            raise RuntimeError("replace failed")
+        self.core = {row["id"]: row for row in self.raw if row["_run_id"] == run_id}
+
 
 def make_rows(first, last):
     return [
@@ -94,10 +99,10 @@ class Clock:
         return self.value
 
 
-def run(source, store, sink, settings, clock=None):
+def run(source, store, sink, settings, clock=None, spec=SPEC):
     clock = clock or Clock()
     return core.run(
-        SPEC,
+        spec,
         source,
         store,
         sink,
@@ -244,3 +249,111 @@ def test_row_count_mismatch_blocks_checkpoint():
 
     assert store.get_json("state/article_read_history.json") is None
     assert not sink.core
+
+
+# --- 전체 교체(snapshot) ---
+
+
+def make_members(ids):
+    return [{"id": i, "provider": "google", "created_at": datetime(2026, 11, 1, 0, 0, 0)} for i in ids]
+
+
+def test_snapshot_replaces_core_and_reflects_updates_and_deletes():
+    source, store, sink = FakeSource(make_members(range(1, 31))), FakeStore(), FakeSink()
+
+    first = run(source, store, sink, SMALL, spec=core.MEMBER)
+    assert first.rows == 30 and sorted(sink.core) == list(range(1, 31))
+
+    rows = make_members([i for i in range(1, 34) if i != 7])  # 7번 탈퇴, 31~33 가입
+    rows[0]["provider"] = "apple"  # 1번 값 변경
+    source.rows = rows
+    calls_before = len(source.calls)
+    second = run(source, store, sink, SMALL, spec=core.MEMBER)
+
+    assert second.rows == 32
+    assert 7 not in sink.core and 33 in sink.core and len(sink.core) == 32
+    assert sink.core[1]["provider"] == "apple"
+    assert source.calls[calls_before] == (0, 10)  # 두 번째도 처음부터 읽는다
+    assert len(sink.raw) == 30 + 32  # raw에는 날짜별 전체본이 쌓인다
+    assert store.get_json("state/member.json")["rows"] == 32
+    assert store.get_json("state/member.pending.json") is None
+
+
+def test_snapshot_that_hits_a_limit_fails_without_touching_core():
+    source, store, sink = FakeSource(make_members(range(1, 21))), FakeStore(), FakeSink()
+    run(source, store, sink, SMALL, spec=core.MEMBER)
+
+    source.rows = make_members(range(1, 101))
+    capped = core.Settings(chunk_size=10, sleep_seconds=0, max_rows_per_run=30)
+    with pytest.raises(core.SnapshotIncomplete):
+        run(source, store, sink, capped, spec=core.MEMBER)
+
+    assert sorted(sink.core) == list(range(1, 21))  # 일부만 읽은 것으로 바꾸지 않는다
+    assert len(sink.raw) == 20
+
+
+def test_snapshot_of_empty_source_keeps_core():
+    source, store, sink = FakeSource(make_members(range(1, 6))), FakeStore(), FakeSink()
+    run(source, store, sink, SMALL, spec=core.MEMBER)
+
+    source.rows = []
+    result = run(source, store, sink, SMALL, spec=core.MEMBER)
+
+    assert result.rows == 0 and result.run_id is None
+    assert sorted(sink.core) == [1, 2, 3, 4, 5]
+
+
+def test_snapshot_failure_keeps_previous_core_and_next_run_recovers():
+    source, store, sink = FakeSource(make_members(range(1, 6))), FakeStore(), FakeSink()
+    run(source, store, sink, SMALL, spec=core.MEMBER)
+
+    source.rows = make_members(range(1, 9))
+    sink.fail_merge = True
+    with pytest.raises(RuntimeError):
+        run(source, store, sink, SMALL, spec=core.MEMBER)
+    assert sorted(sink.core) == [1, 2, 3, 4, 5]
+
+    sink.fail_merge = False
+    run(source, store, sink, SMALL, spec=core.MEMBER)
+    assert sorted(sink.core) == list(range(1, 9))
+
+
+def test_table_chunk_size_overrides_settings():
+    rows = [
+        {"id": i, "member_id": 1, "newsletter_id": 2, "arrived_date_time": datetime(2026, 11, 1),
+         "expected_read_time": 3, "created_at": datetime(2026, 11, 1)}
+        for i in range(1, 1201)
+    ]
+    source, store, sink = FakeSource(rows), FakeStore(), FakeSink()
+    naps = []
+
+    core.run(core.ARTICLE, source, store, sink, core.Settings(), sleep=naps.append)
+
+    assert all(limit == 500 for _, limit in source.calls)
+    assert naps == [0.3, 0.3]
+    assert len(sink.core) == 1200
+
+
+def test_table_row_cap_applies_only_when_lower_than_settings():
+    rows = [
+        {"id": i, "member_id": 1, "newsletter_id": 2, "arrived_date_time": datetime(2026, 11, 1),
+         "expected_read_time": 3, "created_at": datetime(2026, 11, 1)}
+        for i in range(1, 25_001)
+    ]
+    quiet = dict(now=lambda: datetime(2026, 11, 19, 16, 0, 0, tzinfo=timezone.utc), sleep=lambda s: None)
+
+    by_table = core.run(core.ARTICLE, FakeSource(rows), FakeStore(), FakeSink(), core.Settings(), **quiet)
+    by_event = core.run(
+        core.ARTICLE, FakeSource(rows), FakeStore(), FakeSink(), core.Settings(max_rows_per_run=1000), **quiet
+    )
+
+    assert by_table.rows == 20_000 and by_table.stop_reason == "max_rows_per_run"
+    assert by_event.rows == 1000
+
+
+def test_specs_leave_out_personal_and_body_columns():
+    forbidden = {"email", "nickname", "birth_date", "gender", "age_group", "profile_image_url",
+                 "provider_id", "contents", "contents_text", "title", "unsubscribe_url"}
+    for spec in core.TABLES.values():
+        assert not forbidden & set(spec.column_names), spec.name
+        assert spec.key in spec.column_names

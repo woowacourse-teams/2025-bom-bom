@@ -12,6 +12,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryMessage;
 import me.bombom.api.v1.inquiry.domain.InquiryMessageImage;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
+import me.bombom.api.v1.inquiry.dto.InquiryMessageWithAdmin;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
 import me.bombom.api.v1.inquiry.dto.response.InquiryMessagePageResponse;
@@ -48,7 +49,7 @@ public class InquiryMessageService {
         applicationEventPublisher.publishEvent(
                 new InquiryMessageSentEvent(message.getContent(), room.getAssigneeId()));
 
-        return InquiryMessageResponse.of(message, images);
+        return InquiryMessageResponse.ofUserMessage(message, images);
     }
 
     @Transactional
@@ -57,15 +58,15 @@ public class InquiryMessageService {
     ) {
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
-        List<InquiryMessage> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor, size + 1);
+        List<InquiryMessageWithAdmin> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor, size + 1);
         boolean hasNext = messages.size() > size;
-        List<InquiryMessage> pageMessages = hasNext ? messages.subList(0, size) : messages;
+        List<InquiryMessageWithAdmin> pageMessages = hasNext ? messages.subList(0, size) : messages;
 
         if (cursor == null && !pageMessages.isEmpty()) {
-            room.updateLastReadMessageIdByUser(pageMessages.get(0).getId());
+            room.updateLastReadMessageIdByUser(pageMessages.get(0).message().getId());
         }
 
-        List<Long> messageIds = pageMessages.stream().map(InquiryMessage::getId).toList();
+        List<Long> messageIds = pageMessages.stream().map(row -> row.message().getId()).toList();
         List<InquiryMessageImage> images = inquiryMessageImageRepository.findByMessageIdInOrderBySortOrderAsc(
                 messageIds);
         Map<Long, List<InquiryMessageImage>> imagesByMessageId = images.stream()

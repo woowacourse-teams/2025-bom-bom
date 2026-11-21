@@ -1,16 +1,12 @@
 package me.bombom.api.v1.common.session;
 
-import static me.bombom.api.v1.common.session.SessionCookieRefreshInterceptor.REFRESHED_AT_ATTRIBUTE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.mock;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import me.bombom.api.v1.auth.dto.CustomOAuth2User;
@@ -33,8 +29,6 @@ class SessionCookieRefreshInterceptorTest {
     private static final String COOKIE_NAME = "JSESSIONID_TEST";
     private static final String COOKIE_DOMAIN = "example.com";
     private static final int COOKIE_MAX_AGE_SECONDS = 10_368_010;
-    private static final Instant NOW = Instant.parse("2026-11-21T00:00:00Z");
-    private static final Duration REFRESH_INTERVAL = Duration.ofDays(1);
 
     private SessionCookieRefreshInterceptor interceptor;
     private MockHttpServletRequest request;
@@ -50,11 +44,7 @@ class SessionCookieRefreshInterceptorTest {
         cookieSerializer.setUseSecureCookie(true);
         cookieSerializer.setSameSite("None");
 
-        interceptor = new SessionCookieRefreshInterceptor(
-                cookieSerializer,
-                Clock.fixed(NOW, ZoneId.of("Asia/Seoul")),
-                REFRESH_INTERVAL
-        );
+        interceptor = new SessionCookieRefreshInterceptor(cookieSerializer);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         session = new MockHttpSession(null, "session-id-1");
@@ -67,7 +57,7 @@ class SessionCookieRefreshInterceptorTest {
     }
 
     @Test
-    void 로그인된_요청에서_재발급한_적이_없으면_같은_세션_ID로_쿠키를_다시_내려보낸다() {
+    void 로그인된_요청이면_같은_세션_ID로_쿠키를_다시_내려보낸다() {
         // given
         setLoggedInAuthentication(mock(Member.class));
 
@@ -82,41 +72,19 @@ class SessionCookieRefreshInterceptorTest {
             softly.assertThat(setCookie).contains("Max-Age=" + COOKIE_MAX_AGE_SECONDS);
             softly.assertThat(setCookie).contains("Domain=" + COOKIE_DOMAIN);
             softly.assertThat(setCookie).contains("Secure", "HttpOnly", "SameSite=None");
-            softly.assertThat(session.getAttribute(REFRESHED_AT_ATTRIBUTE)).isEqualTo(NOW.toEpochMilli());
         });
     }
 
     @Test
-    void 재발급_간격이_지나지_않았으면_쿠키를_내려보내지_않는다() {
+    void 세션에_속성을_저장하지_않는다() {
         // given
         setLoggedInAuthentication(mock(Member.class));
-        long refreshedAt = NOW.minus(Duration.ofHours(23)).toEpochMilli();
-        session.setAttribute(REFRESHED_AT_ATTRIBUTE, refreshedAt);
 
         // when
         interceptor.preHandle(request, response, new Object());
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isNull();
-            softly.assertThat(session.getAttribute(REFRESHED_AT_ATTRIBUTE)).isEqualTo(refreshedAt);
-        });
-    }
-
-    @Test
-    void 재발급_간격이_지났으면_쿠키를_다시_내려보내고_시각을_갱신한다() {
-        // given
-        setLoggedInAuthentication(mock(Member.class));
-        session.setAttribute(REFRESHED_AT_ATTRIBUTE, NOW.minus(REFRESH_INTERVAL).toEpochMilli());
-
-        // when
-        interceptor.preHandle(request, response, new Object());
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).startsWith(COOKIE_NAME + "=");
-            softly.assertThat(session.getAttribute(REFRESHED_AT_ATTRIBUTE)).isEqualTo(NOW.toEpochMilli());
-        });
+        assertThat(Collections.list(session.getAttributeNames())).isEmpty();
     }
 
     @Test
@@ -132,10 +100,7 @@ class SessionCookieRefreshInterceptorTest {
         interceptor.preHandle(request, response, new Object());
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isNull();
-            softly.assertThat(session.getAttribute(REFRESHED_AT_ATTRIBUTE)).isNull();
-        });
+        assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isNull();
     }
 
     @Test

@@ -32,7 +32,7 @@ class InquiryMessageControllerTest {
         assertSoftly(softly -> {
             softly.assertThat(result.get("content")).isEqualTo("문의합니다");
             softly.assertThat(result.get("senderType")).isEqualTo("USER");
-            softly.assertThat(result.get("adminId")).isNull();
+            softly.assertThat(result).doesNotContainKey("adminId");
         });
     }
 

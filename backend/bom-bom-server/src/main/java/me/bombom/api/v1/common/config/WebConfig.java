@@ -1,8 +1,6 @@
 package me.bombom.api.v1.common.config;
 
 import jakarta.servlet.DispatcherType;
-import java.time.Clock;
-import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.log.MDCLoggingFilter;
@@ -23,10 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private static final Duration SESSION_COOKIE_REFRESH_INTERVAL = Duration.ofDays(1);
-
     private final CookieSerializer cookieSerializer;
-    private final Clock clock;
 
     @Value("${server.servlet.session.cookie.name:JSESSIONID_PROD}")
     private String sessionCookieName;
@@ -46,11 +41,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new SessionCookieRefreshInterceptor(
-                cookieSerializer,
-                clock,
-                SESSION_COOKIE_REFRESH_INTERVAL
-        ));
+        registry.addInterceptor(new SessionCookieRefreshInterceptor(cookieSerializer));
     }
 
     @Override

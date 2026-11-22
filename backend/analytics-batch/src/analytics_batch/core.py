@@ -170,9 +170,31 @@ WITHDRAWN_MEMBER = TableSpec(
     mode=SNAPSHOT,
 )
 
+# 가입 직후 고른 가입 경로(BOM-1319). 기타를 골랐을 때의 직접 입력(detail)은 자유 입력이라 가져오지 않는다.
+MEMBER_SIGNUP_SOURCE = TableSpec(
+    name="member_signup_source",
+    key="id",
+    columns=(
+        Column("id", "INT64"),
+        Column("member_id", "INT64"),
+        Column("source", "STRING"),
+        Column("created_at", "DATETIME"),
+    ),
+    mode=SNAPSHOT,
+)
+
 TABLES = {
     spec.name: spec
-    for spec in (ARTICLE_READ_HISTORY, ARTICLE, MEMBER, SUBSCRIBE, NEWSLETTER, CATEGORY, WITHDRAWN_MEMBER)
+    for spec in (
+        ARTICLE_READ_HISTORY,
+        ARTICLE,
+        MEMBER,
+        SUBSCRIBE,
+        NEWSLETTER,
+        CATEGORY,
+        WITHDRAWN_MEMBER,
+        MEMBER_SIGNUP_SOURCE,
+    )
 }
 
 

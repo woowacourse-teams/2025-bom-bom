@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.signupsource.dto.request.SaveSignupSourceRequest;
-import me.bombom.api.v1.signupsource.dto.response.SignupRecommendationsResponse;
 import me.bombom.api.v1.signupsource.dto.response.SignupSourceStatusResponse;
-import me.bombom.api.v1.signupsource.service.SignupRecommendationService;
 import me.bombom.api.v1.signupsource.service.SignupSourceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,31 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/members/me/signup-source")
 public class SignupSourceController implements SignupSourceControllerApi {
 
     private final SignupSourceService signupSourceService;
-    private final SignupRecommendationService signupRecommendationService;
 
     @Override
-    @GetMapping("/members/me/signup-source")
+    @GetMapping
     public SignupSourceStatusResponse getSignupSourceStatus(@LoginMember Member member) {
         return signupSourceService.getStatus(member);
     }
 
     @Override
-    @PostMapping("/members/me/signup-source")
+    @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void saveSignupSource(
             @LoginMember Member member,
             @Valid @RequestBody SaveSignupSourceRequest request
     ) {
         signupSourceService.save(member, request);
-    }
-
-    @Override
-    @GetMapping("/newsletters/signup-recommendations")
-    public SignupRecommendationsResponse getSignupRecommendations() {
-        return signupRecommendationService.getRecommendations();
     }
 }

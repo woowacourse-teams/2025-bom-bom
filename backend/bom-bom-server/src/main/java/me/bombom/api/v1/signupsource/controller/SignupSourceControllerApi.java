@@ -9,11 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.signupsource.dto.request.SaveSignupSourceRequest;
-import me.bombom.api.v1.signupsource.dto.response.SignupRecommendationsResponse;
 import me.bombom.api.v1.signupsource.dto.response.SignupSourceStatusResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "SignupSource", description = "가입 경로 질문과 첫 구독 추천 API")
+@Tag(name = "SignupSource", description = "가입 경로 질문 API")
 public interface SignupSourceControllerApi {
 
     @Operation(
@@ -39,13 +38,4 @@ public interface SignupSourceControllerApi {
             @Parameter(hidden = true) Member member,
             @Valid @RequestBody SaveSignupSourceRequest request
     );
-
-    @Operation(
-            summary = "가입 직후 첫 구독 추천 목록 조회",
-            description = "추천 순서대로 정렬한 뉴스레터와, 추천이 많은 카테고리 순서를 반환합니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공")
-    })
-    SignupRecommendationsResponse getSignupRecommendations();
 }

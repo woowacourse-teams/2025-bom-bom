@@ -1,6 +1,7 @@
 package me.bombom.api.v1.common;
 
 import java.time.Instant;
+import java.time.Year;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,20 @@ public class DiscordWebhookNotifier {
                                 Map.of("name", "👤 멤버 ID", "value", String.valueOf(event.memberId()), "inline", true),
                                 Map.of("name", "📰 아티클 ID", "value", String.valueOf(event.articleId()), "inline", true),
                                 Map.of("name", "🕒 읽은 시각", "value", String.valueOf(event.readAt()))
+                        ),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(operationErrorWebhookUrl, body);
+    }
+
+    public void sendHolidaySyncErrorNotification(Year year, Exception exception) {
+        String message = exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage();
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of("title", withEnvironmentPrefix("🚨 공휴일 동기화 실패"),
+                        "description", message,
+                        "color", 0xE74C3C,
+                        "fields", List.of(
+                                Map.of("name", "📅 대상 연도", "value", year.toString(), "inline", true)
                         ),
                         "timestamp", Instant.now().toString())));
 

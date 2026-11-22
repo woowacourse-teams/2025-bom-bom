@@ -1,21 +1,17 @@
 package me.bombom.api.v1.signupsource.service;
 
 import java.time.LocalDateTime;
-import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
-import me.bombom.api.v1.signupsource.domain.MemberSignupSource;
 import me.bombom.api.v1.signupsource.domain.SignupSource;
 import me.bombom.api.v1.signupsource.dto.request.SaveSignupSourceRequest;
 import me.bombom.api.v1.signupsource.dto.response.SignupSourceStatusResponse;
 import me.bombom.api.v1.signupsource.repository.MemberSignupSourceRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class SignupSourceService {
@@ -43,20 +39,15 @@ public class SignupSourceService {
     @Transactional
     public void save(Member member, SaveSignupSourceRequest request) {
         String detail = normalizeDetail(request);
-        if (memberSignupSourceRepository.existsByMemberId(member.getId())) {
-            return;
-        }
+        memberSignupSourceRepository.insertIfAbsent(member.getId(), request.source().name(), detail);
+    }
 
-        try {
-            memberSignupSourceRepository.saveAndFlush(MemberSignupSource.builder()
-                    .memberId(member.getId())
-                    .source(request.source())
-                    .detail(detail)
-                    .build());
-        } catch (DataIntegrityViolationException exception) {
-            // 같은 회원의 요청이 동시에 두 번 들어오면 먼저 저장한 값을 그대로 둔다.
-            log.info("가입 경로 중복 저장 요청 무시 memberId={}", member.getId());
-        }
+    /**
+     * 탈퇴하면 자유 입력인 직접 입력 경로만 지운다. 가입 경로 값은 유입 분석을 위해 남긴다.
+     */
+    @Transactional
+    public void clearDetailByMemberId(Long memberId) {
+        memberSignupSourceRepository.clearDetailByMemberId(memberId);
     }
 
     private String normalizeDetail(SaveSignupSourceRequest request) {

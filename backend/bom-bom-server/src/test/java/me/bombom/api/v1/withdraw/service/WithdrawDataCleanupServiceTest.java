@@ -47,6 +47,9 @@ import me.bombom.api.v1.reading.repository.MemberReadTokenBucketRepository;
 import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.repository.NewsletterSubscriptionCountRepository;
+import me.bombom.api.v1.signupsource.domain.MemberSignupSource;
+import me.bombom.api.v1.signupsource.domain.SignupSource;
+import me.bombom.api.v1.signupsource.repository.MemberSignupSourceRepository;
 import me.bombom.api.v1.subscribe.repository.SubscribeRepository;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -123,6 +126,33 @@ class WithdrawDataCleanupServiceTest {
 
     @Autowired
     private NewsletterSubscriptionCountRepository newsletterSubscriptionCountRepository;
+
+    @Autowired
+    private MemberSignupSourceRepository memberSignupSourceRepository;
+
+    @Test
+    void 탈퇴하면_가입_경로_직접_입력만_지우고_가입_경로는_남긴다() {
+        // given
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        memberSignupSourceRepository.save(MemberSignupSource.builder()
+                .memberId(member.getId())
+                .source(SignupSource.ETC)
+                .detail("학교 커뮤니티")
+                .build());
+
+        // when
+        withdrawDataCleanupService.cleanupByMemberId(member.getId());
+
+        // then
+        List<MemberSignupSource> signupSources = memberSignupSourceRepository.findAll().stream()
+                .filter(signupSource -> signupSource.getMemberId().equals(member.getId()))
+                .toList();
+        assertSoftly(softly -> {
+            softly.assertThat(signupSources).hasSize(1);
+            softly.assertThat(signupSources.getFirst().getSource()).isEqualTo(SignupSource.ETC);
+            softly.assertThat(signupSources.getFirst().getDetail()).isNull();
+        });
+    }
 
     @Test
     void 탈퇴_회원의_모든_도메인_데이터가_삭제된다() {

@@ -126,12 +126,12 @@ class SignupSourceControllerTest {
     }
 
     @Test
-    void 추천_목록은_추천_순서대로_활성_뉴스레터만_구독자_수와_함께_반환한다() {
+    void 추천_목록은_추천_순서대로_활성_뉴스레터만_집계된_구독자_수와_함께_반환한다() {
         given(null).get(RECOMMENDATION_PATH)
                 .then()
                 .statusCode(200)
                 .body("newsletters.name", contains("주말토리", "까탈로그", "캐릿"))
-                .body("newsletters.subscriberCount", contains(1, 2, 0))
+                .body("newsletters.subscriberCount", contains(5, 7, 0))
                 .body("newsletters.arrivalDays", contains("매주 금요일", "매주 금요일", "매주 화요일"))
                 .body("newsletters[0].subscribeUrl", equalTo("https://page.stibee.com/subscriptions/1"))
                 .body("newsletters[0].category", equalTo("지역/여행"))

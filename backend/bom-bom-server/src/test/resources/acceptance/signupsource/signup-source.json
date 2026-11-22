@@ -59,6 +59,11 @@
     { "id": 3, "member_id": 3, "newsletter_id": 2, "status": "UNSUBSCRIBING" },
     { "id": 4, "member_id": 3, "newsletter_id": 1, "status": "SUBSCRIBED" }
   ],
+  "newsletter_subscription_count": [
+    { "id": 1, "newsletter_id": 1, "total": 5, "age0s": 0, "age10s": 0, "age20s": 5, "age30s": 0, "age40s": 0, "age50s": 0, "age60plus": 0 },
+    { "id": 2, "newsletter_id": 2, "total": 7, "age0s": 0, "age10s": 0, "age20s": 7, "age30s": 0, "age40s": 0, "age50s": 0, "age60plus": 0 },
+    { "id": 3, "newsletter_id": 4, "total": 9, "age0s": 0, "age10s": 0, "age20s": 9, "age30s": 0, "age40s": 0, "age50s": 0, "age60plus": 0 }
+  ],
   "signup_recommendation": [
     { "id": 1, "newsletter_id": 1, "display_order": 1, "arrival_days": "매주 금요일" },
     { "id": 2, "newsletter_id": 4, "display_order": 2, "arrival_days": "매일" },

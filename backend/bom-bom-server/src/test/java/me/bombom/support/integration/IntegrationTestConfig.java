@@ -3,6 +3,7 @@ package me.bombom.support.integration;
 import jakarta.persistence.EntityManager;
 import me.bombom.support.auth.FakeAppleOAuth2Service;
 import me.bombom.support.auth.FakeOAuth2LoginSuccessHandler;
+import me.bombom.support.holiday.FakeHolidayApiClient;
 import me.bombom.support.notification.FakeDiscordWebhookNotifier;
 import me.bombom.support.persistence.CleanUp;
 import me.bombom.support.s3.FakeS3ImageUploader;
@@ -53,6 +54,12 @@ public class IntegrationTestConfig {
     @Primary
     FakeS3ImageUploader fakeS3ImageUploader() {
         return new FakeS3ImageUploader();
+    }
+
+    @Bean
+    @Primary
+    FakeHolidayApiClient fakeHolidayApiClient() {
+        return new FakeHolidayApiClient();
     }
 
     @Bean

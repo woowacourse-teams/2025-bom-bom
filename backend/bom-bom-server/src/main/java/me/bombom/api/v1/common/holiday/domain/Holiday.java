@@ -39,4 +39,8 @@ public class Holiday extends BaseEntity {
         this.date = date;
         this.name = name;
     }
+
+    public void updateName(@NonNull String name) {
+        this.name = name;
+    }
 }

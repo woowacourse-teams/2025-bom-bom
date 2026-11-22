@@ -13,10 +13,11 @@
 | `newsletter` | 전체 교체 | id, name, category_id, status, suspended_at, source, created_at |
 | `category` | 전체 교체 | id, name |
 | `withdrawn_member` | 전체 교체 | id, member_id, provider, 날짜 3개, 활동량 카운트 7개, created_at |
+| `member_signup_source` | 전체 교체 | id, member_id, source, created_at (기타 직접 입력 `detail`은 제외) |
 
 - **증분:** 추가만 되는 테이블입니다. 마지막 id 이후만 읽어 core에 합칩니다.
 - **전체 교체:** 값이 바뀌거나 지워지는 작은 테이블입니다. 매번 전체를 읽어 raw에 덧붙이고, 행 수가 맞으면 core를 그 실행 분량으로 통째로 바꿉니다. raw에는 날짜별 전체본이 남아서 과거 상태를 볼 수 있습니다.
-- **가져오지 않는 것:** 이메일, 닉네임, 생년월일, 성별, 프로필 이미지, 아티클 제목과 본문. 읽기 전용 계정에도 위 열에만 조회 권한을 줍니다.
+- **가져오지 않는 것:** 이메일, 닉네임, 생년월일, 성별, 프로필 이미지, 아티클 제목과 본문, 가입 경로 직접 입력. 읽기 전용 계정에도 위 열에만 조회 권한을 줍니다.
 - `article.is_read`는 나중에 바뀌는 값이라 증분으로 맞출 수 없어 뺐습니다. 읽음 여부는 `article_read_history`로 봅니다.
 
 ## 흐름
@@ -60,7 +61,7 @@ EventBridge Scheduler (매일 01:00 KST)
 | `BIGQUERY_LOCATION` | `asia-northeast3` | |
 | `BIGQUERY_RAW_DATASET`, `BIGQUERY_CORE_DATASET` | `raw`, `core` | dev는 `dev_raw`, `dev_core` |
 | `GOOGLE_APPLICATION_CREDENTIALS` | 없음 | `/var/task/gcp-credentials.json` |
-| `TABLES` | `article_read_history` | 쉼표로 구분. 운영은 위 표의 일곱 테이블을 모두 적습니다 |
+| `TABLES` | `article_read_history` | 쉼표로 구분. 운영은 위 표의 여덟 테이블을 모두 적습니다 |
 | `CHUNK_SIZE` | 2000 | 한 번의 SELECT로 읽는 행 수. `article`은 행이 커서 코드에서 500으로 고정 |
 | `OVERLAP_ROWS` | 1000 | 다시 읽는 id 폭 |
 | `SLEEP_SECONDS` | 0.2 | 묶음 사이에 쉬는 시간. `article`은 0.3으로 고정 |

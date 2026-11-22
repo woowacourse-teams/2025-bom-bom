@@ -353,7 +353,7 @@ def test_table_row_cap_applies_only_when_lower_than_settings():
 
 def test_specs_leave_out_personal_and_body_columns():
     forbidden = {"email", "nickname", "birth_date", "gender", "age_group", "profile_image_url",
-                 "provider_id", "contents", "contents_text", "title", "unsubscribe_url"}
+                 "provider_id", "contents", "contents_text", "title", "unsubscribe_url", "detail"}
     for spec in core.TABLES.values():
         assert not forbidden & set(spec.column_names), spec.name
         assert spec.key in spec.column_names

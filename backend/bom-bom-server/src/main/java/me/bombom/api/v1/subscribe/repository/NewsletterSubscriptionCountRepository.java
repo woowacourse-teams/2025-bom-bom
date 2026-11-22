@@ -1,5 +1,7 @@
 package me.bombom.api.v1.subscribe.repository;
 
+import java.util.Collection;
+import java.util.List;
 import me.bombom.api.v1.subscribe.domain.NewsletterSubscriptionCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -55,4 +57,6 @@ public interface NewsletterSubscriptionCountRepository extends JpaRepository<New
             @Param("newsletterId") Long newsletterId,
             @Param("ageGroup") String ageGroup
     );
+
+    List<NewsletterSubscriptionCount> findAllByNewsletterIdIn(Collection<Long> newsletterIds);
 }

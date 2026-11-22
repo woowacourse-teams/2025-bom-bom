@@ -1,0 +1,74 @@
+{
+  "member": [
+    {
+      "id": 1,
+      "provider": "provider",
+      "provider_id": "signup-source-new",
+      "email": "new@bombom.news",
+      "nickname": "새회원",
+      "gender": "FEMALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    },
+    {
+      "id": 2,
+      "provider": "provider",
+      "provider_id": "signup-source-answered",
+      "email": "answered@bombom.news",
+      "nickname": "답한회원",
+      "gender": "MALE",
+      "role_id": 1,
+      "created_at": "${CURRENT_DATE_TIME}",
+      "updated_at": "${CURRENT_DATE_TIME}"
+    },
+    {
+      "id": 3,
+      "provider": "provider",
+      "provider_id": "signup-source-old",
+      "email": "old@bombom.news",
+      "nickname": "기존회원",
+      "gender": "MALE",
+      "role_id": 1,
+      "created_at": "1999-12-31T00:00:00",
+      "updated_at": "1999-12-31T00:00:00"
+    }
+  ],
+  "member_signup_source": [
+    { "id": 1, "member_id": 2, "source": "THREADS" }
+  ],
+  "category": [
+    { "id": 1, "name": "트렌드/라이프" },
+    { "id": 2, "name": "지역/여행" }
+  ],
+  "newsletter_detail": [
+    { "id": 1, "main_page_url": "https://weekend.com", "subscribe_url": "https://page.stibee.com/subscriptions/1", "issue_cycle": "매주 금요일", "subscribe_count": 0, "sender": "발신자" },
+    { "id": 2, "main_page_url": "https://catalog.com", "subscribe_url": "https://catalog.com/newsletter", "issue_cycle": "매주 금요일", "subscribe_count": 0, "sender": "발신자" },
+    { "id": 3, "main_page_url": "https://careet.com", "subscribe_url": "https://careet.com/subscribe", "issue_cycle": "주 2회", "subscribe_count": 0, "sender": "발신자" },
+    { "id": 4, "main_page_url": "https://suspended.com", "subscribe_url": "https://suspended.com/subscribe", "issue_cycle": "매일", "subscribe_count": 0, "sender": "발신자" }
+  ],
+  "newsletter": [
+    { "id": 1, "name": "주말토리", "description": "주말 놀 거리", "image_url": "https://cdn.bombom.me/weekend.png", "email": "weekend@stibee.com", "category_id": 2, "detail_id": 1, "status": "ACTIVE", "source": "EXTERNAL" },
+    { "id": 2, "name": "까탈로그", "description": "신제품 리뷰", "image_url": "https://cdn.bombom.me/catalog.png", "email": "catalog@catalog.com", "category_id": 1, "detail_id": 2, "status": "ACTIVE", "source": "EXTERNAL" },
+    { "id": 3, "name": "캐릿", "description": "트렌드 브리핑", "image_url": "https://cdn.bombom.me/careet.png", "email": "careet@careet.com", "category_id": 1, "detail_id": 3, "status": "ACTIVE", "source": "EXTERNAL" },
+    { "id": 4, "name": "휴간레터", "description": "휴간 중", "image_url": "https://cdn.bombom.me/suspended.png", "email": "suspended@suspended.com", "category_id": 1, "detail_id": 4, "status": "SUSPENDED", "suspended_at": "2026-01-01", "source": "EXTERNAL" }
+  ],
+  "subscribe": [
+    { "id": 1, "member_id": 1, "newsletter_id": 2, "status": "SUBSCRIBED" },
+    { "id": 2, "member_id": 2, "newsletter_id": 2, "status": "SUBSCRIBED" },
+    { "id": 3, "member_id": 3, "newsletter_id": 2, "status": "UNSUBSCRIBING" },
+    { "id": 4, "member_id": 3, "newsletter_id": 1, "status": "SUBSCRIBED" }
+  ],
+  "newsletter_subscription_count": [
+    { "id": 1, "newsletter_id": 1, "total": 5, "age0s": 0, "age10s": 0, "age20s": 5, "age30s": 0, "age40s": 0, "age50s": 0, "age60plus": 0 },
+    { "id": 2, "newsletter_id": 2, "total": 7, "age0s": 0, "age10s": 0, "age20s": 7, "age30s": 0, "age40s": 0, "age50s": 0, "age60plus": 0 },
+    { "id": 3, "newsletter_id": 4, "total": 9, "age0s": 0, "age10s": 0, "age20s": 9, "age30s": 0, "age40s": 0, "age50s": 0, "age60plus": 0 }
+  ],
+  "signup_recommendation": [
+    { "id": 1, "newsletter_id": 1, "display_order": 1, "arrival_days": "매주 금요일" },
+    { "id": 2, "newsletter_id": 4, "display_order": 2, "arrival_days": "매일" },
+    { "id": 3, "newsletter_id": 2, "display_order": 3, "arrival_days": "매주 금요일" },
+    { "id": 4, "newsletter_id": 3, "display_order": 4, "arrival_days": "매주 화요일" },
+    { "id": 5, "newsletter_id": 999, "display_order": 5, "arrival_days": "평일" }
+  ]
+}

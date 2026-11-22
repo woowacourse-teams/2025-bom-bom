@@ -17,6 +17,7 @@ import me.bombom.api.v1.member.service.WarningService;
 import me.bombom.api.v1.nativenewsletter.maeilmail.service.MaeilMailSubscribeService;
 import me.bombom.api.v1.pet.service.PetService;
 import me.bombom.api.v1.reading.service.ReadingService;
+import me.bombom.api.v1.signupsource.service.SignupSourceService;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,7 @@ public class WithdrawDataCleanupService {
     private final MemberFcmTokenService memberFcmTokenService;
     private final MemberNotificationSettingService memberNotificationSettingService;
     private final ImageUploadRateLimitService imageUploadRateLimitService;
+    private final SignupSourceService signupSourceService;
 
     public boolean cleanupByMemberId(Long memberId) {
         return cleanupByMemberId(memberId, null);
@@ -65,6 +67,7 @@ public class WithdrawDataCleanupService {
         isSucceeded &= runSafely("FCM 토큰", memberId, memberFcmTokenService::deleteAllByMemberId);
         isSucceeded &= runSafely("알림 설정", memberId, memberNotificationSettingService::deleteAllByMemberId);
         isSucceeded &= runSafely("이미지 업로드 제한", memberId, imageUploadRateLimitService::deleteByMemberId);
+        isSucceeded &= runSafely("가입 경로 직접 입력", memberId, signupSourceService::clearDetailByMemberId);
         return isSucceeded;
     }
 

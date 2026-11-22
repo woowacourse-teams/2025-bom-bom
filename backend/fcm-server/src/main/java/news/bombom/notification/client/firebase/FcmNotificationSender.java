@@ -1,5 +1,6 @@
 package news.bombom.notification.client.firebase;
 
+import com.google.firebase.messaging.FcmOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import news.bombom.notification.client.NotificationSender;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
 import news.bombom.notification.dto.NotificationResult;
@@ -30,6 +32,7 @@ public class FcmNotificationSender implements NotificationSender {
                     .setToken(message.getRecipient())
                     .setNotification(createNotification(message.getTitle(), message.getContent()))
                     .putAllData(convertToStringMap(message.getData()))
+                    .setFcmOptions(createFcmOptions(message.getCategory()))
                     .build();
 
             String response = firebaseMessaging.send(fcmMessage);
@@ -51,12 +54,14 @@ public class FcmNotificationSender implements NotificationSender {
      * 토픽으로 알림 전송 (FCM 특화 기능)
      */
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public NotificationResult sendToTopic(String topic, String title, String content, Map<String, Object> data) {
+    public NotificationResult sendToTopic(String topic, String title, String content, Map<String, Object> data,
+                                          NotificationCategory category) {
         try {
             Message message = Message.builder()
                     .setTopic(topic)
                     .setNotification(createNotification(title, content))
                     .putAllData(convertToStringMap(data))
+                    .setFcmOptions(createFcmOptions(category))
                     .build();
             String response = firebaseMessaging.send(message);
             log.info("FCM 토픽 발송 성공: topic={}, response={}", topic, response);
@@ -97,6 +102,21 @@ public class FcmNotificationSender implements NotificationSender {
                         Map.Entry::getKey,
                         entry -> String.valueOf(entry.getValue())
                 ));
+    }
+
+    /**
+     * Firebase 콘솔 메시지 리포트에서 카테고리별로 집계하기 위한 analytics label
+     */
+    private FcmOptions createFcmOptions(NotificationCategory category) {
+        if (category == null) {
+            return null;
+        }
+        try {
+            return FcmOptions.withAnalyticsLabel(category.name());
+        } catch (IllegalArgumentException e) {
+            log.warn("FCM analytics label 형식이 유효하지 않아 라벨 없이 발송합니다: category={}", category, e);
+            return null;
+        }
     }
 
     private Notification createNotification(String title, String content) {

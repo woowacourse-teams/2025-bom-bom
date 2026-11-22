@@ -113,7 +113,7 @@ public class NotificationService {
                 "notificationType", "topicNotification"
         );
 
-        return fcmNotificationSender.sendToTopic(topic, title, body, data);
+        return fcmNotificationSender.sendToTopic(topic, title, body, data, null);
     }
 
     /**

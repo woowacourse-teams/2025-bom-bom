@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import news.bombom.challenge.domain.ChallengeTodoReminderNotification;
 import news.bombom.challenge.domain.ChallengeTodoReminderPhase;
 import news.bombom.notification.domain.MemberFcmToken;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.NotificationMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,12 @@ class ChallengeTodoReminderMessageBuilderTest {
 
     @Autowired
     private ChallengeTodoReminderMessageBuilder builder;
+
+    @Test
+    void 챌린지_리마인더_카테고리로_메시지를_생성한다() {
+        NotificationMessage msg = build(7, false, ChallengeTodoReminderPhase.FIRST);
+        assertThat(msg.getCategory()).isEqualTo(NotificationCategory.CHALLENGE_TODO_REMINDER);
+    }
 
     @Test
     void 챌린지명이_제목에_포함된다() {

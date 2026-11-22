@@ -7,6 +7,7 @@ import news.bombom.inquiry.domain.InquiryMessageArrivalNotification;
 import news.bombom.inquiry.repository.InquiryMessageRepository;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.Notification;
+import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationPayloadType;
 import news.bombom.notification.domain.NotificationType;
 import news.bombom.notification.dto.NotificationMessage;
@@ -37,6 +38,7 @@ public class InquiryMessageArrivalMessageBuilder implements NotificationMessageB
                 .title(TITLE)
                 .content(message.getContent())
                 .type(NotificationType.FCM)
+                .category(NotificationCategory.INQUIRY_MESSAGE_ARRIVAL)
                 .data(Map.of(
                         "roomId", String.valueOf(message.getRoomId()),
                         "notificationType", NotificationPayloadType.INQUIRY_MESSAGE_ARRIVAL

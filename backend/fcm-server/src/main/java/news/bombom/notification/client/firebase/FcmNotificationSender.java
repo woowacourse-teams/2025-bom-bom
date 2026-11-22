@@ -111,7 +111,12 @@ public class FcmNotificationSender implements NotificationSender {
         if (category == null) {
             return null;
         }
-        return FcmOptions.withAnalyticsLabel(category.name());
+        try {
+            return FcmOptions.withAnalyticsLabel(category.name());
+        } catch (IllegalArgumentException e) {
+            log.warn("FCM analytics label 형식이 유효하지 않아 라벨 없이 발송합니다: category={}", category, e);
+            return null;
+        }
     }
 
     private Notification createNotification(String title, String content) {

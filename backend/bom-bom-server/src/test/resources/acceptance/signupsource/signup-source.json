@@ -34,6 +34,9 @@
       "updated_at": "1999-12-31T00:00:00"
     }
   ],
+  "signup_source_setting": [
+    { "id": 1, "ask_since": "2000-01-01T00:00:00" }
+  ],
   "member_signup_source": [
     { "id": 1, "member_id": 2, "source": "THREADS" }
   ],

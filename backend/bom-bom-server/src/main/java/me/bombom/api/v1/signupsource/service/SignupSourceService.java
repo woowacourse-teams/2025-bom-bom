@@ -1,37 +1,34 @@
 package me.bombom.api.v1.signupsource.service;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.signupsource.domain.SignupSource;
+import me.bombom.api.v1.signupsource.domain.SignupSourceSetting;
 import me.bombom.api.v1.signupsource.dto.request.SaveSignupSourceRequest;
 import me.bombom.api.v1.signupsource.dto.response.SignupSourceStatusResponse;
 import me.bombom.api.v1.signupsource.repository.MemberSignupSourceRepository;
-import org.springframework.beans.factory.annotation.Value;
+import me.bombom.api.v1.signupsource.repository.SignupSourceSettingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SignupSourceService {
 
     private final MemberSignupSourceRepository memberSignupSourceRepository;
-    private final LocalDateTime askSince;
+    private final SignupSourceSettingRepository signupSourceSettingRepository;
 
     /**
-     * askSince 이후에 가입한 회원에게만 가입 경로를 묻는다. 기능 배포 전에 가입한 회원은 묻지 않는다.
+     * 기능을 배포한 시각(마이그레이션 적용 시각) 이후에 가입한 회원에게만 묻는다. 기준 시각이 없으면 아무에게도 묻지 않는다.
      */
-    public SignupSourceService(
-            MemberSignupSourceRepository memberSignupSourceRepository,
-            @Value("${bombom.signup-source.ask-since:2026-11-24T00:00:00}") String askSince
-    ) {
-        this.memberSignupSourceRepository = memberSignupSourceRepository;
-        this.askSince = LocalDateTime.parse(askSince);
-    }
-
     public SignupSourceStatusResponse getStatus(Member member) {
-        boolean isTarget = member.getCreatedAt() != null && !member.getCreatedAt().isBefore(askSince);
+        boolean isTarget = signupSourceSettingRepository.findTopByOrderByIdAsc()
+                .map(SignupSourceSetting::getAskSince)
+                .filter(askSince -> member.getCreatedAt() != null && !member.getCreatedAt().isBefore(askSince))
+                .isPresent();
         boolean hasAnswered = memberSignupSourceRepository.existsByMemberId(member.getId());
         return new SignupSourceStatusResponse(isTarget && !hasAnswered);
     }

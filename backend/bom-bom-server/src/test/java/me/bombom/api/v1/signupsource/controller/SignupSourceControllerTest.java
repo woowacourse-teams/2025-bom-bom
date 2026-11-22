@@ -53,6 +53,17 @@ class SignupSourceControllerTest {
     }
 
     @Test
+    @ResetsAcceptanceData
+    void 질문_기준_시각이_없으면_아무에게도_묻지_않는다() {
+        jdbcTemplate.update("DELETE FROM signup_source_setting");
+
+        given(NEW_MEMBER_ID).get(STATUS_PATH)
+                .then()
+                .statusCode(200)
+                .body("needsSignupSource", equalTo(false));
+    }
+
+    @Test
     void 로그인하지_않으면_질문_여부를_조회할_수_없다() {
         given(null).get(STATUS_PATH).then().statusCode(401);
     }

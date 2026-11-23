@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.CreateInquiryRoomRequest;
-import me.bombom.api.v1.inquiry.dto.response.InquiryMessageResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.dto.response.LastMessageResponse;
+import me.bombom.api.v1.inquiry.service.InquiryMessageService.WrittenUserMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +23,12 @@ public class InquiryStartService {
 
     @Transactional
     public InquiryRoomResponse startInquiry(InquiryRequester requester, CreateInquiryRoomRequest request) {
+        inquiryMessageService.validateContentOrImages(request.content(), request.imageUrls());
+
         InquiryRoom room = inquiryRoomService.createRoom(requester, request.categoryId());
-        InquiryMessageResponse firstMessage = inquiryMessageService.writeUserMessage(
+        WrittenUserMessage firstMessage = inquiryMessageService.writeUserMessage(
                 room, request.content(), request.imageUrls());
 
-        return InquiryRoomResponse.of(room, false, null, LastMessageResponse.from(firstMessage));
+        return InquiryRoomResponse.of(room, false, null, LastMessageResponse.of(firstMessage.message(), null));
     }
 }

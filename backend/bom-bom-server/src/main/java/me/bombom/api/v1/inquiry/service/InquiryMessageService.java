@@ -39,14 +39,15 @@ public class InquiryMessageService {
     @Transactional
     public InquiryMessageResponse sendMessage(InquiryRequester requester, Long roomId,
                                               SendInquiryMessageRequest request) {
+        validateContentOrImages(request.content(), request.imageUrls());
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
-        return writeUserMessage(room, request.content(), request.imageUrls());
+
+        WrittenUserMessage written = writeUserMessage(room, request.content(), request.imageUrls());
+        return InquiryMessageResponse.ofUserMessage(written.message(), written.images());
     }
 
     @Transactional
-    public InquiryMessageResponse writeUserMessage(InquiryRoom room, String content, List<String> imageUrls) {
-        validateContentOrImages(content, imageUrls);
-
+    public WrittenUserMessage writeUserMessage(InquiryRoom room, String content, List<String> imageUrls) {
         InquiryMessage message = inquiryMessageRepository.save(
                 InquiryMessage.createUserMessage(room.getId(), content));
         List<InquiryMessageImage> images = saveImages(message.getId(), imageUrls);
@@ -54,7 +55,7 @@ public class InquiryMessageService {
         applicationEventPublisher.publishEvent(
                 new InquiryMessageSentEvent(message.getContent(), room.getAssigneeId()));
 
-        return InquiryMessageResponse.ofUserMessage(message, images);
+        return new WrittenUserMessage(message, images);
     }
 
     @Transactional
@@ -90,7 +91,7 @@ public class InquiryMessageService {
         message.delete(LocalDateTime.now(clock));
     }
 
-    private void validateContentOrImages(String content, List<String> imageUrls) {
+    public void validateContentOrImages(String content, List<String> imageUrls) {
         boolean hasContent = content != null && !content.isEmpty();
         boolean hasImages = !CollectionUtils.isEmpty(imageUrls);
         if (!hasContent && !hasImages) {
@@ -129,5 +130,8 @@ public class InquiryMessageService {
             images.add(inquiryMessageImageRepository.save(new InquiryMessageImage(messageId, imageUrls.get(i), i)));
         }
         return images;
+    }
+
+    public record WrittenUserMessage(InquiryMessage message, List<InquiryMessageImage> images) {
     }
 }

@@ -19,8 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 })
 class InquiryImageRateLimitTest {
 
-    private static final long MEMBER_ROOM_ID = 1L;
-    private static final long GUEST_ROOM_ID = 2L;
     private static final String GUEST_ID = "e4560796-3db9-4f26-828a-c356c91d5076";
 
     @Test
@@ -80,19 +78,18 @@ class InquiryImageRateLimitTest {
     }
 
     private RequestSpecification memberRequest(int imageCount) {
-        return imageRequest(imageCount, MEMBER_ROOM_ID)
+        return imageRequest(imageCount)
                 .header(AcceptanceTestHeaders.MEMBER_ID, 1);
     }
 
     private RequestSpecification guestRequest(int imageCount) {
-        return imageRequest(imageCount, GUEST_ROOM_ID)
+        return imageRequest(imageCount)
                 .header(GuestIdArgumentResolver.GUEST_ID_HEADER, GUEST_ID);
     }
 
-    private RequestSpecification imageRequest(int imageCount, long roomId) {
+    private RequestSpecification imageRequest(int imageCount) {
         RequestSpecification request = RestAssured.given()
-                .accept(ContentType.JSON)
-                .multiPart("roomId", roomId);
+                .accept(ContentType.JSON);
 
         for (int i = 0; i < imageCount; i++) {
             request.multiPart("images", i + ".png", "content".getBytes(), "image/png");

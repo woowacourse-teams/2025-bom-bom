@@ -5,17 +5,12 @@ import static me.bombom.api.v1.inquiry.domain.QInquiryRoom.inquiryRoom;
 import static me.bombom.api.v1.member.domain.QMember.member;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Coalesce;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.inquiry.domain.InquirySenderType;
-import me.bombom.api.v1.inquiry.domain.QInquiryMessage;
 import me.bombom.api.v1.inquiry.dto.InquiryRoomWithAssignee;
 import me.bombom.api.v1.inquiry.dto.QInquiryRoomWithAssignee;
 import org.springframework.data.domain.Page;
@@ -25,8 +20,6 @@ import org.springframework.data.support.PageableExecutionUtils;
 @RequiredArgsConstructor
 public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
 
-    private static final QInquiryMessage latestMessage = new QInquiryMessage("latestMessage");
-
     private final JPAQueryFactory jpaQueryFactory;
 
     // TODO: 커서 기반 페이지네이션으로 수정
@@ -35,8 +28,10 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
         BooleanExpression requesterEq = requesterEq(memberId, guestId);
 
         List<InquiryRoomWithAssignee> content = selectRoomWithAssignee()
+                .leftJoin(inquiryMessage).on(inquiryMessage.roomId.eq(inquiryRoom.id))
                 .where(requesterEq)
-                .orderBy(latestMessageCreatedAt().desc(), inquiryRoom.id.desc())
+                .groupBy(inquiryRoom.id, member.id)
+                .orderBy(inquiryMessage.id.max().desc(), inquiryRoom.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -84,24 +79,5 @@ public class InquiryRoomRepositoryImpl implements CustomInquiryRoomRepository {
                 .select(new QInquiryRoomWithAssignee(inquiryRoom, member.nickname))
                 .from(inquiryRoom)
                 .leftJoin(member).on(member.id.eq(inquiryRoom.assigneeId));
-    }
-
-    /**
-     * 방의 마지막 메시지(id가 가장 큰 메시지)의 생성 시각입니다. 메시지가 없는 방은 방 생성 시각으로 대체합니다.
-     */
-    private ComparableExpressionBase<LocalDateTime> latestMessageCreatedAt() {
-        return new Coalesce<>(
-                LocalDateTime.class,
-                JPAExpressions
-                        .select(latestMessage.createdAt)
-                        .from(latestMessage)
-                        .where(latestMessage.id.eq(
-                                JPAExpressions
-                                        .select(inquiryMessage.id.max())
-                                        .from(inquiryMessage)
-                                        .where(inquiryMessage.roomId.eq(inquiryRoom.id))
-                        )),
-                inquiryRoom.createdAt)
-                .getValue();
     }
 }

@@ -1,11 +1,14 @@
 package me.bombom.api.v1.inquiry.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.sql.Timestamp;
 import java.util.List;
 import me.bombom.api.v1.TestFixture;
+import me.bombom.api.v1.common.exception.CIllegalArgumentException;
+import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.inquiry.domain.InquiryRoom;
 import me.bombom.api.v1.inquiry.dto.InquiryRequester;
 import me.bombom.api.v1.inquiry.dto.request.SendInquiryMessageRequest;
@@ -72,6 +75,35 @@ class InquiryMessageServiceTest {
             softly.assertThat(events).hasSize(1);
             softly.assertThat(events.get(0).content()).isEqualTo("문의합니다");
             softly.assertThat(events.get(0).assigneeId()).isEqualTo(99L);
+        });
+    }
+
+    @Test
+    void 내용과_이미지가_모두_없으면_메시지를_전송할_수_없다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        SendInquiryMessageRequest request = new SendInquiryMessageRequest("", List.of());
+
+        assertThatThrownBy(() -> inquiryMessageService.sendMessage(requester, room.getId(), request))
+                .isInstanceOf(CIllegalArgumentException.class)
+                .hasFieldOrPropertyWithValue("errorDetail", ErrorDetail.INVALID_INPUT_VALUE);
+    }
+
+    @Test
+    void 이미지를_포함한_메시지를_전송하면_이미지가_순서대로_저장된다() {
+        InquiryRoom room = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        List<String> imageUrls = List.of("https://s3/img1.png", "https://s3/img2.png");
+
+        InquiryMessageResponse sent = inquiryMessageService.sendMessage(
+                requester, room.getId(), new SendInquiryMessageRequest("사진 첨부", imageUrls));
+
+        List<String> savedImageUrls = jdbcTemplate.queryForList(
+                "SELECT image_url FROM inquiry_message_image WHERE message_id = ? ORDER BY sort_order",
+                String.class, sent.id());
+        assertSoftly(softly -> {
+            softly.assertThat(sent.imageUrls()).containsExactlyElementsOf(imageUrls);
+            softly.assertThat(savedImageUrls).containsExactlyElementsOf(imageUrls);
         });
     }
 

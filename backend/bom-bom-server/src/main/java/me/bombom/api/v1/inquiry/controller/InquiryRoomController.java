@@ -10,6 +10,7 @@ import me.bombom.api.v1.inquiry.dto.response.InquiryRoomResponse;
 import me.bombom.api.v1.inquiry.dto.response.InquiryUnreadStatusResponse;
 import me.bombom.api.v1.inquiry.resolver.GuestId;
 import me.bombom.api.v1.inquiry.service.InquiryRoomService;
+import me.bombom.api.v1.inquiry.service.InquiryStartService;
 import me.bombom.api.v1.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class InquiryRoomController implements InquiryRoomControllerApi {
 
     private final InquiryRoomService inquiryRoomService;
+    private final InquiryStartService inquiryStartService;
 
     @Override
     @PostMapping
@@ -38,7 +40,7 @@ public class InquiryRoomController implements InquiryRoomControllerApi {
             @Valid @RequestBody CreateInquiryRoomRequest request
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return inquiryRoomService.createRoom(requester, request.categoryId());
+        return inquiryStartService.startInquiry(requester, request);
     }
 
     @Override

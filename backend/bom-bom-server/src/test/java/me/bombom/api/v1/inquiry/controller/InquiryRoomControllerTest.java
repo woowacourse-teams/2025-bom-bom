@@ -16,12 +16,16 @@ class InquiryRoomControllerTest {
 
     @Test
     @ResetsAcceptanceData
-    void 회원이_문의_채팅방을_생성한다() {
+    void 회원이_첫_메시지와_함께_문의_채팅방을_생성한다() {
         Map<String, Object> result = RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, 1)
-                .body(Map.of("categoryId", 1))
+                .body(Map.of(
+                        "categoryId", 1,
+                        "content", "첫 문의입니다",
+                        "imageUrls", List.of("https://s3/img1.png")
+                ))
                 .when()
                 .post("/api/v1/inquiries/rooms")
                 .then()
@@ -30,9 +34,12 @@ class InquiryRoomControllerTest {
                 .jsonPath()
                 .getMap("$");
 
+        Map<String, Object> lastMessage = (Map<String, Object>) result.get("lastMessage");
         assertSoftly(softly -> {
             softly.assertThat(result.get("categoryId")).isEqualTo(1);
             softly.assertThat(result.get("status")).isEqualTo("UNCONFIRMED");
+            softly.assertThat(lastMessage.get("content")).isEqualTo("첫 문의입니다");
+            softly.assertThat(lastMessage.get("senderType")).isEqualTo("USER");
         });
     }
 
@@ -43,7 +50,7 @@ class InquiryRoomControllerTest {
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .header("X-Guest-Id", "2cf82d31-86ff-4c50-b4f8-e9ffa717d3d6")
-                .body(Map.of("categoryId", 1))
+                .body(Map.of("categoryId", 1, "content", "문의합니다"))
                 .when()
                 .post("/api/v1/inquiries/rooms")
                 .then()
@@ -63,7 +70,7 @@ class InquiryRoomControllerTest {
         RestAssured.given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                .body(Map.of("categoryId", 1))
+                .body(Map.of("categoryId", 1, "content", "문의합니다"))
                 .when()
                 .post("/api/v1/inquiries/rooms")
                 .then()
@@ -76,11 +83,93 @@ class InquiryRoomControllerTest {
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .header(AcceptanceTestHeaders.MEMBER_ID, 1)
-                .body(Map.of("categoryId", 999))
+                .body(Map.of("categoryId", 999, "content", "문의합니다"))
                 .when()
                 .post("/api/v1/inquiries/rooms")
                 .then()
                 .statusCode(404);
+    }
+
+    @Test
+    void 내용과_이미지가_모두_없으면_채팅방을_생성할_수_없다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .body(Map.of("categoryId", 1, "content", "", "imageUrls", List.of()))
+                .when()
+                .post("/api/v1/inquiries/rooms")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 카테고리가_없으면_채팅방을_생성할_수_없다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .body(Map.of("content", "문의합니다"))
+                .when()
+                .post("/api/v1/inquiries/rooms")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 첫_메시지가_500자를_초과하면_채팅방을_생성할_수_없다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .body(Map.of("categoryId", 1, "content", "가".repeat(501)))
+                .when()
+                .post("/api/v1/inquiries/rooms")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void 첫_메시지_이미지가_4장을_초과하면_채팅방을_생성할_수_없다() {
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .body(Map.of("categoryId", 1, "imageUrls", List.of("1", "2", "3", "4", "5")))
+                .when()
+                .post("/api/v1/inquiries/rooms")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @ResetsAcceptanceData
+    void 채팅방_목록은_최근_메시지가_있는_방부터_조회된다() {
+        Long olderRoomId = createRoomAndGetId(AcceptanceTestHeaders.MEMBER_ID, "1");
+        Long newerRoomId = createRoomAndGetId(AcceptanceTestHeaders.MEMBER_ID, "1");
+        RestAssured.given()
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .body(Map.of("content", "추가 문의"))
+                .when()
+                .post("/api/v1/inquiries/rooms/{roomId}/messages", olderRoomId)
+                .then()
+                .statusCode(200);
+
+        List<Integer> roomIds = RestAssured.given()
+                .accept(ContentType.JSON)
+                .header(AcceptanceTestHeaders.MEMBER_ID, 1)
+                .when()
+                .get("/api/v1/inquiries/rooms")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList("content.id", Integer.class);
+
+        assertSoftly(softly -> softly.assertThat(roomIds)
+                .containsExactly(olderRoomId.intValue(), newerRoomId.intValue()));
     }
 
     @Test
@@ -197,7 +286,7 @@ class InquiryRoomControllerTest {
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .header(headerName, headerValue)
-                .body(Map.of("categoryId", 1))
+                .body(Map.of("categoryId", 1, "content", "문의합니다"))
                 .when()
                 .post("/api/v1/inquiries/rooms")
                 .then()

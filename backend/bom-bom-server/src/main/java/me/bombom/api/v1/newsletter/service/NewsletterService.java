@@ -26,12 +26,13 @@ public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
     private final Clock clock;
 
-    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId) {
+    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId, String language) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
         List<NewsletterResponse> allNewsletters = newsletterRepository.findNewslettersInfo(
                 memberId,
                 includeSuspended,
-                suspendedHiddenThresholdDate
+                suspendedHiddenThresholdDate,
+                language
         );
 
         List<CategoryResponse> categories = CategoryResponse.from(allNewsletters);
@@ -41,8 +42,8 @@ public class NewsletterService {
         return NewslettersResponse.of(categories, newsletters);
     }
 
-    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId) {
-        return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId)
+    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId, String language) {
+        return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId, language)
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));

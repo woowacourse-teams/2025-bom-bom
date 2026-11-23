@@ -86,7 +86,7 @@ class SubscribeServiceTest {
         ));
 
         // when
-        List<SubscribedNewsletterResponse> result = subscribeService.getSubscribedNewsletters(member);
+        List<SubscribedNewsletterResponse> result = subscribeService.getSubscribedNewsletters(member, "ko");
 
         // then
         assertThat(result).hasSize(2)

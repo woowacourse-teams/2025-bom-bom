@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -24,8 +25,11 @@ public class SubscribeController implements SubscribeControllerApi {
 
     @Override
     @GetMapping("/me/subscriptions")
-    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(@LoginMember Member member) {
-        return subscribeService.getSubscribedNewsletters(member);
+    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(
+            @LoginMember Member member,
+            @RequestParam(required = false, defaultValue = "ko") String language
+    ) {
+        return subscribeService.getSubscribedNewsletters(member, language);
     }
 
     @Override

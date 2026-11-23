@@ -11,6 +11,7 @@ import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Subscription", description = "구독 관련 API")
 public interface SubscribeControllerApi {
@@ -20,7 +21,10 @@ public interface SubscribeControllerApi {
         @ApiResponse(responseCode = "200", description = "구독한 뉴스레터 목록 조회 성공"),
         @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    List<SubscribedNewsletterResponse> getSubscribedNewsletters(@Parameter(hidden = true) @LoginMember Member member);
+    List<SubscribedNewsletterResponse> getSubscribedNewsletters(
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(description = "응답 언어") @RequestParam(required = false, defaultValue = "ko") String language
+    );
 
     @Operation(summary = "뉴스레터 구독 취소", description = "뉴스레터 구독 취소를 요청합니다. 자동 취소가 비동기로 진행되며, 실패 시 구독 목록에서 수동 취소 링크를 확인할 수 있습니다.")
     @ApiResponses({

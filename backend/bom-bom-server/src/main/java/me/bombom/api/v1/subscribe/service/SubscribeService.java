@@ -69,8 +69,8 @@ public class SubscribeService {
         subscribeRepository.bulkDeleteByMemberIdAndNewsletterId(memberId, newsletterId);
     }
 
-    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member) {
-        return subscribeRepository.findSubscribedByMemberId(member.getId());
+    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member, String language) {
+        return subscribeRepository.findSubscribedByMemberId(member.getId(), language);
     }
 
     @Transactional

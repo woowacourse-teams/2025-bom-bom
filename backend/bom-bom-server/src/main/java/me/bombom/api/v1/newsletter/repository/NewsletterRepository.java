@@ -14,8 +14,8 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long>, C
 
     @Query("""
         SELECT new me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse(
-            n.name,
-            n.description,
+            coalesce(t.name, n.name),
+            coalesce(t.description, n.description),
             n.imageUrl,
             c.name,
             n.status,
@@ -34,11 +34,14 @@ public interface NewsletterRepository extends JpaRepository<Newsletter, Long>, C
         FROM Newsletter n
         JOIN NewsletterDetail d ON d.id = n.detailId
         JOIN Category c ON c.id = n.categoryId
+        LEFT JOIN NewsletterTranslation t ON t.newsletterId = n.id
+            AND t.language = :language AND :language <> 'ko'
         LEFT JOIN Subscribe s ON s.newsletterId = n.id AND s.memberId = :memberId
         WHERE n.id = :newsletterId
     """)
     Optional<NewsletterWithDetailResponse> findNewsletterWithDetailById(
             @Param("newsletterId") Long newsletterId,
-            @Param("memberId") Long memberId
+            @Param("memberId") Long memberId,
+            @Param("language") String language
     );
 }

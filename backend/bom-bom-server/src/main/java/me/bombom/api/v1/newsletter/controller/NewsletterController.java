@@ -24,17 +24,19 @@ public class NewsletterController implements NewsletterControllerApi{
     public NewslettersResponse getNewsletters(
             @LoginMember(anonymous = true, allowInvalidToken = true) Long memberId,
             @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
-            @RequestParam(required = false) Long categoryId
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false, defaultValue = "ko") String language
     ) {
-        return newsletterService.getNewsletters(memberId, includeSuspended, categoryId);
+        return newsletterService.getNewsletters(memberId, includeSuspended, categoryId, language);
     }
 
     @Override
     @GetMapping("/{id}")
     public NewsletterWithDetailResponse getNewsletterWithDetail(
             @LoginMember(anonymous = true) Long memberId,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @RequestParam(required = false, defaultValue = "ko") String language
     ) {
-        return newsletterService.getNewsletterWithDetail(id, memberId);
+        return newsletterService.getNewsletterWithDetail(id, memberId, language);
     }
 }

@@ -3,6 +3,7 @@ package me.bombom.api.v1.newsletter.repository;
 import static me.bombom.api.v1.newsletter.domain.QCategory.category;
 import static me.bombom.api.v1.newsletter.domain.QNewsletter.newsletter;
 import static me.bombom.api.v1.newsletter.domain.QNewsletterDetail.newsletterDetail;
+import static me.bombom.api.v1.newsletter.domain.QNewsletterTranslation.newsletterTranslation;
 import static me.bombom.api.v1.subscribe.domain.QNewsletterSubscriptionCount.newsletterSubscriptionCount;
 import static me.bombom.api.v1.subscribe.domain.QSubscribe.subscribe;
 
@@ -26,7 +27,8 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
     public List<NewsletterResponse> findNewslettersInfo(
             Long memberId,
             boolean includeSuspended,
-            LocalDate suspendedHiddenThresholdDate
+            LocalDate suspendedHiddenThresholdDate,
+            String language
     ) {
         BooleanExpression publicationStatusCondition = createStatusCondition(includeSuspended, suspendedHiddenThresholdDate);
         BooleanExpression isSubscribedCondition = createIsSubscribedCondition(memberId);
@@ -34,9 +36,9 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
         JPAQuery<NewsletterResponse> query = jpaQueryFactory
                 .select(new QNewsletterResponse(
                         newsletter.id,
-                        newsletter.name,
+                        newsletterTranslation.name.coalesce(newsletter.name),
                         newsletter.imageUrl,
-                        newsletter.description,
+                        newsletterTranslation.description.coalesce(newsletter.description),
                         newsletterDetail.subscribeUrl,
                         category.id,
                         category.name,
@@ -46,6 +48,8 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                 ))
                 .from(newsletter)
                 .join(newsletterDetail).on(newsletterDetail.id.eq(newsletter.detailId))
+                .leftJoin(newsletterTranslation).on(newsletterTranslation.newsletterId.eq(newsletter.id)
+                        .and(newsletterTranslation.language.eq("ko".equals(language) ? "" : language)))
                 .leftJoin(newsletterSubscriptionCount).on(newsletterSubscriptionCount.newsletterId.eq(newsletter.id))
                 .join(category).on(category.id.eq(newsletter.categoryId))
                 .where(publicationStatusCondition)

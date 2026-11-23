@@ -19,13 +19,4 @@ public record LastMessageResponse(
                 message.getCreatedAt()
         );
     }
-
-    public static LastMessageResponse from(InquiryMessageResponse message) {
-        return new LastMessageResponse(
-                message.content(),
-                message.senderType(),
-                message.adminNickname(),
-                message.createdAt()
-        );
-    }
 }

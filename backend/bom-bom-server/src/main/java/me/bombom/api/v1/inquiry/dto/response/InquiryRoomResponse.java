@@ -15,10 +15,6 @@ public record InquiryRoomResponse(
         LastMessageResponse lastMessage
 ) {
 
-    public static InquiryRoomResponse ofUnassignedRoom(InquiryRoom room, boolean hasUnreadMessage) {
-        return of(room, hasUnreadMessage, null);
-    }
-
     public static InquiryRoomResponse of(
             InquiryRoom room,
             boolean hasUnreadMessage,

@@ -30,14 +30,13 @@ public class InquiryImageService {
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/png", "image/jpeg", "image/gif", "image/webp");
 
     private final S3ImageUploader imageUploader;
-    private final InquiryRoomService inquiryRoomService;
     private final ImageUploadTokenConsumeHandler imageUploadTokenConsumeHandler;
 
     @Value("${spring.cloud.aws.s3.inquiry-bucket}")
     private String inquiryBucketName;
 
-    public List<String> uploadImages(InquiryRequester requester, Long roomId, List<MultipartFile> images) {
-        inquiryRoomService.getOwnedRoom(roomId, requester);
+    public List<String> uploadImages(InquiryRequester requester, List<MultipartFile> images) {
+        validateRequester(requester);
         validateImageCount(images);
         images.forEach(this::validateImageContentType);
 
@@ -52,6 +51,12 @@ public class InquiryImageService {
         } catch (RuntimeException e) {
             imageUploadTokenConsumeHandler.refund(bucketKey, images.size());
             throw e;
+        }
+    }
+
+    private void validateRequester(InquiryRequester requester) {
+        if (requester.memberId() == null && requester.guestId() == null) {
+            throw new CIllegalArgumentException(ErrorDetail.MISSING_REQUESTER_IDENTIFIER);
         }
     }
 

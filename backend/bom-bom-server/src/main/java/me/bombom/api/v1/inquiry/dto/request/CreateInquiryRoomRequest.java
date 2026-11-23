@@ -1,8 +1,15 @@
 package me.bombom.api.v1.inquiry.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record CreateInquiryRoomRequest(
-        @NotNull(message = "카테고리는 필수 입력 값입니다.") Long categoryId
+        @NotNull(message = "카테고리는 필수 입력 값입니다.") Long categoryId,
+        @Size(max = 500, message = "문의 내용은 500자를 초과할 수 없습니다.") String content,
+        @Size(max = 4, message = "이미지는 최대 4장까지 첨부할 수 있습니다.")
+        List<@NotBlank(message = "이미지 URL은 공백일 수 없습니다.")
+        @Size(max = 512, message = "이미지 URL은 512자를 초과할 수 없습니다.") String> imageUrls
 ) {
 }

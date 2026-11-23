@@ -237,13 +237,13 @@ class InquiryRoomServiceTest {
     }
 
     @Test
-    void 방_목록은_최신_메시지가_늦은_방부터_정렬된다() {
+    void 방_목록은_마지막_메시지_id가_큰_방부터_정렬된다() {
         InquiryRequester requester = new InquiryRequester(1L, null);
         InquiryRoom olderRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         InquiryRoom newerRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
-        // 먼저 만들어진 방에 더 늦은 메시지를 넣어, 방 생성순과 메시지순이 어긋나게 한다
-        insertUserMessageAt(olderRoom.getId(), "나중 메시지", "2026-11-03 12:00:00");
-        insertUserMessageAt(newerRoom.getId(), "이전 메시지", "2026-11-03 10:00:00");
+        // 먼저 만들어진 방에 마지막으로 메시지를 저장하되 생성시각은 더 이르게 넣어, 정렬 기준이 시각이 아닌 id임을 확인한다
+        insertUserMessageAt(newerRoom.getId(), "먼저 저장된 메시지", "2026-11-03 12:00:00");
+        insertUserMessageAt(olderRoom.getId(), "나중에 저장된 메시지", "2026-11-03 10:00:00");
 
         List<InquiryRoomResponse> rooms = getRooms(requester);
 
@@ -252,7 +252,7 @@ class InquiryRoomServiceTest {
     }
 
     @Test
-    void 메시지가_없는_방은_방_생성시각을_기준으로_정렬된다() {
+    void 메시지가_없는_방은_메시지가_있는_방보다_뒤에_정렬된다() {
         InquiryRequester requester = new InquiryRequester(1L, null);
         InquiryRoom roomWithMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         InquiryRoom emptyRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
@@ -261,7 +261,21 @@ class InquiryRoomServiceTest {
         List<InquiryRoomResponse> rooms = getRooms(requester);
 
         assertThat(rooms).extracting(InquiryRoomResponse::id)
-                .containsExactly(emptyRoom.getId(), roomWithMessage.getId());
+                .containsExactly(roomWithMessage.getId(), emptyRoom.getId());
+    }
+
+    @Test
+    void 메시지가_없는_방끼리는_방_id_내림차순으로_정렬된다() {
+        InquiryRequester requester = new InquiryRequester(1L, null);
+        InquiryRoom firstEmptyRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom secondEmptyRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        InquiryRoom roomWithMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
+        insertUserMessageAt(roomWithMessage.getId(), "문의합니다", "2026-11-03 10:00:00");
+
+        List<InquiryRoomResponse> rooms = getRooms(requester);
+
+        assertThat(rooms).extracting(InquiryRoomResponse::id)
+                .containsExactly(roomWithMessage.getId(), secondEmptyRoom.getId(), firstEmptyRoom.getId());
     }
 
     @Test
@@ -289,7 +303,7 @@ class InquiryRoomServiceTest {
     }
 
     @Test
-    void 방은_마지막_메시지의_생성시각으로_정렬되고_미리보기와_일치한다() {
+    void 방은_마지막_메시지_id로_정렬되고_미리보기와_일치한다() {
         InquiryRoom invertedRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         InquiryRoom normalRoom = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         // invertedRoom: 생성시각이 가장 늦은 메시지(12:00)와 마지막으로 저장된 메시지(10:00)가 다르다
@@ -302,8 +316,8 @@ class InquiryRoomServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(rooms).extracting(InquiryRoomResponse::id)
-                    .containsExactly(normalRoom.getId(), invertedRoom.getId());
-            softly.assertThat(rooms.get(1).lastMessage().content()).isEqualTo("마지막으로 저장된 메시지");
+                    .containsExactly(invertedRoom.getId(), normalRoom.getId());
+            softly.assertThat(rooms.get(0).lastMessage().content()).isEqualTo("마지막으로 저장된 메시지");
         });
     }
 
@@ -336,9 +350,10 @@ class InquiryRoomServiceTest {
         InquiryRoom roomWithDeletedMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         InquiryRoom roomWithLiveMessage = inquiryRoomRepository.save(InquiryRoom.createMemberInquiryRoom(1L, 1L));
         insertUserMessageAt(roomWithDeletedMessage.getId(), "오래된 살아있는 메시지", "2026-11-03 10:00:00");
+        insertUserMessageAt(roomWithLiveMessage.getId(), "살아있는 메시지", "2026-11-03 12:00:00");
+        // 삭제된 메시지가 가장 큰 id를 갖지만 정렬 기준에서는 제외되어야 한다
         insertUserMessageAt(roomWithDeletedMessage.getId(), "삭제될 최신 메시지", "2026-11-03 14:00:00");
         softDeleteLatestMessage(roomWithDeletedMessage.getId());
-        insertUserMessageAt(roomWithLiveMessage.getId(), "살아있는 메시지", "2026-11-03 12:00:00");
 
         List<InquiryRoomResponse> rooms = getRooms(requester);
 

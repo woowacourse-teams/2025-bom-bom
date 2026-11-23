@@ -1,6 +1,5 @@
 package me.bombom.api.v1.inquiry.controller;
 
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
@@ -29,10 +28,9 @@ public class InquiryImageController implements InquiryImageControllerApi {
     public InquiryImageUploadResponse uploadImages(
             @LoginMember(anonymous = true) Member member,
             @GuestId String guestId,
-            @RequestParam @Positive(message = "id는 1 이상의 값이어야 합니다.") Long roomId,
             @RequestParam("images") List<MultipartFile> images
     ) {
         InquiryRequester requester = InquiryRequester.of(member, guestId);
-        return InquiryImageUploadResponse.of(inquiryImageService.uploadImages(requester, roomId, images));
+        return InquiryImageUploadResponse.of(inquiryImageService.uploadImages(requester, images));
     }
 }

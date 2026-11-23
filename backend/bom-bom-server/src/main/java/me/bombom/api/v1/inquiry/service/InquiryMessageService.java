@@ -39,17 +39,23 @@ public class InquiryMessageService {
     @Transactional
     public InquiryMessageResponse sendMessage(InquiryRequester requester, Long roomId,
                                               SendInquiryMessageRequest request) {
-        validateContentOrImages(request);
+        validateContentOrImages(request.content(), request.imageUrls());
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
+        WrittenUserMessage written = writeUserMessage(room, request.content(), request.imageUrls());
+        return InquiryMessageResponse.ofUserMessage(written.message(), written.images());
+    }
+
+    @Transactional
+    public WrittenUserMessage writeUserMessage(InquiryRoom room, String content, List<String> imageUrls) {
         InquiryMessage message = inquiryMessageRepository.save(
-                InquiryMessage.createUserMessage(room.getId(), request.content()));
-        List<InquiryMessageImage> images = saveImages(message.getId(), request.imageUrls());
+                InquiryMessage.createUserMessage(room.getId(), content));
+        List<InquiryMessageImage> images = saveImages(message.getId(), imageUrls);
 
         applicationEventPublisher.publishEvent(
                 new InquiryMessageSentEvent(message.getContent(), room.getAssigneeId()));
 
-        return InquiryMessageResponse.ofUserMessage(message, images);
+        return new WrittenUserMessage(message, images);
     }
 
     @Transactional
@@ -58,7 +64,8 @@ public class InquiryMessageService {
     ) {
         InquiryRoom room = inquiryRoomService.getOwnedRoom(roomId, requester);
 
-        List<InquiryMessageWithAdmin> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor, size + 1);
+        List<InquiryMessageWithAdmin> messages = inquiryMessageRepository.findMessagesByCursor(roomId, cursor,
+                size + 1);
         boolean hasNext = messages.size() > size;
         List<InquiryMessageWithAdmin> pageMessages = hasNext ? messages.subList(0, size) : messages;
 
@@ -84,9 +91,9 @@ public class InquiryMessageService {
         message.delete(LocalDateTime.now(clock));
     }
 
-    private void validateContentOrImages(SendInquiryMessageRequest request) {
-        boolean hasContent = request.content() != null && !request.content().isEmpty();
-        boolean hasImages = !CollectionUtils.isEmpty(request.imageUrls());
+    public void validateContentOrImages(String content, List<String> imageUrls) {
+        boolean hasContent = content != null && !content.isEmpty();
+        boolean hasImages = !CollectionUtils.isEmpty(imageUrls);
         if (!hasContent && !hasImages) {
             throw new CIllegalArgumentException(ErrorDetail.INVALID_INPUT_VALUE)
                     .addContext("reason", "content_or_images_required");
@@ -123,5 +130,8 @@ public class InquiryMessageService {
             images.add(inquiryMessageImageRepository.save(new InquiryMessageImage(messageId, imageUrls.get(i), i)));
         }
         return images;
+    }
+
+    public record WrittenUserMessage(InquiryMessage message, List<InquiryMessageImage> images) {
     }
 }

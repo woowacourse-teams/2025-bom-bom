@@ -32,7 +32,7 @@ public class InquiryRoomService {
     private final InquiryCategoryRepository inquiryCategoryRepository;
 
     @Transactional
-    public InquiryRoomResponse createRoom(InquiryRequester requester, Long categoryId) {
+    public InquiryRoom createRoom(InquiryRequester requester, Long categoryId) {
         validateRequester(requester);
         validateCategoryExists(categoryId);
 
@@ -40,8 +40,7 @@ public class InquiryRoomService {
                 ? InquiryRoom.createMemberInquiryRoom(requester.memberId(), categoryId)
                 : InquiryRoom.createGuestInquiryRoom(requester.guestId(), categoryId);
 
-        InquiryRoom saved = inquiryRoomRepository.save(room);
-        return InquiryRoomResponse.ofUnassignedRoom(saved, false);
+        return inquiryRoomRepository.save(room);
     }
 
     public Page<InquiryRoomResponse> getRooms(InquiryRequester requester, Pageable pageable) {

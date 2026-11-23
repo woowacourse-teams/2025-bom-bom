@@ -29,7 +29,7 @@ public class NewsletterTranslation {
     @Column(nullable = false)
     private Long newsletterId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2)
     private String language;
 
     private String name;

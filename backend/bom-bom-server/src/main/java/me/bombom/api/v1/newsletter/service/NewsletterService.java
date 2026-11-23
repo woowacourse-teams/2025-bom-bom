@@ -8,6 +8,7 @@ import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.newsletter.domain.Newsletter;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 import me.bombom.api.v1.newsletter.dto.CategoryResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
@@ -26,7 +27,7 @@ public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
     private final Clock clock;
 
-    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId, String language) {
+    public NewslettersResponse getNewsletters(Long memberId, boolean includeSuspended, Long categoryId, NewsletterLanguage language) {
         LocalDate suspendedHiddenThresholdDate = getSuspendedHiddenThresholdDate();
         List<NewsletterResponse> allNewsletters = newsletterRepository.findNewslettersInfo(
                 memberId,
@@ -42,8 +43,8 @@ public class NewsletterService {
         return NewslettersResponse.of(categories, newsletters);
     }
 
-    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId, String language) {
-        return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId, language)
+    public NewsletterWithDetailResponse getNewsletterWithDetail(Long newsletterId, Long memberId, NewsletterLanguage language) {
+        return newsletterRepository.findNewsletterWithDetailById(newsletterId, memberId, language == null ? null : language.code())
                 .orElseThrow(() -> new CIllegalArgumentException(ErrorDetail.ENTITY_NOT_FOUND)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "newsletter")
                         .addContext(ErrorContextKeys.NEWSLETTER_ID, newsletterId));

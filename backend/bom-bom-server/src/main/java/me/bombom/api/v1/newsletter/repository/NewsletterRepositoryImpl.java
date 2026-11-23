@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.newsletter.domain.NewsletterPublicationStatus;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
 import me.bombom.api.v1.newsletter.dto.QNewsletterResponse;
 
@@ -28,7 +29,7 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
             Long memberId,
             boolean includeSuspended,
             LocalDate suspendedHiddenThresholdDate,
-            String language
+            NewsletterLanguage language
     ) {
         BooleanExpression publicationStatusCondition = createStatusCondition(includeSuspended, suspendedHiddenThresholdDate);
         BooleanExpression isSubscribedCondition = createIsSubscribedCondition(memberId);
@@ -49,7 +50,7 @@ public class NewsletterRepositoryImpl implements CustomNewsletterRepository {
                 .from(newsletter)
                 .join(newsletterDetail).on(newsletterDetail.id.eq(newsletter.detailId))
                 .leftJoin(newsletterTranslation).on(newsletterTranslation.newsletterId.eq(newsletter.id)
-                        .and(newsletterTranslation.language.eq("ko".equals(language) ? "" : language)))
+                        .and(language == null ? Expressions.FALSE : newsletterTranslation.language.eq(language.code())))
                 .leftJoin(newsletterSubscriptionCount).on(newsletterSubscriptionCount.newsletterId.eq(newsletter.id))
                 .join(category).on(category.id.eq(newsletter.categoryId))
                 .where(publicationStatusCondition)

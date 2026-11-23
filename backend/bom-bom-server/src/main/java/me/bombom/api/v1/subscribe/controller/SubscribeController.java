@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
 import me.bombom.api.v1.subscribe.service.SubscribeService;
 import org.springframework.validation.annotation.Validated;
@@ -29,7 +30,10 @@ public class SubscribeController implements SubscribeControllerApi {
             @LoginMember Member member,
             @RequestParam(required = false, defaultValue = "ko") String language
     ) {
-        return subscribeService.getSubscribedNewsletters(member, language);
+        return subscribeService.getSubscribedNewsletters(
+                member,
+                NewsletterLanguage.fromRequest(language).orElse(null)
+        );
     }
 
     @Override

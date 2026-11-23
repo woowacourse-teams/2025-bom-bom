@@ -31,6 +31,7 @@ import me.bombom.support.subscribe.FakeUnsubscribeAgent;
 import me.bombom.support.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @IntegrationTest
 class SubscribeServiceTest {
@@ -40,6 +41,8 @@ class SubscribeServiceTest {
     @Autowired
     private SubscribeService subscribeService;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private MemberRepository memberRepository;
 
@@ -86,12 +89,39 @@ class SubscribeServiceTest {
         ));
 
         // when
-        List<SubscribedNewsletterResponse> result = subscribeService.getSubscribedNewsletters(member, "ko");
+        List<SubscribedNewsletterResponse> result = subscribeService.getSubscribedNewsletters(member, null);
 
         // then
         assertThat(result).hasSize(2)
                 .extracting("name")
                 .containsExactlyInAnyOrder(newsletters.getFirst().getName(), newsletters.getLast().getName());
+    }
+
+    @Test
+    void 구독중인_뉴스레터를_요청한_언어로_조회하고_번역이_없으면_한국어로_대체한다() {
+        Member member = memberRepository.save(TestFixture.uniqueMemberFixture());
+        Category category = categoryRepository.save(TestFixture.createCategory());
+        NewsletterDetail detail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        NewsletterDetail fallbackDetail = newsletterDetailRepository.save(TestFixture.createNewsletterDetail(true));
+        Newsletter translated = newsletterRepository.save(TestFixture.createNewsletter(
+                "한국어 이름", "translated@test.com", category.getId(), detail.getId()));
+        Newsletter untranslated = newsletterRepository.save(TestFixture.createNewsletter(
+                "기본 이름", "fallback@test.com", category.getId(), fallbackDetail.getId()));
+        // 원본 값을 바꿔 일부 필드 번역 누락에 대한 필드별 대체도 확인한다.
+        translated = newsletterRepository.save(Newsletter.builder()
+                .id(translated.getId()).name("한국어 이름").description("한국어 설명")
+                .imageUrl(translated.getImageUrl()).email(translated.getEmail())
+                .categoryId(category.getId()).detailId(detail.getId()).build());
+        subscribeRepository.saveAll(List.of(
+                Subscribe.builder().memberId(member.getId()).newsletterId(translated.getId()).build(),
+                Subscribe.builder().memberId(member.getId()).newsletterId(untranslated.getId()).build()));
+        jdbcTemplate.update("INSERT INTO newsletter_translation (newsletter_id, language, name) VALUES (?, ?, ?)",
+                translated.getId(), "en", "English name");
+        List<SubscribedNewsletterResponse> result = subscribeService.getSubscribedNewsletters(member,
+                me.bombom.api.v1.newsletter.domain.NewsletterLanguage.EN);
+
+        assertThat(result).extracting("name").contains("English name", "기본 이름");
+        assertThat(result).extracting("description").contains("한국어 설명");
     }
 
     @Test

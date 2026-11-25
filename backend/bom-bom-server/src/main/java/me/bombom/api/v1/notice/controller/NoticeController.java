@@ -1,6 +1,7 @@
 package me.bombom.api.v1.notice.controller;
 
 import lombok.RequiredArgsConstructor;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
 import me.bombom.api.v1.notice.service.NoticeService;
 import org.springframework.data.domain.Page;
@@ -27,15 +28,18 @@ public class NoticeController implements NoticeControllerApi {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC),
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
-            }) Pageable pageable
+            }) Pageable pageable,
+            @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "ko") String language
     ) {
-        return noticeService.getNotices(pageable);
+        return noticeService.getNotices(pageable, NewsletterLanguage.fromRequest(language).orElse(null));
     }
 
     @Override
     @GetMapping("/representative")
-    public ResponseEntity<NoticeResponse> getRepresentativeNotice() {
-        return noticeService.getRepresentativeNotice()
+    public ResponseEntity<NoticeResponse> getRepresentativeNotice(
+            @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "ko") String language
+    ) {
+        return noticeService.getRepresentativeNotice(NewsletterLanguage.fromRequest(language).orElse(null))
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }

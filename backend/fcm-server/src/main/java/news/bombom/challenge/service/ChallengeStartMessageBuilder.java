@@ -33,7 +33,9 @@ public class ChallengeStartMessageBuilder implements NotificationMessageBuilder 
                 .category(NotificationCategory.CHALLENGE_START)
                 .data(Map.of(
                         "challengeId", String.valueOf(startNotification.getChallengeId()),
-                        "notificationType", NotificationPayloadType.CHALLENGE_START
+                        "notificationType", NotificationPayloadType.CHALLENGE_START,
+                        "notificationId", String.valueOf(startNotification.getId()),
+                        "category", NotificationCategory.CHALLENGE_START.name()
                 ))
                 .build();
     }

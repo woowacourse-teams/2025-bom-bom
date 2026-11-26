@@ -31,7 +31,9 @@ public class ArticleArrivalMessageBuilder implements NotificationMessageBuilder 
                 .category(NotificationCategory.ARTICLE)
                 .data(Map.of(
                         "articleId", String.valueOf(article.getArticleId()),
-                        "notificationType", NotificationPayloadType.ARTICLE
+                        "notificationType", NotificationPayloadType.ARTICLE,
+                        "notificationId", String.valueOf(article.getId()),
+                        "category", NotificationCategory.ARTICLE.name()
                 ))
                 .build();
     }

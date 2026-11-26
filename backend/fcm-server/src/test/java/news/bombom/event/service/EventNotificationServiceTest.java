@@ -215,7 +215,9 @@ class EventNotificationServiceTest {
                             && dataMap.containsKey("notificationType")
                             && dataMap.containsKey("scheduleType")
                             && dataMap.get("eventId").equals(EVENT_ID.toString())
-                            && dataMap.get("scheduleType").equals("BEFORE_MINUTES");
+                            && dataMap.get("scheduleType").equals("BEFORE_MINUTES")
+                            && dataMap.get("scheduleId").equals(SCHEDULE_ID.toString())
+                            && dataMap.get("category").equals("EVENT");
                 }),
                 any()
         );

@@ -38,7 +38,9 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
                 .category(NotificationCategory.CHALLENGE_TODO_REMINDER)
                 .data(Map.of(
                         "challengeId", String.valueOf(remind.getChallengeId()),
-                        "notificationType", NotificationPayloadType.DEFAULT
+                        "notificationType", NotificationPayloadType.DEFAULT,
+                        "notificationId", String.valueOf(remind.getId()),
+                        "category", NotificationCategory.CHALLENGE_TODO_REMINDER.name()
                 ))
                 .build();
     }

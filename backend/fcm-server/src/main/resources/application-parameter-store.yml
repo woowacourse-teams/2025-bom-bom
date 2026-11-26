@@ -12,3 +12,8 @@ spring:
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+notification:
+  admin:
+    # 어드민 알림 지표 API(X-Admin-Api-Key) 검증 키. 값이 없으면 해당 API는 모든 요청을 거부한다.
+    api-key: ${FCM_ADMIN_API_KEY:}

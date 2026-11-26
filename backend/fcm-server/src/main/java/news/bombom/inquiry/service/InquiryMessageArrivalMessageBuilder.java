@@ -28,6 +28,11 @@ public class InquiryMessageArrivalMessageBuilder implements NotificationMessageB
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.INQUIRY_MESSAGE_ARRIVAL;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         InquiryMessageArrivalNotification inquiry = (InquiryMessageArrivalNotification) notification;
         InquiryMessage message = inquiryMessageRepository.findById(inquiry.getMessageId())

@@ -20,6 +20,11 @@ public class ArticleArrivalMessageBuilder implements NotificationMessageBuilder 
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.ARTICLE;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         ArticleArrivalNotification article = (ArticleArrivalNotification) notification;
 

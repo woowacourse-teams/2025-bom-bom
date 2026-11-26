@@ -27,6 +27,11 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.CHALLENGE_TODO_REMINDER;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         ChallengeTodoReminderNotification remind = (ChallengeTodoReminderNotification) notification;
         ReminderMessageParams params = ReminderMessageParams.from(remind);

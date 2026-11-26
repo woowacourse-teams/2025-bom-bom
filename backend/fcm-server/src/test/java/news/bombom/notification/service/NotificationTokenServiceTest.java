@@ -103,6 +103,21 @@ class NotificationTokenServiceTest {
     }
 
     @Test
+    @DisplayName("OS 알림 권한 동기화 성공")
+    void updateOsPermission_Success() {
+        // Given
+        MemberFcmToken existingToken = mock(MemberFcmToken.class);
+        when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
+                .thenReturn(Optional.of(existingToken));
+
+        // When
+        notificationTokenService.updateOsPermission(TEST_MEMBER_ID, TEST_DEVICE_UUID, false);
+
+        // Then
+        verify(existingToken, times(1)).updateOsPermission(false);
+    }
+
+    @Test
     @DisplayName("알림 설정 업데이트 실패 - 토큰 없음")
     void updateNotificationSetting_Failure_TokenNotFound() {
         // Given

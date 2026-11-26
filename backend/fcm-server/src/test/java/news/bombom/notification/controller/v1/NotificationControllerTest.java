@@ -121,6 +121,28 @@ class NotificationControllerTest {
     }
 
     @Test
+    @DisplayName("OS 알림 권한 동기화 성공")
+    void updateOsPermission_Success() throws Exception {
+        mockMvc.perform(put("/api/v1/notifications/tokens/{memberId}/{deviceUuid}/os-permission",
+                        TEST_MEMBER_ID, TEST_DEVICE_UUID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"granted\": false}"))
+                .andExpect(status().isNoContent());
+
+        verify(notificationTokenService, times(1)).updateOsPermission(TEST_MEMBER_ID, TEST_DEVICE_UUID, false);
+    }
+
+    @Test
+    @DisplayName("OS 알림 권한 동기화 - granted 누락 시 400")
+    void updateOsPermission_ValidationFailure() throws Exception {
+        mockMvc.perform(put("/api/v1/notifications/tokens/{memberId}/{deviceUuid}/os-permission",
+                        TEST_MEMBER_ID, TEST_DEVICE_UUID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("알림 직접 발송 성공")
     void sendNotification_Success() throws Exception {
         // Given

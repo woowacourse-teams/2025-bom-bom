@@ -76,6 +76,21 @@ public class NotificationTokenService {
     }
 
     /**
+     * 기기 OS 알림 권한 동기화
+     */
+    @Transactional
+    public void updateOsPermission(Long memberId, String deviceUuid, boolean granted) {
+        Optional<MemberFcmToken> existingToken = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid);
+
+        if (existingToken.isPresent()) {
+            existingToken.get().updateOsPermission(granted);
+            log.info("OS 알림 권한 동기화: memberId={}, deviceUuid={}, granted={}", memberId, deviceUuid, granted);
+        } else {
+            log.warn("알림 토큰을 찾을 수 없습니다: memberId={}, deviceUuid={}", memberId, deviceUuid);
+        }
+    }
+
+    /**
      * 알림 토큰 삭제
      */
     @Transactional

@@ -37,6 +37,11 @@ public class MemberFcmToken extends BaseEntity {
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isNotificationEnabled = true;
 
+    /**
+     * 기기 OS의 알림 권한 허용 여부. null이면 앱이 아직 보고하지 않음(구버전 앱)
+     */
+    private Boolean osPermissionGranted;
+
     @Builder
     public MemberFcmToken(
             Long id,
@@ -58,5 +63,9 @@ public class MemberFcmToken extends BaseEntity {
 
     public void updateNotificationSetting(boolean enabled) {
         this.isNotificationEnabled = enabled;
+    }
+
+    public void updateOsPermission(boolean granted) {
+        this.osPermissionGranted = granted;
     }
 }

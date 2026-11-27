@@ -23,6 +23,7 @@ import news.bombom.notification.dto.response.stats.CategoryStatsResponse.Deliver
 import news.bombom.notification.dto.response.stats.CategoryStatsResponse.DeviceSendsResponse;
 import news.bombom.notification.dto.response.stats.CategoryStatsResponse.FailureReasonResponse;
 import news.bombom.notification.dto.response.stats.CategoryStatsResponse.OpensResponse;
+import news.bombom.notification.dto.response.stats.DailyStatsResponse;
 import news.bombom.notification.dto.response.stats.NotificationStatsResponse;
 import news.bombom.notification.dto.response.stats.PlatformOpenCountResponse;
 import news.bombom.notification.dto.response.stats.ReachResponse;
@@ -35,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 어드민 알림 지표 집계. 날짜는 Asia/Seoul 기준이며 from·to를 모두 포함한다.
  * 발송·기기 로그는 발송 시각, 열림은 열림 시각 기준으로 기간에 귀속한다.
+ * 단, 일별 추이(daily)는 열림을 발송일에 귀속하는 발송일 코호트로 센다.
  */
 @Service
 @RequiredArgsConstructor
@@ -64,7 +66,8 @@ public class NotificationStatsService {
                 to,
                 categories,
                 getReach(),
-                getOpensByPlatform(start, end)
+                getOpensByPlatform(start, end),
+                getDaily(from, to, start, end)
         );
     }
 
@@ -199,6 +202,37 @@ public class NotificationStatsService {
         return Arrays.stream(DevicePlatform.values())
                 .map(platform -> new PlatformOpenCountResponse(platform, counts.getOrDefault(platform, 0L)))
                 .toList();
+    }
+
+    /**
+     * 기간의 모든 날짜 × 모든 카테고리를 빠짐없이 채운다. 카테고리당 날짜별 GROUP BY 쿼리 한두 번으로 끝낸다.
+     */
+    private List<DailyStatsResponse> getDaily(LocalDate from, LocalDate to,
+                                              LocalDateTime start, LocalDateTime end) {
+        Map<NotificationCategory, Map<LocalDate, Long>> sentByCategory = new LinkedHashMap<>();
+        Map<NotificationCategory, Map<LocalDate, Long>> openedByCategory = new LinkedHashMap<>();
+        for (NotificationCategory category : NotificationCategory.values()) {
+            if (category.isUseTopic()) {
+                openedByCategory.put(category,
+                        statsQueryRepository.countDistinctScheduleMemberOpensBySendDate(category, start, end));
+                continue;
+            }
+            sentByCategory.put(category, statsQueryRepository.countSentBySendDate(category, start, end));
+            openedByCategory.put(category,
+                    statsQueryRepository.countOpenedNotificationsBySendDate(category, start, end));
+        }
+
+        List<DailyStatsResponse> daily = new ArrayList<>();
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            for (NotificationCategory category : NotificationCategory.values()) {
+                Long sent = category.isUseTopic()
+                        ? null
+                        : sentByCategory.get(category).getOrDefault(date, 0L);
+                daily.add(new DailyStatsResponse(
+                        date, category, sent, openedByCategory.get(category).getOrDefault(date, 0L)));
+            }
+        }
+        return daily;
     }
 
     private Double divide(long numerator, Long denominator) {

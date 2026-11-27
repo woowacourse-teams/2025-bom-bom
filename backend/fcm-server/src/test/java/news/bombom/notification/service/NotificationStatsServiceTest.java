@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import news.bombom.article.domain.ArticleArrivalNotification;
 import news.bombom.article.domain.ArticleArrivalNotificationFailed;
+import news.bombom.event.domain.EventNotificationSchedule;
+import news.bombom.event.domain.NotificationScheduleType;
 import news.bombom.notification.domain.DevicePlatform;
 import news.bombom.notification.domain.MemberFcmToken;
 import news.bombom.notification.domain.MemberNotificationSetting;
@@ -18,6 +20,7 @@ import news.bombom.notification.domain.SendResult.SendStatus;
 import news.bombom.notification.dto.response.stats.CategoryStatsResponse;
 import news.bombom.notification.dto.response.stats.CategoryStatsResponse.DeliveryMode;
 import news.bombom.notification.dto.response.stats.CategoryStatsResponse.FailureReasonResponse;
+import news.bombom.notification.dto.response.stats.DailyStatsResponse;
 import news.bombom.notification.dto.response.stats.NotificationStatsResponse;
 import news.bombom.notification.dto.response.stats.PlatformOpenCountResponse;
 import news.bombom.notification.repository.NotificationStatsQueryRepository;
@@ -161,6 +164,40 @@ class NotificationStatsServiceTest {
     }
 
     @Test
+    void 일별_추이는_열림을_발송일에_귀속하고_기간의_모든_날짜와_카테고리를_채운다() {
+        EventNotificationSchedule schedule = EventNotificationSchedule.builder()
+                .eventId(1L)
+                .scheduledAt(LocalDateTime.now())
+                .type(NotificationScheduleType.AT_START)
+                .build();
+        schedule.markAsSent();
+        entityManager.persist(schedule);
+        persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_A, DevicePlatform.ANDROID,
+                LocalDateTime.now());
+        persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_A, DevicePlatform.ANDROID,
+                LocalDateTime.now());
+        persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_B, DevicePlatform.IOS,
+                LocalDateTime.now());
+        entityManager.flush();
+        entityManager.clear();
+
+        NotificationStatsResponse response = statsService.getStats(today.minusDays(2), today);
+
+        assertThat(response.daily()).hasSize(3 * NotificationCategory.values().length);
+        assertThat(response.daily().get(0))
+                .isEqualTo(new DailyStatsResponse(today.minusDays(2), NotificationCategory.ARTICLE, 0L, 0L));
+        // 발송 2건 중 1건이 열렸다. 발송 전 날짜에 기록된 열림도 발송일로 귀속돼 한 번만 센다.
+        assertThat(findDaily(response, today, NotificationCategory.ARTICLE))
+                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.ARTICLE, 2L, 1L));
+        // 토픽 발송은 발송 수가 없고, 발송된 스케줄의 (스케줄, 회원) 조합만 센다.
+        assertThat(findDaily(response, today, NotificationCategory.EVENT))
+                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.EVENT, null, 2L));
+        assertThat(findDaily(response, today.minusDays(1), NotificationCategory.EVENT).sent()).isNull();
+        assertThat(findDaily(response, today, NotificationCategory.INQUIRY_MESSAGE_ARRIVAL))
+                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.INQUIRY_MESSAGE_ARRIVAL, 0L, 0L));
+    }
+
+    @Test
     void to가_from보다_이전이면_예외가_발생한다() {
         assertThatThrownBy(() -> statsService.getStats(today, today.minusDays(1)))
                 .isInstanceOf(ResponseStatusException.class);
@@ -175,6 +212,14 @@ class NotificationStatsServiceTest {
     private CategoryStatsResponse findCategory(NotificationStatsResponse response, NotificationCategory category) {
         return response.categories().stream()
                 .filter(stats -> stats.category() == category)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private DailyStatsResponse findDaily(NotificationStatsResponse response, LocalDate date,
+                                         NotificationCategory category) {
+        return response.daily().stream()
+                .filter(daily -> daily.date().equals(date) && daily.category() == category)
                 .findFirst()
                 .orElseThrow();
     }

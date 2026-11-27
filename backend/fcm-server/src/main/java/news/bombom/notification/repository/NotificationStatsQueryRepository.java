@@ -1,6 +1,7 @@
 package news.bombom.notification.repository;
 
 import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -185,6 +186,63 @@ public class NotificationStatsQueryRepository {
                 .size();
     }
 
+    /**
+     * 발송일별 SENT 알림 수. key = 알림 row 생성일
+     */
+    public Map<LocalDate, Long> countSentBySendDate(NotificationCategory category,
+                                                    LocalDateTime start, LocalDateTime end) {
+        List<Object[]> rows = entityManager.createQuery(
+                        "SELECT CAST(n.createdAt AS LocalDate), COUNT(n) FROM " + entityName(category) + " n"
+                                + " WHERE n.status = :status AND n.createdAt >= :start AND n.createdAt < :end"
+                                + " GROUP BY CAST(n.createdAt AS LocalDate)", Object[].class)
+                .setParameter("status", NotificationStatus.SENT)
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList();
+        return toDateCounts(rows);
+    }
+
+    /**
+     * 발송일별로, 그날 보낸 SENT 알림 중 한 번이라도 열린 알림 수. 열림 시각은 기간에 제한하지 않는다.
+     */
+    public Map<LocalDate, Long> countOpenedNotificationsBySendDate(NotificationCategory category,
+                                                                   LocalDateTime start, LocalDateTime end) {
+        List<Object[]> rows = entityManager.createQuery(
+                        "SELECT CAST(n.createdAt AS LocalDate), COUNT(DISTINCT n.id)"
+                                + " FROM " + entityName(category) + " n, NotificationOpen o"
+                                + " WHERE o.notificationId = n.id AND o.category = :category"
+                                + " AND n.status = :status AND n.createdAt >= :start AND n.createdAt < :end"
+                                + " GROUP BY CAST(n.createdAt AS LocalDate)", Object[].class)
+                .setParameter("category", category)
+                .setParameter("status", NotificationStatus.SENT)
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList();
+        return toDateCounts(rows);
+    }
+
+    /**
+     * 토픽 발송 스케줄의 실제 발송일별로, 그 스케줄 알림을 연 (scheduleId, memberId) 조합 수.
+     * memberId가 없는 열림은 스케줄마다 하나로 묶인다.
+     */
+    public Map<LocalDate, Long> countDistinctScheduleMemberOpensBySendDate(NotificationCategory category,
+                                                                           LocalDateTime start,
+                                                                           LocalDateTime end) {
+        List<Object[]> rows = entityManager.createQuery(
+                        "SELECT DISTINCT CAST(s.sentAt AS LocalDate), o.scheduleId, o.memberId"
+                                + " FROM EventNotificationSchedule s, NotificationOpen o"
+                                + " WHERE o.scheduleId = s.id AND o.category = :category"
+                                + " AND s.sent = true AND s.sentAt >= :start AND s.sentAt < :end", Object[].class)
+                .setParameter("category", category)
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList();
+
+        Map<LocalDate, Long> counts = new HashMap<>();
+        rows.forEach(row -> counts.merge((LocalDate) row[0], 1L, Long::sum));
+        return counts;
+    }
+
     public Map<Long, LocalDateTime> findCreatedAtByIds(NotificationCategory category, Collection<Long> ids) {
         Map<Long, LocalDateTime> createdAtById = new HashMap<>();
         List<Long> idList = new ArrayList<>(ids);
@@ -245,6 +303,12 @@ public class NotificationStatsQueryRepository {
 
         Map<DevicePlatform, Long> counts = new EnumMap<>(DevicePlatform.class);
         rows.forEach(row -> counts.put((DevicePlatform) row[0], (Long) row[1]));
+        return counts;
+    }
+
+    private Map<LocalDate, Long> toDateCounts(List<Object[]> rows) {
+        Map<LocalDate, Long> counts = new HashMap<>();
+        rows.forEach(row -> counts.put((LocalDate) row[0], (Long) row[1]));
         return counts;
     }
 

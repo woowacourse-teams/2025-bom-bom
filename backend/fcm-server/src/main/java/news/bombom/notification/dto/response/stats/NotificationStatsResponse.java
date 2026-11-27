@@ -10,6 +10,7 @@ public record NotificationStatsResponse(
         LocalDate to,
         List<CategoryStatsResponse> categories,
         ReachResponse reach,
-        List<PlatformOpenCountResponse> opensByPlatform
+        List<PlatformOpenCountResponse> opensByPlatform,
+        List<DailyStatsResponse> daily
 ) {
 }

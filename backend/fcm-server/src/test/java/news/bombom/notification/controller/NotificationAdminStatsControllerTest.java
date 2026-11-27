@@ -53,7 +53,7 @@ class NotificationAdminStatsControllerTest {
         LocalDate to = LocalDate.of(2026, 11, 26);
         when(notificationStatsService.getStats(from, to)).thenReturn(new NotificationStatsResponse(
                 OffsetDateTime.parse("2026-11-26T21:00:00+09:00"), from, to, List.of(),
-                new ReachResponse(0, 0, 0, 0, 0), List.of()));
+                new ReachResponse(0, 0, 0, 0, 0), List.of(), List.of()));
 
         mockMvc.perform(get(PATH)
                         .header(AdminApiKeyVerifier.HEADER_NAME, "test-admin-key")

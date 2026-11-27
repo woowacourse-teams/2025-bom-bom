@@ -17,7 +17,10 @@ CREATE TABLE notification_open (
     opened_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
     INDEX idx_notification_open_opened_at (opened_at),
-    INDEX idx_notification_open_category_opened_at (category, opened_at)
+    INDEX idx_notification_open_category_opened_at (category, opened_at),
+    -- 일별 추이: 발송일 코호트로 알림 row·스케줄과 열림을 잇는다
+    INDEX idx_notification_open_category_notification_id (category, notification_id),
+    INDEX idx_notification_open_schedule_id (schedule_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 회원별 알림 1건의 기기 단위 발송 결과

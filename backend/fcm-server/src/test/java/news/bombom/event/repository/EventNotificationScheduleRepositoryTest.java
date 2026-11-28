@@ -80,7 +80,7 @@ class EventNotificationScheduleRepositoryTest {
                 .type(NotificationScheduleType.BEFORE_MINUTES)
                 .minutesBefore(40)
                 .build();
-        sent.markAsSent();
+        sent.markAsSent(null);
         entityManager.persistAndFlush(sent);
 
         // 취소된 이벤트의 알림 (제외되어야 함)

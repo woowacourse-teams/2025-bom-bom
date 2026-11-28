@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationProcessingService {
 
+    public static final String NO_TOKEN_ERROR = "FCM 토큰 없음";
+
     private final NotificationTokenService notificationTokenService;
     private final NotificationSenderService notificationSender;
     private final NotificationSettingService notificationSettingService;
@@ -33,7 +35,7 @@ public class NotificationProcessingService {
 
         List<MemberFcmToken> fcmTokens = notificationTokenService.resolveTokens(memberId);
         if (fcmTokens.isEmpty()) {
-            statusHandler.markAsFailed(notification, "FCM 토큰 없음");
+            statusHandler.markAsFailed(notification, NO_TOKEN_ERROR);
             return;
         }
 

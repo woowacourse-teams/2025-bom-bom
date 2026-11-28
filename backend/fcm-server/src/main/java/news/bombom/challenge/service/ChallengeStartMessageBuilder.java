@@ -20,6 +20,11 @@ public class ChallengeStartMessageBuilder implements NotificationMessageBuilder 
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.CHALLENGE_START;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         ChallengeStartNotification startNotification = (ChallengeStartNotification) notification;
         String title = startNotification.getChallengeName() + " 오늘부터 시작!";
@@ -33,7 +38,9 @@ public class ChallengeStartMessageBuilder implements NotificationMessageBuilder 
                 .category(NotificationCategory.CHALLENGE_START)
                 .data(Map.of(
                         "challengeId", String.valueOf(startNotification.getChallengeId()),
-                        "notificationType", NotificationPayloadType.CHALLENGE_START
+                        "notificationType", NotificationPayloadType.CHALLENGE_START,
+                        "notificationId", String.valueOf(startNotification.getId()),
+                        "category", NotificationCategory.CHALLENGE_START.name()
                 ))
                 .build();
     }

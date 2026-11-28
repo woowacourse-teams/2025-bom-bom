@@ -17,6 +17,7 @@ import news.bombom.notification.repository.MemberFcmTokenRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,6 +50,24 @@ class NotificationTokenServiceTest {
         // Then
         verify(fcmTokenRepository, times(1)).deleteByDeviceUuid(TEST_DEVICE_UUID);
         verify(fcmTokenRepository, times(1)).save(any(MemberFcmToken.class));
+    }
+
+    @Test
+    @DisplayName("토큰을 다시 등록해도 기기의 OS 알림 권한을 유지한다")
+    void registerToken_KeepsOsPermission() {
+        // Given
+        MemberFcmToken previousToken = createTestToken();
+        previousToken.updateOsPermission(false);
+        when(fcmTokenRepository.findByDeviceUuid(TEST_DEVICE_UUID)).thenReturn(List.of(previousToken));
+
+        // When
+        notificationTokenService.registerToken(TEST_MEMBER_ID, TEST_DEVICE_UUID, NEW_FCM_TOKEN);
+
+        // Then
+        ArgumentCaptor<MemberFcmToken> saved = ArgumentCaptor.forClass(MemberFcmToken.class);
+        verify(fcmTokenRepository).save(saved.capture());
+        assertThat(saved.getValue().getOsPermissionGranted()).isFalse();
+        assertThat(saved.getValue().getFcmToken()).isEqualTo(NEW_FCM_TOKEN);
     }
 
     @Test
@@ -100,6 +119,21 @@ class NotificationTokenServiceTest {
         // Then
         verify(fcmTokenRepository, times(1)).findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID);
         verify(existingToken, times(1)).updateNotificationSetting(false);
+    }
+
+    @Test
+    @DisplayName("OS 알림 권한 동기화 성공")
+    void updateOsPermission_Success() {
+        // Given
+        MemberFcmToken existingToken = mock(MemberFcmToken.class);
+        when(fcmTokenRepository.findByMemberIdAndDeviceUuid(TEST_MEMBER_ID, TEST_DEVICE_UUID))
+                .thenReturn(Optional.of(existingToken));
+
+        // When
+        notificationTokenService.updateOsPermission(TEST_MEMBER_ID, TEST_DEVICE_UUID, false);
+
+        // Then
+        verify(existingToken, times(1)).updateOsPermission(false);
     }
 
     @Test

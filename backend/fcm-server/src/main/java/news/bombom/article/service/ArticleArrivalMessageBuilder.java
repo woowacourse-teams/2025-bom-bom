@@ -20,6 +20,11 @@ public class ArticleArrivalMessageBuilder implements NotificationMessageBuilder 
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.ARTICLE;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         ArticleArrivalNotification article = (ArticleArrivalNotification) notification;
 
@@ -31,7 +36,9 @@ public class ArticleArrivalMessageBuilder implements NotificationMessageBuilder 
                 .category(NotificationCategory.ARTICLE)
                 .data(Map.of(
                         "articleId", String.valueOf(article.getArticleId()),
-                        "notificationType", NotificationPayloadType.ARTICLE
+                        "notificationType", NotificationPayloadType.ARTICLE,
+                        "notificationId", String.valueOf(article.getId()),
+                        "category", NotificationCategory.ARTICLE.name()
                 ))
                 .build();
     }

@@ -21,6 +21,7 @@ import news.bombom.event.repository.EventNotificationScheduleRepository;
 import news.bombom.notification.client.firebase.FcmNotificationSender;
 import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.dto.NotificationResult;
+import news.bombom.notification.repository.NotificationStatsQueryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,9 @@ class EventNotificationServiceTest {
 
     @Mock
     private FcmNotificationSender fcmNotificationSender;
+
+    @Mock
+    private NotificationStatsQueryRepository statsQueryRepository;
 
     @InjectMocks
     private EventNotificationService eventNotificationService;
@@ -104,6 +108,46 @@ class EventNotificationServiceTest {
                 eq(NotificationCategory.EVENT)
         );
         verify(scheduleRepository, times(1)).save(schedule);
+    }
+
+    @Test
+    @DisplayName("발송 성공 시 발송 직전의 수신 동의 회원 수를 스케줄에 남긴다")
+    void sendEventNotification_Success_RecordsConsentingMemberCount() {
+        // given
+        Event event = createEvent(EventStatus.SCHEDULED);
+        EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.AT_START, null);
+
+        when(eventService.getEvent(EVENT_ID)).thenReturn(event);
+        when(statsQueryRepository.countConsentingMembersInNewTransaction(NotificationCategory.EVENT)).thenReturn(120L);
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
+                .thenReturn(NotificationResult.success("message-id-123"));
+
+        // when
+        eventNotificationService.sendEventNotification(schedule);
+
+        // then
+        assertThat(schedule.getConsentingMemberCount()).isEqualTo(120);
+    }
+
+    @Test
+    @DisplayName("수신 동의 회원 수 집계에 실패해도 알림은 발송한다")
+    void sendEventNotification_CountFailure_StillSends() {
+        // given
+        Event event = createEvent(EventStatus.SCHEDULED);
+        EventNotificationSchedule schedule = createSchedule(NotificationScheduleType.AT_START, null);
+
+        when(eventService.getEvent(EVENT_ID)).thenReturn(event);
+        when(statsQueryRepository.countConsentingMembersInNewTransaction(NotificationCategory.EVENT))
+                .thenThrow(new IllegalStateException("db error"));
+        when(fcmNotificationSender.sendToTopic(anyString(), anyString(), anyString(), anyMap(), any()))
+                .thenReturn(NotificationResult.success("message-id-123"));
+
+        // when
+        eventNotificationService.sendEventNotification(schedule);
+
+        // then
+        assertThat(schedule.isSent()).isTrue();
+        assertThat(schedule.getConsentingMemberCount()).isNull();
     }
 
     @Test
@@ -215,7 +259,9 @@ class EventNotificationServiceTest {
                             && dataMap.containsKey("notificationType")
                             && dataMap.containsKey("scheduleType")
                             && dataMap.get("eventId").equals(EVENT_ID.toString())
-                            && dataMap.get("scheduleType").equals("BEFORE_MINUTES");
+                            && dataMap.get("scheduleType").equals("BEFORE_MINUTES")
+                            && dataMap.get("scheduleId").equals(SCHEDULE_ID.toString())
+                            && dataMap.get("category").equals("EVENT");
                 }),
                 any()
         );

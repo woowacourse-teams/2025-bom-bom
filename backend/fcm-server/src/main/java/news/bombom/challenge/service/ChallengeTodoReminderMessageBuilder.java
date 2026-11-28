@@ -27,6 +27,11 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.CHALLENGE_TODO_REMINDER;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         ChallengeTodoReminderNotification remind = (ChallengeTodoReminderNotification) notification;
         ReminderMessageParams params = ReminderMessageParams.from(remind);
@@ -38,7 +43,9 @@ public class ChallengeTodoReminderMessageBuilder implements NotificationMessageB
                 .category(NotificationCategory.CHALLENGE_TODO_REMINDER)
                 .data(Map.of(
                         "challengeId", String.valueOf(remind.getChallengeId()),
-                        "notificationType", NotificationPayloadType.DEFAULT
+                        "notificationType", NotificationPayloadType.DEFAULT,
+                        "notificationId", String.valueOf(remind.getId()),
+                        "category", NotificationCategory.CHALLENGE_TODO_REMINDER.name()
                 ))
                 .build();
     }

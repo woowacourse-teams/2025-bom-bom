@@ -9,6 +9,8 @@ public interface MemberFcmTokenRepository extends JpaRepository<MemberFcmToken, 
 
     List<MemberFcmToken> findByMemberId(Long memberId);
 
+    List<MemberFcmToken> findByDeviceUuid(String deviceUuid);
+
     Optional<MemberFcmToken> findByMemberIdAndDeviceUuid(Long memberId, String deviceUuid);
 
     void deleteByMemberIdAndDeviceUuid(Long memberId, String deviceUuid);

@@ -28,6 +28,11 @@ public class InquiryMessageArrivalMessageBuilder implements NotificationMessageB
     }
 
     @Override
+    public NotificationCategory getCategory() {
+        return NotificationCategory.INQUIRY_MESSAGE_ARRIVAL;
+    }
+
+    @Override
     public NotificationMessage build(Notification notification, MemberFcmToken token) {
         InquiryMessageArrivalNotification inquiry = (InquiryMessageArrivalNotification) notification;
         InquiryMessage message = inquiryMessageRepository.findById(inquiry.getMessageId())
@@ -41,7 +46,9 @@ public class InquiryMessageArrivalMessageBuilder implements NotificationMessageB
                 .category(NotificationCategory.INQUIRY_MESSAGE_ARRIVAL)
                 .data(Map.of(
                         "roomId", String.valueOf(message.getRoomId()),
-                        "notificationType", NotificationPayloadType.INQUIRY_MESSAGE_ARRIVAL
+                        "notificationType", NotificationPayloadType.INQUIRY_MESSAGE_ARRIVAL,
+                        "notificationId", String.valueOf(inquiry.getId()),
+                        "category", NotificationCategory.INQUIRY_MESSAGE_ARRIVAL.name()
                 ))
                 .build();
     }

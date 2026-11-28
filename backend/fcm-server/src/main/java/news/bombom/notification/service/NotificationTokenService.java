@@ -2,6 +2,7 @@ package news.bombom.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +24,7 @@ public class NotificationTokenService {
      */
     @Transactional
     public void registerToken(Long memberId, String deviceUuid, String fcmToken) {
-        fcmTokenRepository.deleteByDeviceUuid(deviceUuid);
-
-        MemberFcmToken token = MemberFcmToken.builder()
-                .memberId(memberId)
-                .deviceUuid(deviceUuid)
-                .fcmToken(fcmToken)
-                .isNotificationEnabled(true)
-                .build();
-        fcmTokenRepository.save(token);
+        replaceDeviceToken(memberId, deviceUuid, fcmToken);
         log.info("알림 토큰 등록 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
     }
 
@@ -48,15 +41,31 @@ public class NotificationTokenService {
             return;
         }
 
+        replaceDeviceToken(memberId, deviceUuid, fcmToken);
+        log.info("알림 토큰 처리 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
+    }
+
+    /**
+     * 기기의 기존 토큰을 지우고 새로 만든다. OS 알림 권한은 회원이 아니라 기기 설정이라 그대로 옮긴다.
+     */
+    private void replaceDeviceToken(Long memberId, String deviceUuid, String fcmToken) {
+        Boolean osPermissionGranted = fcmTokenRepository.findByDeviceUuid(deviceUuid).stream()
+                .map(MemberFcmToken::getOsPermissionGranted)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
         fcmTokenRepository.deleteByDeviceUuid(deviceUuid);
+
         MemberFcmToken token = MemberFcmToken.builder()
                 .memberId(memberId)
                 .deviceUuid(deviceUuid)
                 .fcmToken(fcmToken)
                 .isNotificationEnabled(true)
                 .build();
+        if (osPermissionGranted != null) {
+            token.updateOsPermission(osPermissionGranted);
+        }
         fcmTokenRepository.save(token);
-        log.info("알림 토큰 처리 완료: memberId={}, deviceUuid={}", memberId, deviceUuid);
     }
 
     /**
@@ -70,6 +79,21 @@ public class NotificationTokenService {
             MemberFcmToken fcmToken = existingToken.get();
             fcmToken.updateNotificationSetting(enabled);
             log.info("알림 설정 변경: memberId={}, deviceUuid={}, enabled={}", memberId, deviceUuid, enabled);
+        } else {
+            log.warn("알림 토큰을 찾을 수 없습니다: memberId={}, deviceUuid={}", memberId, deviceUuid);
+        }
+    }
+
+    /**
+     * 기기 OS 알림 권한 동기화
+     */
+    @Transactional
+    public void updateOsPermission(Long memberId, String deviceUuid, boolean granted) {
+        Optional<MemberFcmToken> existingToken = fcmTokenRepository.findByMemberIdAndDeviceUuid(memberId, deviceUuid);
+
+        if (existingToken.isPresent()) {
+            existingToken.get().updateOsPermission(granted);
+            log.info("OS 알림 권한 동기화: memberId={}, deviceUuid={}, granted={}", memberId, deviceUuid, granted);
         } else {
             log.warn("알림 토큰을 찾을 수 없습니다: memberId={}, deviceUuid={}", memberId, deviceUuid);
         }

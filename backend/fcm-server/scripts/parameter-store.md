@@ -11,6 +11,10 @@ FCM은 메일 서버 및 메인 서비스와 동일한 Parameter Store 항목을
 
 JDBC URL은 RDS 호스트명 뒤에 포트 `3306`과 MySQL 연결 옵션을 붙여 구성합니다. 비밀번호가 변경되면 기존 `/bom-bom/prod/MYSQL_PASSWORD` 값을 갱신하면 됩니다. FCM용으로 복제된 값을 만들 필요는 없습니다.
 
+## 어드민 알림 지표 API 키
+
+`GET /api/v1/notifications/admin/stats`는 `X-Admin-Api-Key` 헤더를 `/bom-bom/prod/FCM_ADMIN_API_KEY`(`SecureString`) 값과 비교합니다. 이 값은 선택 항목이라 배포 전 점검 대상에 넣지 않았습니다. 값이 없으면 앱은 정상 기동하고 이 API만 모든 요청을 `401`로 거부합니다. 이 API는 어드민 서버(`Bombom-Team/admin`)가 관리자 세션을 확인한 뒤 호출하며, 어드민 서버도 배포할 때 같은 파라미터를 읽습니다. 값을 바꾸면 fcm-server와 어드민 서버를 함께 재배포합니다.
+
 ## GitHub Actions와 YAML
 
 나머지 운영 설정은 GitHub Secret `FCM_APPLICATION_PROD_YML`에서 생성합니다. 워크플로우는 패키징 전에 생성된 `application.yml`에서 `spring.datasource.url`, `spring.datasource.username`, `spring.datasource.password` 항목을 제거합니다. 따라서 이 Secret에 예전 DB 접속 정보가 남아 있어도 새 JAR나 이미지에는 포함되지 않습니다. Secret에서 해당 세 항목을 직접 삭제해도 됩니다.

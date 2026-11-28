@@ -41,7 +41,7 @@ public class FcmNotificationSender implements NotificationSender {
 
         } catch (FirebaseMessagingException e) {
             log.error("FCM 발송 실패: recipient={}, error={}", message.getRecipient(), e.getMessage());
-            return NotificationResult.failure("FCM 발송 실패: " + e.getMessage());
+            return NotificationResult.failure("FCM 발송 실패: " + e.getMessage(), resolveErrorCode(e));
         }
     }
 
@@ -117,6 +117,13 @@ public class FcmNotificationSender implements NotificationSender {
             log.warn("FCM analytics label 형식이 유효하지 않아 라벨 없이 발송합니다: category={}", category, e);
             return null;
         }
+    }
+
+    private String resolveErrorCode(FirebaseMessagingException e) {
+        if (e.getMessagingErrorCode() != null) {
+            return e.getMessagingErrorCode().name();
+        }
+        return e.getErrorCode() != null ? e.getErrorCode().name() : null;
     }
 
     private Notification createNotification(String title, String content) {

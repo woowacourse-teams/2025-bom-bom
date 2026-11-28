@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import news.bombom.notification.dto.request.NotificationSendRequest;
 import news.bombom.notification.dto.request.NotificationSettingRequest;
 import news.bombom.notification.dto.request.NotificationTokenRequest;
+import news.bombom.notification.dto.request.OsPermissionRequest;
 import news.bombom.notification.service.NotificationProcessingService;
 import news.bombom.notification.service.NotificationService;
 import news.bombom.notification.service.NotificationTokenService;
@@ -50,6 +51,15 @@ public class NotificationController {
             @PathVariable @NotBlank String deviceUuid,
             @Valid @RequestBody NotificationSettingRequest request) {
         notificationTokenService.updateNotificationSetting(memberId, deviceUuid, request.enabled());
+    }
+
+    @PutMapping("/tokens/{memberId}/{deviceUuid}/os-permission")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateOsPermission(
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long memberId,
+            @PathVariable @NotBlank String deviceUuid,
+            @Valid @RequestBody OsPermissionRequest request) {
+        notificationTokenService.updateOsPermission(memberId, deviceUuid, request.granted());
     }
 
     @GetMapping("/tokens/{memberId}/{deviceUuid}/settings/status")

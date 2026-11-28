@@ -37,6 +37,12 @@ public class EventNotificationSchedule extends BaseEntity {
 
     private LocalDateTime sentAt;
 
+    /**
+     * 발송 시점의 이벤트 알림 수신 동의 회원 수. 토픽 발송은 수신 대상 수를 알 수 없어 열림률 분모(근사)로 쓴다.
+     * 기록 전에 발송된 스케줄이나 집계에 실패하면 null이다.
+     */
+    private Integer consentingMemberCount;
+
     @Builder
     public EventNotificationSchedule(
             @NonNull Long eventId,
@@ -51,8 +57,9 @@ public class EventNotificationSchedule extends BaseEntity {
         this.sent = false;
     }
 
-    public void markAsSent() {
+    public void markAsSent(Integer consentingMemberCount) {
         this.sent = true;
         this.sentAt = LocalDateTime.now();
+        this.consentingMemberCount = consentingMemberCount;
     }
 }

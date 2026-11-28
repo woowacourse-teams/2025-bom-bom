@@ -15,6 +15,8 @@ import news.bombom.notification.domain.NotificationCategory;
 import news.bombom.notification.domain.NotificationStatus;
 import news.bombom.notification.domain.SendResult.SendStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 어드민 알림 지표 집계 쿼리. 기간은 [start, end) 범위다.
@@ -243,6 +245,25 @@ public class NotificationStatsQueryRepository {
         return counts;
     }
 
+    /**
+     * 기간에 발송된 이벤트 스케줄의 발송 시점 수신 동의 회원 수를 발송일별로 더한다.
+     * 값이 기록되기 전에 발송된 스케줄은 fallback(조회 시점 동의 회원 수)으로 대신한다.
+     */
+    public Map<LocalDate, Long> sumEventConsentingMembersBySendDate(LocalDateTime start, LocalDateTime end,
+                                                                    long fallback) {
+        List<Object[]> rows = entityManager.createQuery(
+                        "SELECT CAST(s.sentAt AS LocalDate), s.consentingMemberCount FROM EventNotificationSchedule s"
+                                + " WHERE s.sent = true AND s.sentAt >= :start AND s.sentAt < :end", Object[].class)
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList();
+
+        Map<LocalDate, Long> sums = new HashMap<>();
+        rows.forEach(row -> sums.merge((LocalDate) row[0],
+                row[1] == null ? fallback : ((Integer) row[1]).longValue(), Long::sum));
+        return sums;
+    }
+
     public Map<Long, LocalDateTime> findCreatedAtByIds(NotificationCategory category, Collection<Long> ids) {
         Map<Long, LocalDateTime> createdAtById = new HashMap<>();
         List<Long> idList = new ArrayList<>(ids);
@@ -271,6 +292,15 @@ public class NotificationStatsQueryRepository {
                 .setParameter("category", category)
                 .setParameter("defaultSetting", category.getDefaultSetting())
                 .getSingleResult();
+    }
+
+    /**
+     * 발송 트랜잭션 안에서 쿼리가 실패하면 트랜잭션이 롤백 대상으로 표시돼 발송 완료 기록까지 롤백된다.
+     * 발송 중 지표용으로 셀 때는 별도 트랜잭션에서 센다.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public long countConsentingMembersInNewTransaction(NotificationCategory category) {
+        return countConsentingMembers(category);
     }
 
     public long countMembersWithToken() {

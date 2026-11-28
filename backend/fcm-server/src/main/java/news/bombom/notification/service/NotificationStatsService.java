@@ -101,7 +101,8 @@ public class NotificationStatsService {
                         statsQueryRepository.countUnlinkedOpens(category, start, end)),
                 divide(uniqueLinked, statusCounts.get(NotificationStatus.SENT)),
                 getMedianSecondsToOpen(category, firstOpenedAt),
-                statsQueryRepository.countConsentingMembers(category)
+                statsQueryRepository.countConsentingMembers(category),
+                null
         );
     }
 
@@ -109,6 +110,9 @@ public class NotificationStatsService {
                                                         LocalDateTime start, LocalDateTime end) {
         long uniqueLinked = statsQueryRepository.countDistinctScheduleMemberOpens(category, start, end);
         long consentingMembers = statsQueryRepository.countConsentingMembers(category);
+        long estimatedRecipients = statsQueryRepository
+                .sumEventConsentingMembersBySendDate(start, end, consentingMembers)
+                .values().stream().mapToLong(Long::longValue).sum();
 
         return new CategoryStatsResponse(
                 category,
@@ -120,9 +124,10 @@ public class NotificationStatsService {
                         statsQueryRepository.countLinkedOpens(category, start, end),
                         uniqueLinked,
                         statsQueryRepository.countUnlinkedOpens(category, start, end)),
-                divide(uniqueLinked, consentingMembers),
+                divide(uniqueLinked, estimatedRecipients),
                 null,
-                consentingMembers
+                consentingMembers,
+                estimatedRecipients
         );
     }
 
@@ -211,10 +216,13 @@ public class NotificationStatsService {
                                               LocalDateTime start, LocalDateTime end) {
         Map<NotificationCategory, Map<LocalDate, Long>> sentByCategory = new LinkedHashMap<>();
         Map<NotificationCategory, Map<LocalDate, Long>> openedByCategory = new LinkedHashMap<>();
+        Map<NotificationCategory, Map<LocalDate, Long>> recipientsByCategory = new LinkedHashMap<>();
         for (NotificationCategory category : NotificationCategory.values()) {
             if (category.isUseTopic()) {
                 openedByCategory.put(category,
                         statsQueryRepository.countDistinctScheduleMemberOpensBySendDate(category, start, end));
+                recipientsByCategory.put(category, statsQueryRepository.sumEventConsentingMembersBySendDate(
+                        start, end, statsQueryRepository.countConsentingMembers(category)));
                 continue;
             }
             sentByCategory.put(category, statsQueryRepository.countSentBySendDate(category, start, end));
@@ -228,8 +236,11 @@ public class NotificationStatsService {
                 Long sent = category.isUseTopic()
                         ? null
                         : sentByCategory.get(category).getOrDefault(date, 0L);
-                daily.add(new DailyStatsResponse(
-                        date, category, sent, openedByCategory.get(category).getOrDefault(date, 0L)));
+                Long estimatedRecipients = category.isUseTopic()
+                        ? recipientsByCategory.get(category).getOrDefault(date, 0L)
+                        : null;
+                daily.add(new DailyStatsResponse(date, category, sent,
+                        openedByCategory.get(category).getOrDefault(date, 0L), estimatedRecipients));
             }
         }
         return daily;

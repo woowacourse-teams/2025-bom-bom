@@ -121,10 +121,17 @@ class NotificationStatsServiceTest {
         assertThat(article.openRate()).isEqualTo(0.5);
         assertThat(article.medianSecondsToOpen()).isEqualTo(60L);
         assertThat(article.consentingMembers()).isEqualTo(1L);
+        assertThat(article.estimatedRecipients()).isNull();
     }
 
     @Test
-    void 토픽_발송_카테고리는_스케줄_회원_단위로_열림을_세고_동의_회원수를_분모로_쓴다() {
+    void 토픽_발송_카테고리는_스케줄_회원_단위로_열림을_세고_발송_시점_동의_회원수를_분모로_쓴다() {
+        persistSentSchedule(4);
+        // 값이 기록되기 전에 발송된 스케줄은 조회 시점 동의 회원 수(1명)로 대신한다.
+        persistSentSchedule(null);
+        entityManager.flush();
+        entityManager.clear();
+
         NotificationStatsResponse response = statsService.getStats(today.minusDays(1), today.plusDays(1));
 
         CategoryStatsResponse event = findCategory(response, NotificationCategory.EVENT);
@@ -134,7 +141,8 @@ class NotificationStatsServiceTest {
         assertThat(event.opens().linked()).isEqualTo(3L);
         assertThat(event.opens().uniqueLinked()).isEqualTo(2L);
         assertThat(event.consentingMembers()).isEqualTo(1L);
-        assertThat(event.openRate()).isEqualTo(2.0);
+        assertThat(event.estimatedRecipients()).isEqualTo(5L);
+        assertThat(event.openRate()).isEqualTo(0.4);
         assertThat(event.medianSecondsToOpen()).isNull();
     }
 
@@ -170,7 +178,7 @@ class NotificationStatsServiceTest {
                 .scheduledAt(LocalDateTime.now())
                 .type(NotificationScheduleType.AT_START)
                 .build();
-        schedule.markAsSent();
+        schedule.markAsSent(3);
         entityManager.persist(schedule);
         persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_A, DevicePlatform.ANDROID,
                 LocalDateTime.now());
@@ -185,16 +193,17 @@ class NotificationStatsServiceTest {
 
         assertThat(response.daily()).hasSize(3 * NotificationCategory.values().length);
         assertThat(response.daily().get(0))
-                .isEqualTo(new DailyStatsResponse(today.minusDays(2), NotificationCategory.ARTICLE, 0L, 0L));
+                .isEqualTo(new DailyStatsResponse(today.minusDays(2), NotificationCategory.ARTICLE, 0L, 0L, null));
         // 발송 2건 중 1건이 열렸다. 발송 전 날짜에 기록된 열림도 발송일로 귀속돼 한 번만 센다.
         assertThat(findDaily(response, today, NotificationCategory.ARTICLE))
-                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.ARTICLE, 2L, 1L));
-        // 토픽 발송은 발송 수가 없고, 발송된 스케줄의 (스케줄, 회원) 조합만 센다.
+                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.ARTICLE, 2L, 1L, null));
+        // 토픽 발송은 발송 수가 없고, 발송된 스케줄의 (스케줄, 회원) 조합과 발송 시점 동의 회원 수를 센다.
         assertThat(findDaily(response, today, NotificationCategory.EVENT))
-                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.EVENT, null, 2L));
-        assertThat(findDaily(response, today.minusDays(1), NotificationCategory.EVENT).sent()).isNull();
+                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.EVENT, null, 2L, 3L));
+        assertThat(findDaily(response, today.minusDays(1), NotificationCategory.EVENT))
+                .isEqualTo(new DailyStatsResponse(today.minusDays(1), NotificationCategory.EVENT, null, 0L, 0L));
         assertThat(findDaily(response, today, NotificationCategory.INQUIRY_MESSAGE_ARRIVAL))
-                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.INQUIRY_MESSAGE_ARRIVAL, 0L, 0L));
+                .isEqualTo(new DailyStatsResponse(today, NotificationCategory.INQUIRY_MESSAGE_ARRIVAL, 0L, 0L, null));
     }
 
     @Test
@@ -245,6 +254,16 @@ class NotificationStatsServiceTest {
                 .platform(platform)
                 .openedAt(openedAt)
                 .build());
+    }
+
+    private void persistSentSchedule(Integer consentingMemberCount) {
+        EventNotificationSchedule schedule = EventNotificationSchedule.builder()
+                .eventId(1L)
+                .scheduledAt(LocalDateTime.now())
+                .type(NotificationScheduleType.AT_START)
+                .build();
+        schedule.markAsSent(consentingMemberCount);
+        entityManager.persist(schedule);
     }
 
     private void persistDeviceLog(SendStatus status, String errorCode) {

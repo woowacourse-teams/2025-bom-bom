@@ -3,6 +3,7 @@ package me.bombom.api.v1.newsletter.controller;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.resolver.LoginMember;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 import me.bombom.api.v1.newsletter.dto.NewsletterWithDetailResponse;
 import me.bombom.api.v1.newsletter.dto.NewslettersResponse;
 import me.bombom.api.v1.newsletter.service.NewsletterService;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/newsletters")
-public class NewsletterController implements NewsletterControllerApi{
+public class NewsletterController implements NewsletterControllerApi {
 
     private final NewsletterService newsletterService;
 
@@ -24,17 +25,28 @@ public class NewsletterController implements NewsletterControllerApi{
     public NewslettersResponse getNewsletters(
             @LoginMember(anonymous = true, allowInvalidToken = true) Long memberId,
             @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
-            @RequestParam(required = false) Long categoryId
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false, defaultValue = "ko") String language
     ) {
-        return newsletterService.getNewsletters(memberId, includeSuspended, categoryId);
+        return newsletterService.getNewsletters(
+                memberId,
+                includeSuspended,
+                categoryId,
+                NewsletterLanguage.fromRequest(language).orElse(null)
+        );
     }
 
     @Override
     @GetMapping("/{id}")
     public NewsletterWithDetailResponse getNewsletterWithDetail(
             @LoginMember(anonymous = true) Long memberId,
-            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id
+            @PathVariable @Positive(message = "id는 1 이상의 값이어야 합니다.") Long id,
+            @RequestParam(required = false, defaultValue = "ko") String language
     ) {
-        return newsletterService.getNewsletterWithDetail(id, memberId);
+        return newsletterService.getNewsletterWithDetail(
+                id,
+                memberId,
+                NewsletterLanguage.fromRequest(language).orElse(null)
+        );
     }
 }

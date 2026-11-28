@@ -32,7 +32,8 @@ public interface NewsletterControllerApi {
     NewslettersResponse getNewsletters(
             @Parameter(hidden = true) Long memberId,
             @Parameter(description = "휴재 뉴스레터 포함 여부") @RequestParam(required = false, defaultValue = "false") boolean includeSuspended,
-            @Parameter(description = "카테고리 ID (미입력 시 전체)") @RequestParam(required = false) Long categoryId
+            @Parameter(description = "카테고리 ID (미입력 시 전체)") @RequestParam(required = false) Long categoryId,
+            @Parameter(description = "응답 언어") @RequestParam(required = false, defaultValue = "ko") String language
     );
 
     @Operation(
@@ -47,6 +48,7 @@ public interface NewsletterControllerApi {
     NewsletterWithDetailResponse getNewsletterWithDetail(
             @Parameter(hidden = true) Long memberId,
             @Positive(message = "id는 1 이상의 값이어야 합니다.")
-            @Parameter(description = "뉴스레터 ID") Long id
+            @Parameter(description = "뉴스레터 ID") Long id,
+            @Parameter(description = "응답 언어") @RequestParam(required = false, defaultValue = "ko") String language
     );
 }

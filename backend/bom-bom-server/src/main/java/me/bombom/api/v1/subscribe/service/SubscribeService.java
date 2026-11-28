@@ -13,6 +13,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.common.exception.RetryableException;
 import me.bombom.api.v1.common.exception.UnauthorizedException;
 import me.bombom.api.v1.member.domain.Member;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 import me.bombom.api.v1.subscribe.domain.Subscribe;
 import me.bombom.api.v1.subscribe.domain.SubscribeStatus;
 import me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse;
@@ -69,8 +70,8 @@ public class SubscribeService {
         subscribeRepository.bulkDeleteByMemberIdAndNewsletterId(memberId, newsletterId);
     }
 
-    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member) {
-        return subscribeRepository.findSubscribedByMemberId(member.getId());
+    public List<SubscribedNewsletterResponse> getSubscribedNewsletters(Member member, NewsletterLanguage language) {
+        return subscribeRepository.findSubscribedByMemberId(member.getId(), language == null ? null : language.code());
     }
 
     @Transactional

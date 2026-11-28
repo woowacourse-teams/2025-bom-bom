@@ -3,12 +3,22 @@ package me.bombom.api.v1.newsletter.repository;
 import java.time.LocalDate;
 import java.util.List;
 import me.bombom.api.v1.newsletter.dto.NewsletterResponse;
+import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 
 public interface CustomNewsletterRepository {
+
+    default List<NewsletterResponse> findNewslettersInfo(
+            Long memberId,
+            boolean includeSuspended,
+            LocalDate suspendedHiddenThresholdDate
+    ) {
+        return findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate, null);
+    }
 
     List<NewsletterResponse> findNewslettersInfo(
             Long memberId,
             boolean includeSuspended,
-            LocalDate suspendedHiddenThresholdDate
+            LocalDate suspendedHiddenThresholdDate,
+            NewsletterLanguage language
     );
 }

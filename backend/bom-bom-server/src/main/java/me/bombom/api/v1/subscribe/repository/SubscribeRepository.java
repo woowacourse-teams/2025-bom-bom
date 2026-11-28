@@ -15,9 +15,9 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
         SELECT new me.bombom.api.v1.subscribe.dto.response.SubscribedNewsletterResponse(
             s.id,
             n.id,
-            n.name,
+            coalesce(t.name, n.name),
             n.imageUrl,
-            n.description,
+            coalesce(t.description, n.description),
             s.unsubscribeUrl,
             s.status,
             n.status,
@@ -25,10 +25,15 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
         )
         FROM Subscribe s
         JOIN Newsletter n ON s.newsletterId = n.id
+        LEFT JOIN NewsletterTranslation t ON t.newsletterId = n.id
+            AND t.language = :language AND :language <> 'ko'
         WHERE s.memberId = :memberId
         ORDER BY n.name
     """)
-    List<SubscribedNewsletterResponse> findSubscribedByMemberId(@Param("memberId") Long memberId);
+    List<SubscribedNewsletterResponse> findSubscribedByMemberId(
+            @Param("memberId") Long memberId,
+            @Param("language") String language
+    );
 
     boolean existsByMemberIdAndNewsletterId(Long memberId, Long newsletterId);
 

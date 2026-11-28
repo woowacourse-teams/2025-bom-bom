@@ -4,6 +4,10 @@
 ALTER TABLE member_fcm_token
     ADD COLUMN os_permission_granted BOOLEAN NULL;
 
+-- 이벤트 토픽 발송 시점의 수신 동의 회원 수. 토픽 발송은 수신 대상 수를 알 수 없어 열림률 분모(근사)로 쓴다
+ALTER TABLE event_notification_schedule
+    ADD COLUMN consenting_member_count INT NULL;
+
 -- 푸시 알림을 눌러 앱을 연 기록. notification_id/schedule_id가 없으면 발송 건과 연결되지 않은 열림
 CREATE TABLE notification_open (
     id BIGINT NOT NULL AUTO_INCREMENT,

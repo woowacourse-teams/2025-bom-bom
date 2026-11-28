@@ -1,6 +1,7 @@
 package me.bombom.api.v1.common;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,21 @@ public class DiscordWebhookNotifier {
                                 Map.of("name", "🆔 ID 정보", "value",
                                         "Subscribe: " + subscribe.getId()
                                                 + " / Member: " + subscribe.getMemberId())),
+                        "timestamp", Instant.now().toString())));
+
+        webhookClient.post(operationErrorWebhookUrl, body);
+    }
+
+    public void sendDailyResultRecordErrorNotification(LocalDate targetDate, Exception exception) {
+        String message = exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage();
+        Map<String, Object> body = Map.of("embeds", List.of(
+                Map.of("title", "🚨 연속 읽기 일별 결과 기록 실패",
+                        "description", message,
+                        "color", 0xE74C3C,
+                        "fields", List.of(
+                                Map.of("name", "📅 대상 날짜", "value", targetDate.toString(), "inline", true),
+                                Map.of("name", "ℹ️ 영향", "value", "연속 읽기 초기화는 계속 진행됨. 해당 날짜의 최근 연속 읽기 상태가 MISSED로 보일 수 있음")
+                        ),
                         "timestamp", Instant.now().toString())));
 
         webhookClient.post(operationErrorWebhookUrl, body);

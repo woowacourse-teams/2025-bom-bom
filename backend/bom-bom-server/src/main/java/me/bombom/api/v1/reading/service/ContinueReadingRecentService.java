@@ -21,7 +21,6 @@ import me.bombom.api.v1.reading.domain.StreakPeriod;
 import me.bombom.api.v1.reading.dto.response.RecentContinueReadingResponse;
 import me.bombom.api.v1.reading.dto.response.StreakShieldResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
-import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
 import me.bombom.api.v1.reading.repository.TodayReadingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContinueReadingRecentService {
 
     private final ContinueReadingRealtimeRepository continueReadingRealtimeRepository;
-    private final ContinueReadingSnapshotRepository continueReadingSnapshotRepository;
     private final TodayReadingRepository todayReadingRepository;
     private final ArticleReadHistoryRepository articleReadHistoryRepository;
     private final HolidayRepository holidayRepository;
@@ -48,11 +46,10 @@ public class ContinueReadingRecentService {
         StreakPeriod period = StreakPeriod.recent(LocalDate.now(clock), days);
 
         int dayCount = findDayCount(memberId);
-        long rank = findRank(memberId);
         StreakShieldResponse streakShield = continueReadingShieldService.getStreakShield(memberId);
         RecentStreakDays recentStreakDays = createRecentStreakDays(member, period);
 
-        return RecentContinueReadingResponse.of(dayCount, rank, streakShield, recentStreakDays.days());
+        return RecentContinueReadingResponse.of(dayCount, streakShield, recentStreakDays.days());
     }
 
     private RecentStreakDays createRecentStreakDays(Member member, StreakPeriod period) {
@@ -121,12 +118,6 @@ public class ContinueReadingRecentService {
         return continueReadingRealtimeRepository.findByMemberId(memberId)
                 .orElseThrow(() -> entityNotFound(memberId, "ContinueReadingRealtime"))
                 .getDayCount();
-    }
-
-    private long findRank(Long memberId) {
-        return continueReadingSnapshotRepository.findByMemberId(memberId)
-                .orElseThrow(() -> entityNotFound(memberId, "ContinueReadingSnapshot"))
-                .getRankOrder();
     }
 
     private CIllegalArgumentException entityNotFound(Long memberId, String entityType) {

@@ -1,5 +1,6 @@
 package me.bombom.support.notification;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import me.bombom.api.v1.common.DiscordWebhookNotifier;
@@ -16,6 +17,7 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
     private final List<UnsubscribeErrorNotification> unsubscribeErrorNotifications = new ArrayList<>();
     private final List<UnresolvedInquiryRoomCounts> inquiryDailyStatusNotifications = new ArrayList<>();
     private final List<InquiryNewMessageNotification> inquiryNewMessageNotifications = new ArrayList<>();
+    private final List<LocalDate> dailyResultRecordErrorNotifications = new ArrayList<>();
 
     public FakeDiscordWebhookNotifier() {
         super(null, null, null, null);
@@ -41,6 +43,15 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
         inquiryNewMessageNotifications.add(new InquiryNewMessageNotification(content, assigneeText));
     }
 
+    @Override
+    public void sendDailyResultRecordErrorNotification(LocalDate targetDate, Exception exception) {
+        dailyResultRecordErrorNotifications.add(targetDate);
+    }
+
+    public List<LocalDate> getDailyResultRecordErrorNotifications() {
+        return List.copyOf(dailyResultRecordErrorNotifications);
+    }
+
     public List<String> getNewMemberNotifications() {
         return List.copyOf(newMemberNotifications);
     }
@@ -60,6 +71,7 @@ public final class FakeDiscordWebhookNotifier extends DiscordWebhookNotifier imp
     @Override
     public void reset() {
         newMemberNotifications.clear();
+        dailyResultRecordErrorNotifications.clear();
         unsubscribeErrorNotifications.clear();
         inquiryDailyStatusNotifications.clear();
         inquiryNewMessageNotifications.clear();

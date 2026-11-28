@@ -198,7 +198,7 @@ class ReadingControllerTest {
 
         assertSoftly(softly -> {
             softly.assertThat(response.get("dayCount")).isEqualTo(10);
-            softly.assertThat(response.get("rank")).isEqualTo(1);
+            softly.assertThat(response).doesNotContainKey("rank");
             softly.assertThat(streakShield.get("status")).isEqualTo("AVAILABLE");
             softly.assertThat(streakShield.get("remainingCount")).isEqualTo(1);
             softly.assertThat(days).hasSize(7);

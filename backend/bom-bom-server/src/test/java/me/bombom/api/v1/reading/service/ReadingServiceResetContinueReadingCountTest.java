@@ -2,6 +2,7 @@ package me.bombom.api.v1.reading.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.holiday.repository.HolidayRepository;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.TodayReading;
@@ -45,6 +47,9 @@ class ReadingServiceResetContinueReadingCountTest {
 
     @Mock
     private ContinueReadingDailyResultService continueReadingDailyResultService;
+
+    @Mock
+    private DiscordWebhookNotifier discordWebhookNotifier;
 
     @Mock
     private Clock clock;
@@ -110,6 +115,21 @@ class ReadingServiceResetContinueReadingCountTest {
             softly.assertThat(continueReading.getDayCount()).isZero();
             softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);
         });
+    }
+
+    @Test
+    void 일별_결과_기록이_실패해도_알림을_보내고_연속_읽기_초기화는_계속한다() {
+        fixClockTo(LocalDate.of(2026, 4, 28)); // Tuesday
+        LocalDate targetDate = LocalDate.of(2026, 4, 27);
+        given(holidayRepository.existsByDate(targetDate)).willReturn(false);
+        RuntimeException failure = new RuntimeException("기록 실패");
+        willThrow(failure).given(continueReadingDailyResultService).recordDailyResults(targetDate, false);
+        given(todayReadingRepository.findTotalNonZeroAndReadZero()).willReturn(List.of());
+
+        readingService.resetContinueReadingCount();
+
+        verify(discordWebhookNotifier).sendDailyResultRecordErrorNotification(targetDate, failure);
+        verify(todayReadingRepository).findTotalNonZeroAndReadZero();
     }
 
     @Test

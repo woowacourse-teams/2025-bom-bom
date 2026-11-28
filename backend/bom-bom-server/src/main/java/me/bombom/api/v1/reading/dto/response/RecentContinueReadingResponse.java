@@ -10,12 +10,6 @@ public record RecentContinueReadingResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "현재 연속 읽기 일수 (실시간)")
         int dayCount,
 
-        @Schema(
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                description = "연속 읽기 순위. 랭킹 스냅샷 값이라 갱신 주기(약 10분)만큼 늦을 수 있음"
-        )
-        long rank,
-
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         StreakShieldResponse streakShield,
 
@@ -26,13 +20,11 @@ public record RecentContinueReadingResponse(
 
     public static RecentContinueReadingResponse of(
             int dayCount,
-            long rank,
             StreakShieldResponse streakShield,
             List<StreakDay> streakDays
     ) {
         return new RecentContinueReadingResponse(
                 dayCount,
-                rank,
                 streakShield,
                 streakDays.stream()
                         .map(StreakDayResponse::from)

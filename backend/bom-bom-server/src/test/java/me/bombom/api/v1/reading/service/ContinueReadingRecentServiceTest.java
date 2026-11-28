@@ -98,7 +98,7 @@ class ContinueReadingRecentServiceTest {
     void 최근_7일의_날짜별_상태와_연속_읽기_현황을_조회한다() {
         // given
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        saveContinueReading(member, 3, 1L);
+        saveContinueReading(member, 3);
         saveTodayReading(member, 0);
 
         saveRead(member, LocalDateTime.of(2026, 11, 20, 23, 59, 59)); // 조회 범위 밖
@@ -123,7 +123,6 @@ class ContinueReadingRecentServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(response.dayCount()).isEqualTo(3);
-            softly.assertThat(response.rank()).isEqualTo(1L);
             softly.assertThat(response.streakShield().status()).isEqualTo(StreakShieldStatus.AVAILABLE);
             softly.assertThat(response.streakShield().remainingCount()).isEqualTo(1);
             softly.assertThat(response.days())
@@ -144,7 +143,7 @@ class ContinueReadingRecentServiceTest {
     void 자정에_기록한_일별_결과로_도착_없는_평일과_읽은_기록_없는_읽음을_판정한다() {
         // given
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        saveContinueReading(member, 5, 1L);
+        saveContinueReading(member, 5);
         saveTodayReading(member, 0);
         saveDailyResult(member, LocalDate.of(2026, 11, 25), ContinueReadingDailyResultType.NO_ARTICLE);
         saveDailyResult(member, LocalDate.of(2026, 11, 26), ContinueReadingDailyResultType.READ); // 가이드 메일 등
@@ -166,7 +165,7 @@ class ContinueReadingRecentServiceTest {
     void 오늘_0시에_읽었으면_오늘은_READ다() {
         // given
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        saveContinueReading(member, 1, 1L);
+        saveContinueReading(member, 1);
         saveTodayReading(member, 0);
         saveRead(member, TODAY.atStartOfDay());
 
@@ -183,7 +182,7 @@ class ContinueReadingRecentServiceTest {
     void 기록이_시작된_날부터는_일별_결과로만_지난_날의_읽음을_판정한다() {
         // given: 11-24부터 일별 결과 기록이 있음. 11-25는 읽은 기록은 있지만 연속에 반영되지 않음(읽기 제한 등)
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        saveContinueReading(member, 0, 1L);
+        saveContinueReading(member, 0);
         saveTodayReading(member, 0);
         saveRead(member, LocalDateTime.of(2026, 11, 23, 10, 0)); // 기록 시작 전
         saveDailyResult(member, LocalDate.of(2026, 11, 24), ContinueReadingDailyResultType.NO_ARTICLE);
@@ -208,7 +207,7 @@ class ContinueReadingRecentServiceTest {
     void 오늘_읽은_기록이_있으면_연속_읽기_반영_전이어도_오늘은_READ다() {
         // given: 읽기 반영(비동기) 전이라 today_reading.read_count는 아직 0
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        saveContinueReading(member, 0, 1L);
+        saveContinueReading(member, 0);
         saveTodayReading(member, 0);
         saveDailyResult(member, LocalDate.of(2026, 11, 26), ContinueReadingDailyResultType.READ);
         saveRead(member, TODAY.atTime(11, 0));
@@ -226,7 +225,7 @@ class ContinueReadingRecentServiceTest {
     void 가입_당일_가이드_메일만_읽어도_오늘은_READ다() {
         // given: 가이드 메일 읽기는 article_read_history 없이 today_reading.read_count만 올린다
         Member member = saveMemberJoinedAt(TODAY.atTime(9, 0));
-        saveContinueReading(member, 1, 3L);
+        saveContinueReading(member, 1);
         saveTodayReading(member, 1);
 
         // when
@@ -245,7 +244,7 @@ class ContinueReadingRecentServiceTest {
     void 가입_직후_이력이_없는_회원은_가입일_이전이_BEFORE_JOIN이고_연속_일수는_0이다() {
         // given
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 11, 26, 21, 0));
-        saveContinueReading(member, 0, 5L);
+        saveContinueReading(member, 0);
 
         // when
         RecentContinueReadingResponse response = continueReadingRecentService.getRecentContinueReading(member, 7);
@@ -253,7 +252,6 @@ class ContinueReadingRecentServiceTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(response.dayCount()).isZero();
-            softly.assertThat(response.rank()).isEqualTo(5L);
             softly.assertThat(response.days())
                     .extracting(StreakDayResponse::status)
                     .containsExactly(
@@ -269,34 +267,40 @@ class ContinueReadingRecentServiceTest {
     }
 
     @Test
-    void 연속_일수는_실시간_값이고_순위는_스냅샷_값이다() {
+    void 연속_일수는_랭킹_스냅샷이_아니라_실시간_값이다() {
         // given: 스냅샷 갱신 전에 실시간 연속 일수가 먼저 오른 상황
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        continueReadingRealtimeRepository.save(ContinueReadingRealtime.builder()
-                .memberId(member.getId())
-                .dayCount(4)
-                .build());
-        continueReadingShieldRepository.save(ContinueReadingShield.create(member.getId()));
+        saveContinueReading(member, 4);
         continueReadingSnapshotRepository.save(ContinueReadingSnapshot.create(member.getId(), 3, 7L));
 
         // when
         RecentContinueReadingResponse response = continueReadingRecentService.getRecentContinueReading(member, 1);
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.dayCount()).isEqualTo(4);
-            softly.assertThat(response.rank()).isEqualTo(7L);
-        });
+        assertThat(response.dayCount()).isEqualTo(4);
     }
 
     @Test
-    void 연속_읽기_스냅샷이_없으면_ENTITY_NOT_FOUND_예외가_발생한다() {
-        // given
+    void 오늘이_주말이고_아직_안_읽었으면_오늘은_REST다() {
+        // given: 2026-11-28(토) 12:00 KST
+        clock.setInstant(Instant.parse("2026-11-28T03:00:00Z"), SEOUL_ZONE);
         Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
-        continueReadingRealtimeRepository.save(ContinueReadingRealtime.builder()
-                .memberId(member.getId())
-                .dayCount(0)
-                .build());
+        saveContinueReading(member, 2);
+        saveTodayReading(member, 0);
+
+        // when
+        RecentContinueReadingResponse response = continueReadingRecentService.getRecentContinueReading(member, 1);
+
+        // then
+        assertThat(response.days())
+                .extracting(StreakDayResponse::date, StreakDayResponse::status)
+                .containsExactly(tuple(LocalDate.of(2026, 11, 28), StreakDayStatus.REST));
+    }
+
+    @Test
+    void 연속_읽기_정보가_없으면_ENTITY_NOT_FOUND_예외가_발생한다() {
+        // given: 가입 시 읽기 정보 초기화가 실패한 회원
+        Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
 
         // when & then
         assertThatThrownBy(() -> continueReadingRecentService.getRecentContinueReading(member, 7))
@@ -310,13 +314,12 @@ class ContinueReadingRecentServiceTest {
         return memberRepository.findById(member.getId()).orElseThrow();
     }
 
-    private void saveContinueReading(Member member, int dayCount, long rankOrder) {
+    private void saveContinueReading(Member member, int dayCount) {
         continueReadingRealtimeRepository.save(ContinueReadingRealtime.builder()
                 .memberId(member.getId())
                 .dayCount(dayCount)
                 .build());
         continueReadingShieldRepository.save(ContinueReadingShield.create(member.getId()));
-        continueReadingSnapshotRepository.save(ContinueReadingSnapshot.create(member.getId(), dayCount, rankOrder));
     }
 
     private void saveTodayReading(Member member, int readCount) {

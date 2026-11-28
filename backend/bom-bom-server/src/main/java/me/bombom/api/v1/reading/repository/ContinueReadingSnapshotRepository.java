@@ -130,7 +130,5 @@ public interface ContinueReadingSnapshotRepository extends JpaRepository<Continu
             @Param("lastMonthValue") int lastMonthValue
     );
 
-    Optional<ContinueReadingSnapshot> findByMemberId(Long memberId);
-
     void deleteByMemberId(Long memberId);
 }

@@ -9,7 +9,7 @@ import me.bombom.api.v1.common.util.DateUtils;
 /**
  * 최근 N일의 날짜별 연속 읽기 상태를 판정한다.
  * 판정 순서: READ → PENDING → BEFORE_JOIN → SHIELD → REST → NO_ARTICLE → MISSED
- * 기간의 마지막 날(endDate)을 오늘로 본다.
+ * 기간의 마지막 날(endDate)을 오늘로 본다. 오늘이 주말·공휴일이면 아직 안 읽었어도 끊기지 않는 날이라 PENDING 대신 REST다.
  */
 public class RecentStreakDays {
 
@@ -51,7 +51,7 @@ public class RecentStreakDays {
             return StreakDayStatus.READ;
         }
         if (date.equals(period.endDate())) {
-            return StreakDayStatus.PENDING;
+            return isNonWorkingDay(date) ? StreakDayStatus.REST : StreakDayStatus.PENDING;
         }
         if (date.isBefore(joinDate)) {
             return StreakDayStatus.BEFORE_JOIN;
@@ -59,13 +59,17 @@ public class RecentStreakDays {
         if (shieldUsedDates.contains(date)) {
             return StreakDayStatus.SHIELD;
         }
-        if (DateUtils.isWeekend(date) || holidays.contains(date)) {
+        if (isNonWorkingDay(date)) {
             return StreakDayStatus.REST;
         }
         if (noArticleDates.contains(date)) {
             return StreakDayStatus.NO_ARTICLE;
         }
         return StreakDayStatus.MISSED;
+    }
+
+    private boolean isNonWorkingDay(LocalDate date) {
+        return DateUtils.isWeekend(date) || holidays.contains(date);
     }
 
     public record StreakDay(LocalDate date, StreakDayStatus status) {

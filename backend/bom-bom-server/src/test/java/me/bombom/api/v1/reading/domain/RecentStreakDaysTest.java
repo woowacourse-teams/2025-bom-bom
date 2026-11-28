@@ -71,6 +71,33 @@ class RecentStreakDaysTest {
     }
 
     @Test
+    void 오늘이_주말이면_아직_안_읽었어도_REST다() {
+        LocalDate saturday = LocalDate.of(2026, 11, 28);
+        RecentStreakDays recentStreakDays = streakDays(
+                StreakPeriod.recent(saturday, 1), Set.of(), Set.of(), Set.of(), Set.of()
+        );
+
+        assertThat(recentStreakDays.statusOf(saturday)).isEqualTo(StreakDayStatus.REST);
+    }
+
+    @Test
+    void 오늘이_공휴일이면_아직_안_읽었어도_REST다() {
+        RecentStreakDays recentStreakDays = streakDays(WEEK, Set.of(), Set.of(), Set.of(), Set.of(TODAY));
+
+        assertThat(recentStreakDays.statusOf(TODAY)).isEqualTo(StreakDayStatus.REST);
+    }
+
+    @Test
+    void 오늘이_주말이어도_읽었으면_READ다() {
+        LocalDate saturday = LocalDate.of(2026, 11, 28);
+        RecentStreakDays recentStreakDays = streakDays(
+                StreakPeriod.recent(saturday, 1), Set.of(saturday), Set.of(), Set.of(), Set.of()
+        );
+
+        assertThat(recentStreakDays.statusOf(saturday)).isEqualTo(StreakDayStatus.READ);
+    }
+
+    @Test
     void 가입일_이전은_BEFORE_JOIN이고_가입일부터는_일반_판정을_한다() {
         RecentStreakDays recentStreakDays = new RecentStreakDays(
                 WEEK, LocalDate.of(2026, 11, 25), Set.of(), Set.of(), Set.of(), Set.of()

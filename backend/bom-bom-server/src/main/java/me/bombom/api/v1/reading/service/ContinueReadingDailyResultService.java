@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.reading.domain.ContinueReadingDailyResult;
 import me.bombom.api.v1.reading.repository.ContinueReadingDailyResultRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -25,8 +26,9 @@ public class ContinueReadingDailyResultService {
 
     /**
      * today_reading을 초기화하기 전에 호출해야 한다. 전날의 today_reading 값으로 판정한다.
+     * 기록이 실패해도 연속 읽기 초기화가 롤백되지 않도록 별도 트랜잭션으로 실행한다.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordDailyResults(LocalDate targetDate, boolean nonWorkingDay) {
         int readCount = continueReadingDailyResultRepository.bulkInsertReadResults(targetDate);
         int noArticleCount = 0;

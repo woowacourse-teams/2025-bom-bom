@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import me.bombom.api.v1.notice.dto.NoticeResponse;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,8 @@ public interface NoticeControllerApi {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC),
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
-            }) Pageable pageable
+            }) Pageable pageable,
+            @RequestParam(required = false, defaultValue = "ko") String language
     );
 
     @Operation(
@@ -38,5 +40,7 @@ public interface NoticeControllerApi {
             @ApiResponse(responseCode = "200", description = "대표 공지 조회 성공"),
             @ApiResponse(responseCode = "204", description = "대표로 지정된 공개 공지가 없음")
     })
-    ResponseEntity<NoticeResponse> getRepresentativeNotice();
+    ResponseEntity<NoticeResponse> getRepresentativeNotice(
+            @RequestParam(required = false, defaultValue = "ko") String language
+    );
 }

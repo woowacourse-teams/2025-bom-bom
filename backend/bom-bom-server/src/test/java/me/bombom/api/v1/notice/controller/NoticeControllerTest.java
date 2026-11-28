@@ -30,6 +30,26 @@ class NoticeControllerTest {
     }
 
     @Test
+    @AdditionalAcceptanceDataSet("acceptance/notice/notice-translation.json")
+    void 영어_공지_번역이_있으면_번역된_제목과_내용을_조회한다() {
+        Map<String, Object> result = RestAssured.given()
+                .accept(ContentType.JSON)
+                .queryParam("language", "en")
+                .when()
+                .get("/api/v1/notices")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getMap("$");
+
+        assertSoftly(softly -> {
+            softly.assertThat(content(result).get(0).get("title")).isEqualTo("English title");
+            softly.assertThat(content(result).get(0).get("content")).isEqualTo("English content");
+        });
+    }
+
+    @Test
     void 비공개_공지는_목록에서_제외된다() {
         Map<String, Object> result = getNotices();
 

@@ -28,6 +28,12 @@ public class NotificationStatsQueryRepository {
     private static final int IN_CLAUSE_CHUNK_SIZE = 1000;
 
     /**
+     * (scheduleId, memberId) 조합을 COUNT(DISTINCT)로 세기 위한 문자열 키. memberId가 없는 열림은 0으로 묶는다.
+     */
+    private static final String SCHEDULE_MEMBER_KEY =
+            "CONCAT(STR(o.scheduleId), ':', STR(COALESCE(o.memberId, 0)))";
+
+    /**
      * 회원별 발송 카테고리의 알림 row 엔티티 이름. 쿼리 문자열에 들어가므로 상수로만 관리한다.
      */
     private static final Map<NotificationCategory, String> MEMBER_NOTIFICATION_ENTITIES = Map.of(
@@ -153,13 +159,14 @@ public class NotificationStatsQueryRepository {
     }
 
     /**
-     * 회원별 발송 알림의 첫 열림 시각. key = 알림 row id
+     * 회원별 발송 알림의 첫 열림 시각. key = 알림 row id. 실제 알림 row가 없는 열림은 제외한다.
      */
     public Map<Long, LocalDateTime> findFirstOpenedAtByNotificationId(NotificationCategory category,
                                                                       LocalDateTime start, LocalDateTime end) {
         List<Object[]> rows = entityManager.createQuery(
-                        "SELECT o.notificationId, MIN(o.openedAt) FROM NotificationOpen o"
-                                + " WHERE o.category = :category AND o.notificationId IS NOT NULL"
+                        "SELECT o.notificationId, MIN(o.openedAt)"
+                                + " FROM NotificationOpen o, " + entityName(category) + " n"
+                                + " WHERE o.notificationId = n.id AND o.category = :category"
                                 + " AND o.openedAt >= :start AND o.openedAt < :end"
                                 + " GROUP BY o.notificationId", Object[].class)
                 .setParameter("category", category)
@@ -174,18 +181,19 @@ public class NotificationStatsQueryRepository {
 
     /**
      * 토픽 발송 알림을 연 (scheduleId, memberId) 조합 수. memberId가 없는 열림은 스케줄마다 하나로 묶인다.
+     * 실제 스케줄이 없는 열림은 제외하고, 조합을 애플리케이션에 올리지 않도록 DB에서 센다.
      */
     public long countDistinctScheduleMemberOpens(NotificationCategory category,
                                                  LocalDateTime start, LocalDateTime end) {
         return entityManager.createQuery(
-                        "SELECT DISTINCT o.scheduleId, o.memberId FROM NotificationOpen o"
-                                + " WHERE o.category = :category AND o.scheduleId IS NOT NULL"
-                                + " AND o.openedAt >= :start AND o.openedAt < :end", Object[].class)
+                        "SELECT COUNT(DISTINCT " + SCHEDULE_MEMBER_KEY + ")"
+                                + " FROM NotificationOpen o, EventNotificationSchedule s"
+                                + " WHERE o.scheduleId = s.id AND o.category = :category"
+                                + " AND o.openedAt >= :start AND o.openedAt < :end", Long.class)
                 .setParameter("category", category)
                 .setParameter("start", start)
                 .setParameter("end", end)
-                .getResultList()
-                .size();
+                .getSingleResult();
     }
 
     /**
@@ -231,18 +239,16 @@ public class NotificationStatsQueryRepository {
                                                                            LocalDateTime start,
                                                                            LocalDateTime end) {
         List<Object[]> rows = entityManager.createQuery(
-                        "SELECT DISTINCT CAST(s.sentAt AS LocalDate), o.scheduleId, o.memberId"
+                        "SELECT CAST(s.sentAt AS LocalDate), COUNT(DISTINCT " + SCHEDULE_MEMBER_KEY + ")"
                                 + " FROM EventNotificationSchedule s, NotificationOpen o"
                                 + " WHERE o.scheduleId = s.id AND o.category = :category"
-                                + " AND s.sent = true AND s.sentAt >= :start AND s.sentAt < :end", Object[].class)
+                                + " AND s.sent = true AND s.sentAt >= :start AND s.sentAt < :end"
+                                + " GROUP BY CAST(s.sentAt AS LocalDate)", Object[].class)
                 .setParameter("category", category)
                 .setParameter("start", start)
                 .setParameter("end", end)
                 .getResultList();
-
-        Map<LocalDate, Long> counts = new HashMap<>();
-        rows.forEach(row -> counts.merge((LocalDate) row[0], 1L, Long::sum));
-        return counts;
+        return toDateCounts(rows);
     }
 
     /**

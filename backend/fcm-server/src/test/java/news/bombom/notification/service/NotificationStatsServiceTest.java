@@ -118,6 +118,7 @@ class NotificationStatsServiceTest {
         assertThat(article.opens().linked()).isEqualTo(2L);
         assertThat(article.opens().uniqueLinked()).isEqualTo(1L);
         assertThat(article.opens().unlinked()).isEqualTo(1L);
+        assertThat(article.openedOfSent()).isEqualTo(1L);
         assertThat(article.openRate()).isEqualTo(0.5);
         assertThat(article.medianSecondsToOpen()).isEqualTo(60L);
         assertThat(article.consentingMembers()).isEqualTo(1L);
@@ -126,9 +127,15 @@ class NotificationStatsServiceTest {
 
     @Test
     void 토픽_발송_카테고리는_스케줄_회원_단위로_열림을_세고_발송_시점_동의_회원수를_분모로_쓴다() {
-        persistSentSchedule(4);
+        EventNotificationSchedule schedule = persistSentSchedule(4);
         // 값이 기록되기 전에 발송된 스케줄은 조회 시점 동의 회원 수(1명)로 대신한다.
         persistSentSchedule(null);
+        persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_A, DevicePlatform.ANDROID,
+                LocalDateTime.now());
+        persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_A, DevicePlatform.ANDROID,
+                LocalDateTime.now());
+        persistOpen(NotificationCategory.EVENT, null, schedule.getId(), MEMBER_B, DevicePlatform.IOS,
+                LocalDateTime.now());
         entityManager.flush();
         entityManager.clear();
 
@@ -138,12 +145,28 @@ class NotificationStatsServiceTest {
         assertThat(event.deliveryMode()).isEqualTo(DeliveryMode.TOPIC);
         assertThat(event.statusCounts()).isNull();
         assertThat(event.deviceSends()).isNull();
-        assertThat(event.opens().linked()).isEqualTo(3L);
+        // 존재하지 않는 스케줄(SCHEDULE_ID)의 열림은 횟수에만 남고 고유 열림과 열림률에서는 빠진다.
+        assertThat(event.opens().linked()).isEqualTo(6L);
         assertThat(event.opens().uniqueLinked()).isEqualTo(2L);
+        assertThat(event.openedOfSent()).isEqualTo(2L);
         assertThat(event.consentingMembers()).isEqualTo(1L);
         assertThat(event.estimatedRecipients()).isEqualTo(5L);
         assertThat(event.openRate()).isEqualTo(0.4);
         assertThat(event.medianSecondsToOpen()).isNull();
+    }
+
+    @Test
+    void 실제_알림이_없는_열림은_고유_열림과_열림률에서_빠진다() {
+        persistOpen(NotificationCategory.ARTICLE, 999_999L, null, MEMBER_B, DevicePlatform.IOS, LocalDateTime.now());
+        entityManager.flush();
+        entityManager.clear();
+
+        NotificationStatsResponse response = statsService.getStats(today.minusDays(1), today.plusDays(1));
+
+        CategoryStatsResponse article = findCategory(response, NotificationCategory.ARTICLE);
+        assertThat(article.opens().uniqueLinked()).isEqualTo(1L);
+        assertThat(article.openedOfSent()).isEqualTo(1L);
+        assertThat(article.openRate()).isEqualTo(0.5);
     }
 
     @Test
@@ -256,7 +279,7 @@ class NotificationStatsServiceTest {
                 .build());
     }
 
-    private void persistSentSchedule(Integer consentingMemberCount) {
+    private EventNotificationSchedule persistSentSchedule(Integer consentingMemberCount) {
         EventNotificationSchedule schedule = EventNotificationSchedule.builder()
                 .eventId(1L)
                 .scheduledAt(LocalDateTime.now())
@@ -264,6 +287,7 @@ class NotificationStatsServiceTest {
                 .build();
         schedule.markAsSent(consentingMemberCount);
         entityManager.persist(schedule);
+        return schedule;
     }
 
     private void persistDeviceLog(SendStatus status, String errorCode) {

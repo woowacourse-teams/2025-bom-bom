@@ -54,10 +54,11 @@ public class NotificationStatsService {
         LocalDateTime start = from.atStartOfDay();
         LocalDateTime end = to.plusDays(1).atStartOfDay();
 
+        Map<NotificationCategory, CohortCounts> cohorts = getCohortCounts(start, end);
         List<CategoryStatsResponse> categories = Arrays.stream(NotificationCategory.values())
                 .map(category -> category.isUseTopic()
-                        ? getTopicCategoryStats(category, start, end)
-                        : getMemberCategoryStats(category, start, end))
+                        ? getTopicCategoryStats(category, cohorts.get(category), start, end)
+                        : getMemberCategoryStats(category, cohorts.get(category), start, end))
                 .toList();
 
         return new NotificationStatsResponse(
@@ -67,7 +68,7 @@ public class NotificationStatsService {
                 categories,
                 getReach(),
                 getOpensByPlatform(start, end),
-                getDaily(from, to, start, end)
+                getDaily(from, to, cohorts)
         );
     }
 
@@ -80,11 +81,12 @@ public class NotificationStatsService {
         }
     }
 
-    private CategoryStatsResponse getMemberCategoryStats(NotificationCategory category,
+    private CategoryStatsResponse getMemberCategoryStats(NotificationCategory category, CohortCounts cohort,
                                                          LocalDateTime start, LocalDateTime end) {
         Map<NotificationStatus, Long> statusCounts = getStatusCounts(category, start, end);
         Map<Long, LocalDateTime> firstOpenedAt = statsQueryRepository.findFirstOpenedAtByNotificationId(category, start, end);
         long uniqueLinked = firstOpenedAt.size();
+        long openedOfSent = cohort.openedTotal();
         Map<SendStatus, Long> deviceSends = statsQueryRepository.countDeviceSendsByStatus(category, start, end);
 
         return new CategoryStatsResponse(
@@ -99,20 +101,19 @@ public class NotificationStatsService {
                         statsQueryRepository.countLinkedOpens(category, start, end),
                         uniqueLinked,
                         statsQueryRepository.countUnlinkedOpens(category, start, end)),
-                divide(uniqueLinked, statusCounts.get(NotificationStatus.SENT)),
+                openedOfSent,
+                divide(openedOfSent, statusCounts.get(NotificationStatus.SENT)),
                 getMedianSecondsToOpen(category, firstOpenedAt),
                 statsQueryRepository.countConsentingMembers(category),
                 null
         );
     }
 
-    private CategoryStatsResponse getTopicCategoryStats(NotificationCategory category,
+    private CategoryStatsResponse getTopicCategoryStats(NotificationCategory category, CohortCounts cohort,
                                                         LocalDateTime start, LocalDateTime end) {
         long uniqueLinked = statsQueryRepository.countDistinctScheduleMemberOpens(category, start, end);
-        long consentingMembers = statsQueryRepository.countConsentingMembers(category);
-        long estimatedRecipients = statsQueryRepository
-                .sumEventConsentingMembersBySendDate(start, end, consentingMembers)
-                .values().stream().mapToLong(Long::longValue).sum();
+        long openedOfSent = cohort.openedTotal();
+        long estimatedRecipients = cohort.recipientsTotal();
 
         return new CategoryStatsResponse(
                 category,
@@ -124,9 +125,10 @@ public class NotificationStatsService {
                         statsQueryRepository.countLinkedOpens(category, start, end),
                         uniqueLinked,
                         statsQueryRepository.countUnlinkedOpens(category, start, end)),
-                divide(uniqueLinked, estimatedRecipients),
+                openedOfSent,
+                divide(openedOfSent, estimatedRecipients),
                 null,
-                consentingMembers,
+                statsQueryRepository.countConsentingMembers(category),
                 estimatedRecipients
         );
     }
@@ -210,40 +212,62 @@ public class NotificationStatsService {
     }
 
     /**
-     * 기간의 모든 날짜 × 모든 카테고리를 빠짐없이 채운다. 카테고리당 날짜별 GROUP BY 쿼리 한두 번으로 끝낸다.
+     * 발송일 코호트 집계. 열림은 열린 날짜가 아니라 발송일에 귀속하고, 실제 발송 건과 이어진 열림만 센다.
+     * 카테고리 열림률과 일별 추이가 같은 값을 쓰도록 한 번만 조회한다.
      */
-    private List<DailyStatsResponse> getDaily(LocalDate from, LocalDate to,
-                                              LocalDateTime start, LocalDateTime end) {
-        Map<NotificationCategory, Map<LocalDate, Long>> sentByCategory = new LinkedHashMap<>();
-        Map<NotificationCategory, Map<LocalDate, Long>> openedByCategory = new LinkedHashMap<>();
-        Map<NotificationCategory, Map<LocalDate, Long>> recipientsByCategory = new LinkedHashMap<>();
+    private Map<NotificationCategory, CohortCounts> getCohortCounts(LocalDateTime start, LocalDateTime end) {
+        Map<NotificationCategory, CohortCounts> cohorts = new LinkedHashMap<>();
         for (NotificationCategory category : NotificationCategory.values()) {
             if (category.isUseTopic()) {
-                openedByCategory.put(category,
-                        statsQueryRepository.countDistinctScheduleMemberOpensBySendDate(category, start, end));
-                recipientsByCategory.put(category, statsQueryRepository.sumEventConsentingMembersBySendDate(
-                        start, end, statsQueryRepository.countConsentingMembers(category)));
+                cohorts.put(category, new CohortCounts(
+                        Map.of(),
+                        statsQueryRepository.countDistinctScheduleMemberOpensBySendDate(category, start, end),
+                        statsQueryRepository.sumEventConsentingMembersBySendDate(
+                                start, end, statsQueryRepository.countConsentingMembers(category))));
                 continue;
             }
-            sentByCategory.put(category, statsQueryRepository.countSentBySendDate(category, start, end));
-            openedByCategory.put(category,
-                    statsQueryRepository.countOpenedNotificationsBySendDate(category, start, end));
+            cohorts.put(category, new CohortCounts(
+                    statsQueryRepository.countSentBySendDate(category, start, end),
+                    statsQueryRepository.countOpenedNotificationsBySendDate(category, start, end),
+                    Map.of()));
         }
+        return cohorts;
+    }
 
+    /**
+     * 기간의 모든 날짜 × 모든 카테고리를 빠짐없이 채운다.
+     */
+    private List<DailyStatsResponse> getDaily(LocalDate from, LocalDate to,
+                                              Map<NotificationCategory, CohortCounts> cohorts) {
         List<DailyStatsResponse> daily = new ArrayList<>();
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
             for (NotificationCategory category : NotificationCategory.values()) {
-                Long sent = category.isUseTopic()
-                        ? null
-                        : sentByCategory.get(category).getOrDefault(date, 0L);
+                CohortCounts cohort = cohorts.get(category);
+                Long sent = category.isUseTopic() ? null : cohort.sent().getOrDefault(date, 0L);
                 Long estimatedRecipients = category.isUseTopic()
-                        ? recipientsByCategory.get(category).getOrDefault(date, 0L)
+                        ? cohort.recipients().getOrDefault(date, 0L)
                         : null;
                 daily.add(new DailyStatsResponse(date, category, sent,
-                        openedByCategory.get(category).getOrDefault(date, 0L), estimatedRecipients));
+                        cohort.opened().getOrDefault(date, 0L), estimatedRecipients));
             }
         }
         return daily;
+    }
+
+    /**
+     * 발송일별 수치. sent는 회원별 발송, recipients(발송 시점 수신 동의 회원 수)는 토픽 발송만 채운다.
+     */
+    private record CohortCounts(Map<LocalDate, Long> sent,
+                                Map<LocalDate, Long> opened,
+                                Map<LocalDate, Long> recipients) {
+
+        long openedTotal() {
+            return opened.values().stream().mapToLong(Long::longValue).sum();
+        }
+
+        long recipientsTotal() {
+            return recipients.values().stream().mapToLong(Long::longValue).sum();
+        }
     }
 
     private Double divide(long numerator, Long denominator) {

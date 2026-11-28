@@ -41,10 +41,3 @@ CREATE TABLE notification_device_send_log (
     INDEX idx_notification_device_send_log_sent_at (sent_at),
     INDEX idx_notification_device_send_log_category_sent_at (category, sent_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 기간별 발송 상태 집계용
-CREATE INDEX idx_article_arrival_notification_created_at ON article_arrival_notification (created_at);
-CREATE INDEX idx_article_arrival_notification_failed_created_at ON article_arrival_notification_failed (created_at);
-CREATE INDEX idx_challenge_start_notification_created_at ON challenge_start_notification (created_at);
-CREATE INDEX idx_challenge_todo_reminder_notification_created_at ON challenge_todo_reminder_notification (created_at);
-CREATE INDEX idx_inquiry_message_arrival_notification_created_at ON inquiry_message_arrival_notification (created_at);

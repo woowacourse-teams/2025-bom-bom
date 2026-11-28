@@ -85,6 +85,7 @@ public class ReadingService {
     private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
     private final BadgeService badgeService;
     private final ContinueReadingShieldService continueReadingShieldService;
+    private final ContinueReadingDailyResultService continueReadingDailyResultService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
 
@@ -136,7 +137,9 @@ public class ReadingService {
     @Transactional
     public void resetContinueReadingCount() {
         LocalDate targetDate = LocalDate.now(clock).minusDays(1);
-        if (isNonWorkingDay(targetDate)) {
+        boolean nonWorkingDay = isNonWorkingDay(targetDate);
+        continueReadingDailyResultService.recordDailyResults(targetDate, nonWorkingDay);
+        if (nonWorkingDay) {
             return;
         }
 
@@ -381,6 +384,7 @@ public class ReadingService {
         monthlyReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
         memberReadTokenBucketRepository.bulkDeleteAllByMemberId(memberId);
         continueReadingShieldService.deleteByMemberId(memberId);
+        continueReadingDailyResultService.deleteByMemberId(memberId);
     }
 
     private LocalDate getLastMonth() {

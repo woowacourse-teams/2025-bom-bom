@@ -1,5 +1,6 @@
 package me.bombom.api.v1.article.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -75,6 +76,19 @@ public interface ArticleReadHistoryRepository extends JpaRepository<ArticleReadH
             GROUP BY day(h.readAt)
             """)
     List<DailyReadCount> countDailyReads(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+            SELECT DISTINCT cast(h.readAt as LocalDate)
+            FROM ArticleReadHistory h
+            WHERE h.memberId = :memberId
+              AND h.readAt >= :start
+              AND h.readAt < :end
+            """)
+    List<LocalDate> findReadDates(
             @Param("memberId") Long memberId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end

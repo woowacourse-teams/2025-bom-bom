@@ -44,6 +44,9 @@ class ReadingServiceResetContinueReadingCountTest {
     private ContinueReadingShieldService continueReadingShieldService;
 
     @Mock
+    private ContinueReadingDailyResultService continueReadingDailyResultService;
+
+    @Mock
     private Clock clock;
 
     @Test
@@ -52,6 +55,7 @@ class ReadingServiceResetContinueReadingCountTest {
 
         readingService.resetContinueReadingCount();
 
+        verify(continueReadingDailyResultService).recordDailyResults(LocalDate.of(2026, 4, 25), true);
         verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
         verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
@@ -74,6 +78,7 @@ class ReadingServiceResetContinueReadingCountTest {
 
         readingService.resetContinueReadingCount();
 
+        verify(continueReadingDailyResultService).recordDailyResults(holiday, true);
         verify(todayReadingRepository, never()).findTotalNonZeroAndReadZero();
         verify(continueReadingShieldService, never()).useShield(anyLong(), any());
     }
@@ -100,6 +105,7 @@ class ReadingServiceResetContinueReadingCountTest {
 
         readingService.resetContinueReadingCount();
 
+        verify(continueReadingDailyResultService).recordDailyResults(targetDate, false);
         assertSoftly(softly -> {
             softly.assertThat(continueReading.getDayCount()).isZero();
             softly.assertThat(continueReading.getMaxDayCount()).isEqualTo(15);

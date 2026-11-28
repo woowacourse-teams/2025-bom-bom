@@ -7,6 +7,14 @@ import me.bombom.api.v1.newsletter.domain.NewsletterLanguage;
 
 public interface CustomNewsletterRepository {
 
+    default List<NewsletterResponse> findNewslettersInfo(
+            Long memberId,
+            boolean includeSuspended,
+            LocalDate suspendedHiddenThresholdDate
+    ) {
+        return findNewslettersInfo(memberId, includeSuspended, suspendedHiddenThresholdDate, null);
+    }
+
     List<NewsletterResponse> findNewslettersInfo(
             Long memberId,
             boolean includeSuspended,

@@ -2,6 +2,8 @@ package me.bombom.api.v1.reading.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -9,6 +11,7 @@ import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistory;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
+import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
 import me.bombom.api.v1.reading.dto.response.StreakShieldResponse;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldHistoryRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
@@ -71,6 +74,19 @@ public class ContinueReadingShieldService {
                         .addContext(ErrorContextKeys.MEMBER_ID, memberId)
                         .addContext(ErrorContextKeys.ENTITY_TYPE, "ContinueReadingShield"));
         return StreakShieldResponse.of(shield, MONTHLY_GRANT_COUNT);
+    }
+
+    public Set<LocalDate> findUsedDates(Long memberId, LocalDate startDate, LocalDate endDate) {
+        return continueReadingShieldHistoryRepository
+                .findAllByMemberIdAndTypeAndEventDateBetween(
+                        memberId,
+                        ContinueReadingShieldHistoryType.USE,
+                        startDate,
+                        endDate
+                )
+                .stream()
+                .map(ContinueReadingShieldHistory::getEventDate)
+                .collect(Collectors.toSet());
     }
 
     @Transactional

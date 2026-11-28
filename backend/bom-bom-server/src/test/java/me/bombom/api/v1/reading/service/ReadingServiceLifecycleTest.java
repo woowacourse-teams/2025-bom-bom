@@ -3,11 +3,14 @@ package me.bombom.api.v1.reading.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.LocalDate;
 import me.bombom.api.v1.TestFixture;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorDetail;
 import me.bombom.api.v1.member.domain.Member;
 import me.bombom.api.v1.member.repository.MemberRepository;
+import me.bombom.api.v1.reading.domain.ContinueReadingDailyResult;
+import me.bombom.api.v1.reading.domain.ContinueReadingDailyResultType;
 import me.bombom.api.v1.reading.domain.ContinueReadingRealtime;
 import me.bombom.api.v1.reading.domain.ContinueReadingShield;
 import me.bombom.api.v1.reading.domain.ContinueReadingSnapshot;
@@ -16,6 +19,7 @@ import me.bombom.api.v1.reading.domain.MonthlyReadingSnapshot;
 import me.bombom.api.v1.reading.domain.TodayReading;
 import me.bombom.api.v1.reading.domain.WeeklyReading;
 import me.bombom.api.v1.reading.domain.YearlyReading;
+import me.bombom.api.v1.reading.repository.ContinueReadingDailyResultRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingRealtimeRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingShieldRepository;
 import me.bombom.api.v1.reading.repository.ContinueReadingSnapshotRepository;
@@ -61,6 +65,9 @@ class ReadingServiceLifecycleTest {
     @Autowired
     private ContinueReadingShieldRepository continueReadingShieldRepository;
 
+    @Autowired
+    private ContinueReadingDailyResultRepository continueReadingDailyResultRepository;
+
     @Test
     void 회원_읽기_정보를_모두_삭제한다() {
         // given
@@ -84,6 +91,11 @@ class ReadingServiceLifecycleTest {
                 .currentCount(7)
                 .build());
         continueReadingShieldRepository.save(ContinueReadingShield.create(member.getId()));
+        continueReadingDailyResultRepository.save(ContinueReadingDailyResult.builder()
+                .memberId(member.getId())
+                .resultDate(LocalDate.of(2026, 11, 26))
+                .result(ContinueReadingDailyResultType.READ)
+                .build());
 
         // when
         readingService.deleteAllByMemberId(member.getId());
@@ -99,6 +111,8 @@ class ReadingServiceLifecycleTest {
             softly.assertThat(monthlyReadingRealtimeRepository.findById(monthlyRealtime.getId())).isEmpty();
             softly.assertThat(yearlyReadingRepository.findByMemberIdAndReadingYear(member.getId(), 2026)).isEmpty();
             softly.assertThat(continueReadingShieldRepository.findByMemberId(member.getId())).isEmpty();
+            softly.assertThat(continueReadingDailyResultRepository.findAll())
+                    .noneMatch(result -> result.getMemberId().equals(member.getId()));
         });
     }
 

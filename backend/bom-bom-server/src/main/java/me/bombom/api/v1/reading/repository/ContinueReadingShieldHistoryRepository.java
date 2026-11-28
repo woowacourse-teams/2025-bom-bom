@@ -1,6 +1,7 @@
 package me.bombom.api.v1.reading.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistory;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryReason;
 import me.bombom.api.v1.reading.domain.ContinueReadingShieldHistoryType;
@@ -16,6 +17,13 @@ public interface ContinueReadingShieldHistoryRepository extends JpaRepository<Co
             ContinueReadingShieldHistoryType type,
             ContinueReadingShieldHistoryReason reason,
             LocalDate eventDate
+    );
+
+    List<ContinueReadingShieldHistory> findAllByMemberIdAndTypeAndEventDateBetween(
+            Long memberId,
+            ContinueReadingShieldHistoryType type,
+            LocalDate startDate,
+            LocalDate endDate
     );
 
     @Modifying

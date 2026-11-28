@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.badge.domain.BadgeGrade;
 import me.bombom.api.v1.badge.service.BadgeService;
 import me.bombom.api.v1.common.ContinueReadingRankingScheduleProperties;
+import me.bombom.api.v1.common.DiscordWebhookNotifier;
 import me.bombom.api.v1.common.MonthlyRankingScheduleProperties;
 import me.bombom.api.v1.common.exception.CIllegalArgumentException;
 import me.bombom.api.v1.common.exception.ErrorContextKeys;
@@ -85,6 +86,8 @@ public class ReadingService {
     private final ContinueReadingRankingScheduleProperties continueReadingRankingScheduleProperties;
     private final BadgeService badgeService;
     private final ContinueReadingShieldService continueReadingShieldService;
+    private final ContinueReadingDailyResultService continueReadingDailyResultService;
+    private final DiscordWebhookNotifier discordWebhookNotifier;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Clock clock;
 
@@ -136,7 +139,9 @@ public class ReadingService {
     @Transactional
     public void resetContinueReadingCount() {
         LocalDate targetDate = LocalDate.now(clock).minusDays(1);
-        if (isNonWorkingDay(targetDate)) {
+        boolean nonWorkingDay = isNonWorkingDay(targetDate);
+        recordDailyResults(targetDate, nonWorkingDay);
+        if (nonWorkingDay) {
             return;
         }
 
@@ -381,6 +386,7 @@ public class ReadingService {
         monthlyReadingRankHistoryRepository.bulkDeleteAllByMemberId(memberId);
         memberReadTokenBucketRepository.bulkDeleteAllByMemberId(memberId);
         continueReadingShieldService.deleteByMemberId(memberId);
+        continueReadingDailyResultService.deleteByMemberId(memberId);
     }
 
     private LocalDate getLastMonth() {
@@ -448,6 +454,26 @@ public class ReadingService {
             return;
         }
         continueReading.resetDayCount();
+    }
+
+    /**
+     * 일별 결과 기록은 화면 표시용이라, 실패해도 연속 읽기 초기화와 today_reading 초기화는 계속 진행한다.
+     */
+    private void recordDailyResults(LocalDate targetDate, boolean nonWorkingDay) {
+        try {
+            continueReadingDailyResultService.recordDailyResults(targetDate, nonWorkingDay);
+        } catch (Exception e) {
+            log.error("연속 읽기 일별 결과 기록에 실패했습니다. 초기화는 계속합니다. targetDate={}", targetDate, e);
+            notifyDailyResultRecordError(targetDate, e);
+        }
+    }
+
+    private void notifyDailyResultRecordError(LocalDate targetDate, Exception exception) {
+        try {
+            discordWebhookNotifier.sendDailyResultRecordErrorNotification(targetDate, exception);
+        } catch (Exception e) {
+            log.error("연속 읽기 일별 결과 기록 실패 알림 전송에 실패했습니다. targetDate={}", targetDate, e);
+        }
     }
 
     private boolean isNonWorkingDay(LocalDate date) {

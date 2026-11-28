@@ -14,12 +14,19 @@ public record RankHistoryResponse(
         String label,
 
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-        long rank
+        long rank,
+
+        @Schema(
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                description = "그 달의 값. reading은 그 달 읽은 아티클 수, streak는 다음 달 1일 0시 확정 시점의 연속 읽기 일수"
+        )
+        int value
 ) {
 
     public static RankHistoryResponse of(
             LocalDate period,
             long rank,
+            int value,
             LocalDate today
     ) {
         String month = YearMonth.from(period).toString();
@@ -29,7 +36,8 @@ public record RankHistoryResponse(
         return new RankHistoryResponse(
                 month,
                 label,
-                rank
+                rank,
+                value
         );
     }
 }

@@ -29,5 +29,8 @@
   ],
   "monthly_reading_realtime": [
     { "id": 1, "member_id": 1, "current_count": 7 }
-  ]
+  ],
+  "continue_reading_shield_history": [],
+  "continue_reading_daily_result": [],
+  "article_read_history": []
 }

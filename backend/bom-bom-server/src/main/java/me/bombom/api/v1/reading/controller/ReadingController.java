@@ -1,5 +1,7 @@
 package me.bombom.api.v1.reading.controller;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +11,12 @@ import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingCountResponse;
 import me.bombom.api.v1.reading.dto.response.MemberMonthlyReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.MonthlyReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.ReadingInformationResponse;
+import me.bombom.api.v1.reading.domain.StreakPeriod;
+import me.bombom.api.v1.reading.dto.response.RecentContinueReadingResponse;
 import me.bombom.api.v1.reading.dto.response.ContinueReadingRankingResponse;
 import me.bombom.api.v1.reading.dto.response.MemberContinueReadingRankResponse;
 import me.bombom.api.v1.reading.dto.response.WeeklyGoalCountResponse;
+import me.bombom.api.v1.reading.service.ContinueReadingRecentService;
 import me.bombom.api.v1.reading.service.ReadingService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReadingController implements ReadingControllerApi{
 
     private final ReadingService readingService;
+    private final ContinueReadingRecentService continueReadingRecentService;
 
     @Override
     @PatchMapping("/progress/week/goal")
@@ -66,6 +72,18 @@ public class ReadingController implements ReadingControllerApi{
     @GetMapping("/streak/rank/me")
     public MemberContinueReadingRankResponse getMemberContinueReadingRank(@LoginMember Member member) {
         return readingService.getMemberContinueReadingRank(member);
+    }
+
+    @Override
+    @GetMapping("/streak/recent")
+    public RecentContinueReadingResponse getRecentContinueReading(
+            @LoginMember Member member,
+            @RequestParam(defaultValue = StreakPeriod.DEFAULT_DAYS)
+            @Min(value = StreakPeriod.MIN_DAYS, message = StreakPeriod.DAYS_RANGE_MESSAGE)
+            @Max(value = StreakPeriod.MAX_DAYS, message = StreakPeriod.DAYS_RANGE_MESSAGE)
+            int days
+    ) {
+        return continueReadingRecentService.getRecentContinueReading(member, days);
     }
 
     @Override

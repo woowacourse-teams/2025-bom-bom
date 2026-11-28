@@ -73,20 +73,24 @@ public class ContinueReadingRecentService {
     }
 
     /**
-     * 읽은 날 = 읽은 기록(article_read_history) ∪ 0시에 기록한 READ ∪ 오늘 연속 읽기에 반영된 읽기.
-     * 가이드 메일 읽기는 article_read_history를 남기지 않아 today_reading과 일별 결과로 보완한다.
+     * 읽은 날을 정한다.
+     * - 지난 날: 0시에 연속 읽기 판정과 함께 기록한 READ (연속 계산이 실제로 쓴 값, 가이드 메일 읽기 포함)
+     * - 기록이 시작되기 전 날: 기록이 없으므로 읽은 기록(article_read_history)으로 대신 판정
+     * - 오늘: today_reading.read_count > 0 또는 오늘 읽은 기록.
+     *   읽기 반영은 비동기라, 방금 읽은 글이 바로 보이도록 읽은 기록도 함께 본다.
      */
     private Set<LocalDate> findReadDates(
             Long memberId,
             StreakPeriod period,
             List<ContinueReadingDailyResult> dailyResults
     ) {
-        Set<LocalDate> readDates = new HashSet<>(articleReadHistoryRepository.findReadDates(
-                memberId,
-                period.startInclusive(),
-                period.endExclusive()
-        ));
-        readDates.addAll(datesOf(dailyResults, ContinueReadingDailyResultType.READ));
+        Set<LocalDate> readDates = new HashSet<>(datesOf(dailyResults, ContinueReadingDailyResultType.READ));
+        LocalDate recordStartDate = continueReadingDailyResultService.findRecordStartDate()
+                .orElse(period.endDate());
+        articleReadHistoryRepository.findReadDates(memberId, period.startInclusive(), period.endExclusive())
+                .stream()
+                .filter(date -> date.isBefore(recordStartDate) || date.equals(period.endDate()))
+                .forEach(readDates::add);
         if (hasReadToday(memberId)) {
             readDates.add(period.endDate());
         }

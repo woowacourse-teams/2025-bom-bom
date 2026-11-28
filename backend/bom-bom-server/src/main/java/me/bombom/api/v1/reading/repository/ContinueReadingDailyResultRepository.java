@@ -2,6 +2,7 @@ package me.bombom.api.v1.reading.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import me.bombom.api.v1.reading.domain.ContinueReadingDailyResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,6 +16,12 @@ public interface ContinueReadingDailyResultRepository extends JpaRepository<Cont
             LocalDate startDate,
             LocalDate endDate
     );
+
+    @Query("""
+        SELECT MIN(r.resultDate)
+        FROM ContinueReadingDailyResult r
+    """)
+    Optional<LocalDate> findFirstResultDate();
 
     @Modifying
     @Query(value = """

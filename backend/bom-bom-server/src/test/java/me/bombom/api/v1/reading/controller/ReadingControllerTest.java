@@ -211,6 +211,7 @@ class ReadingControllerTest {
 
     @Test
     void 최근_연속_읽기_기록은_days만큼_조회한다() {
+        mutableClock.setInstant(Instant.parse("2026-11-27T03:00:00Z"), ZoneId.of("Asia/Seoul"));
         Map<String, Object> response = RestAssured.given()
                 .accept(ContentType.JSON)
                 .header(MEMBER_ID, MEMBER_ID_VALUE)

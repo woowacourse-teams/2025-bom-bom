@@ -93,8 +93,8 @@ public interface ReadingControllerApi {
                     dayCount는 실시간 값이고, rank는 랭킹 스냅샷 값이라 약 10분 늦을 수 있습니다. streakShield는 /streak/rank/me와 같습니다.
                     날짜는 KST 기준이며 오름차순입니다.
                     status 판정 순서: READ → PENDING(오늘, 아직 안 읽음) → BEFORE_JOIN(가입일 이전) → SHIELD(보호막 사용) → REST(주말·공휴일) → NO_ARTICLE(받은 아티클이 없는 평일) → MISSED.
-                    지난 날짜의 READ·NO_ARTICLE은 매일 0시 연속 읽기 초기화 때 기록한 결과를 사용합니다(90일 보관).
-                    기록이 시작되기 전 날짜는 읽은 기록으로만 판정하므로 받은 아티클이 없던 평일도 MISSED로 보일 수 있습니다.
+                    READ는 연속 읽기 계산이 실제로 쓴 값입니다. 오늘은 today_reading, 지난 날짜는 매일 0시 초기화 때 기록한 결과(90일 보관)를 씁니다.
+                    기록이 시작되기 전 날짜는 읽은 기록으로 대신 판정하므로, 받은 아티클이 없던 평일도 MISSED로 보일 수 있습니다.
                     0시 초기화가 끝나기 전 잠깐 동안은 어제가 MISSED로 보일 수 있습니다.
                     """
     )

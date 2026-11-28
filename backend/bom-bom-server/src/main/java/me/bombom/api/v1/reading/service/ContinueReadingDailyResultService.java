@@ -2,6 +2,7 @@ package me.bombom.api.v1.reading.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bombom.api.v1.reading.domain.ContinueReadingDailyResult;
@@ -45,6 +46,14 @@ public class ContinueReadingDailyResultService {
                 startDate,
                 endDate
         );
+    }
+
+    /**
+     * 일별 결과 기록이 시작된 날짜. 이 날짜부터는 기록이 연속 읽기 판정의 기준이다.
+     * 보관 기간이 지난 기록을 지워도 조회 가능 기간(최대 31일)보다 항상 이르다.
+     */
+    public Optional<LocalDate> findRecordStartDate() {
+        return continueReadingDailyResultRepository.findFirstResultDate();
     }
 
     @Transactional

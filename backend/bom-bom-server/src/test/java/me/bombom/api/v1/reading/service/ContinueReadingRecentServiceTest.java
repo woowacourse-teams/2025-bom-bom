@@ -180,6 +180,49 @@ class ContinueReadingRecentServiceTest {
     }
 
     @Test
+    void 기록이_시작된_날부터는_일별_결과로만_지난_날의_읽음을_판정한다() {
+        // given: 11-24부터 일별 결과 기록이 있음. 11-25는 읽은 기록은 있지만 연속에 반영되지 않음(읽기 제한 등)
+        Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
+        saveContinueReading(member, 0, 1L);
+        saveTodayReading(member, 0);
+        saveRead(member, LocalDateTime.of(2026, 11, 23, 10, 0)); // 기록 시작 전
+        saveDailyResult(member, LocalDate.of(2026, 11, 24), ContinueReadingDailyResultType.NO_ARTICLE);
+        saveRead(member, LocalDateTime.of(2026, 11, 25, 10, 0)); // 기록 시작 후, READ 기록 없음
+
+        // when
+        RecentContinueReadingResponse response = continueReadingRecentService.getRecentContinueReading(member, 5);
+
+        // then
+        assertThat(response.days())
+                .extracting(StreakDayResponse::date, StreakDayResponse::status)
+                .containsExactly(
+                        tuple(LocalDate.of(2026, 11, 23), StreakDayStatus.READ),
+                        tuple(LocalDate.of(2026, 11, 24), StreakDayStatus.NO_ARTICLE),
+                        tuple(LocalDate.of(2026, 11, 25), StreakDayStatus.MISSED),
+                        tuple(LocalDate.of(2026, 11, 26), StreakDayStatus.MISSED),
+                        tuple(TODAY, StreakDayStatus.PENDING)
+                );
+    }
+
+    @Test
+    void 오늘_읽은_기록이_있으면_연속_읽기_반영_전이어도_오늘은_READ다() {
+        // given: 읽기 반영(비동기) 전이라 today_reading.read_count는 아직 0
+        Member member = saveMemberJoinedAt(LocalDateTime.of(2026, 1, 1, 9, 0));
+        saveContinueReading(member, 0, 1L);
+        saveTodayReading(member, 0);
+        saveDailyResult(member, LocalDate.of(2026, 11, 26), ContinueReadingDailyResultType.READ);
+        saveRead(member, TODAY.atTime(11, 0));
+
+        // when
+        RecentContinueReadingResponse response = continueReadingRecentService.getRecentContinueReading(member, 1);
+
+        // then
+        assertThat(response.days())
+                .extracting(StreakDayResponse::status)
+                .containsExactly(StreakDayStatus.READ);
+    }
+
+    @Test
     void 가입_당일_가이드_메일만_읽어도_오늘은_READ다() {
         // given: 가이드 메일 읽기는 article_read_history 없이 today_reading.read_count만 올린다
         Member member = saveMemberJoinedAt(TODAY.atTime(9, 0));

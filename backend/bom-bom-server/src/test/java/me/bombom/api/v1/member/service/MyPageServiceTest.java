@@ -93,9 +93,9 @@ class MyPageServiceTest {
             softly.assertThat(response.cards().getFirst().currentRank()).isEqualTo(4);
             softly.assertThat(response.cards().getFirst().value()).isEqualTo(77);
             softly.assertThat(response.cards().getFirst().rankHistory())
-                    .extracting("month", "label", "rank")
+                    .extracting("month", "label", "rank", "value")
                     .containsExactly(
-                            tuple("2026-05", "5월", 4L)
+                            tuple("2026-05", "5월", 4L, 8)
                     );
         });
     }
@@ -132,10 +132,10 @@ class MyPageServiceTest {
             softly.assertThat(response.cards().getFirst().currentRank()).isEqualTo(3);
             softly.assertThat(response.cards().getFirst().value()).isEqualTo(6);
             softly.assertThat(response.cards().getFirst().rankHistory())
-                    .extracting("month", "label", "rank")
+                    .extracting("month", "label", "rank", "value")
                     .containsExactly(
-                            tuple("2025-12", "25.12", 20L),
-                            tuple("2026-05", "5월", 3L)
+                            tuple("2025-12", "25.12", 20L, 2),
+                            tuple("2026-05", "5월", 3L, 6)
                     );
         });
     }

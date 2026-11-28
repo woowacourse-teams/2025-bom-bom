@@ -87,6 +87,7 @@ public class MyPageService {
                 .map(history -> RankHistoryResponse.of(
                         history.getPeriod(),
                         history.getRankOrder(),
+                        history.getDayCount(),
                         today
                 ))
                 .toList();
@@ -111,6 +112,7 @@ public class MyPageService {
                 .map(history -> RankHistoryResponse.of(
                         history.getPeriod(),
                         history.getRankOrder(),
+                        history.getReadCount(),
                         today
                 ))
                 .toList();
